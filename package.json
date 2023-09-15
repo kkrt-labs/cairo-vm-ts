@@ -1,0 +1,20 @@
+{
+  "name": "cairo-vm-ts",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "echo \"Error: no entrypoint yet\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Clément Walter <clement@kakarot.org>",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  },
+  "prettier": {
+    "proseWrap": "always"
+  }
+}
