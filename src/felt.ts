@@ -1,7 +1,5 @@
-import { Relocatable } from "./relocatable";
-import { MaybeRelocatable, NotImplementedError } from "./types";
-
 export class FeltError extends Error {}
+export class ConversionError extends Error {}
 
 export class Felt {
   // TODO: should check for PRIME overflow.
@@ -11,25 +9,33 @@ export class Felt {
     this.inner = _inner;
   }
 
-  add(other: MaybeRelocatable): MaybeRelocatable {
-    if (other instanceof Relocatable) throw new NotImplementedError();
+  add(other: Felt): Felt {
     return new Felt(this.inner + other.inner);
   }
 
-  sub(other: MaybeRelocatable): MaybeRelocatable {
-    if (other instanceof Relocatable) throw new NotImplementedError();
+  sub(other: Felt): Felt {
     return new Felt(this.inner - other.inner);
   }
 
-  toString() {
+  getInner(): BigInt {
+    return this.inner;
+  }
+
+  toString(): string {
     return this.inner.toString();
   }
 
-  toNumber() {
-    return Number(this.inner);
+  toNumber(): number {
+    let num = Number(this.inner);
+    // The value of the largest integer n such that n and n + 1 are both exactly representable as a Number value.
+    // The value of Number.MAX_SAFE_INTEGER is 9007199254740991, i.e. 2^53 − 1.
+    if (num > Number.MAX_SAFE_INTEGER) {
+      throw new ConversionError();
+    }
+    return num;
   }
 
-  toHexString() {
+  toHexString(): string {
     return this.inner.toString(16);
   }
 }
