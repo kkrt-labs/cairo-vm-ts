@@ -6,7 +6,7 @@ import {
   Relocatable,
 } from './relocatable';
 import { add, sub } from './maybeRelocatable';
-import { InternalError } from './types';
+import { InternalError } from '../types';
 
 describe('maybe relocatable', () => {
   test('should add two Felts correctly', () => {
