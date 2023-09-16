@@ -40,6 +40,10 @@ function subRelocatableFelt(
   );
 }
 
+export function add(a: Felt, b: Felt): Felt;
+export function add(a: Felt, b: Relocatable): Relocatable;
+export function add(a: Relocatable, b: Felt): Relocatable;
+export function add(a: Relocatable, b: Relocatable): never;
 export function add(
   a: MaybeRelocatable,
   b: MaybeRelocatable
@@ -66,6 +70,10 @@ export function add(
 /**
  * Compute a - b
  */
+export function sub(a: Felt, b: Felt): Felt;
+export function sub(a: Relocatable, b: Felt): Relocatable;
+export function sub(a: Relocatable, b: Relocatable): Relocatable;
+export function sub(a: Felt, b: Relocatable): never;
 export function sub(
   a: MaybeRelocatable,
   b: MaybeRelocatable
@@ -78,7 +86,7 @@ export function sub(
     return subRelocatableFelt(a, b);
   }
 
-  // Cannot substract a Relocatable from a Felt
+  // Cannot perform Felt - Relocatable
   if (a instanceof Felt && b instanceof Relocatable) {
     throw new ForbiddenOperation();
   }

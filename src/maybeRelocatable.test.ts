@@ -12,36 +12,36 @@ describe('maybe relocatable', () => {
   test('should add two Felts correctly', () => {
     const a = new Felt(100n);
     const b = new Felt(200n);
-    const result = add(a, b) as Felt;
+    const result = add(a, b);
     expect(result.getInner()).toEqual(300n);
   });
 
   test('should subtract two Felts correctly', () => {
     const a = new Felt(300n);
     const b = new Felt(200n);
-    const result = sub(a, b) as Felt;
+    const result = sub(a, b);
     expect(result.getInner()).toEqual(100n);
   });
 
   test('should add Felt and Relocatable', () => {
     const a = new Felt(100n);
     const b = new Relocatable(1, 200);
-    const result = add(a, b) as Relocatable;
+    const result = add(a, b);
     expect(result.getSegmentIndex()).toEqual(1);
     expect(result.getOffset()).toEqual(300);
   });
 
   test('should subtract Felt from Relocatable', () => {
-    const a = new Felt(100n);
-    const b = new Relocatable(1, 300);
-    const result = sub(a, b) as Relocatable;
+    const a = new Relocatable(1, 300);
+    const b = new Felt(100n);
+    const result = sub(a, b);
     expect(result.getSegmentIndex()).toEqual(1);
     expect(result.getOffset()).toEqual(200);
   });
 
   test('should throw OffsetUnderflow when subtracting a larger Felt from a Relocatable', () => {
-    const a = new Felt(400n);
-    const b = new Relocatable(1, 200);
+    const a = new Relocatable(1, 200);
+    const b = new Felt(400n);
     try {
       sub(a, b);
     } catch (err) {
