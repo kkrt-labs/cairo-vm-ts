@@ -1,5 +1,5 @@
-import { Relocatable, SegmentError } from "./relocatable";
-import { MaybeRelocatable } from "./types";
+import { Relocatable, SegmentError } from './relocatable';
+import { MaybeRelocatable } from './maybeRelocatable';
 
 export class MemoryError extends Error {}
 export class WriteOnceError extends MemoryError {}
@@ -15,7 +15,7 @@ class Memory {
   }
 
   insert(address: Relocatable, value: MaybeRelocatable) {
-    if (address.segmentIndex >= this.numSegments) {
+    if (address.getSegmentIndex() >= this.numSegments) {
       throw new SegmentError();
     }
 
