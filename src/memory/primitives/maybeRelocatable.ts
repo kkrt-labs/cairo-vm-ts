@@ -4,7 +4,7 @@ import {
   OffsetUnderflow,
   Relocatable,
 } from './relocatable';
-import { InternalError } from './types';
+import { InternalError } from '../types';
 
 export type MaybeRelocatable = Relocatable | Felt;
 

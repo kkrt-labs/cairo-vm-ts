@@ -1,5 +1,5 @@
-import { Relocatable, SegmentError } from './relocatable';
-import { MaybeRelocatable } from './maybeRelocatable';
+import { Relocatable, SegmentError } from './primitives/relocatable';
+import { MaybeRelocatable } from './primitives/maybeRelocatable';
 
 export class MemoryError extends Error {}
 export class WriteOnceError extends MemoryError {}
