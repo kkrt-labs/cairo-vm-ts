@@ -1,8 +1,11 @@
-class RelocatableError extends Error {}
-class OffsetUnderflow extends RelocatableError {}
-class SegmentError extends RelocatableError {}
+import { Felt } from "./felt";
+import { MaybeRelocatable, NotImplementedError } from "./types";
 
-class Relocatable {
+export class RelocatableError extends Error {}
+export class OffsetUnderflow extends RelocatableError {}
+export class SegmentError extends RelocatableError {}
+
+export class Relocatable {
   segmentIndex: number;
   offset: number;
 

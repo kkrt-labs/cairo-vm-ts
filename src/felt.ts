@@ -1,6 +1,9 @@
-class FeltError extends Error {}
+import { Relocatable } from "./relocatable";
+import { MaybeRelocatable, NotImplementedError } from "./types";
 
-class Felt {
+export class FeltError extends Error {}
+
+export class Felt {
   // TODO: should check for PRIME overflow.
   // TODO: put private to make sure nothing is broken once this is added
   private inner: bigint;
