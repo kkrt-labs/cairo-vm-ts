@@ -1,3 +1,6 @@
-class NotImplementedError extends Error {}
+import { Felt } from "./felt";
+import { Relocatable } from "./relocatable";
 
-type MaybeRelocatable = Relocatable | Felt;
+export class NotImplementedError extends Error {}
+
+export type MaybeRelocatable = Relocatable | Felt;

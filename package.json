@@ -11,7 +11,7 @@
   "author": "Clément Walter <clement@kakarot.org>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "ts-node": "^10.9.1",
+    "bun-types": "^1.0.2",
     "typescript": "^5.2.2"
   },
   "prettier": {

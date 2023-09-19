@@ -1,6 +1,9 @@
-class MemoryError extends Error {}
-class WriteOnceError extends MemoryError {}
-class UnknownAddressError extends MemoryError {}
+import { Relocatable, SegmentError } from "./relocatable";
+import { MaybeRelocatable } from "./types";
+
+export class MemoryError extends Error {}
+export class WriteOnceError extends MemoryError {}
+export class UnknownAddressError extends MemoryError {}
 
 class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
