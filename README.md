@@ -28,3 +28,9 @@ reading it.
 
 Read so far up to
 [#Run Context](https://github.com/lambdaclass/cairo-vm_in_go/blob/main/README.md#runcontext)
+
+## Requirements
+
+- Install [bun](https://bun.sh/)
+- Run `bun install` to install all dependencies
+- Run `bun test` to run all tests
