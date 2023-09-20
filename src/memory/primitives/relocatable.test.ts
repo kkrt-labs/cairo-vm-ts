@@ -6,6 +6,7 @@ import {
   SegmentError,
   ForbiddenOperation,
 } from './relocatable';
+import { Uint, UnsignedInteger } from './uint';
 
 describe('Relocatable', () => {
   describe('constructor', () => {
@@ -34,6 +35,20 @@ describe('Relocatable', () => {
       const a = new Relocatable(1, 10);
       const b = new Relocatable(2, 5);
       expect(() => a.sub(b)).toThrow(new SegmentError());
+    });
+  });
+  describe('addPositiveNumber', () => {
+    test('should add a positive number correctly to a relocatable', () => {
+      const relocatable = new Relocatable(0, 5);
+      const result = relocatable.addPositiveNumber(UnsignedInteger.toUint(5));
+      expect(result.getOffset()).toEqual(10);
+    });
+
+    test('should throw when adding a negative number', () => {
+      const relocatable = new Relocatable(0, 10);
+      expect(() =>
+        relocatable.addPositiveNumber(UnsignedInteger.toUint(-5))
+      ).toThrow(new TypeError());
     });
   });
 

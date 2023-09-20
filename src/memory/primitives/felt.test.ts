@@ -1,7 +1,7 @@
 import { test, expect, describe } from 'bun:test';
 import { ConversionError, Felt, FeltError } from './felt';
 
-describe('felt', () => {
+describe('Felt', () => {
   describe('constructor', () => {
     test('should initialise a felt correctly', () => {
       const felt = new Felt(10n);

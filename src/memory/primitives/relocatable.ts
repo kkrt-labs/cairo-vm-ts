@@ -1,19 +1,27 @@
 import { Felt } from './felt';
+import { Uint, UnsignedInteger } from './uint';
 
 export class RelocatableError extends Error {}
 export class OffsetUnderflow extends RelocatableError {}
 export class SegmentError extends RelocatableError {}
 export class ForbiddenOperation extends RelocatableError {}
+export class TypeError extends RelocatableError {}
 
 export type MaybeRelocatable = Relocatable | Felt;
 
 export class Relocatable {
-  private segmentIndex: number;
-  private offset: number;
+  private segmentIndex: Uint;
+  private offset: Uint;
 
   constructor(segmentIndex: number, offset: number) {
-    this.segmentIndex = segmentIndex;
-    this.offset = offset;
+    if (
+      !UnsignedInteger.isUint(segmentIndex) ||
+      !UnsignedInteger.isUint(offset)
+    ) {
+      throw new TypeError('Both segmentIndex and offset must be integers.');
+    }
+    this.segmentIndex = UnsignedInteger.toUint(segmentIndex);
+    this.offset = UnsignedInteger.toUint(offset);
   }
 
   sub(other: Relocatable): Relocatable {
@@ -28,7 +36,7 @@ export class Relocatable {
     return new Relocatable(this.segmentIndex, this.offset - other.offset);
   }
 
-  addNumber(other: number): Relocatable {
+  addPositiveNumber(other: Uint): Relocatable {
     return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
   }
 
@@ -76,11 +84,11 @@ export class Relocatable {
     throw new RelocatableError();
   }
 
-  getSegmentIndex(): number {
+  getSegmentIndex(): Uint {
     return this.segmentIndex;
   }
 
-  getOffset(): number {
+  getOffset(): Uint {
     return this.offset;
   }
 }
