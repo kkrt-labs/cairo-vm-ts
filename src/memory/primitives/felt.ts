@@ -1,24 +1,44 @@
 export class FeltError extends Error {}
-export class ConversionError extends Error {}
+export class ConversionError extends FeltError {
+  constructor(
+    message = 'Failed to convert BigInt to Number due to size limitations.'
+  ) {
+    super(message);
+  }
+}
 
 export class Felt {
   // TODO: should check for PRIME overflow.
   // TODO: put private to make sure nothing is broken once this is added
   private inner: bigint;
+  static PRIME: bigint =
+    0x800000000000011000000000000000000000000000000000000000000000001n;
   constructor(_inner: bigint) {
+    if (_inner < 0n || _inner > Felt.PRIME) {
+      throw new FeltError();
+    }
     this.inner = _inner;
   }
 
   add(other: Felt): Felt {
-    return new Felt(this.inner + other.inner);
+    return new Felt((this.inner + other.inner) % Felt.PRIME);
   }
 
   sub(other: Felt): Felt {
-    return new Felt(this.inner - other.inner);
+    let result = this.inner - other.inner;
+    if (result < 0n) {
+      result += Felt.PRIME;
+    }
+    return new Felt(result);
   }
 
-  getInner(): BigInt {
+  //
+  _getInner(): BigInt {
     return this.inner;
+  }
+
+  eq(other: Felt): boolean {
+    return this.inner == other._getInner();
   }
 
   toString(): string {

@@ -1,5 +1,8 @@
-import { Relocatable, SegmentError } from './primitives/relocatable';
-import { MaybeRelocatable } from './primitives/maybeRelocatable';
+import {
+  MaybeRelocatable,
+  Relocatable,
+  SegmentError,
+} from './primitives/relocatable';
 
 export class MemoryError extends Error {}
 export class WriteOnceError extends MemoryError {}
@@ -49,7 +52,7 @@ class MemorySegmentManager {
   }
 
   loadData(address: Relocatable, data: MaybeRelocatable[]) {
-    data.forEach((d, index) => this.memory.insert(address.add(index), d));
-    return address.add(data.length);
+    data.forEach((d, index) => this.memory.insert(address.addNumber(index), d));
+    return address.addNumber(data.length);
   }
 }
