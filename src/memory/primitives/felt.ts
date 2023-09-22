@@ -32,13 +32,8 @@ export class Felt {
     return new Felt(result);
   }
 
-  //
-  _getInner(): BigInt {
-    return this.inner;
-  }
-
   eq(other: Felt): boolean {
-    return this.inner == other._getInner();
+    return this.inner == other.inner;
   }
 
   toString(): string {

@@ -3,10 +3,6 @@ import { ConversionError, Felt, FeltError } from './felt';
 
 describe('Felt', () => {
   describe('constructor', () => {
-    test('should initialise a felt correctly', () => {
-      const felt = new Felt(10n);
-      expect(felt._getInner()).toEqual(10n);
-    });
     test('should throw if initialising a felt with a negative inner', () => {
       expect(() => new Felt(-10n)).toThrow(new FeltError());
     });

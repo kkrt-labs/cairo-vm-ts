@@ -3,9 +3,11 @@ import { Uint, UnsignedInteger } from './uint';
 
 export class RelocatableError extends Error {}
 export class OffsetUnderflow extends RelocatableError {}
+export class OffsetOverflow extends RelocatableError {}
 export class SegmentError extends RelocatableError {}
 export class ForbiddenOperation extends RelocatableError {}
 export class TypeError extends RelocatableError {}
+export class InternalError extends RelocatableError {}
 
 export type MaybeRelocatable = Relocatable | Felt;
 
@@ -18,70 +20,54 @@ export class Relocatable {
       !UnsignedInteger.isUint(segmentIndex) ||
       !UnsignedInteger.isUint(offset)
     ) {
-      throw new TypeError('Both segmentIndex and offset must be integers.');
+      throw new TypeError(
+        'Both segmentIndex and offset must be positive integers.'
+      );
     }
     this.segmentIndex = UnsignedInteger.toUint(segmentIndex);
     this.offset = UnsignedInteger.toUint(offset);
   }
 
-  sub(other: Relocatable): Relocatable {
-    if (this.offset < other.offset) {
-      throw new OffsetUnderflow();
-    }
-
-    if (this.segmentIndex !== other.segmentIndex) {
-      throw new SegmentError();
-    }
-
-    return new Relocatable(this.segmentIndex, this.offset - other.offset);
-  }
-
-  addPositiveNumber(other: Uint): Relocatable {
-    return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
-  }
-
-  /**
-   * Adds a Felt and a Relocatable
-   * Panics: throws an error if a.inner > Number.MAX_SAFE_INTEGER
-   */
-  addFelt(other: Felt): Relocatable {
-    return new Relocatable(
-      this.getSegmentIndex(),
-      this.getOffset() + other.toNumber()
-    );
-  }
-
-  /**
-   * Sub a Felt and a Relocatable
-   * Panics: throws an error if a.inner > Number.MAX_SAFE_INTEGER
-   */
-  subFelt(felt: Felt): Relocatable {
-    const delta = felt.toNumber();
-    if (this.getOffset() < delta) {
-      throw new OffsetUnderflow();
-    }
-    return new Relocatable(this.getSegmentIndex(), this.getOffset() - delta);
-  }
-
-  addMaybeRelocatable(other: MaybeRelocatable): Relocatable {
+  add(other: MaybeRelocatable | Uint): Relocatable {
     if (other instanceof Felt) {
-      return this.addFelt(other);
-    } else {
-      throw new ForbiddenOperation();
-    }
-  }
-
-  subMaybeRelocatable(other: MaybeRelocatable): Relocatable {
-    if (other instanceof Felt) {
-      return this.subFelt(other);
+      if (this.getOffset() + other.toNumber() > Number.MAX_SAFE_INTEGER) {
+        throw new OffsetOverflow();
+      }
+      return new Relocatable(
+        this.getSegmentIndex(),
+        this.getOffset() + other.toNumber()
+      );
     }
 
     if (other instanceof Relocatable) {
-      return this.sub(other);
+      throw new ForbiddenOperation();
     }
 
-    // We need to throw an error in case `other` is neither a Felt or a Relocatable for the Typescript compiler
-    throw new RelocatableError();
+    return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
+  }
+
+  sub(other: MaybeRelocatable | Uint): Relocatable {
+    if (other instanceof Felt) {
+      const delta = other.toNumber();
+      if (this.getOffset() < delta) {
+        throw new OffsetUnderflow();
+      }
+      return new Relocatable(this.getSegmentIndex(), this.getOffset() - delta);
+    }
+
+    if (other instanceof Relocatable) {
+      if (this.offset < other.offset) {
+        throw new OffsetUnderflow();
+      }
+
+      if (this.segmentIndex !== other.segmentIndex) {
+        throw new SegmentError();
+      }
+
+      return new Relocatable(this.segmentIndex, this.offset - other.offset);
+    }
+
+    return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 
   getSegmentIndex(): Uint {
