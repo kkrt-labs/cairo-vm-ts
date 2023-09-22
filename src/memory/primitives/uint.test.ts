@@ -27,16 +27,16 @@ describe('UnsignedInteger', () => {
     });
 
     test('should throw a TypeError for negative numbers', () => {
-      expect(() => UnsignedInteger.toUint(-5)).toThrow(TypeError);
+      expect(() => UnsignedInteger.toUint(-5)).toThrow(new TypeError());
     });
 
     test('should throw a TypeError for floating point numbers', () => {
-      expect(() => UnsignedInteger.toUint(0.5)).toThrow(TypeError);
+      expect(() => UnsignedInteger.toUint(0.5)).toThrow(new TypeError());
     });
 
     test('should throw a TypeError for numbers greater than Number.MAX_SAFE_INTEGER', () => {
       expect(() => UnsignedInteger.toUint(Number.MAX_SAFE_INTEGER + 1)).toThrow(
-        TypeError
+        new TypeError()
       );
     });
   });

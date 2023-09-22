@@ -23,6 +23,7 @@ describe('Relocatable', () => {
       const b = new Relocatable(1, 3);
       const result = a.sub(b);
       expect(result.getOffset()).toEqual(7);
+      expect(result.getSegmentIndex()).toEqual(1);
     });
 
     test('should throw OffsetUnderflow when offset goes below zero', () => {
@@ -41,6 +42,7 @@ describe('Relocatable', () => {
       const felt = new Felt(5n);
       const result = relocatable.sub(felt);
       expect(result.getOffset()).toEqual(5);
+      expect(result.getSegmentIndex()).toEqual(0);
     });
 
     test('should throw OffsetUnderflow when subtracting a larger Felt', () => {
@@ -49,27 +51,30 @@ describe('Relocatable', () => {
       expect(() => relocatable.sub(felt)).toThrow(new OffsetUnderflow());
     });
 
-    test('should subtract a Relocatable wrapped in MaybeRelocatable', () => {
+    test('should subtract a Relocatable', () => {
       const a = new Relocatable(0, 10);
       const b = new Relocatable(0, 5);
       const result = a.sub(b);
       expect(result.getOffset()).toEqual(5);
+      expect(result.getSegmentIndex()).toEqual(0);
     });
 
-    test('should subtract a Felt wrapped in MaybeRelocatable', () => {
+    test('should subtract a Felt', () => {
       const a = new Relocatable(0, 10);
       const b = new Felt(5n);
       const result = a.sub(b);
       expect(result.getOffset()).toEqual(5);
+      expect(result.getSegmentIndex()).toEqual(0);
     });
   });
 
   describe('add', () => {
-    test('should add a Felt wrapped in MaybeRelocatable', () => {
+    test('should add a Felt', () => {
       const relocatable = new Relocatable(0, 5);
       const felt = new Felt(5n);
       const result = relocatable.add(felt);
       expect(result.getOffset()).toEqual(10);
+      expect(result.getSegmentIndex()).toEqual(0);
     });
 
     test('should throw ForbiddenOperation when adding an incompatible MaybeRelocatable', () => {
@@ -82,18 +87,13 @@ describe('Relocatable', () => {
       const felt = new Felt(5n);
       const result = relocatable.add(felt);
       expect(result.getOffset()).toEqual(10);
+      expect(result.getSegmentIndex()).toEqual(0);
     });
     test('should add a positive number correctly to a relocatable', () => {
       const relocatable = new Relocatable(0, 5);
       const result = relocatable.add(UnsignedInteger.toUint(5));
       expect(result.getOffset()).toEqual(10);
-    });
-
-    test('should throw when adding a negative number', () => {
-      const relocatable = new Relocatable(0, 10);
-      expect(() => relocatable.add(UnsignedInteger.toUint(-5))).toThrow(
-        new TypeError()
-      );
+      expect(result.getSegmentIndex()).toEqual(0);
     });
   });
 });
