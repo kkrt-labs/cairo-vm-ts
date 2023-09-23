@@ -1,0 +1,23 @@
+name: tests
+
+on:
+  pull_request:
+    branches:
+      - '*'
+
+permissions:
+  deployments: read
+  contents: read
+  pull-requests: write
+
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+
+      # run any `bun` or `bunx` command
+      - run: bun install
+      - run: bun test
