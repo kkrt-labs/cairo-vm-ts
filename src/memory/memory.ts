@@ -9,13 +9,13 @@ export class MemoryError extends Error {}
 export class WriteOnceError extends MemoryError {}
 export class UnknownAddressError extends MemoryError {}
 
-class Memory {
+export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
   numSegments: Uint;
 
-  constructor(data: Map<Relocatable, MaybeRelocatable>, numSegments: number) {
-    this.data = data;
-    this.numSegments = UnsignedInteger.toUint(numSegments);
+  constructor() {
+    this.data = new Map();
+    this.numSegments = UnsignedInteger.toUint(0);
   }
 
   insert(address: Relocatable, value: MaybeRelocatable) {
@@ -30,37 +30,36 @@ class Memory {
     this.data.set(address, value);
   }
 
-  get(address: Relocatable) {
+  get(address: Relocatable): MaybeRelocatable {
     const value = this.data.get(address);
     if (value === undefined) {
       throw new UnknownAddressError();
     }
+    return value;
   }
 }
 
-class MemorySegmentManager {
-  segmentSizes: Record<number, number>;
+export class MemorySegmentManager {
+  segmentSizes: Record<Uint, Uint>;
   memory: Memory;
 
-  constructor(segmentSizes: Record<number, number>, memory: Memory) {
-    this.segmentSizes = segmentSizes;
-    this.memory = memory;
+  constructor() {
+    this.segmentSizes = {};
+    this.memory = new Memory();
   }
 
-  addSegment() {
+  addSegment(): Relocatable {
+    const ptr = new Relocatable(this.memory.numSegments, 0);
     this.memory.numSegments = UnsignedInteger.toUint(
       this.memory.numSegments + 1
     );
-    return new Relocatable(this.memory.numSegments - 1, 0);
+    return ptr;
   }
 
-  loadData(address: Relocatable, data: MaybeRelocatable[]) {
+  loadData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
     data.forEach((d, index) =>
-      this.memory.insert(
-        address.addPositiveNumber(UnsignedInteger.toUint(index)),
-        d
-      )
+      this.memory.insert(address.add(UnsignedInteger.toUint(index)), d)
     );
-    return address.addPositiveNumber(UnsignedInteger.toUint(data.length));
+    return address.add(UnsignedInteger.toUint(data.length));
   }
 }
