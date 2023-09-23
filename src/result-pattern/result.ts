@@ -1,4 +1,4 @@
-type ErrorData = {
+export type VMError = {
   message: string;
 };
 
@@ -7,14 +7,14 @@ type Success<T> = {
   value: T;
 };
 
-type Err<E extends ErrorData> = {
+type Err<E extends VMError> = {
   success: false;
   value: E;
 };
 
 export class UnwrapError extends Error {}
 
-export class Result<T, E extends ErrorData> {
+export class Result<T, E extends VMError> {
   private value: Success<T> | Err<E>;
 
   private constructor(value: Success<T> | Err<E>) {
@@ -29,7 +29,7 @@ export class Result<T, E extends ErrorData> {
     return new Result<T, never>(res);
   }
 
-  static error<E extends ErrorData>(value: E): Result<never, E> {
+  static error<E extends VMError>(value: E): Result<never, E> {
     const res: Err<E> = {
       success: false,
       value,
