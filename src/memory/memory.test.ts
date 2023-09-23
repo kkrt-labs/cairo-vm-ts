@@ -10,7 +10,7 @@ import { UnsignedInteger } from './primitives/uint';
 
 describe('Memory', () => {
   describe('get', () => {
-    test('should throw if address is not written to', () => {
+    test('should return error if address is not written to', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
       const result = memory.get(address);
@@ -28,7 +28,7 @@ describe('Memory', () => {
   });
 
   describe('insert', () => {
-    test('should throw if relocatable is out of memory segment bounds', () => {
+    test('should return error if relocatable is out of memory segment bounds', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 0);
       const value = new Felt(10n);
@@ -36,7 +36,7 @@ describe('Memory', () => {
       expect(result.unwrapErr()).toEqual(SegmentError);
     });
 
-    test('should throw if address is already written to', () => {
+    test('should return error if address is already written to', () => {
       let memory = new Memory();
       memory.numSegments = UnsignedInteger.toUint(1);
       const address = new Relocatable(0, 0);

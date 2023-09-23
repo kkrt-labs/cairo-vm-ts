@@ -26,14 +26,14 @@ describe('Relocatable', () => {
       expect(result.getSegmentIndex()).toEqual(1);
     });
 
-    test('should throw OffsetUnderflow when offset goes below zero', () => {
+    test('should return error OffsetUnderflow when offset goes below zero', () => {
       const a = new Relocatable(1, 2);
       const b = new Relocatable(1, 3);
       const result = a.sub(b).unwrapErr();
       expect(result).toEqual(OffsetUnderflow);
     });
 
-    test('should throw SegmentError when segments are different', () => {
+    test('should return error SegmentError when segments are different', () => {
       const a = new Relocatable(1, 10);
       const b = new Relocatable(2, 5);
       const result = a.sub(b).unwrapErr();
@@ -81,7 +81,7 @@ describe('Relocatable', () => {
       expect(result.getSegmentIndex()).toEqual(0);
     });
 
-    test('should throw ForbiddenOperation when adding an incompatible MaybeRelocatable', () => {
+    test('should return error ForbiddenOperation when adding an incompatible MaybeRelocatable', () => {
       const a = new Relocatable(0, 10);
       const b = new Relocatable(0, 5);
       const result = a.add(b).unwrapErr();
