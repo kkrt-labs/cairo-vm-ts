@@ -3,10 +3,10 @@ import { ConversionError, Felt, FeltError } from './felt';
 
 describe('Felt', () => {
   describe('constructor', () => {
-    test('should throw if initialising a felt with a negative inner', () => {
+    test('should throw if initializing a felt with a negative inner', () => {
       expect(() => new Felt(-10n)).toThrow(new FeltError());
     });
-    test('should throw a FeltError when initialising with a BigInt larger than PRIME', () => {
+    test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
       const biggerThanPrime = Felt.PRIME + 1n;
       expect(() => new Felt(biggerThanPrime)).toThrow(new FeltError());
     });

@@ -41,7 +41,7 @@ export class Felt {
   }
 
   toNumber(): number {
-    let num = Number(this.inner);
+    const num = Number(this.inner);
     // The value of the largest integer n such that n and n + 1 are both exactly representable as a Number value.
     // The value of Number.MAX_SAFE_INTEGER is 9007199254740991, i.e. 2^53 − 1.
     if (num > Number.MAX_SAFE_INTEGER) {
