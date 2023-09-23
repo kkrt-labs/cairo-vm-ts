@@ -12,6 +12,8 @@ type Err<E extends ErrorData> = {
   value: E;
 };
 
+export class UnwrapError extends Error {}
+
 export class Result<T, E extends ErrorData> {
   private value: Success<T> | Err<E>;
 
@@ -55,5 +57,19 @@ export class Result<T, E extends ErrorData> {
       return this.value.value;
     }
     return undefined;
+  }
+
+  unwrap(): T {
+    if (this.isOk()) {
+      return this.value.value;
+    }
+    throw new UnwrapError();
+  }
+
+  unwrapErr(): E {
+    if (this.isErr()) {
+      return this.value.value;
+    }
+    throw new UnwrapError();
   }
 }

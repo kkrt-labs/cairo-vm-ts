@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { Result } from './result';
+import { Result, UnwrapError } from './result';
 import { FeltError } from '../memory/primitives/felt';
 
 describe('Result', () => {
@@ -66,6 +66,31 @@ describe('Result', () => {
     test('should return undefined for a successful result', () => {
       const result = Result.ok(123);
       expect(result.unwrapErrOrUndefined()).toBeUndefined();
+    });
+  });
+
+  describe('unwrap', () => {
+    test('should unwrap a successful result value', () => {
+      const result = Result.ok(123);
+      expect(result.unwrap()).toEqual(123);
+    });
+
+    test('should throw an error for an error result', () => {
+      const result = Result.error(new FeltError());
+      expect(() => result.unwrap()).toThrow(new UnwrapError());
+    });
+  });
+
+  describe('unwrapErr', () => {
+    test('should unwrap an error result value', () => {
+      const error = new FeltError();
+      const result = Result.error(error);
+      expect(result.unwrapErr()).toBe(error);
+    });
+
+    test('should throw an error for a successful result', () => {
+      const result = Result.ok(123);
+      expect(() => result.unwrapErr()).toThrow(new UnwrapError());
     });
   });
 });
