@@ -15,11 +15,11 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       const segment = memoryManager.addSegment();
 
-      expect(memoryManager.memory.numSegments).toEqual(1);
+      expect(memoryManager.memory.getNumSegments()).toEqual(1);
     });
   });
   describe('loadData', () => {
-    test('should load data into the memory', () => {
+    test('should return the final state of the pointer', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const data = [
@@ -34,6 +34,21 @@ describe('MemoryManager', () => {
       expect(memoryManager.loadData(address, data)).toEqual(
         new Relocatable(0, 5)
       );
+    });
+    test('should load the data in memory', () => {
+      const memoryManager = new MemorySegmentManager();
+      memoryManager.addSegment();
+      const data = [
+        new Relocatable(0, 0),
+        new Relocatable(0, 1),
+        new Felt(1n),
+        new Felt(2n),
+        new Relocatable(1, 1),
+      ];
+      const address = new Relocatable(0, 0);
+      memoryManager.loadData(address, data);
+
+      expect([...memoryManager.memory.data.values()]).toEqual(data);
     });
   });
 });
