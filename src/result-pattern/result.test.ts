@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { Result, UnwrapError } from './result';
-import { FeltError } from '../memory/primitives/felt';
+import { FeltError } from 'primitives/felt';
 
 describe('Result', () => {
   describe('success', () => {

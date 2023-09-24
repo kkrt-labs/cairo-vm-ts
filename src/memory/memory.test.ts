@@ -1,12 +1,8 @@
 import { test, expect, describe } from 'bun:test';
 import { Memory, UnknownAddressError, WriteOnceError } from './memory';
-import {
-  Relocatable,
-  RelocatableError,
-  SegmentError,
-} from './primitives/relocatable';
-import { Felt } from './primitives/felt';
-import { UnsignedInteger } from './primitives/uint';
+import { Relocatable, RelocatableError } from 'primitives/relocatable';
+import { Felt } from 'primitives/felt';
+import { UnsignedInteger } from 'primitives/uint';
 
 describe('Memory', () => {
   describe('get', () => {

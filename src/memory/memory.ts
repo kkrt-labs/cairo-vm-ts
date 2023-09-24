@@ -3,8 +3,8 @@ import {
   MaybeRelocatable,
   Relocatable,
   SegmentError,
-} from './primitives/relocatable';
-import { Uint, UnsignedInteger } from './primitives/uint';
+} from 'primitives/relocatable';
+import { Uint, UnsignedInteger } from 'primitives/uint';
 
 export class MemoryError extends Error {}
 
