@@ -1,4 +1,4 @@
-import { Result, VMError } from '../../result-pattern/result';
+import { Result, VMError } from 'result-pattern/result';
 import { ConversionError, Felt } from './felt';
 import { Uint, UnsignedInteger } from './uint';
 

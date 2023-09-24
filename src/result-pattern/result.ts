@@ -42,7 +42,7 @@ export class Result<T, E extends VMError> {
   }
 
   isErr(): this is Result<never, E> {
-    return this.value.success === false;
+    return !this.isOk();
   }
 
   unwrapOrUndefined(): T | undefined {
@@ -59,17 +59,31 @@ export class Result<T, E extends VMError> {
     return undefined;
   }
 
-  unwrap(): T {
+  unwrap(this: Result<T, never>): T {
     if (this.isOk()) {
       return this.value.value;
     }
     throw new UnwrapError();
   }
 
-  unwrapErr(): E {
+  unsafeUnwrap(): T {
+    if (this.isOk()) {
+      return this.value.value;
+    }
+    throw new UnwrapError();
+  }
+
+  unwrapErr(this: Result<never, E>): E {
     if (this.isErr()) {
       return this.value.value;
     }
     throw new UnwrapError();
+  }
+
+  static composeErrors(errors: VMError[]): VMError {
+    const message = errors.reduce((acc, err) => acc + err.message + ' \n ', '');
+    return {
+      message,
+    };
   }
 }

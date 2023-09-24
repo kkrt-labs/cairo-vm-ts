@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { Result, UnwrapError } from './result';
+import { Result, UnwrapError, VMError } from './result';
 import { FeltError } from 'primitives/felt';
 
 describe('Result', () => {
@@ -77,7 +77,10 @@ describe('Result', () => {
 
     test('should throw an error for an error result', () => {
       const result = Result.error(new FeltError());
-      expect(() => result.unwrap()).toThrow(new UnwrapError());
+      // We're tricking the Typescript compiler to force an exception to be thrown
+      expect(() =>
+        (result as unknown as Result<boolean, never>).unwrap()
+      ).toThrow(new UnwrapError());
     });
   });
 
@@ -90,7 +93,40 @@ describe('Result', () => {
 
     test('should throw an error for a successful result', () => {
       const result = Result.ok(123);
-      expect(() => result.unwrapErr()).toThrow(new UnwrapError());
+      // We're tricking the Typescript compiler to force an exception to be thrown
+      expect(() =>
+        (result as unknown as Result<never, VMError>).unwrapErr()
+      ).toThrow(new UnwrapError());
+    });
+  });
+  describe('composeErrors', () => {
+    test('should concatenate multiple error messages', () => {
+      const errors: VMError[] = [
+        { message: 'First error.' },
+        { message: 'Second error.' },
+      ];
+
+      const result = Result.composeErrors(errors);
+      expect(result.message).toEqual('First error. \n Second error. \n ');
+    });
+
+    test('should return empty string for no errors', () => {
+      const errors: VMError[] = [];
+      const result = Result.composeErrors(errors);
+      expect(result.message).toEqual('');
+    });
+  });
+
+  describe('unsafeUnwrap', () => {
+    test('should directly unwrap a successful result value', () => {
+      const result = Result.ok(123);
+      expect(result.unsafeUnwrap()).toEqual(123);
+    });
+
+    test('should directly unwrap an error result value', () => {
+      const error = new FeltError();
+      const result = Result.error(error);
+      expect(() => result.unsafeUnwrap()).toThrow(new UnwrapError());
     });
   });
 });

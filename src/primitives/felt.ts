@@ -1,4 +1,4 @@
-import { Result, VMError } from '../../result-pattern/result';
+import { Result, VMError } from 'result-pattern/result';
 
 export class FeltError extends Error {}
 
