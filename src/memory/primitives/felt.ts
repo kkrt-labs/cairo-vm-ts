@@ -1,11 +1,11 @@
+import { Result, VMError } from '../../result-pattern/result';
+
 export class FeltError extends Error {}
-export class ConversionError extends FeltError {
-  constructor(
-    message = 'Failed to convert BigInt to Number due to size limitations.'
-  ) {
-    super(message);
-  }
-}
+
+export const ConversionError = {
+  message:
+    'FeltError: cannot convert to Felt to Number, as underlying bigint > Number.MAX_SAFE_INTEGER',
+};
 
 export class Felt {
   // TODO: should check for PRIME overflow.
@@ -15,7 +15,9 @@ export class Felt {
     0x800000000000011000000000000000000000000000000000000000000000001n;
   constructor(_inner: bigint) {
     if (_inner < 0n || _inner > Felt.PRIME) {
-      throw new FeltError();
+      throw new FeltError(
+        'FeltError: cannot initialize a Felt with underlying bigint negative, or greater than Felt.PRIME'
+      );
     }
     this.inner = _inner;
   }
@@ -40,14 +42,14 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toNumber(): number {
+  toNumber(): Result<number, VMError> {
     const num = Number(this.inner);
     // The value of the largest integer n such that n and n + 1 are both exactly representable as a Number value.
     // The value of Number.MAX_SAFE_INTEGER is 9007199254740991, i.e. 2^53 − 1.
     if (num > Number.MAX_SAFE_INTEGER) {
-      throw new ConversionError();
+      return Result.error(ConversionError);
     }
-    return num;
+    return Result.ok(num);
   }
 
   toHexString(): string {

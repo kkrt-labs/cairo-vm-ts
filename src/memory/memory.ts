@@ -1,3 +1,4 @@
+import { Result, VMError } from '../result-pattern/result';
 import {
   MaybeRelocatable,
   Relocatable,
@@ -6,8 +7,16 @@ import {
 import { Uint, UnsignedInteger } from './primitives/uint';
 
 export class MemoryError extends Error {}
-export class WriteOnceError extends MemoryError {}
-export class UnknownAddressError extends MemoryError {}
+
+export const UnknownAddressError = {
+  message:
+    'MemoryError: tried to access memory at unknown or uninitialized address',
+};
+
+export const WriteOnceError = {
+  message:
+    'MemoryError: tried to write exisiting memory. Can only write to memory once.',
+};
 
 export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
@@ -18,24 +27,25 @@ export class Memory {
     this.numSegments = UnsignedInteger.toUint(0);
   }
 
-  insert(address: Relocatable, value: MaybeRelocatable) {
+  insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
     if (address.getSegmentIndex() >= this.numSegments) {
-      throw new SegmentError();
+      return Result.error(SegmentError);
     }
 
     if (this.data.get(address) !== undefined) {
-      throw new WriteOnceError();
+      return Result.error(WriteOnceError);
     }
 
     this.data.set(address, value);
+    return Result.ok(true);
   }
 
-  get(address: Relocatable): MaybeRelocatable {
+  get(address: Relocatable): Result<MaybeRelocatable, VMError> {
     const value = this.data.get(address);
     if (value === undefined) {
-      throw new UnknownAddressError();
+      return Result.error(UnknownAddressError);
     }
-    return value;
+    return Result.ok(value);
   }
 }
 
@@ -56,10 +66,20 @@ export class MemorySegmentManager {
     return ptr;
   }
 
-  loadData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
-    data.forEach((d, index) =>
-      this.memory.insert(address.add(UnsignedInteger.toUint(index)), d)
-    );
+  loadData(
+    address: Relocatable,
+    data: MaybeRelocatable[]
+  ): Result<Relocatable, VMError> {
+    for (let index = 0; index < data.length; index++) {
+      const sum = address.add(UnsignedInteger.toUint(index));
+      if (sum.isErr()) {
+        return sum;
+      }
+      const insertResult = this.memory.insert(sum.unwrap(), data[index]);
+      if (insertResult.isErr()) {
+        return insertResult;
+      }
+    }
     return address.add(UnsignedInteger.toUint(data.length));
   }
 }

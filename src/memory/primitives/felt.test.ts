@@ -4,18 +4,26 @@ import { ConversionError, Felt, FeltError } from './felt';
 describe('Felt', () => {
   describe('constructor', () => {
     test('should throw if initializing a felt with a negative inner', () => {
-      expect(() => new Felt(-10n)).toThrow(new FeltError());
+      expect(() => new Felt(-10n)).toThrow(
+        new FeltError(
+          'FeltError: cannot initialize a Felt with underlying bigint negative, or greater than Felt.PRIME'
+        )
+      );
     });
     test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
       const biggerThanPrime = Felt.PRIME + 1n;
-      expect(() => new Felt(biggerThanPrime)).toThrow(new FeltError());
+      expect(() => new Felt(biggerThanPrime)).toThrow(
+        new FeltError(
+          'FeltError: cannot initialize a Felt with underlying bigint negative, or greater than Felt.PRIME'
+        )
+      );
     });
   });
 
   describe('conversions', () => {
     test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
       const felt = new Felt(10n);
-      expect(felt.toNumber()).toEqual(10);
+      expect(felt.toNumber().unwrap()).toEqual(10);
     });
     test('should convert correctly a felt to its string representation', () => {
       const felt = new Felt(10n);
@@ -27,7 +35,8 @@ describe('Felt', () => {
     });
     test('should fail number conversion when felt inner > JS max number', () => {
       const felt = new Felt(BigInt(Number.MAX_SAFE_INTEGER + 1));
-      expect(() => felt.toNumber()).toThrow(new ConversionError());
+      const result = felt.toNumber();
+      expect(result.unwrapErr().message).toEqual(ConversionError.message);
     });
   });
 
