@@ -13,10 +13,8 @@ export class MemorySegmentManager {
   }
 
   addSegment(): Relocatable {
-    const ptr = new Relocatable(this.memory.numSegments, 0n);
-    this.memory.numSegments = UnsignedInteger.toUint64(
-      this.memory.numSegments + 1n
-    );
+    const ptr = new Relocatable(this.memory.getNumSegments(), 0n);
+    this.memory.incrementNumSegments();
     return ptr;
   }
 

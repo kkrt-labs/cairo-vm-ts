@@ -19,7 +19,7 @@ describe('Memory', () => {
 
     test('should return the value at the address', () => {
       const memory = new Memory();
-      memory.numSegments = UnsignedInteger.toUint64(1n);
+      memory.incrementNumSegments();
       const address = new Relocatable(0n, 0n);
       const value = new Felt(10n);
       memory.insert(address, value);
@@ -39,7 +39,7 @@ describe('Memory', () => {
 
     test('should return error if address is already written to', () => {
       let memory = new Memory();
-      memory.numSegments = UnsignedInteger.toUint64(1n);
+      memory.incrementNumSegments();
       const address = new Relocatable(0n, 0n);
       const value = new Felt(10n);
       memory.insert(address, value);

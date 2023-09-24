@@ -20,7 +20,7 @@ export const WriteOnceError = {
 
 export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
-  numSegments: Uint64;
+  private numSegments: Uint64;
 
   constructor() {
     this.data = new Map();
@@ -46,5 +46,13 @@ export class Memory {
       return new Err(UnknownAddressError);
     }
     return new Ok(value);
+  }
+
+  incrementNumSegments() {
+    this.numSegments = UnsignedInteger.toUint64(this.numSegments + 1n);
+  }
+
+  getNumSegments(): Uint64 {
+    return this.numSegments;
   }
 }
