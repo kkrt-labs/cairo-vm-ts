@@ -1,4 +1,4 @@
-import { Result } from '../../result-pattern/result';
+import { Result, VMError } from '../../result-pattern/result';
 
 export class FeltError extends Error {}
 
@@ -42,7 +42,7 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toNumber(): Result<number, typeof ConversionError> {
+  toNumber(): Result<number, VMError> {
     const num = Number(this.inner);
     // The value of the largest integer n such that n and n + 1 are both exactly representable as a Number value.
     // The value of Number.MAX_SAFE_INTEGER is 9007199254740991, i.e. 2^53 − 1.

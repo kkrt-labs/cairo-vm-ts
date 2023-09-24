@@ -70,21 +70,15 @@ export class MemorySegmentManager {
     address: Relocatable,
     data: MaybeRelocatable[]
   ): Result<Relocatable, VMError> {
-    let result: VMError | undefined = undefined;
     for (let index = 0; index < data.length; index++) {
       const sum = address.add(UnsignedInteger.toUint(index));
       if (sum.isErr()) {
-        result = sum.unwrapErr();
-        break;
+        return sum;
       }
       const insertResult = this.memory.insert(sum.unwrap(), data[index]);
       if (insertResult.isErr()) {
-        result = insertResult.unwrapErr();
-        break;
+        return insertResult;
       }
-    }
-    if (result !== undefined) {
-      return Result.error(result);
     }
     return address.add(UnsignedInteger.toUint(data.length));
   }
