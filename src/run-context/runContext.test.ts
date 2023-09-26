@@ -7,10 +7,10 @@ describe('RunContext', () => {
     test('should successfully increment pc', () => {
       const ctx = new RunContext();
       const instructionSize = UnsignedInteger.toUint(2);
-      const result = ctx.incrementPc(instructionSize).unsafeUnwrap();
+      const result = ctx.incrementPc(instructionSize);
 
-      expect(result.getOffset()).toEqual(2);
-      expect(result.getSegmentIndex()).toEqual(0);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(2);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0);
     });
   });
 });

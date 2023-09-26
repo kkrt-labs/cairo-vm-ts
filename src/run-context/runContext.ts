@@ -1,6 +1,6 @@
 import { Relocatable } from 'primitives/relocatable';
-import { Uint, UnsignedInteger } from 'primitives/uint';
-import { Result, VMError } from 'result-pattern/result';
+import { Uint } from 'primitives/uint';
+import { Result, Err, Ok, VMError } from 'result-pattern/result';
 
 export const PCError = {
   message: 'RunContextError: cannot increment PC',
@@ -20,9 +20,13 @@ export class RunContext {
   incrementPc(instructionSize: Uint): Result<Relocatable, VMError> {
     const res = this.pc.add(instructionSize);
     if (res.isErr()) {
-      return Result.error(Result.composeErrors([res.unwrapErr(), PCError]));
+      return new Err(Err.composeErrors([res.unwrapErr(), PCError]));
     }
 
     return res;
+  }
+
+  getPc() {
+    return this.pc;
   }
 }

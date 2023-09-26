@@ -1,4 +1,4 @@
-import { Result, VMError } from '../result-pattern/result';
+import { Ok, Err, VMError, Result } from 'result-pattern/result';
 import {
   MaybeRelocatable,
   Relocatable,
@@ -29,23 +29,23 @@ export class Memory {
 
   insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
     if (address.getSegmentIndex() >= this.numSegments) {
-      return Result.error(SegmentError);
+      return new Err(SegmentError);
     }
 
     if (this.data.get(address) !== undefined) {
-      return Result.error(WriteOnceError);
+      return new Err(WriteOnceError);
     }
 
     this.data.set(address, value);
-    return Result.ok(true);
+    return new Ok(true);
   }
 
   get(address: Relocatable): Result<MaybeRelocatable, VMError> {
     const value = this.data.get(address);
     if (value === undefined) {
-      return Result.error(UnknownAddressError);
+      return new Err(UnknownAddressError);
     }
-    return Result.ok(value);
+    return new Ok(value);
   }
 }
 

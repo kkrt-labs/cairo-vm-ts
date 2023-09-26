@@ -1,15 +1,20 @@
 import { test, expect, describe } from 'bun:test';
 import { Memory, UnknownAddressError, WriteOnceError } from './memory';
-import { Relocatable, SegmentError } from 'primitives/relocatable';
+import {
+  MaybeRelocatable,
+  Relocatable,
+  SegmentError,
+} from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
 import { UnsignedInteger } from 'primitives/uint';
+import { Err, Ok, VMError } from 'result-pattern/result';
 
 describe('Memory', () => {
   describe('get', () => {
     test('should return error if address is not written to', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
-      const result = memory.get(address);
+      const result = memory.get(address) as Err<VMError>;
       expect(result.unwrapErr()).toEqual(UnknownAddressError);
     });
 
@@ -19,7 +24,9 @@ describe('Memory', () => {
       const address = new Relocatable(0, 0);
       const value = new Felt(10n);
       memory.insert(address, value);
-      expect(memory.get(address).unwrap()).toEqual(value);
+      expect((memory.get(address) as Ok<MaybeRelocatable>).unwrap()).toEqual(
+        value
+      );
     });
   });
 
@@ -28,7 +35,7 @@ describe('Memory', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 0);
       const value = new Felt(10n);
-      const result = memory.insert(address, value);
+      const result = memory.insert(address, value) as Err<VMError>;
       expect(result.unwrapErr()).toEqual(SegmentError);
     });
 
@@ -38,7 +45,7 @@ describe('Memory', () => {
       const address = new Relocatable(0, 0);
       const value = new Felt(10n);
       memory.insert(address, value);
-      const err = memory.insert(address, value);
+      const err = memory.insert(address, value) as Err<VMError>;
       expect(err.unwrapErr()).toEqual(WriteOnceError);
     });
   });
