@@ -28,7 +28,7 @@ export class Relocatable {
   private segmentIndex: Uint;
   private offset: Uint;
 
-  constructor(segmentIndex: number, offset: number) {
+  constructor(segmentIndex: bigint, offset: bigint) {
     if (
       !UnsignedInteger.isUint(segmentIndex) ||
       !UnsignedInteger.isUint(offset)
