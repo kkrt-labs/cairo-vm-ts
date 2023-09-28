@@ -12,9 +12,9 @@ export class RunContext {
   private fp: Relocatable;
 
   constructor() {
-    this.ap = new Relocatable(0, 0);
-    this.pc = new Relocatable(0, 0);
-    this.fp = new Relocatable(0, 0);
+    this.ap = new Relocatable(0n, 0n);
+    this.pc = new Relocatable(0n, 0n);
+    this.fp = new Relocatable(0n, 0n);
   }
 
   incrementPc(instructionSize: Uint): Result<Relocatable, VMError> {

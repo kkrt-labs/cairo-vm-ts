@@ -22,54 +22,54 @@ describe('Relocatable', () => {
     test('should subtract two relocatables properly within the same segment', () => {
       const a = new Relocatable(1n, 10n);
       const b = new Relocatable(1n, 3n);
-      const result = (a.sub(b) as Ok<Relocatable>).unwrap();
-      expect(result.getOffset()).toEqual(7n);
-      expect(result.getSegmentIndex()).toEqual(1n);
+      const result = a.sub(b);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(7n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(1n);
     });
 
     test('should return error OffsetUnderflow when offset goes below zero', () => {
       const a = new Relocatable(1n, 2n);
       const b = new Relocatable(1n, 3n);
-      const result = (a.sub(b) as Err<VMError>).unwrapErr();
-      expect(result).toEqual(OffsetUnderflow);
+      const result = a.sub(b);
+      expect(result.isErr() && result.unwrapErr()).toEqual(OffsetUnderflow);
     });
 
     test('should return error SegmentError when segments are different', () => {
       const a = new Relocatable(1n, 10n);
       const b = new Relocatable(2n, 5n);
-      const result = (a.sub(b) as Err<VMError>).unwrapErr();
-      expect(result).toEqual(SegmentError);
+      const result = a.sub(b);
+      expect(result.isErr() && result.unwrapErr()).toEqual(SegmentError);
     });
 
     test('should subtract a Felt from a Relocatable', () => {
       const relocatable = new Relocatable(0n, 10n);
       const felt = new Felt(5n);
-      const result = (relocatable.sub(felt) as Ok<Relocatable>).unwrap();
-      expect(result.getOffset()).toEqual(5n);
-      expect(result.getSegmentIndex()).toEqual(0n);
+      const result = relocatable.sub(felt);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(5n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });
 
     test('should return OffsetUnderflow when subtracting a larger Felt', () => {
       const relocatable = new Relocatable(0n, 5n);
       const felt = new Felt(10n);
-      const result = (relocatable.sub(felt) as Err<VMError>).unwrapErr();
-      expect(result).toEqual(OffsetUnderflow);
+      const result = relocatable.sub(felt);
+      expect(result.isErr() && result.unwrapErr()).toEqual(OffsetUnderflow);
     });
 
     test('should subtract a Relocatable', () => {
       const a = new Relocatable(0n, 10n);
       const b = new Relocatable(0n, 5n);
-      const result = (a.sub(b) as Ok<Relocatable>).unwrap();
-      expect(result.getOffset()).toEqual(5n);
-      expect(result.getSegmentIndex()).toEqual(0n);
+      const result = a.sub(b);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(5n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });
 
     test('should subtract a Felt', () => {
       const a = new Relocatable(0n, 10n);
       const b = new Felt(5n);
-      const result = (a.sub(b) as Ok<Relocatable>).unwrap();
-      expect(result.getOffset()).toEqual(5n);
-      expect(result.getSegmentIndex()).toEqual(0n);
+      const result = a.sub(b);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(5n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });
   });
 
@@ -77,31 +77,29 @@ describe('Relocatable', () => {
     test('should add a Felt', () => {
       const relocatable = new Relocatable(0n, 5n);
       const felt = new Felt(5n);
-      const result = (relocatable.add(felt) as Ok<Relocatable>).unwrap();
-      expect(result.getOffset()).toEqual(10n);
-      expect(result.getSegmentIndex()).toEqual(0n);
+      const result = relocatable.add(felt);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(10n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });
 
     test('should return error ForbiddenOperation when adding an incompatible MaybeRelocatable', () => {
       const a = new Relocatable(0n, 10n);
       const b = new Relocatable(0n, 5n);
-      const result = (a.add(b) as Err<VMError>).unwrapErr();
-      expect(result).toEqual(ForbiddenOperation);
+      const result = a.add(b);
+      expect(result.isErr() && result.unwrapErr()).toEqual(ForbiddenOperation);
     });
     test('should add a Felt to a Relocatable', () => {
       const relocatable = new Relocatable(0n, 5n);
       const felt = new Felt(5n);
-      const result = (relocatable.add(felt) as Ok<Relocatable>).unwrap();
-      expect(result.getOffset()).toEqual(10n);
-      expect(result.getSegmentIndex()).toEqual(0n);
+      const result = relocatable.add(felt);
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(10n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });
     test('should add a positive number correctly to a relocatable', () => {
       const relocatable = new Relocatable(0n, 5n);
-      const result = (
-        relocatable.add(UnsignedInteger.toUint(5n)) as Ok<Relocatable>
-      ).unwrap();
-      expect(result.getOffset()).toEqual(10n);
-      expect(result.getSegmentIndex()).toEqual(0n);
+      const result = relocatable.add(UnsignedInteger.toUint(5n));
+      expect(result.isOk() && result.unwrap().getOffset()).toEqual(10n);
+      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });
   });
 });

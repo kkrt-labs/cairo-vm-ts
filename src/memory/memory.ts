@@ -24,7 +24,7 @@ export class Memory {
 
   constructor() {
     this.data = new Map();
-    this.numSegments = UnsignedInteger.toUint(0);
+    this.numSegments = UnsignedInteger.toUint(0n);
   }
 
   insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
@@ -50,7 +50,7 @@ export class Memory {
 }
 
 export class MemorySegmentManager {
-  segmentSizes: Record<Uint, Uint>;
+  segmentSizes: Record<number, Uint>;
   memory: Memory;
 
   constructor() {
@@ -59,9 +59,9 @@ export class MemorySegmentManager {
   }
 
   addSegment(): Relocatable {
-    const ptr = new Relocatable(this.memory.numSegments, 0);
+    const ptr = new Relocatable(this.memory.numSegments, 0n);
     this.memory.numSegments = UnsignedInteger.toUint(
-      this.memory.numSegments + 1
+      this.memory.numSegments + 1n
     );
     return ptr;
   }
@@ -71,7 +71,7 @@ export class MemorySegmentManager {
     data: MaybeRelocatable[]
   ): Result<Relocatable, VMError> {
     for (let index = 0; index < data.length; index++) {
-      const sum = address.add(UnsignedInteger.toUint(index));
+      const sum = address.add(UnsignedInteger.toUint(BigInt(index)));
       if (sum.isErr()) {
         return sum;
       }
@@ -80,6 +80,6 @@ export class MemorySegmentManager {
         return insertResult;
       }
     }
-    return address.add(UnsignedInteger.toUint(data.length));
+    return address.add(UnsignedInteger.toUint(BigInt(data.length)));
   }
 }

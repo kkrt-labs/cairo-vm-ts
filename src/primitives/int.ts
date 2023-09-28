@@ -12,7 +12,7 @@ export class SignedInteger16 {
   static readonly MAX_VALUE: number = 2 ** 15 - 1;
 
   // Returns whether the number is a safe 16-bit signed integer
-  static isInt16(num: number): boolean {
+  static isInt16(num: number): num is Int16 {
     return (
       Number.isInteger(num) &&
       num >= SignedInteger16.MIN_VALUE &&
@@ -22,7 +22,7 @@ export class SignedInteger16 {
 
   static toInt16(num: number): Int16 {
     if (SignedInteger16.isInt16(num)) {
-      return num as Int16;
+      return num;
     }
     throw new TypeError('Number is not within the 16-bit integer range.');
   }
