@@ -31,7 +31,7 @@ describe('MemoryManager', () => {
       ];
       const address = new Relocatable(0, 0);
 
-      expect(memoryManager.loadData(address, data)).toEqual(
+      expect(memoryManager.loadData(address, data).unwrap()).toEqual(
         new Relocatable(0, 5)
       );
     });
