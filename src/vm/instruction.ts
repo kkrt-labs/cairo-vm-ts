@@ -20,18 +20,29 @@
 
 // Dst & Op0 register flags
 // If the flag == 0, then the offset will point to Ap
-type ApRegisterFlag = 0;
 // If the flag == 1, then the offset will point to Fp
-type FpRegisterFlag = 1;
-type RegisterFlag = ApRegisterFlag | FpRegisterFlag;
+enum RegisterFlag {
+  ApRegisterFlag = 0,
+  FpRegisterFlag = 1,
+}
 type DstRegister = RegisterFlag;
 type Op0Register = RegisterFlag;
 
 // Op1Src
-type Op1Src = 0 | 1 | 2 | 4;
+enum Op1Src {
+  Imm = 0,
+  FpPlusOffOp1 = 1,
+  ApPlusOffOp1 = 2,
+  Op0 = 4,
+}
 
 // ResLogic
-type ResLogic = 0 | 1 | 2 | 3;
+enum ResLogic {
+  Op1 = 0,
+  Add = 1,
+  Mul = 2,
+  Unconstrained = 3,
+}
 
 // Pc Update
 enum PcUpdate {
