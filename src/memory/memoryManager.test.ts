@@ -1,7 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { MemorySegmentManager } from './memoryManager';
-import { Relocatable } from './primitives/relocatable';
-import { Felt } from './primitives/felt';
+import { Relocatable } from 'primitives/relocatable';
+import { Felt } from 'primitives/felt';
 
 describe('MemoryManager', () => {
   describe('addSegment', () => {
@@ -9,13 +9,13 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       const segment = memoryManager.addSegment();
 
-      expect(segment).toEqual(new Relocatable(0, 0));
+      expect(segment).toEqual(new Relocatable(0n, 0n));
     });
     test('should expand the memory size', () => {
       const memoryManager = new MemorySegmentManager();
       const segment = memoryManager.addSegment();
 
-      expect(memoryManager.memory.getNumSegments()).toEqual(1);
+      expect(memoryManager.memory.getNumSegments()).toEqual(1n);
     });
   });
   describe('loadData', () => {
@@ -23,29 +23,30 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const data = [
-        new Relocatable(0, 0),
-        new Relocatable(0, 1),
+        new Relocatable(0n, 0n),
+        new Relocatable(0n, 1n),
         new Felt(1n),
         new Felt(2n),
-        new Relocatable(1, 1),
+        new Relocatable(1n, 1n),
       ];
-      const address = new Relocatable(0, 0);
+      const address = new Relocatable(0n, 0n);
+      const loadedAddress = memoryManager.loadData(address, data);
 
-      expect(memoryManager.loadData(address, data).unwrap()).toEqual(
-        new Relocatable(0, 5)
+      expect(loadedAddress.isOk() && loadedAddress.unwrap()).toEqual(
+        new Relocatable(0n, 5n)
       );
     });
     test('should load the data in memory', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const data = [
-        new Relocatable(0, 0),
-        new Relocatable(0, 1),
+        new Relocatable(0n, 0n),
+        new Relocatable(0n, 1n),
         new Felt(1n),
         new Felt(2n),
-        new Relocatable(1, 1),
+        new Relocatable(1n, 1n),
       ];
-      const address = new Relocatable(0, 0);
+      const address = new Relocatable(0n, 0n);
       memoryManager.loadData(address, data);
 
       expect([...memoryManager.memory.data.values()]).toEqual(data);
