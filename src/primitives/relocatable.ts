@@ -1,6 +1,6 @@
 import { Result, Ok, Err, VMError } from 'result-pattern/result';
 import { ConversionError, Felt } from './felt';
-import { Uint64, UnsignedInteger } from './uint';
+import { Uint32, UnsignedInteger } from './uint';
 
 export class RelocatableError extends Error {}
 export class TypeError extends RelocatableError {}
@@ -25,25 +25,17 @@ export const SegmentError = {
 };
 
 export class Relocatable {
-  private segmentIndex: Uint64;
-  private offset: Uint64;
+  private segmentIndex: Uint32;
+  private offset: Uint32;
 
-  constructor(segmentIndex: bigint, offset: bigint) {
-    if (
-      !UnsignedInteger.isUint64(segmentIndex) ||
-      !UnsignedInteger.isUint64(offset)
-    ) {
-      throw new TypeError(
-        'Both segmentIndex and offset must be positive integers.'
-      );
-    }
-    this.segmentIndex = UnsignedInteger.toUint64(segmentIndex);
-    this.offset = UnsignedInteger.toUint64(offset);
+  constructor(segmentIndex: number, offset: number) {
+    this.segmentIndex = UnsignedInteger.toUint32(segmentIndex);
+    this.offset = UnsignedInteger.toUint32(offset);
   }
 
-  add(other: MaybeRelocatable | Uint64): Result<Relocatable, VMError> {
+  add(other: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
-      const num = other.toUint64();
+      const num = other.toUint32();
       if (num.isErr()) {
         return new Err(ConversionError);
       }
@@ -64,9 +56,9 @@ export class Relocatable {
     );
   }
 
-  sub(other: MaybeRelocatable | Uint64): Result<Relocatable, VMError> {
+  sub(other: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
-      const delta = other.toUint64();
+      const delta = other.toUint32();
 
       if (delta.isErr()) {
         return delta;
@@ -102,11 +94,11 @@ export class Relocatable {
     );
   }
 
-  getSegmentIndex(): Uint64 {
+  getSegmentIndex(): Uint32 {
     return this.segmentIndex;
   }
 
-  getOffset(): Uint64 {
+  getOffset(): Uint32 {
     return this.offset;
   }
 }
