@@ -4,11 +4,11 @@ import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { Result, VMError } from 'result-pattern/result';
 
 export class MemorySegmentManager {
-  segmentSizes: Record<number, Uint64>;
+  private segmentSizes: Map<Uint64, Uint64>;
   memory: Memory;
 
   constructor() {
-    this.segmentSizes = {};
+    this.segmentSizes = new Map();
     this.memory = new Memory();
   }
 
@@ -32,6 +32,14 @@ export class MemorySegmentManager {
         return insertResult;
       }
     }
-    return address.add(UnsignedInteger.toUint64(BigInt(data.length)));
+
+    const segmentSize = UnsignedInteger.toUint64(BigInt(data.length));
+    this.segmentSizes.set(address.getSegmentIndex(), segmentSize);
+
+    return address.add(segmentSize);
+  }
+
+  getSegmentSize(segmentIndex: Uint64): Uint64 {
+    return this.segmentSizes.get(segmentIndex) || UnsignedInteger.toUint64(0n);
   }
 }
