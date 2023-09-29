@@ -8,6 +8,8 @@
     "module": "esnext",
     "target": "esnext",
 
+    "baseUrl": "./src",
+
     // if TS 5.x+
     "moduleResolution": "bundler",
     "noEmit": true,

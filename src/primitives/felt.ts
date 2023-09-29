@@ -1,10 +1,11 @@
-import { Result, VMError } from '../../result-pattern/result';
+import { Result, Err, Ok, VMError } from 'result-pattern/result';
+import { Uint64, UnsignedInteger } from './uint';
 
 export class FeltError extends Error {}
 
 export const ConversionError = {
   message:
-    'FeltError: cannot convert to Felt to Number, as underlying bigint > Number.MAX_SAFE_INTEGER',
+    'FeltError: cannot convert to Felt to Number, as underlying bigint > Number.MAX_SAFE_INTEGER or < 0',
 };
 
 export class Felt {
@@ -42,14 +43,12 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toNumber(): Result<number, VMError> {
-    const num = Number(this.inner);
-    // The value of the largest integer n such that n and n + 1 are both exactly representable as a Number value.
-    // The value of Number.MAX_SAFE_INTEGER is 9007199254740991, i.e. 2^53 − 1.
-    if (num > Number.MAX_SAFE_INTEGER) {
-      return Result.error(ConversionError);
+  toUint64(): Result<Uint64, VMError> {
+    if (this.inner < 0n) {
+      return new Err(ConversionError);
     }
-    return Result.ok(num);
+
+    return new Ok(UnsignedInteger.toUint64(this.inner));
   }
 
   toHexString(): string {

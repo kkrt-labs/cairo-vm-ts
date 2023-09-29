@@ -1,6 +1,6 @@
-import { Result, VMError } from '../../result-pattern/result';
+import { Result, Ok, Err, VMError } from 'result-pattern/result';
 import { ConversionError, Felt } from './felt';
-import { Uint, UnsignedInteger } from './uint';
+import { Uint64, UnsignedInteger } from './uint';
 
 export class RelocatableError extends Error {}
 export class TypeError extends RelocatableError {}
@@ -25,83 +25,88 @@ export const SegmentError = {
 };
 
 export class Relocatable {
-  private segmentIndex: Uint;
-  private offset: Uint;
+  private segmentIndex: Uint64;
+  private offset: Uint64;
 
-  constructor(segmentIndex: number, offset: number) {
+  constructor(segmentIndex: bigint, offset: bigint) {
     if (
-      !UnsignedInteger.isUint(segmentIndex) ||
-      !UnsignedInteger.isUint(offset)
+      !UnsignedInteger.isUint64(segmentIndex) ||
+      !UnsignedInteger.isUint64(offset)
     ) {
       throw new TypeError(
         'Both segmentIndex and offset must be positive integers.'
       );
     }
-    this.segmentIndex = UnsignedInteger.toUint(segmentIndex);
-    this.offset = UnsignedInteger.toUint(offset);
+    this.segmentIndex = UnsignedInteger.toUint64(segmentIndex);
+    this.offset = UnsignedInteger.toUint64(offset);
   }
 
-  add(other: MaybeRelocatable | Uint): Result<Relocatable, VMError> {
+  add(other: MaybeRelocatable | Uint64): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
-      const num = other.toNumber();
+      const num = other.toUint64();
       if (num.isErr()) {
-        return Result.error(ConversionError);
+        return new Err(ConversionError);
       }
       if (this.getOffset() + num.unwrap() > Number.MAX_SAFE_INTEGER) {
-        return Result.error(OffsetOverflow);
+        return new Err(OffsetOverflow);
       }
-      return Result.ok(
+      return new Ok(
         new Relocatable(this.getSegmentIndex(), this.getOffset() + num.unwrap())
       );
     }
 
     if (other instanceof Relocatable) {
-      return Result.error(ForbiddenOperation);
+      return new Err(ForbiddenOperation);
     }
 
-    return Result.ok(
+    return new Ok(
       new Relocatable(this.getSegmentIndex(), this.getOffset() + other)
     );
   }
 
-  sub(other: MaybeRelocatable | Uint): Result<Relocatable, VMError> {
+  sub(other: MaybeRelocatable | Uint64): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
-      const delta = other.toNumber().unwrapOrUndefined();
-      if (delta === undefined) {
-        return Result.error(ConversionError);
+      const delta = other.toUint64();
+
+      if (delta.isErr()) {
+        return delta;
       }
-      if (this.getOffset() < delta) {
-        return Result.error(OffsetUnderflow);
+
+      if (this.getOffset() < delta.unwrap()) {
+        return new Err(OffsetUnderflow);
       }
-      return Result.ok(
-        new Relocatable(this.getSegmentIndex(), this.getOffset() - delta)
+      return new Ok(
+        new Relocatable(
+          this.getSegmentIndex(),
+          this.getOffset() - delta.unwrap()
+        )
       );
     }
 
     if (other instanceof Relocatable) {
       if (this.offset < other.offset) {
-        return Result.error(OffsetUnderflow);
+        return new Err(OffsetUnderflow);
       }
 
       if (this.segmentIndex !== other.segmentIndex) {
-        return Result.error(SegmentError);
+        return new Err(SegmentError);
       }
 
-      return Result.ok(
+      return new Ok(
         new Relocatable(this.segmentIndex, this.offset - other.offset)
       );
     }
 
-    return Result.ok(
+    return new Ok(
       new Relocatable(this.getSegmentIndex(), this.getOffset() - other)
     );
   }
 
-  getSegmentIndex(): Uint {
+  getSegmentIndex(): Uint64 {
     return this.segmentIndex;
   }
 
-  getOffset(): Uint {
+  getOffset(): Uint64 {
     return this.offset;
   }
 }

@@ -7,69 +7,56 @@ type Success<T> = {
   value: T;
 };
 
-type Err<E extends VMError> = {
+type TErr<E extends VMError> = {
   success: false;
   value: E;
 };
 
 export class UnwrapError extends Error {}
 
-export class Result<T, E extends VMError> {
-  private value: Success<T> | Err<E>;
-
-  private constructor(value: Success<T> | Err<E>) {
-    this.value = value;
-  }
-
-  static ok<T>(value: T): Result<T, never> {
-    const res: Success<T> = {
+export class Ok<T> {
+  private value: Success<T>;
+  constructor(value: T) {
+    this.value = {
       success: true,
       value,
     };
-    return new Result<T, never>(res);
   }
+  isOk(): this is Ok<T> {
+    return true;
+  }
+  isErr(): this is never {
+    return false;
+  }
+  unwrap(): T {
+    return this.value.value;
+  }
+}
 
-  static error<E extends VMError>(value: E): Result<never, E> {
-    const res: Err<E> = {
+export class Err<E extends VMError> {
+  private value: TErr<E>;
+  constructor(value: E) {
+    this.value = {
       success: false,
       value,
     };
-    return new Result<never, E>(res);
   }
-
-  isOk(): this is Result<T, never> {
-    return this.value.success === true;
+  isOk(): this is never {
+    return false;
   }
-
-  isErr(): this is Result<never, E> {
-    return this.value.success === false;
+  isErr(): this is Err<E> {
+    return true;
   }
-
-  unwrapOrUndefined(): T | undefined {
-    if (this.isOk()) {
-      return this.value.value;
-    }
-    return undefined;
-  }
-
-  unwrapErrOrUndefined(): E | undefined {
-    if (this.isErr()) {
-      return this.value.value;
-    }
-    return undefined;
-  }
-
-  unwrap(): T {
-    if (this.isOk()) {
-      return this.value.value;
-    }
-    throw new UnwrapError();
-  }
-
   unwrapErr(): E {
-    if (this.isErr()) {
-      return this.value.value;
-    }
-    throw new UnwrapError();
+    return this.value.value;
+  }
+
+  static composeErrors(errors: VMError[]): VMError {
+    const message = errors.reduce((acc, err) => acc + err.message + ' \n ', '');
+    return {
+      message,
+    };
   }
 }
+
+export type Result<T, E extends VMError> = Ok<T> | Err<E>;

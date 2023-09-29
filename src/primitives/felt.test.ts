@@ -23,7 +23,8 @@ describe('Felt', () => {
   describe('conversions', () => {
     test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
       const felt = new Felt(10n);
-      expect(felt.toNumber().unwrap()).toEqual(10);
+      const result = felt.toUint64();
+      expect(result.isOk() && result.unwrap()).toEqual(10n);
     });
     test('should convert correctly a felt to its string representation', () => {
       const felt = new Felt(10n);
@@ -32,11 +33,6 @@ describe('Felt', () => {
     test('should convert correctly a felt to its hexstring representation', () => {
       const felt = new Felt(10n);
       expect(felt.toHexString()).toEqual('a');
-    });
-    test('should fail number conversion when felt inner > JS max number', () => {
-      const felt = new Felt(BigInt(Number.MAX_SAFE_INTEGER + 1));
-      const result = felt.toNumber();
-      expect(result.unwrapErr().message).toEqual(ConversionError.message);
     });
   });
 
