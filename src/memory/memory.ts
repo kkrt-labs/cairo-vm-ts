@@ -20,7 +20,7 @@ export const WriteOnceError = {
 
 export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
-  numSegments: Uint64;
+  private numSegments: Uint64;
 
   constructor() {
     this.data = new Map();
@@ -47,39 +47,12 @@ export class Memory {
     }
     return new Ok(value);
   }
-}
 
-export class MemorySegmentManager {
-  segmentSizes: Record<number, Uint64>;
-  memory: Memory;
-
-  constructor() {
-    this.segmentSizes = {};
-    this.memory = new Memory();
+  incrementNumSegments() {
+    this.numSegments = UnsignedInteger.toUint64(this.numSegments + 1n);
   }
 
-  addSegment(): Relocatable {
-    const ptr = new Relocatable(this.memory.numSegments, 0n);
-    this.memory.numSegments = UnsignedInteger.toUint64(
-      this.memory.numSegments + 1n
-    );
-    return ptr;
-  }
-
-  loadData(
-    address: Relocatable,
-    data: MaybeRelocatable[]
-  ): Result<Relocatable, VMError> {
-    for (let index = 0; index < data.length; index++) {
-      const sum = address.add(UnsignedInteger.toUint64(BigInt(index)));
-      if (sum.isErr()) {
-        return sum;
-      }
-      const insertResult = this.memory.insert(sum.unwrap(), data[index]);
-      if (insertResult.isErr()) {
-        return insertResult;
-      }
-    }
-    return address.add(UnsignedInteger.toUint64(BigInt(data.length)));
+  getNumSegments(): Uint64 {
+    return this.numSegments;
   }
 }
