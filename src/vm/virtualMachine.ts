@@ -1,6 +1,6 @@
 import { MemorySegmentManager } from 'memory/memory';
 import { Felt } from 'primitives/felt';
-import { Uint, UnsignedInteger } from 'primitives/uint';
+import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { Result, Err, VMError } from 'result-pattern/result';
 import { RunContext } from 'run-context/runContext';
 
@@ -10,11 +10,11 @@ export const InstructionError = {
 
 export class VirtualMachine {
   private runContext: RunContext;
-  private currentStep: Uint;
+  private currentStep: Uint64;
   private segments: MemorySegmentManager;
 
   constructor() {
-    this.currentStep = UnsignedInteger.toUint(0n);
+    this.currentStep = UnsignedInteger.toUint64(0n);
     this.segments = new MemorySegmentManager();
     this.runContext = new RunContext();
   }
@@ -34,7 +34,7 @@ export class VirtualMachine {
       return new Err(InstructionError);
     }
 
-    const maybeUint = encodedInstruction.toUint();
+    const maybeUint = encodedInstruction.toUint64();
     if (maybeUint.isErr()) {
       return maybeUint;
     }

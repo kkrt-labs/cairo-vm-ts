@@ -4,7 +4,7 @@ import {
   Relocatable,
   SegmentError,
 } from 'primitives/relocatable';
-import { Uint, UnsignedInteger } from 'primitives/uint';
+import { Uint64, UnsignedInteger } from 'primitives/uint';
 
 export class MemoryError extends Error {}
 
@@ -20,11 +20,11 @@ export const WriteOnceError = {
 
 export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
-  numSegments: Uint;
+  numSegments: Uint64;
 
   constructor() {
     this.data = new Map();
-    this.numSegments = UnsignedInteger.toUint(0n);
+    this.numSegments = UnsignedInteger.toUint64(0n);
   }
 
   insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
@@ -50,7 +50,7 @@ export class Memory {
 }
 
 export class MemorySegmentManager {
-  segmentSizes: Record<number, Uint>;
+  segmentSizes: Record<number, Uint64>;
   memory: Memory;
 
   constructor() {
@@ -60,7 +60,7 @@ export class MemorySegmentManager {
 
   addSegment(): Relocatable {
     const ptr = new Relocatable(this.memory.numSegments, 0n);
-    this.memory.numSegments = UnsignedInteger.toUint(
+    this.memory.numSegments = UnsignedInteger.toUint64(
       this.memory.numSegments + 1n
     );
     return ptr;
@@ -71,7 +71,7 @@ export class MemorySegmentManager {
     data: MaybeRelocatable[]
   ): Result<Relocatable, VMError> {
     for (let index = 0; index < data.length; index++) {
-      const sum = address.add(UnsignedInteger.toUint(BigInt(index)));
+      const sum = address.add(UnsignedInteger.toUint64(BigInt(index)));
       if (sum.isErr()) {
         return sum;
       }
@@ -80,6 +80,6 @@ export class MemorySegmentManager {
         return insertResult;
       }
     }
-    return address.add(UnsignedInteger.toUint(BigInt(data.length)));
+    return address.add(UnsignedInteger.toUint64(BigInt(data.length)));
   }
 }

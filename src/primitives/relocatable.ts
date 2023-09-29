@@ -1,6 +1,6 @@
 import { Result, Ok, Err, VMError } from 'result-pattern/result';
 import { ConversionError, Felt } from './felt';
-import { Uint, UnsignedInteger } from './uint';
+import { Uint64, UnsignedInteger } from './uint';
 
 export class RelocatableError extends Error {}
 export class TypeError extends RelocatableError {}
@@ -25,25 +25,25 @@ export const SegmentError = {
 };
 
 export class Relocatable {
-  private segmentIndex: Uint;
-  private offset: Uint;
+  private segmentIndex: Uint64;
+  private offset: Uint64;
 
   constructor(segmentIndex: bigint, offset: bigint) {
     if (
-      !UnsignedInteger.isUint(segmentIndex) ||
-      !UnsignedInteger.isUint(offset)
+      !UnsignedInteger.isUint64(segmentIndex) ||
+      !UnsignedInteger.isUint64(offset)
     ) {
       throw new TypeError(
         'Both segmentIndex and offset must be positive integers.'
       );
     }
-    this.segmentIndex = UnsignedInteger.toUint(segmentIndex);
-    this.offset = UnsignedInteger.toUint(offset);
+    this.segmentIndex = UnsignedInteger.toUint64(segmentIndex);
+    this.offset = UnsignedInteger.toUint64(offset);
   }
 
-  add(other: MaybeRelocatable | Uint): Result<Relocatable, VMError> {
+  add(other: MaybeRelocatable | Uint64): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
-      const num = other.toUint();
+      const num = other.toUint64();
       if (num.isErr()) {
         return new Err(ConversionError);
       }
@@ -64,9 +64,9 @@ export class Relocatable {
     );
   }
 
-  sub(other: MaybeRelocatable | Uint): Result<Relocatable, VMError> {
+  sub(other: MaybeRelocatable | Uint64): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
-      const delta = other.toUint();
+      const delta = other.toUint64();
 
       if (delta.isErr()) {
         return delta;
@@ -102,11 +102,11 @@ export class Relocatable {
     );
   }
 
-  getSegmentIndex(): Uint {
+  getSegmentIndex(): Uint64 {
     return this.segmentIndex;
   }
 
-  getOffset(): Uint {
+  getOffset(): Uint64 {
     return this.offset;
   }
 }

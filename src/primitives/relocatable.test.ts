@@ -97,7 +97,7 @@ describe('Relocatable', () => {
     });
     test('should add a positive number correctly to a relocatable', () => {
       const relocatable = new Relocatable(0n, 5n);
-      const result = relocatable.add(UnsignedInteger.toUint(5n));
+      const result = relocatable.add(UnsignedInteger.toUint64(5n));
       expect(result.isOk() && result.unwrap().getOffset()).toEqual(10n);
       expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0n);
     });

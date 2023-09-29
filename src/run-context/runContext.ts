@@ -1,5 +1,5 @@
 import { Relocatable } from 'primitives/relocatable';
-import { Uint } from 'primitives/uint';
+import { Uint64 } from 'primitives/uint';
 import { Result, Err, Ok, VMError } from 'result-pattern/result';
 
 export const PCError = {
@@ -17,7 +17,7 @@ export class RunContext {
     this.fp = new Relocatable(0n, 0n);
   }
 
-  incrementPc(instructionSize: Uint): Result<Relocatable, VMError> {
+  incrementPc(instructionSize: Uint64): Result<Relocatable, VMError> {
     const res = this.pc.add(instructionSize);
     if (res.isErr()) {
       return new Err(Err.composeErrors([res.unwrapErr(), PCError]));

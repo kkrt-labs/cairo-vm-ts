@@ -1,5 +1,5 @@
 import { Result, Err, Ok, VMError } from 'result-pattern/result';
-import { Uint, UnsignedInteger } from './uint';
+import { Uint64, UnsignedInteger } from './uint';
 
 export class FeltError extends Error {}
 
@@ -43,12 +43,12 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint(): Result<Uint, VMError> {
+  toUint64(): Result<Uint64, VMError> {
     if (this.inner < 0n) {
       return new Err(ConversionError);
     }
 
-    return new Ok(UnsignedInteger.toUint(this.inner));
+    return new Ok(UnsignedInteger.toUint64(this.inner));
   }
 
   toHexString(): string {

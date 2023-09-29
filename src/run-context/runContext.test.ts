@@ -6,7 +6,7 @@ describe('RunContext', () => {
   describe('incrementPc', () => {
     test('should successfully increment pc', () => {
       const ctx = new RunContext();
-      const instructionSize = UnsignedInteger.toUint(2n);
+      const instructionSize = UnsignedInteger.toUint64(2n);
       const result = ctx.incrementPc(instructionSize);
 
       expect(result.isOk() && result.unwrap().getOffset()).toEqual(2n);
