@@ -1,4 +1,4 @@
-import { MemorySegmentManager } from 'memory/memory';
+import { MemorySegmentManager } from 'memory/memoryManager';
 import { Felt } from 'primitives/felt';
 import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { Result, Err, VMError } from 'result-pattern/result';
