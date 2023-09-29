@@ -40,6 +40,6 @@ export class MemorySegmentManager {
   }
 
   getSegmentSize(segmentIndex: Uint64): Uint64 {
-    return this.segmentSizes.get(segmentIndex) || UnsignedInteger.toUint64(0n);
+    return this.segmentSizes.get(segmentIndex) ?? UnsignedInteger.toUint64(0n);
   }
 }
