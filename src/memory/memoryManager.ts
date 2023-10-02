@@ -23,20 +23,29 @@ export class MemorySegmentManager {
     data: MaybeRelocatable[]
   ): Result<Relocatable, VMError> {
     for (let index = 0; index < data.length; index++) {
-      const sum = address.add(UnsignedInteger.toUint32(index));
-      if (sum.isErr()) {
-        return sum;
+      const next_address = address.add(UnsignedInteger.toUint32(index));
+      if (next_address.isErr()) {
+        return next_address;
       }
-      const insertResult = this.memory.insert(sum.unwrap(), data[index]);
+      const insertResult = this.memory.insert(
+        next_address.unwrap(),
+        data[index]
+      );
       if (insertResult.isErr()) {
         return insertResult;
       }
     }
 
-    const segmentSize = UnsignedInteger.toUint32(data.length);
-    this.segmentSizes.set(address.getSegmentIndex(), segmentSize);
+    const dataLen = UnsignedInteger.toUint32(data.length);
 
-    return address.add(segmentSize);
+    const newSegmentSize =
+      this.getSegmentSize(address.getSegmentIndex()) + dataLen;
+    this.segmentSizes.set(
+      address.getSegmentIndex(),
+      UnsignedInteger.toUint32(newSegmentSize)
+    );
+
+    return address.add(dataLen);
   }
 
   getSegmentSize(segmentIndex: Uint32): Uint32 {
