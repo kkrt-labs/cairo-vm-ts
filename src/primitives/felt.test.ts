@@ -1,5 +1,7 @@
 import { test, expect, describe } from 'bun:test';
-import { ConversionError, Felt, FeltError } from './felt';
+import { Felt, FeltError } from './felt';
+import { unwrapErr, unwrapOk } from 'test-utils/utils';
+import { NumberConversionError, Uint32ConversionError } from './uint';
 
 describe('Felt', () => {
   describe('constructor', () => {
@@ -23,8 +25,8 @@ describe('Felt', () => {
   describe('conversions', () => {
     test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
       const felt = new Felt(10n);
-      const result = felt.toUint64();
-      expect(result.isOk() && result.unwrap()).toEqual(10n);
+      const result = unwrapOk(felt.toUint64());
+      expect(result).toEqual(10n);
     });
     test('should convert correctly a felt to its string representation', () => {
       const felt = new Felt(10n);
@@ -78,6 +80,13 @@ describe('Felt', () => {
       const result = a.sub(b);
       const expected = new Felt(Felt.PRIME - 3n);
       expect(result.eq(expected)).toBeTrue();
+    });
+  });
+  describe('toUint32', () => {
+    test('should return an error if the felt is larger than the max safe integer', () => {
+      const a = new Felt(2n ** 53n);
+      const result = a.toUint32();
+      expect(unwrapErr(result)).toEqual(NumberConversionError);
     });
   });
 });

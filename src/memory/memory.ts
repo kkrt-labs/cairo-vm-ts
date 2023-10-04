@@ -4,7 +4,7 @@ import {
   Relocatable,
   SegmentError,
 } from 'primitives/relocatable';
-import { Uint64, UnsignedInteger } from 'primitives/uint';
+import { Uint32, UnsignedInteger } from 'primitives/uint';
 
 export class MemoryError extends Error {}
 
@@ -15,16 +15,16 @@ export const UnknownAddressError = {
 
 export const WriteOnceError = {
   message:
-    'MemoryError: tried to write exisiting memory. Can only write to memory once.',
+    'MemoryError: tried to write existing memory. Can only write to memory once.',
 };
 
 export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
-  private numSegments: Uint64;
+  private numSegments: Uint32;
 
   constructor() {
     this.data = new Map();
-    this.numSegments = UnsignedInteger.toUint64(0n);
+    this.numSegments = UnsignedInteger.ZERO;
   }
 
   insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
@@ -49,10 +49,16 @@ export class Memory {
   }
 
   incrementNumSegments() {
-    this.numSegments = UnsignedInteger.toUint64(this.numSegments + 1n);
+    const newNumSegments = UnsignedInteger.toUint32(this.numSegments + 1);
+    if (newNumSegments.isErr()) {
+      throw new MemoryError(
+        'MemoryError: error incrementing number of segments'
+      );
+    }
+    this.numSegments = newNumSegments.unwrap();
   }
 
-  getNumSegments(): Uint64 {
+  getNumSegments(): Uint32 {
     return this.numSegments;
   }
 }

@@ -2,7 +2,7 @@ import { Err, Ok, Result, VMError } from 'result-pattern/result';
 
 export type Int16 = number & { _intBrand: void };
 
-const ConversionError: VMError = {
+export const Int16ConversionError: VMError = {
   message: 'Int16Error: Expected a byte array of length 2.',
 };
 
@@ -32,7 +32,7 @@ export class SignedInteger16 {
     bytes: Uint8Array
   ): Result<Int16, VMError> {
     if (bytes.length !== 2) {
-      return new Err(ConversionError);
+      return new Err(Int16ConversionError);
     }
 
     // Convert little-endian bytes to a 16-bit number

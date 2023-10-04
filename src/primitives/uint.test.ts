@@ -1,5 +1,6 @@
 import { test, expect, describe } from 'bun:test';
-import { Uint64, UnsignedInteger } from './uint';
+import { Uint64ConversionError, UnsignedInteger } from './uint';
+import { unwrapErr, unwrapOk } from 'test-utils/utils';
 
 describe('UnsignedInteger', () => {
   describe('isUint64', () => {
@@ -14,12 +15,13 @@ describe('UnsignedInteger', () => {
 
   describe('toUint64', () => {
     test('should convert a valid bigint to Uint64', () => {
-      const result: Uint64 = UnsignedInteger.toUint64(5n);
+      const result = unwrapOk(UnsignedInteger.toUint64(5n));
       expect(result).toEqual(5n);
     });
 
-    test('should throw a TypeError for negative bigints', () => {
-      expect(() => UnsignedInteger.toUint64(-5n)).toThrow(new TypeError());
+    test('should return an Uint64ConversionError for negative bigints', () => {
+      const result = unwrapErr(UnsignedInteger.toUint64(-5n));
+      expect(result).toEqual(Uint64ConversionError);
     });
   });
 });
