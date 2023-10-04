@@ -24,7 +24,7 @@ export class Memory {
 
   constructor() {
     this.data = new Map();
-    this.numSegments = new UnsignedInteger().ZERO;
+    this.numSegments = UnsignedInteger.ZERO;
   }
 
   insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {

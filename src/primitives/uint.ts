@@ -27,7 +27,7 @@ export const Uint64ConversionError = {
 };
 
 export class UnsignedInteger {
-  readonly ZERO: Uint32 = 0 as Uint32;
+  static readonly ZERO: Uint32 = 0 as Uint32;
 
   // Returns whether the number is a safe unsigned integer,
   // i.e. a positive number between 0 and 2^32
