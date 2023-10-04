@@ -1,5 +1,5 @@
 import { Result, Ok, Err, VMError } from 'result-pattern/result';
-import { ConversionError, Felt } from './felt';
+import { Felt } from './felt';
 import { Uint32, UnsignedInteger } from './uint';
 
 export class RelocatableError extends Error {}
@@ -29,15 +29,23 @@ export class Relocatable {
   private offset: Uint32;
 
   constructor(segmentIndex: number, offset: number) {
-    this.segmentIndex = UnsignedInteger.toUint32(segmentIndex);
-    this.offset = UnsignedInteger.toUint32(offset);
+    const segmentIndexResult = UnsignedInteger.toUint32(segmentIndex);
+    const offsetResult = UnsignedInteger.toUint32(offset);
+    if (segmentIndexResult.isErr()) {
+      throw segmentIndexResult.unwrapErr();
+    }
+    if (offsetResult.isErr()) {
+      throw offsetResult.unwrapErr();
+    }
+    this.segmentIndex = segmentIndexResult.unwrap();
+    this.offset = offsetResult.unwrap();
   }
 
   add(other: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
     if (other instanceof Felt) {
       const num = other.toUint32();
       if (num.isErr()) {
-        return new Err(ConversionError);
+        return num;
       }
       if (this.getOffset() + num.unwrap() > Number.MAX_SAFE_INTEGER) {
         return new Err(OffsetOverflow);

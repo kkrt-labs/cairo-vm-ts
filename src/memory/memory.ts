@@ -24,7 +24,7 @@ export class Memory {
 
   constructor() {
     this.data = new Map();
-    this.numSegments = UnsignedInteger.toUint32(0);
+    this.numSegments = new UnsignedInteger().ZERO;
   }
 
   insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
@@ -49,7 +49,13 @@ export class Memory {
   }
 
   incrementNumSegments() {
-    this.numSegments = UnsignedInteger.toUint32(this.numSegments + 1);
+    const newNumSegments = UnsignedInteger.toUint32(this.numSegments + 1);
+    if (newNumSegments.isErr()) {
+      throw new MemoryError(
+        'MemoryError: error incrementing number of segments'
+      );
+    }
+    this.numSegments = newNumSegments.unwrap();
   }
 
   getNumSegments(): Uint32 {

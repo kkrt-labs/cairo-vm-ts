@@ -1,12 +1,7 @@
-import { Result, Err, Ok, VMError } from 'result-pattern/result';
-import { Uint32, Uint64, UnsignedInteger } from './uint';
+import { Result, Err, VMError } from 'result-pattern/result';
+import { NumberConversionError, Uint32, Uint64, UnsignedInteger } from './uint';
 
 export class FeltError extends Error {}
-
-export const ConversionError = {
-  message:
-    'FeltError: cannot convert to Felt to Number, as underlying bigint > Number.MAX_SAFE_INTEGER or < 0',
-};
 
 export class Felt {
   // TODO: should check for PRIME overflow.
@@ -44,19 +39,14 @@ export class Felt {
   }
 
   toUint32(): Result<Uint32, VMError> {
-    if (this.inner < 0n) {
-      return new Err(ConversionError);
+    if (this.inner > Number.MAX_SAFE_INTEGER) {
+      return new Err(NumberConversionError);
     }
-
-    return new Ok(UnsignedInteger.toUint32(Number(this.inner)));
+    return UnsignedInteger.toUint32(Number(this.inner));
   }
 
   toUint64(): Result<Uint64, VMError> {
-    if (this.inner < 0n) {
-      return new Err(ConversionError);
-    }
-
-    return new Ok(UnsignedInteger.toUint64(this.inner));
+    return UnsignedInteger.toUint64(this.inner);
   }
 
   toHexString(): string {
