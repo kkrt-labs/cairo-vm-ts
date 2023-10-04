@@ -6,11 +6,11 @@ describe('RunContext', () => {
   describe('incrementPc', () => {
     test('should successfully increment pc', () => {
       const ctx = new RunContext();
-      const instructionSize = UnsignedInteger.toUint32(2);
-      const result = ctx.incrementPc(instructionSize);
+      const instructionSize = UnsignedInteger.toUint32(2).unwrap();
+      const result = ctx.incrementPc(instructionSize).unwrap();
 
-      expect(result.isOk() && result.unwrap().getOffset()).toEqual(2);
-      expect(result.isOk() && result.unwrap().getSegmentIndex()).toEqual(0);
+      expect(result.getOffset()).toEqual(2);
+      expect(result.getSegmentIndex()).toEqual(0);
     });
   });
 });

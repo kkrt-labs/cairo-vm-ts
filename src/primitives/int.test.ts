@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test';
-import { Int16, SignedInteger16 } from './int'; // adjust the import path accordingly
-import { Err, Ok, VMError } from 'result-pattern/result';
+import { SignedInteger16, Int16ConversionError } from './int'; // adjust the import path accordingly
+import { unwrapErr, unwrapOk } from 'test-utils/utils';
 
 describe('SignedInteger16', () => {
   describe('isInt16', () => {
@@ -30,28 +30,28 @@ describe('SignedInteger16', () => {
   describe('fromBiasedLittleEndianBytes', () => {
     test('should convert a biased little-endian byte array to Int16', () => {
       const bytes = new Uint8Array([0xff, 0x7f]); // Represents 2^15-1 in little-endian biased representation
-      const result = SignedInteger16.fromBiasedLittleEndianBytes(bytes);
-      expect(result.isOk() && result.unwrap()).toEqual(-1); // Due to the bias subtraction
+      const result = unwrapOk(
+        SignedInteger16.fromBiasedLittleEndianBytes(bytes)
+      );
+      expect(result).toEqual(-1); // Due to the bias subtraction
     });
 
     test('should return an Err for byte array of length 1', () => {
-      const result = SignedInteger16.fromBiasedLittleEndianBytes(
-        new Uint8Array([0xff])
+      const result = unwrapErr(
+        SignedInteger16.fromBiasedLittleEndianBytes(new Uint8Array([0xff]))
       );
 
-      expect(result.isErr() && result.unwrapErr().message).toBe(
-        'Int16Error: Expected a byte array of length 2.'
-      );
+      expect(result).toEqual(Int16ConversionError);
     });
 
     test('should return an Err for byte array of length 3', () => {
-      const result = SignedInteger16.fromBiasedLittleEndianBytes(
-        new Uint8Array([0xff, 0x7f, 0xff])
+      const result = unwrapErr(
+        SignedInteger16.fromBiasedLittleEndianBytes(
+          new Uint8Array([0xff, 0x7f, 0xff])
+        )
       );
 
-      expect(result.isErr() && result.unwrapErr().message).toBe(
-        'Int16Error: Expected a byte array of length 2.'
-      );
+      expect(result).toEqual(Int16ConversionError);
     });
   });
 });
