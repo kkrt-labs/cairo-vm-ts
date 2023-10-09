@@ -29,6 +29,8 @@ export const Uint64ConversionError = {
 export class UnsignedInteger {
   static readonly ZERO: Uint32 = 0 as Uint32;
 
+  static readonly ZERO_UINT64: Uint64 = 0n as Uint64;
+
   // Returns whether the number is a safe unsigned integer,
   // i.e. a positive number between 0 and 2^32
   static isUint32(num: number): num is Uint32 {

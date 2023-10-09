@@ -2,6 +2,8 @@
 // Some instructions spread over two words when they use an immediate value, so
 // representing the first one with this struct is enougth.
 
+import { Int16 } from 'primitives/int';
+
 //  Structure of the 63-bit that form the first word of each instruction.
 //  See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
 // ┌─────────────────────────────────────────────────────────────────────────┐
@@ -21,12 +23,12 @@
 // Dst & Op0 register flags
 // If the flag == 0, then the offset will point to Ap
 // If the flag == 1, then the offset will point to Fp
-enum RegisterFlag {
+export enum RegisterFlag {
   ApRegisterFlag = 0,
   FpRegisterFlag = 1,
 }
-type DstRegister = RegisterFlag;
-type Op0Register = RegisterFlag;
+export type DstRegister = RegisterFlag;
+export type Op0Register = RegisterFlag;
 
 // Op1Src
 enum Op1Src {
@@ -74,4 +76,17 @@ enum Opcode {
   Ret = 4,
 }
 
-export type Instruction = {};
+export type Instruction = {
+  // The offset to add or sub to ap/fp to obtain the Destination Operand
+  offDst: Int16;
+  offOp0: Int16;
+  offOp1: Int16;
+  dstReg: RegisterFlag;
+  op0Reg: RegisterFlag;
+  op1Src: Op1Src;
+  resLogic: ResLogic;
+  pcUpdate: PcUpdate;
+  apUpdate: ApUpdate;
+  fpUpdate: FpUpdate;
+  opcode: Opcode;
+};

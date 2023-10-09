@@ -1,6 +1,7 @@
 import { Relocatable } from 'primitives/relocatable';
-import { Uint32 } from 'primitives/uint';
-import { Result, Err, VMError } from 'result-pattern/result';
+import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { Result, Err, VMError, Ok } from 'result-pattern/result';
+import { DstRegister, Instruction, RegisterFlag } from 'vm/instruction';
 
 export const PCError = {
   message: 'RunContextError: cannot increment PC',
@@ -28,5 +29,30 @@ export class RunContext {
 
   getPc() {
     return this.pc;
+  }
+
+  computeDstAddress(instruction: Instruction): Result<Relocatable, VMError> {
+    const offsetIsNegative = instruction.dstReg < 0 ? 1 : 0;
+
+    const offDst = UnsignedInteger.toUint32(
+      -1 * offsetIsNegative * instruction.dstReg +
+        (1 - offsetIsNegative) * instruction.dstReg
+    );
+
+    if (offDst.isErr()) {
+      return offDst;
+    }
+
+    switch (instruction.dstReg) {
+      case RegisterFlag.ApRegisterFlag:
+        return offsetIsNegative
+          ? this.ap.sub(offDst.unwrap())
+          : this.ap.add(offDst.unwrap());
+
+      case RegisterFlag.FpRegisterFlag:
+        return offsetIsNegative
+          ? this.fp.sub(offDst.unwrap())
+          : this.fp.add(offDst.unwrap());
+    }
   }
 }
