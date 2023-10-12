@@ -61,6 +61,6 @@ export class MemorySegmentManager {
   }
 
   getSegmentSize(segmentIndex: Uint32): Uint32 {
-    return this.segmentSizes.get(segmentIndex) ?? UnsignedInteger.ZERO;
+    return this.segmentSizes.get(segmentIndex) ?? UnsignedInteger.ZERO_UINT32;
   }
 }

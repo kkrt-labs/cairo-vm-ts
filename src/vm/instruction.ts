@@ -81,8 +81,8 @@ export type Instruction = {
   offDst: Int16;
   offOp0: Int16;
   offOp1: Int16;
-  dstReg: RegisterFlag;
-  op0Reg: RegisterFlag;
+  dstReg: DstRegister;
+  op0Reg: Op0Register;
   op1Src: Op1Src;
   resLogic: ResLogic;
   pcUpdate: PcUpdate;
