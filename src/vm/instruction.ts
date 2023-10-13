@@ -31,15 +31,15 @@ export type DstRegister = RegisterFlag;
 export type Op0Register = RegisterFlag;
 
 // Op1Src
-enum Op1Src {
+export enum Op1Src {
   Imm = 0,
-  FpPlusOffOp1 = 1,
-  ApPlusOffOp1 = 2,
+  ApPlusOffOp1 = 1,
+  FpPlusOffOp1 = 2,
   Op0 = 4,
 }
 
 // ResLogic
-enum ResLogic {
+export enum ResLogic {
   Op1 = 0,
   Add = 1,
   Mul = 2,
@@ -47,7 +47,7 @@ enum ResLogic {
 }
 
 // Pc Update
-enum PcUpdate {
+export enum PcUpdate {
   PcUpdateRegular = 0,
   PcUpdateJump = 1,
   PcUpdateJumpRel = 2,
@@ -55,7 +55,7 @@ enum PcUpdate {
 }
 
 // Ap update
-enum ApUpdate {
+export enum ApUpdate {
   ApUpdateRegular = 0,
   ApUpdateAdd = 1,
   AppUpdateAdd1 = 2,
@@ -63,13 +63,13 @@ enum ApUpdate {
 }
 
 // Fp Update
-enum FpUpdate {
+export enum FpUpdate {
   FpUpdateRegular = 0,
   FpUpdateApPlus2 = 1,
   FpUpdateDst = 2,
 }
 
-enum Opcode {
+export enum Opcode {
   NoOp = 0,
   AssertEq = 1,
   Call = 2,
