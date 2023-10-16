@@ -1,4 +1,8 @@
-import { ProgramCounter, Relocatable, VmPointer } from 'primitives/relocatable';
+import {
+  ProgramCounter,
+  Relocatable,
+  MemoryPointer,
+} from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
 import { Result, Err, VMError, Ok } from 'result-pattern/result';
 import { Instruction, RegisterFlag } from 'vm/instruction';
@@ -8,8 +12,8 @@ export const PCError = {
 };
 
 export class RunContext {
-  private pc: VmPointer;
-  private ap: VmPointer;
+  private pc: MemoryPointer;
+  private ap: MemoryPointer;
   private fp: ProgramCounter;
 
   static default() {
@@ -18,8 +22,8 @@ export class RunContext {
 
   constructor(pc: number, ap: number, fp: number) {
     this.pc = new ProgramCounter(pc);
-    this.ap = new VmPointer(ap);
-    this.fp = new VmPointer(fp);
+    this.ap = new MemoryPointer(ap);
+    this.fp = new MemoryPointer(fp);
   }
 
   incrementPc(instructionSize: Uint32): Result<Relocatable, VMError> {

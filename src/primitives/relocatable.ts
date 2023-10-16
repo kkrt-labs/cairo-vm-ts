@@ -116,7 +116,7 @@ export class Relocatable {
  * These CairoVM registers are considered relocatables must only have segment index equal to 1
  * as they always point to the execution segment.
  */
-export class VmPointer extends Relocatable {
+export class MemoryPointer extends Relocatable {
   constructor(offset: number) {
     super(1, offset);
   }

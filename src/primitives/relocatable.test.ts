@@ -5,7 +5,7 @@ import {
   OffsetUnderflow,
   SegmentError,
   ForbiddenOperation,
-  VmPointer,
+  MemoryPointer,
   ProgramCounter,
 } from './relocatable';
 import { unwrapErr, unwrapOk } from '../test-utils/utils';
@@ -106,10 +106,10 @@ describe('Relocatable', () => {
     });
   });
 });
-describe('VmPointer', () => {
+describe('MemoryPointer', () => {
   describe('constructor', () => {
     test('should always set segment to 1', () => {
-      const pointer = new VmPointer(42);
+      const pointer = new MemoryPointer(42);
       expect(pointer.getSegmentIndex()).toEqual(1);
       expect(pointer.getOffset()).toEqual(42);
     });
