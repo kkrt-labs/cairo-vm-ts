@@ -1,6 +1,5 @@
 import { test, expect, describe } from 'bun:test';
 import { SignedInteger16, Int16ConversionError } from './int'; // adjust the import path accordingly
-import { unwrapErr, unwrapOk } from 'test-utils/utils';
 
 describe('SignedInteger16', () => {
   describe('isInt16', () => {
@@ -30,26 +29,23 @@ describe('SignedInteger16', () => {
   describe('fromBiasedLittleEndianBytes', () => {
     test('should convert a biased little-endian byte array to Int16', () => {
       const bytes = new Uint8Array([0xff, 0x7f]); // Represents 2^15-1 in little-endian biased representation
-      const result = unwrapOk(
-        SignedInteger16.fromBiasedLittleEndianBytes(bytes)
-      );
+      const result =
+        SignedInteger16.fromBiasedLittleEndianBytes(bytes).unwrap();
       expect(result).toEqual(-1); // Due to the bias subtraction
     });
 
     test('should return an Err for byte array of length 1', () => {
-      const result = unwrapErr(
-        SignedInteger16.fromBiasedLittleEndianBytes(new Uint8Array([0xff]))
-      );
+      const result = SignedInteger16.fromBiasedLittleEndianBytes(
+        new Uint8Array([0xff])
+      ).unwrapErr();
 
       expect(result).toEqual(Int16ConversionError);
     });
 
     test('should return an Err for byte array of length 3', () => {
-      const result = unwrapErr(
-        SignedInteger16.fromBiasedLittleEndianBytes(
-          new Uint8Array([0xff, 0x7f, 0xff])
-        )
-      );
+      const result = SignedInteger16.fromBiasedLittleEndianBytes(
+        new Uint8Array([0xff, 0x7f, 0xff])
+      ).unwrapErr();
 
       expect(result).toEqual(Int16ConversionError);
     });

@@ -2,8 +2,7 @@ import { describe, test, expect } from 'bun:test';
 import { MemorySegmentManager } from './memoryManager';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { unwrapOk } from 'test-utils/utils';
+import { UnsignedInteger } from 'primitives/uint';
 
 const DATA = [
   new Relocatable(0, 0),
@@ -33,7 +32,7 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      const loadedAddress = unwrapOk(memoryManager.loadData(address, DATA));
+      const loadedAddress = memoryManager.loadData(address, DATA).unwrap();
 
       expect(loadedAddress).toEqual(new Relocatable(0, 5));
     });
@@ -54,7 +53,7 @@ describe('MemoryManager', () => {
       const segmentAddress = UnsignedInteger.ZERO_UINT32;
 
       expect(memoryManager.getSegmentSize(segmentAddress)).toEqual(
-        unwrapOk(UnsignedInteger.toUint32(5))
+        UnsignedInteger.toUint32(5).unwrap()
       );
     });
   });
