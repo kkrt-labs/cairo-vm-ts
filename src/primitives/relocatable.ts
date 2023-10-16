@@ -113,7 +113,7 @@ export class Relocatable {
 
 /**
  * Subclass of Relocatable, specific to the Allocation Pointer (Ap) and the Frame Pointer (Fp)
- * These CairoVM registers are considered relocatables must can only have segment index equal to 1
+ * These CairoVM registers are considered relocatables must only have segment index equal to 1
  * as they always point to the execution segment.
  */
 export class VmPointer extends Relocatable {
