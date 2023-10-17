@@ -40,7 +40,7 @@ export class UnsignedInteger {
   // Returns whether the number is a safe unsigned integer,
   // i.e. a positive number between 0 and 2^32
   static isUint16(num: number): num is Uint16 {
-    if (num >= 0 && num < 0x10000) {
+    if (num >= 0 && num < 0x10000 && Number.isInteger(num)) {
       return true;
     }
     return false;
@@ -49,7 +49,7 @@ export class UnsignedInteger {
   // Returns whether the number is a safe unsigned integer,
   // i.e. a positive number between 0 and 2^32
   static isUint32(num: number): num is Uint32 {
-    if (num >= 0 && num < 0x100000000) {
+    if (num >= 0 && num < 0x100000000 && Number.isInteger(num)) {
       return true;
     }
     return false;
@@ -111,7 +111,7 @@ export class UnsignedInteger {
     throw Uint64ConversionError;
   }
 
-  static uint16Rhs(lsh: Uint16, rhs: Uint16): Uint16 {
+  static uint16Shr(lsh: Uint16, rhs: Uint16): Uint16 {
     const result = lsh >> rhs;
     if (this.isUint16(result)) {
       return result;
@@ -124,14 +124,16 @@ export class UnsignedInteger {
     if (this.isUint64(result)) {
       return result;
     }
+    // anding two Uint64s will always result in a Uint64
     throw Uint64ConversionError;
   }
 
-  static uint64Rhs(lsh: Uint64, rhs: Uint64): Uint64 {
+  static uint64Shr(lsh: Uint64, rhs: Uint64): Uint64 {
     const result = lsh >> rhs;
     if (this.isUint64(result)) {
       return result;
     }
+    // shifting right a Uint64 will always result in a Uint64
     throw Uint64ConversionError;
   }
 }

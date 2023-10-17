@@ -12,8 +12,12 @@ describe('UnsignedInteger', () => {
       expect(UnsignedInteger.isUint16(5)).toBe(true);
     });
 
-    test('should return false for negative bigints', () => {
+    test('should return false for negative numbers', () => {
       expect(UnsignedInteger.isUint16(-5)).toBe(false);
+    });
+
+    test('should return false for decimal values', () => {
+      expect(UnsignedInteger.isUint16(1.1)).toBe(false);
     });
   });
 
@@ -23,7 +27,7 @@ describe('UnsignedInteger', () => {
       expect(result).toEqual(5);
     });
 
-    test('should return an Uint16ConversionError for negative bigints', () => {
+    test('should return an Uint16ConversionError for negative numbers', () => {
       const result = UnsignedInteger.toUint16(-5).unwrapErr();
       expect(result).toEqual(Uint16ConversionError);
     });
@@ -37,6 +41,10 @@ describe('UnsignedInteger', () => {
     test('should return false for negative bigints', () => {
       expect(UnsignedInteger.isUint32(-5)).toBe(false);
     });
+
+    test('should return false for decimal values', () => {
+      expect(UnsignedInteger.isUint32(1.1)).toBe(false);
+    });
   });
 
   describe('toUint32', () => {
@@ -45,7 +53,7 @@ describe('UnsignedInteger', () => {
       expect(result).toEqual(5);
     });
 
-    test('should return an Uint32ConversionError for negative bigints', () => {
+    test('should return an Uint32ConversionError for negative numbers', () => {
       const result = UnsignedInteger.toUint32(-5).unwrapErr();
       expect(result).toEqual(Uint32ConversionError);
     });
@@ -120,7 +128,7 @@ describe('UnsignedInteger', () => {
     test('should shift the first value by the second value amount of bits return the result', () => {
       const a = UnsignedInteger.toUint16(0b1010111010101010).unwrap();
       const b = UnsignedInteger.toUint16(5).unwrap();
-      const value = UnsignedInteger.uint16Rhs(a, b);
+      const value = UnsignedInteger.uint16Shr(a, b);
       expect(value).toEqual(0b10101110101);
     });
   });
@@ -138,7 +146,7 @@ describe('UnsignedInteger', () => {
     test('should shift the first value by the second value amount of bits return the result', () => {
       const a = UnsignedInteger.toUint64(0b1010111010101010n).unwrap();
       const b = UnsignedInteger.toUint64(5n).unwrap();
-      const value = UnsignedInteger.uint64Rhs(a, b);
+      const value = UnsignedInteger.uint64Shr(a, b);
       expect(value).toEqual(0b10101110101n);
     });
   });
