@@ -6,23 +6,32 @@ import { Int16, SignedInteger16 } from 'primitives/int';
 import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { Err, Ok, Result, VMError } from 'result-pattern/result';
 
+const DECODING_ERRORS = {
+  HIGH_BIT_SET: 'High bit is not zero',
+  INVALID_OP1_SRC: 'Invalid Operand 1 Source',
+  INVALID_PC_UPDATE: 'Invalid PC Update',
+  INVALID_AP_UPDATE: 'Invalid AP Update',
+  INVALID_RES_LOGIC: 'Invalid Result Logic',
+  INVALID_OPCODE: 'Invalid Opcode',
+} as const;
+
 export const HighBitSetError: VMError = {
-  message: 'InstructionDecodingError: High bit is not zero',
+  message: `InstructionDecodingError: ${DECODING_ERRORS.HIGH_BIT_SET}`,
 };
 export const InvalidOp1Src: VMError = {
-  message: 'InstructionDecodingError: Invalid Operand 1 Source',
+  message: `InstructionDecodingError: ${DECODING_ERRORS.INVALID_OP1_SRC}`,
 };
 export const InvalidPcUpdate: VMError = {
-  message: 'InstructionDecodingError: Invalid PC Update',
+  message: `InstructionDecodingError: ${DECODING_ERRORS.INVALID_PC_UPDATE}`,
 };
 export const InvalidApUpdate: VMError = {
-  message: 'InstructionDecodingError: Invalid AP Update',
+  message: `InstructionDecodingError: ${DECODING_ERRORS.INVALID_AP_UPDATE}`,
 };
 export const InvalidResultLogic: VMError = {
-  message: 'InstructionDecodingError: Invalid Result Logic',
+  message: `InstructionDecodingError: ${DECODING_ERRORS.INVALID_RES_LOGIC}`,
 };
 export const InvalidOpcode: VMError = {
-  message: 'InstructionDecodingError: Invalid Opcode',
+  message: `InstructionDecodingError: ${DECODING_ERRORS.INVALID_OPCODE}`,
 };
 
 //  Structure of the 63-bit that form the first word of each instruction.
@@ -53,10 +62,10 @@ export type Op0Register = RegisterFlag;
 
 // Op1Src
 export enum Op1Src {
-  Imm = 0,
-  ApPlusOffOp1 = 1,
-  FpPlusOffOp1 = 2,
-  Op0 = 4,
+  Op1SrcOp0 = 0,
+  Op1SrcImm = 1,
+  Op1SrcFP = 2,
+  Op1SrcAP = 4,
 }
 
 // ResLogic
@@ -115,28 +124,44 @@ export type Instruction = {
 export function decodeInstruction(
   encodedInstruction: Uint64
 ): Result<Instruction, VMError> {
+  // mask for the high bit of a 64-bit number
   const highBit = 1n << 63n;
-  const dstRegMask = UnsignedInteger.toUint16(0x01).unwrap(); // safe to unwrap
-  const dstRegOff = UnsignedInteger.toUint16(0).unwrap(); // safe to unwrap
-  const op0RegMask = UnsignedInteger.toUint16(0x02).unwrap(); // safe to unwrap
-  const op0RegOff = UnsignedInteger.toUint16(1).unwrap(); // safe to unwrap
-  const op1SrcMask = UnsignedInteger.toUint16(0x1c).unwrap(); // safe to unwrap
-  const op1SrcOff = UnsignedInteger.toUint16(2).unwrap(); // safe to unwrap
-  const resLogicMask = UnsignedInteger.toUint16(0x60).unwrap(); // safe to unwrap
-  const resLogicOff = UnsignedInteger.toUint16(5).unwrap(); // safe to unwrap
-  const pcUpdateMask = UnsignedInteger.toUint16(0x0380).unwrap(); // safe to unwrap
-  const pcUpdateOff = UnsignedInteger.toUint16(7).unwrap(); // safe to unwrap
-  const apUpdateMask = UnsignedInteger.toUint16(0x0c00).unwrap(); // safe to unwrap
-  const apUpdateOff = UnsignedInteger.toUint16(10).unwrap(); // safe to unwrap
-  const opcodeMask = UnsignedInteger.toUint16(0x7000).unwrap(); // safe to unwrap
-  const opcodeOff = UnsignedInteger.toUint16(12).unwrap(); // safe to unwrap
+  // dstReg is located at bits 0-0. We apply a mask of 0x01 (0b1)
+  // and shift 0 bits right
+  const dstRegMask = UnsignedInteger.toUint16(0x01).unwrap();
+  const dstRegOff = UnsignedInteger.toUint16(0).unwrap();
+  // op0Reg is located at bits 1-1. We apply a mask of 0x02 (0b10)
+  // and shift 1 bit right
+  const op0RegMask = UnsignedInteger.toUint16(0x02).unwrap();
+  const op0RegOff = UnsignedInteger.toUint16(1).unwrap();
+  // op1Src is located at bits 2-4. We apply a mask of 0x1c (0b11100)
+  // and shift 2 bits right
+  const op1SrcMask = UnsignedInteger.toUint16(0x1c).unwrap();
+  const op1SrcOff = UnsignedInteger.toUint16(2).unwrap();
+  // resLogic is located at bits 5-6. We apply a mask of 0x60 (0b1100000)
+  // and shift 5 bits right
+  const resLogicMask = UnsignedInteger.toUint16(0x60).unwrap();
+  const resLogicOff = UnsignedInteger.toUint16(5).unwrap();
+  // pcUpdate is located at bits 7-9. We apply a mask of 0x380 (0b1110000000)
+  // and shift 7 bits right
+  const pcUpdateMask = UnsignedInteger.toUint16(0x0380).unwrap();
+  const pcUpdateOff = UnsignedInteger.toUint16(7).unwrap();
+  // apUpdate is located at bits 10-11. We apply a mask of 0xc00 (0b110000000000)
+  // and shift 10 bits right
+  const apUpdateMask = UnsignedInteger.toUint16(0x0c00).unwrap();
+  const apUpdateOff = UnsignedInteger.toUint16(10).unwrap();
+  // opcode is located at bits 12-14. We apply a mask of 0x7000 (0b111000000000000)
+  // and shift 12 bits right
+  const opcodeMask = UnsignedInteger.toUint16(0x7000).unwrap();
+  const opcodeOff = UnsignedInteger.toUint16(12).unwrap();
 
   if ((highBit & encodedInstruction) !== 0n) {
     return new Err(HighBitSetError);
   }
 
-  const mask = UnsignedInteger.toUint64(0xffffn).unwrap(); // safe to unwrap
-  const shift = UnsignedInteger.toUint64(16n).unwrap(); // safe to unwrap
+  // mask for the 16 least significant bits of a 64-bit number
+  const mask = UnsignedInteger.toUint64(0xffffn).unwrap();
+  const shift = UnsignedInteger.toUint64(16n).unwrap();
 
   // Get the offset by masking and shifting the encoded instruction
   const offsetDstUint64 = UnsignedInteger.uint64And(encodedInstruction, mask);
@@ -146,7 +171,7 @@ export function decodeInstruction(
   }
   const offsetDst = offsetDstResult.unwrap();
 
-  var shiftedEncodedInstruction = UnsignedInteger.uint64Rhs(
+  let shiftedEncodedInstruction = UnsignedInteger.uint64Shr(
     encodedInstruction,
     shift
   );
@@ -160,7 +185,7 @@ export function decodeInstruction(
   }
   const offsetOp0 = offsetOp0Result.unwrap();
 
-  var shiftedEncodedInstruction = UnsignedInteger.uint64Rhs(
+  shiftedEncodedInstruction = UnsignedInteger.uint64Shr(
     shiftedEncodedInstruction,
     shift
   );
@@ -174,54 +199,52 @@ export function decodeInstruction(
   }
   const offsetOp1 = offsetOp1Result.unwrap();
 
-  // Get the flags by masking and shifting the encoded instruction
-  var shiftedEncodedInstruction = UnsignedInteger.uint64Rhs(
+  // Get the flags by shifting the encoded instruction
+  shiftedEncodedInstruction = UnsignedInteger.uint64Shr(
     shiftedEncodedInstruction,
     shift
   );
-  const flagsUint64 = UnsignedInteger.uint64And(
-    shiftedEncodedInstruction,
-    mask
+  const flagsResult = UnsignedInteger.downCastToUint16(
+    shiftedEncodedInstruction
   );
-  const flagsResult = UnsignedInteger.downCastToUint16(flagsUint64);
   if (flagsResult.isErr()) {
     return flagsResult;
   }
 
   const flags = flagsResult.unwrap();
 
-  const dstReg = UnsignedInteger.uint16Rhs(
+  const dstReg = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, dstRegMask),
     dstRegOff
   );
-  const op0Reg = UnsignedInteger.uint16Rhs(
+  const op0Reg = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, op0RegMask),
     op0RegOff
   );
 
-  const op1SrcNum = UnsignedInteger.uint16Rhs(
+  const op1SrcNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, op1SrcMask),
     op1SrcOff
   );
   var op1Src: Op1Src;
   switch (op1SrcNum) {
     case 0:
-      op1Src = Op1Src.Imm;
+      op1Src = Op1Src.Op1SrcOp0;
       break;
     case 1:
-      op1Src = Op1Src.FpPlusOffOp1;
+      op1Src = Op1Src.Op1SrcImm;
       break;
     case 2:
-      op1Src = Op1Src.ApPlusOffOp1;
+      op1Src = Op1Src.Op1SrcFP;
       break;
     case 4:
-      op1Src = Op1Src.Op0;
+      op1Src = Op1Src.Op1SrcAP;
       break;
     default:
       return new Err(InvalidOp1Src);
   }
 
-  const pcUpdateNum = UnsignedInteger.uint16Rhs(
+  const pcUpdateNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, pcUpdateMask),
     pcUpdateOff
   );
@@ -243,18 +266,19 @@ export function decodeInstruction(
       return new Err(InvalidOp1Src);
   }
 
-  const resLogicNum = UnsignedInteger.uint16Rhs(
+  const resLogicNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, resLogicMask),
     resLogicOff
   );
   var resLogic: ResLogic;
   switch (resLogicNum) {
     case 0:
-      if (pcUpdate == PcUpdate.PcUpdateJump) {
+      if (pcUpdate == PcUpdate.PcUpdateJnz) {
         resLogic = ResLogic.Unconstrained;
       } else {
         resLogic = ResLogic.Op1;
       }
+      break;
     case 1:
       resLogic = ResLogic.Add;
       break;
@@ -265,7 +289,7 @@ export function decodeInstruction(
       return new Err(InvalidOp1Src);
   }
 
-  const opcodeNum = UnsignedInteger.uint16Rhs(
+  const opcodeNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, opcodeMask),
     opcodeOff
   );
@@ -287,7 +311,7 @@ export function decodeInstruction(
       return new Err(InvalidOp1Src);
   }
 
-  const apUpdateNum = UnsignedInteger.uint16Rhs(
+  const apUpdateNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, apUpdateMask),
     apUpdateOff
   );
