@@ -5,6 +5,8 @@ import {
   OffsetUnderflow,
   SegmentError,
   ForbiddenOperation,
+  MemoryPointer,
+  ProgramCounter,
 } from './relocatable';
 import { unwrapErr, unwrapOk } from '../test-utils/utils';
 import { UnsignedInteger } from './uint';
@@ -101,6 +103,25 @@ describe('Relocatable', () => {
       const result = unwrapOk(relocatable.add(add));
       expect(result.getOffset()).toEqual(10);
       expect(result.getSegmentIndex()).toEqual(0);
+    });
+  });
+});
+describe('MemoryPointer', () => {
+  describe('constructor', () => {
+    test('should always set segment to 1', () => {
+      const pointer = new MemoryPointer(42);
+      expect(pointer.getSegmentIndex()).toEqual(1);
+      expect(pointer.getOffset()).toEqual(42);
+    });
+  });
+});
+
+describe('ProgramCounter', () => {
+  describe('constructor', () => {
+    test('should always set segment to 0', () => {
+      const pc = new ProgramCounter(24);
+      expect(pc.getSegmentIndex()).toEqual(0);
+      expect(pc.getOffset()).toEqual(24);
     });
   });
 });

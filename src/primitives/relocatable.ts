@@ -110,3 +110,25 @@ export class Relocatable {
     return this.offset;
   }
 }
+
+/**
+ * Subclass of Relocatable, specific to the Allocation Pointer (Ap) and the Frame Pointer (Fp)
+ * These CairoVM registers are considered relocatables must only have segment index equal to 1
+ * as they always point to the execution segment.
+ */
+export class MemoryPointer extends Relocatable {
+  constructor(offset: number) {
+    super(1, offset);
+  }
+}
+
+/**
+ * Subclass of Relocatable, specific to the Program Counter (PC).
+ * PC points to the program segment. Its segment will be 0 until the last instruction.
+ * At the end of a program run, the PC will be set to the end pointer, i.e. the address of the end segment.
+ */
+export class ProgramCounter extends Relocatable {
+  constructor(offset: number) {
+    super(0, offset);
+  }
+}

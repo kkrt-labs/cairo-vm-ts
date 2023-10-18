@@ -3,6 +3,7 @@ import { Felt } from 'primitives/felt';
 import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { Result, Err, VMError } from 'result-pattern/result';
 import { RunContext } from 'run-context/runContext';
+import { Instruction } from './instruction';
 
 export const InstructionError = {
   message: 'VMError: VM Instruction must be a Field Element',
@@ -14,7 +15,7 @@ export class VirtualMachine {
   private segments: MemorySegmentManager;
 
   constructor() {
-    this.currentStep = UnsignedInteger.toUint64(0n);
+    this.currentStep = UnsignedInteger.ZERO_UINT64;
     this.segments = new MemorySegmentManager();
     this.runContext = new RunContext();
   }
@@ -43,4 +44,6 @@ export class VirtualMachine {
     // return this.runInstruction();
     throw new Error('TODO: Not Implemented');
   }
+
+  computeOperands(instruction: Instruction) {}
 }

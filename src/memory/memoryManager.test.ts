@@ -51,7 +51,7 @@ describe('MemoryManager', () => {
       const address = new Relocatable(0, 0);
       memoryManager.loadData(address, DATA);
 
-      const segmentAddress = UnsignedInteger.ZERO;
+      const segmentAddress = UnsignedInteger.ZERO_UINT32;
 
       expect(memoryManager.getSegmentSize(segmentAddress)).toEqual(
         unwrapOk(UnsignedInteger.toUint32(5))

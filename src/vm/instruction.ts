@@ -2,6 +2,8 @@
 // Some instructions spread over two words when they use an immediate value, so
 // representing the first one with this struct is enougth.
 
+import { Int16 } from 'primitives/int';
+
 //  Structure of the 63-bit that form the first word of each instruction.
 //  See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
 // ┌─────────────────────────────────────────────────────────────────────────┐
@@ -21,23 +23,23 @@
 // Dst & Op0 register flags
 // If the flag == 0, then the offset will point to Ap
 // If the flag == 1, then the offset will point to Fp
-enum RegisterFlag {
+export enum RegisterFlag {
   ApRegisterFlag = 0,
   FpRegisterFlag = 1,
 }
-type DstRegister = RegisterFlag;
-type Op0Register = RegisterFlag;
+export type DstRegister = RegisterFlag;
+export type Op0Register = RegisterFlag;
 
 // Op1Src
-enum Op1Src {
+export enum Op1Src {
   Imm = 0,
-  FpPlusOffOp1 = 1,
-  ApPlusOffOp1 = 2,
+  ApPlusOffOp1 = 1,
+  FpPlusOffOp1 = 2,
   Op0 = 4,
 }
 
 // ResLogic
-enum ResLogic {
+export enum ResLogic {
   Op1 = 0,
   Add = 1,
   Mul = 2,
@@ -45,7 +47,7 @@ enum ResLogic {
 }
 
 // Pc Update
-enum PcUpdate {
+export enum PcUpdate {
   PcUpdateRegular = 0,
   PcUpdateJump = 1,
   PcUpdateJumpRel = 2,
@@ -53,7 +55,7 @@ enum PcUpdate {
 }
 
 // Ap update
-enum ApUpdate {
+export enum ApUpdate {
   ApUpdateRegular = 0,
   ApUpdateAdd = 1,
   AppUpdateAdd1 = 2,
@@ -61,17 +63,30 @@ enum ApUpdate {
 }
 
 // Fp Update
-enum FpUpdate {
+export enum FpUpdate {
   FpUpdateRegular = 0,
   FpUpdateApPlus2 = 1,
   FpUpdateDst = 2,
 }
 
-enum Opcode {
+export enum Opcode {
   NoOp = 0,
   AssertEq = 1,
   Call = 2,
   Ret = 4,
 }
 
-export type Instruction = {};
+export type Instruction = {
+  // The offset to add or sub to ap/fp to obtain the Destination Operand
+  offDst: Int16;
+  offOp0: Int16;
+  offOp1: Int16;
+  dstReg: DstRegister;
+  op0Reg: Op0Register;
+  op1Src: Op1Src;
+  resLogic: ResLogic;
+  pcUpdate: PcUpdate;
+  apUpdate: ApUpdate;
+  fpUpdate: FpUpdate;
+  opcode: Opcode;
+};
