@@ -213,10 +213,12 @@ export function decodeInstruction(
 
   const flags = flagsResult.unwrap();
 
+  // Destination register is either Ap or Fp
   const dstReg = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, dstRegMask),
     dstRegOff
   );
+  // Operand 0 register is either Ap or Fp
   const op0Reg = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, op0RegMask),
     op0RegOff
@@ -226,18 +228,22 @@ export function decodeInstruction(
     UnsignedInteger.uint16And(flags, op1SrcMask),
     op1SrcOff
   );
-  var op1Src: Op1Src;
+  let op1Src: Op1Src;
   switch (op1SrcNum) {
     case 0:
+      // op1 = m(op0 + offop1)
       op1Src = Op1Src.Op1SrcOp0;
       break;
     case 1:
+      // op1 = m(pc + offop1)
       op1Src = Op1Src.Op1SrcImm;
       break;
     case 2:
+      // op1 = m(fp + offop1)
       op1Src = Op1Src.Op1SrcFP;
       break;
     case 4:
+      // op1 = m(ap + offop1)
       op1Src = Op1Src.Op1SrcAP;
       break;
     default:
@@ -248,31 +254,37 @@ export function decodeInstruction(
     UnsignedInteger.uint16And(flags, pcUpdateMask),
     pcUpdateOff
   );
-  var pcUpdate: PcUpdate;
+  let pcUpdate: PcUpdate;
   switch (pcUpdateNum) {
     case 0:
+      // pc = pc + instruction size
       pcUpdate = PcUpdate.PcUpdateRegular;
       break;
     case 1:
+      // pc = res
       pcUpdate = PcUpdate.PcUpdateJump;
       break;
     case 2:
+      // pc = pc + res
       pcUpdate = PcUpdate.PcUpdateJumpRel;
       break;
     case 4:
+      // if dst != 0 then pc = pc + instruction_size else pc + op1
       pcUpdate = PcUpdate.PcUpdateJnz;
       break;
     default:
-      return new Err(InvalidOp1Src);
+      return new Err(InvalidPcUpdate);
   }
 
   const resLogicNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, resLogicMask),
     resLogicOff
   );
-  var resLogic: ResLogic;
+  let resLogic: ResLogic;
   switch (resLogicNum) {
     case 0:
+      // jnz with res_logic == 0 and pc_update == 3 then unconstrained
+      // else res = op1
       if (pcUpdate == PcUpdate.PcUpdateJnz) {
         resLogic = ResLogic.Unconstrained;
       } else {
@@ -280,44 +292,52 @@ export function decodeInstruction(
       }
       break;
     case 1:
+      // res = op0 + op1
       resLogic = ResLogic.Add;
       break;
     case 2:
+      // res = op0 * op1
       resLogic = ResLogic.Mul;
       break;
     default:
-      return new Err(InvalidOp1Src);
+      return new Err(InvalidResultLogic);
   }
 
   const opcodeNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, opcodeMask),
     opcodeOff
   );
-  var opcode: Opcode;
+  let opcode: Opcode;
   switch (opcodeNum) {
     case 0:
+      // fp = fp
       opcode = Opcode.NoOp;
       break;
     case 1:
+      // fp = ap + 2
       opcode = Opcode.Call;
       break;
     case 2:
+      // Return: fp = dst
       opcode = Opcode.Ret;
       break;
     case 4:
+      // Assert equal: assert dst == op0, fp = fp
       opcode = Opcode.AssertEq;
       break;
     default:
-      return new Err(InvalidOp1Src);
+      return new Err(InvalidOpcode);
   }
 
   const apUpdateNum = UnsignedInteger.uint16Shr(
     UnsignedInteger.uint16And(flags, apUpdateMask),
     apUpdateOff
   );
-  var apUpdate: ApUpdate;
+  let apUpdate: ApUpdate;
   switch (apUpdateNum) {
     case 0:
+      // call with ap_update = 0: ap = ap + 2
+      // else ap = ap
       if (opcode == Opcode.Call) {
         apUpdate = ApUpdate.ApUpdateAdd2;
       } else {
@@ -325,24 +345,29 @@ export function decodeInstruction(
       }
       break;
     case 1:
+      // ap = ap + res
       apUpdate = ApUpdate.ApUpdateAdd;
       break;
     case 2:
+      // ap = ap + 1
       apUpdate = ApUpdate.ApUpdateAdd1;
       break;
     default:
-      return new Err(InvalidOp1Src);
+      return new Err(InvalidApUpdate);
   }
 
-  var fpUpdate: FpUpdate;
+  let fpUpdate: FpUpdate;
   switch (opcode) {
     case Opcode.Call:
+      // fp = ap + 2
       fpUpdate = FpUpdate.FpUpdateApPlus2;
       break;
     case Opcode.Ret:
+      // fp = dst
       fpUpdate = FpUpdate.FpUpdateDst;
       break;
     default:
+      // fp = fp
       fpUpdate = FpUpdate.FpUpdateRegular;
   }
 
