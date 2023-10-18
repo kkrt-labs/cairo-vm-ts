@@ -2,10 +2,6 @@ import { Result, Ok, Err, VMError } from 'result-pattern/result';
 import { Felt } from './felt';
 import { Uint32, UnsignedInteger } from './uint';
 
-export class RelocatableError extends Error {}
-export class TypeError extends RelocatableError {}
-export class InternalError extends RelocatableError {}
-
 export type MaybeRelocatable = Relocatable | Felt;
 
 export const OffsetOverflow = {

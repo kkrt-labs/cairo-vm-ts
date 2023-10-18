@@ -1,7 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { RunContext } from './runContext';
 import { UnsignedInteger } from 'primitives/uint';
-import { unwrapOk } from 'test-utils/utils';
 import {
   ApUpdate,
   FpUpdate,
@@ -18,8 +17,8 @@ describe('RunContext', () => {
   describe('incrementPc', () => {
     test('should successfully increment pc', () => {
       const ctx = RunContext.default();
-      const instructionSize = unwrapOk(UnsignedInteger.toUint32(2));
-      const result = unwrapOk(ctx.incrementPc(instructionSize));
+      const instructionSize = UnsignedInteger.toUint32(2).unwrap();
+      const result = ctx.incrementPc(instructionSize).unwrap();
 
       expect(result.getOffset()).toEqual(2);
       expect(result.getSegmentIndex()).toEqual(0);
@@ -36,11 +35,11 @@ describe('RunContext', () => {
         offOp1: SignedInteger16.toInt16(3),
         dstReg: RegisterFlag.ApRegisterFlag,
         op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.ApPlusOffOp1,
+        op1Src: Op1Src.AP,
         resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.PcUpdateRegular,
-        apUpdate: ApUpdate.ApUpdateRegular,
-        fpUpdate: FpUpdate.FpUpdateRegular,
+        pcUpdate: PcUpdate.Regular,
+        apUpdate: ApUpdate.Regular,
+        fpUpdate: FpUpdate.Regular,
         opcode: Opcode.NoOp,
       };
 
@@ -48,8 +47,8 @@ describe('RunContext', () => {
 
       const dstAddr = runContext.computeDstAddress(instruction);
 
-      expect(unwrapOk(dstAddr).getSegmentIndex()).toEqual(1);
-      expect(unwrapOk(dstAddr).getOffset()).toEqual(6);
+      expect(dstAddr.unwrap().getSegmentIndex()).toEqual(1);
+      expect(dstAddr.unwrap().getOffset()).toEqual(6);
     });
 
     test('should compute dst addr for ap register', () => {
@@ -59,11 +58,11 @@ describe('RunContext', () => {
         offOp1: SignedInteger16.toInt16(3),
         dstReg: RegisterFlag.FpRegisterFlag,
         op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.ApPlusOffOp1,
+        op1Src: Op1Src.AP,
         resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.PcUpdateRegular,
-        apUpdate: ApUpdate.ApUpdateRegular,
-        fpUpdate: FpUpdate.FpUpdateRegular,
+        pcUpdate: PcUpdate.Regular,
+        apUpdate: ApUpdate.Regular,
+        fpUpdate: FpUpdate.Regular,
         opcode: Opcode.NoOp,
       };
 
@@ -71,8 +70,8 @@ describe('RunContext', () => {
 
       const dstAddr = runContext.computeDstAddress(instruction);
 
-      expect(unwrapOk(dstAddr).getSegmentIndex()).toEqual(1);
-      expect(unwrapOk(dstAddr).getOffset()).toEqual(7);
+      expect(dstAddr.unwrap().getSegmentIndex()).toEqual(1);
+      expect(dstAddr.unwrap().getOffset()).toEqual(7);
     });
   });
 });

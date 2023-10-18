@@ -1,4 +1,5 @@
 import { Err, Ok, Result, VMError } from 'result-pattern/result';
+import { Uint16, Uint64, UnsignedInteger } from './uint';
 
 export type Int16 = number & { _intBrand: void };
 
@@ -42,5 +43,16 @@ export class SignedInteger16 {
     num -= SignedInteger16.BIAS;
 
     return new Ok(this.toInt16(num));
+  }
+
+  // Convert a Uint64 represented in its biased form to a regular Int16
+  static fromBiased(num: Uint64): Result<Int16, VMError> {
+    const numUint16Result = UnsignedInteger.downCastToUint16(num);
+    if (numUint16Result.isErr()) {
+      return numUint16Result;
+    }
+    return new Ok(
+      this.toInt16(numUint16Result.unwrap() - SignedInteger16.BIAS)
+    );
   }
 }

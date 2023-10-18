@@ -28,6 +28,9 @@ export class Ok<T> {
   isErr(): this is never {
     return false;
   }
+  unwrapErr(): never {
+    throw new UnwrapError('Attempted to unwrap an Ok value');
+  }
   unwrap(): T {
     return this.value.value;
   }
@@ -49,6 +52,9 @@ export class Err<E extends VMError> {
   }
   unwrapErr(): E {
     return this.value.value;
+  }
+  unwrap(): never {
+    throw new UnwrapError('Attempted to unwrap an Err value');
   }
 
   static composeErrors(errors: VMError[]): VMError {
