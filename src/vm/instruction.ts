@@ -62,10 +62,10 @@ export type Op0Register = RegisterFlag;
 
 // Op1Src
 export enum Op1Src {
-  Op1SrcOp0 = 0,
-  Op1SrcImm = 1,
-  Op1SrcFP = 2,
-  Op1SrcAP = 4,
+  Op0 = 0,
+  Imm = 1,
+  FP = 2,
+  AP = 4,
 }
 
 // ResLogic
@@ -78,25 +78,25 @@ export enum ResLogic {
 
 // Pc Update
 export enum PcUpdate {
-  PcUpdateRegular = 0,
-  PcUpdateJump = 1,
-  PcUpdateJumpRel = 2,
-  PcUpdateJnz = 3,
+  Regular = 0,
+  Jump = 1,
+  JumpRel = 2,
+  Jnz = 4,
 }
 
 // Ap update
 export enum ApUpdate {
-  ApUpdateRegular = 0,
-  ApUpdateAdd = 1,
-  ApUpdateAdd1 = 2,
-  ApUpdateAdd2 = 3,
+  Regular = 0,
+  Add = 1,
+  Add1 = 2,
+  Add2 = 3,
 }
 
 // Fp Update
 export enum FpUpdate {
-  FpUpdateRegular = 0,
-  FpUpdateApPlus2 = 1,
-  FpUpdateDst = 2,
+  Regular = 0,
+  ApPlus2 = 1,
+  Dst = 2,
 }
 
 export enum Opcode {
@@ -232,19 +232,19 @@ export function decodeInstruction(
   switch (op1SrcNum) {
     case 0:
       // op1 = m(op0 + offop1)
-      op1Src = Op1Src.Op1SrcOp0;
+      op1Src = Op1Src.Op0;
       break;
     case 1:
       // op1 = m(pc + offop1)
-      op1Src = Op1Src.Op1SrcImm;
+      op1Src = Op1Src.Imm;
       break;
     case 2:
       // op1 = m(fp + offop1)
-      op1Src = Op1Src.Op1SrcFP;
+      op1Src = Op1Src.FP;
       break;
     case 4:
       // op1 = m(ap + offop1)
-      op1Src = Op1Src.Op1SrcAP;
+      op1Src = Op1Src.AP;
       break;
     default:
       return new Err(InvalidOp1Src);
@@ -258,19 +258,19 @@ export function decodeInstruction(
   switch (pcUpdateNum) {
     case 0:
       // pc = pc + instruction size
-      pcUpdate = PcUpdate.PcUpdateRegular;
+      pcUpdate = PcUpdate.Regular;
       break;
     case 1:
       // pc = res
-      pcUpdate = PcUpdate.PcUpdateJump;
+      pcUpdate = PcUpdate.Jump;
       break;
     case 2:
       // pc = pc + res
-      pcUpdate = PcUpdate.PcUpdateJumpRel;
+      pcUpdate = PcUpdate.JumpRel;
       break;
     case 4:
       // if dst != 0 then pc = pc + instruction_size else pc + op1
-      pcUpdate = PcUpdate.PcUpdateJnz;
+      pcUpdate = PcUpdate.Jnz;
       break;
     default:
       return new Err(InvalidPcUpdate);
@@ -285,7 +285,7 @@ export function decodeInstruction(
     case 0:
       // jnz with res_logic == 0 and pc_update == 3 then unconstrained
       // else res = op1
-      if (pcUpdate == PcUpdate.PcUpdateJnz) {
+      if (pcUpdate == PcUpdate.Jnz) {
         resLogic = ResLogic.Unconstrained;
       } else {
         resLogic = ResLogic.Op1;
@@ -339,18 +339,18 @@ export function decodeInstruction(
       // call with ap_update = 0: ap = ap + 2
       // else ap = ap
       if (opcode == Opcode.Call) {
-        apUpdate = ApUpdate.ApUpdateAdd2;
+        apUpdate = ApUpdate.Add2;
       } else {
-        apUpdate = ApUpdate.ApUpdateRegular;
+        apUpdate = ApUpdate.Regular;
       }
       break;
     case 1:
       // ap = ap + res
-      apUpdate = ApUpdate.ApUpdateAdd;
+      apUpdate = ApUpdate.Add;
       break;
     case 2:
       // ap = ap + 1
-      apUpdate = ApUpdate.ApUpdateAdd1;
+      apUpdate = ApUpdate.Add1;
       break;
     default:
       return new Err(InvalidApUpdate);
@@ -360,15 +360,15 @@ export function decodeInstruction(
   switch (opcode) {
     case Opcode.Call:
       // fp = ap + 2
-      fpUpdate = FpUpdate.FpUpdateApPlus2;
+      fpUpdate = FpUpdate.ApPlus2;
       break;
     case Opcode.Ret:
       // fp = dst
-      fpUpdate = FpUpdate.FpUpdateDst;
+      fpUpdate = FpUpdate.Dst;
       break;
     default:
       // fp = fp
-      fpUpdate = FpUpdate.FpUpdateRegular;
+      fpUpdate = FpUpdate.Regular;
   }
 
   return new Ok({
