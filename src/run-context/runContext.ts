@@ -12,9 +12,9 @@ export const PCError = {
 };
 
 export class RunContext {
-  private pc: MemoryPointer;
+  private pc: ProgramCounter;
   private ap: MemoryPointer;
-  private fp: ProgramCounter;
+  private fp: MemoryPointer;
 
   static default() {
     return new RunContext(0, 0, 0);
