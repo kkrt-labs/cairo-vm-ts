@@ -111,13 +111,21 @@ export type Instruction = {
   offDst: Int16;
   offOp0: Int16;
   offOp1: Int16;
+  // The register to use as the Destination Operand
   dstReg: DstRegister;
+  // The register to use as the Operand 0
   op0Reg: Op0Register;
+  // The source of the Operand 1
   op1Src: Op1Src;
+  // The result logic
   resLogic: ResLogic;
+  // The logic to use to compute the next pc
   pcUpdate: PcUpdate;
+  // The logic to use to compute the next ap
   apUpdate: ApUpdate;
+  // The logic to use to compute the next fp
   fpUpdate: FpUpdate;
+  // The opcode
   opcode: Opcode;
 };
 
@@ -283,8 +291,8 @@ export function decodeInstruction(
   let resLogic: ResLogic;
   switch (resLogicNum) {
     case 0:
-      // jnz with res_logic == 0 and pc_update == 3 then unconstrained
-      // else res = op1
+      // if pc_update == jnz and res_logic == 0 then
+      // res is unconstrained else res = op1
       if (pcUpdate == PcUpdate.Jnz) {
         resLogic = ResLogic.Unconstrained;
       } else {
