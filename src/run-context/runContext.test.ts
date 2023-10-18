@@ -35,11 +35,11 @@ describe('RunContext', () => {
         offOp1: SignedInteger16.toInt16(3),
         dstReg: RegisterFlag.ApRegisterFlag,
         op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.ApPlusOffOp1,
+        op1Src: Op1Src.AP,
         resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.PcUpdateRegular,
-        apUpdate: ApUpdate.ApUpdateRegular,
-        fpUpdate: FpUpdate.FpUpdateRegular,
+        pcUpdate: PcUpdate.Regular,
+        apUpdate: ApUpdate.Regular,
+        fpUpdate: FpUpdate.Regular,
         opcode: Opcode.NoOp,
       };
 
@@ -58,11 +58,11 @@ describe('RunContext', () => {
         offOp1: SignedInteger16.toInt16(3),
         dstReg: RegisterFlag.FpRegisterFlag,
         op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.ApPlusOffOp1,
+        op1Src: Op1Src.AP,
         resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.PcUpdateRegular,
-        apUpdate: ApUpdate.ApUpdateRegular,
-        fpUpdate: FpUpdate.FpUpdateRegular,
+        pcUpdate: PcUpdate.Regular,
+        apUpdate: ApUpdate.Regular,
+        fpUpdate: FpUpdate.Regular,
         opcode: Opcode.NoOp,
       };
 
