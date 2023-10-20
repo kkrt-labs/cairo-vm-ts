@@ -172,29 +172,26 @@ export function decodeInstruction(
   const shift = 16n;
 
   // Get the offset by masking and shifting the encoded instruction
-  const offsetDstResult = SignedInteger16.fromBiased(encodedInstruction & mask);
-  if (offsetDstResult.isErr()) {
-    return offsetDstResult;
+  const offsetDst = SignedInteger16.fromBiased(encodedInstruction & mask);
+  if (offsetDst.isErr()) {
+    return offsetDst;
   }
-  const offsetDst = offsetDstResult.unwrap();
 
   let shiftedEncodedInstruction = encodedInstruction >> shift;
-  const offsetOp0Result = SignedInteger16.fromBiased(
+  const offsetOp0 = SignedInteger16.fromBiased(
     shiftedEncodedInstruction & mask
   );
-  if (offsetOp0Result.isErr()) {
-    return offsetOp0Result;
+  if (offsetOp0.isErr()) {
+    return offsetOp0;
   }
-  const offsetOp0 = offsetOp0Result.unwrap();
 
   shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-  const offsetOp1Result = SignedInteger16.fromBiased(
+  const offsetOp1 = SignedInteger16.fromBiased(
     shiftedEncodedInstruction & mask
   );
-  if (offsetOp1Result.isErr()) {
-    return offsetOp1Result;
+  if (offsetOp1.isErr()) {
+    return offsetOp1;
   }
-  const offsetOp1 = offsetOp1Result.unwrap();
 
   // Get the flags by shifting the encoded instruction
   const flags = Number(shiftedEncodedInstruction >> shift);
@@ -337,9 +334,9 @@ export function decodeInstruction(
   }
 
   return new Ok({
-    offDst: offsetDst,
-    offOp0: offsetOp0,
-    offOp1: offsetOp1,
+    offDst: offsetDst.unwrap(),
+    offOp0: offsetOp0.unwrap(),
+    offOp1: offsetOp1.unwrap(),
     dstReg: dstReg,
     op0Reg: op0Reg,
     op1Src: op1Src,

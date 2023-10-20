@@ -25,16 +25,16 @@ export class Relocatable {
   private offset: Uint32;
 
   constructor(segmentIndex: number, offset: number) {
-    const segmentIndexResult = UnsignedInteger.toUint32(segmentIndex);
-    const offsetResult = UnsignedInteger.toUint32(offset);
-    if (segmentIndexResult.isErr()) {
-      throw segmentIndexResult.unwrapErr();
+    const segmentIndexUint = UnsignedInteger.toUint32(segmentIndex);
+    if (segmentIndexUint.isErr()) {
+      throw segmentIndexUint.unwrapErr();
     }
-    if (offsetResult.isErr()) {
-      throw offsetResult.unwrapErr();
+    const offsetUint = UnsignedInteger.toUint32(offset);
+    if (offsetUint.isErr()) {
+      throw offsetUint.unwrapErr();
     }
-    this.segmentIndex = segmentIndexResult.unwrap();
-    this.offset = offsetResult.unwrap();
+    this.segmentIndex = segmentIndexUint.unwrap();
+    this.offset = offsetUint.unwrap();
   }
 
   add(other: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {

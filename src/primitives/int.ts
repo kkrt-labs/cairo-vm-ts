@@ -47,18 +47,14 @@ export class SignedInteger16 {
 
   // Convert a bigint represented in its biased form to a regular Int16
   static fromBiased(num: bigint): Result<Int16, VMError> {
-    const numUint64Result = UnsignedInteger.toUint64(num);
-    if (numUint64Result.isErr()) {
-      return numUint64Result;
+    const numUint = UnsignedInteger.toUint64(num);
+    if (numUint.isErr()) {
+      return numUint;
     }
-    const numUint16Result = UnsignedInteger.downCastToUint16(
-      numUint64Result.unwrap()
-    );
-    if (numUint16Result.isErr()) {
+    const numUint16 = UnsignedInteger.downCastToUint16(numUint.unwrap());
+    if (numUint16.isErr()) {
       return new Err(Int16ConversionError);
     }
-    return new Ok(
-      this.toInt16(numUint16Result.unwrap() - SignedInteger16.BIAS)
-    );
+    return new Ok(this.toInt16(numUint16.unwrap() - SignedInteger16.BIAS));
   }
 }
