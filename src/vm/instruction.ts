@@ -54,8 +54,8 @@ export const InvalidOpcode: VMError = {
 // If the flag == 0, then the offset will point to Ap
 // If the flag == 1, then the offset will point to Fp
 export enum RegisterFlag {
-  ApRegisterFlag = 0,
-  FpRegisterFlag = 1,
+  AP = 0,
+  FP = 1,
 }
 export type DstRegister = RegisterFlag;
 export type Op0Register = RegisterFlag;
@@ -136,106 +136,75 @@ export function decodeInstruction(
   const highBit = 1n << 63n;
   // dstReg is located at bits 0-0. We apply a mask of 0x01 (0b1)
   // and shift 0 bits right
-  const dstRegMask = UnsignedInteger.toUint16(0x01).unwrap();
-  const dstRegOff = UnsignedInteger.toUint16(0).unwrap();
+  const dstRegMask = 0x01;
+  const dstRegOff = 0;
   // op0Reg is located at bits 1-1. We apply a mask of 0x02 (0b10)
   // and shift 1 bit right
-  const op0RegMask = UnsignedInteger.toUint16(0x02).unwrap();
-  const op0RegOff = UnsignedInteger.toUint16(1).unwrap();
+  const op0RegMask = 0x02;
+  const op0RegOff = 1;
   // op1Src is located at bits 2-4. We apply a mask of 0x1c (0b11100)
   // and shift 2 bits right
-  const op1SrcMask = UnsignedInteger.toUint16(0x1c).unwrap();
-  const op1SrcOff = UnsignedInteger.toUint16(2).unwrap();
+  const op1SrcMask = 0x1c;
+  const op1SrcOff = 2;
   // resLogic is located at bits 5-6. We apply a mask of 0x60 (0b1100000)
   // and shift 5 bits right
-  const resLogicMask = UnsignedInteger.toUint16(0x60).unwrap();
-  const resLogicOff = UnsignedInteger.toUint16(5).unwrap();
+  const resLogicMask = 0x60;
+  const resLogicOff = 5;
   // pcUpdate is located at bits 7-9. We apply a mask of 0x380 (0b1110000000)
   // and shift 7 bits right
-  const pcUpdateMask = UnsignedInteger.toUint16(0x0380).unwrap();
-  const pcUpdateOff = UnsignedInteger.toUint16(7).unwrap();
+  const pcUpdateMask = 0x0380;
+  const pcUpdateOff = 7;
   // apUpdate is located at bits 10-11. We apply a mask of 0xc00 (0b110000000000)
   // and shift 10 bits right
-  const apUpdateMask = UnsignedInteger.toUint16(0x0c00).unwrap();
-  const apUpdateOff = UnsignedInteger.toUint16(10).unwrap();
+  const apUpdateMask = 0x0c00;
+  const apUpdateOff = 10;
   // opcode is located at bits 12-14. We apply a mask of 0x7000 (0b111000000000000)
   // and shift 12 bits right
-  const opcodeMask = UnsignedInteger.toUint16(0x7000).unwrap();
-  const opcodeOff = UnsignedInteger.toUint16(12).unwrap();
+  const opcodeMask = 0x7000;
+  const opcodeOff = 12;
 
   if ((highBit & encodedInstruction) !== 0n) {
     return new Err(HighBitSetError);
   }
 
   // mask for the 16 least significant bits of a 64-bit number
-  const mask = UnsignedInteger.toUint64(0xffffn).unwrap();
-  const shift = UnsignedInteger.toUint64(16n).unwrap();
+  const mask = 0xffffn;
+  const shift = 16n;
 
   // Get the offset by masking and shifting the encoded instruction
-  const offsetDstUint64 = UnsignedInteger.uint64And(encodedInstruction, mask);
-  const offsetDstResult = SignedInteger16.fromBiased(offsetDstUint64);
+  const offsetDstResult = SignedInteger16.fromBiased(encodedInstruction & mask);
   if (offsetDstResult.isErr()) {
     return offsetDstResult;
   }
   const offsetDst = offsetDstResult.unwrap();
 
-  let shiftedEncodedInstruction = UnsignedInteger.uint64Shr(
-    encodedInstruction,
-    shift
+  let shiftedEncodedInstruction = encodedInstruction >> shift;
+  const offsetOp0Result = SignedInteger16.fromBiased(
+    shiftedEncodedInstruction & mask
   );
-  const offsetOp0Uint64 = UnsignedInteger.uint64And(
-    shiftedEncodedInstruction,
-    mask
-  );
-  const offsetOp0Result = SignedInteger16.fromBiased(offsetOp0Uint64);
   if (offsetOp0Result.isErr()) {
     return offsetOp0Result;
   }
   const offsetOp0 = offsetOp0Result.unwrap();
 
-  shiftedEncodedInstruction = UnsignedInteger.uint64Shr(
-    shiftedEncodedInstruction,
-    shift
+  shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
+  const offsetOp1Result = SignedInteger16.fromBiased(
+    shiftedEncodedInstruction & mask
   );
-  const offsetOp1Uint64 = UnsignedInteger.uint64And(
-    shiftedEncodedInstruction,
-    mask
-  );
-  const offsetOp1Result = SignedInteger16.fromBiased(offsetOp1Uint64);
   if (offsetOp1Result.isErr()) {
     return offsetOp1Result;
   }
   const offsetOp1 = offsetOp1Result.unwrap();
 
   // Get the flags by shifting the encoded instruction
-  shiftedEncodedInstruction = UnsignedInteger.uint64Shr(
-    shiftedEncodedInstruction,
-    shift
-  );
-  const flagsResult = UnsignedInteger.downCastToUint16(
-    shiftedEncodedInstruction
-  );
-  if (flagsResult.isErr()) {
-    return flagsResult;
-  }
-
-  const flags = flagsResult.unwrap();
+  const flags = Number(shiftedEncodedInstruction >> shift);
 
   // Destination register is either Ap or Fp
-  const dstReg = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, dstRegMask),
-    dstRegOff
-  );
+  const dstReg = (flags & dstRegMask) >> dstRegOff;
   // Operand 0 register is either Ap or Fp
-  const op0Reg = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, op0RegMask),
-    op0RegOff
-  );
+  const op0Reg = (flags & op0RegMask) >> op0RegOff;
 
-  const op1SrcNum = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, op1SrcMask),
-    op1SrcOff
-  );
+  const op1SrcNum = (flags & op1SrcMask) >> op1SrcOff;
   let op1Src: Op1Src;
   switch (op1SrcNum) {
     case 0:
@@ -258,10 +227,7 @@ export function decodeInstruction(
       return new Err(InvalidOp1Src);
   }
 
-  const pcUpdateNum = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, pcUpdateMask),
-    pcUpdateOff
-  );
+  const pcUpdateNum = (flags & pcUpdateMask) >> pcUpdateOff;
   let pcUpdate: PcUpdate;
   switch (pcUpdateNum) {
     case 0:
@@ -284,10 +250,7 @@ export function decodeInstruction(
       return new Err(InvalidPcUpdate);
   }
 
-  const resLogicNum = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, resLogicMask),
-    resLogicOff
-  );
+  const resLogicNum = (flags & resLogicMask) >> resLogicOff;
   let resLogic: ResLogic;
   switch (resLogicNum) {
     case 0:
@@ -311,10 +274,7 @@ export function decodeInstruction(
       return new Err(InvalidResultLogic);
   }
 
-  const opcodeNum = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, opcodeMask),
-    opcodeOff
-  );
+  const opcodeNum = (flags & opcodeMask) >> opcodeOff;
   let opcode: Opcode;
   switch (opcodeNum) {
     case 0:
@@ -337,10 +297,7 @@ export function decodeInstruction(
       return new Err(InvalidOpcode);
   }
 
-  const apUpdateNum = UnsignedInteger.uint16Shr(
-    UnsignedInteger.uint16And(flags, apUpdateMask),
-    apUpdateOff
-  );
+  const apUpdateNum = (flags & apUpdateMask) >> apUpdateOff;
   let apUpdate: ApUpdate;
   switch (apUpdateNum) {
     case 0:

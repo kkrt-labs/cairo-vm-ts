@@ -52,12 +52,12 @@ export class RunContext {
     }
 
     switch (instruction.dstReg) {
-      case RegisterFlag.ApRegisterFlag:
+      case RegisterFlag.AP:
         return offsetIsNegative
           ? this.ap.sub(offDst.unwrap())
           : this.ap.add(offDst.unwrap());
 
-      case RegisterFlag.FpRegisterFlag:
+      case RegisterFlag.FP:
         return offsetIsNegative
           ? this.fp.sub(offDst.unwrap())
           : this.fp.add(offDst.unwrap());
