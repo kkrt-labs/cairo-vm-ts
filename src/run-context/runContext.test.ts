@@ -29,24 +29,46 @@ describe('RunContext', () => {
   // https://github.com/lambdaclass/cairo-vm/blob/main/vm/src/vm/context/run_context.rs#L116
   describe('computeDstAddress', () => {
     test('should compute dst addr for ap register', () => {
+      const instruction: Instruction = {
+        offDst: SignedInteger16.toInt16(1),
+        offOp0: SignedInteger16.toInt16(2),
+        offOp1: SignedInteger16.toInt16(3),
+        dstReg: RegisterFlag.AP,
+        op0Reg: RegisterFlag.FP,
+        op1Src: Op1Src.AP,
+        resLogic: ResLogic.Add,
+        pcUpdate: PcUpdate.Regular,
+        apUpdate: ApUpdate.Regular,
+        fpUpdate: FpUpdate.Regular,
+        opcode: Opcode.NoOp,
+      };
+
       const runContext = new RunContext(4, 5, 6);
 
-      const dstAddr = runContext.computeAddress(
-        RegisterFlag.AP,
-        SignedInteger16.toInt16(1)
-      );
+      const dstAddr = runContext.computeDstAddress(instruction);
 
       expect(dstAddr.unwrap().getSegmentIndex()).toEqual(1);
       expect(dstAddr.unwrap().getOffset()).toEqual(6);
     });
 
     test('should compute dst addr for ap register', () => {
+      const instruction: Instruction = {
+        offDst: SignedInteger16.toInt16(1),
+        offOp0: SignedInteger16.toInt16(2),
+        offOp1: SignedInteger16.toInt16(3),
+        dstReg: RegisterFlag.FP,
+        op0Reg: RegisterFlag.FP,
+        op1Src: Op1Src.AP,
+        resLogic: ResLogic.Add,
+        pcUpdate: PcUpdate.Regular,
+        apUpdate: ApUpdate.Regular,
+        fpUpdate: FpUpdate.Regular,
+        opcode: Opcode.NoOp,
+      };
+
       const runContext = new RunContext(4, 5, 6);
 
-      const dstAddr = runContext.computeAddress(
-        RegisterFlag.FP,
-        SignedInteger16.toInt16(1)
-      );
+      const dstAddr = runContext.computeDstAddress(instruction);
 
       expect(dstAddr.unwrap().getSegmentIndex()).toEqual(1);
       expect(dstAddr.unwrap().getOffset()).toEqual(7);
