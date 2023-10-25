@@ -9,6 +9,10 @@ export const InstructionError = {
   message: 'VMError: VM Instruction must be a Field Element',
 };
 
+export const EndOfInstructionsError = {
+  message: 'VMError: reached end of instructions',
+};
+
 export class VirtualMachine {
   private runContext: RunContext;
   private currentStep: Uint64;
@@ -25,8 +29,8 @@ export class VirtualMachine {
       this.runContext.getPc()
     );
 
-    if (maybeEncodedInstruction.isErr()) {
-      return maybeEncodedInstruction;
+    if (maybeEncodedInstruction.isNone()) {
+      return new Err(EndOfInstructionsError);
     }
 
     const encodedInstruction = maybeEncodedInstruction.unwrap();

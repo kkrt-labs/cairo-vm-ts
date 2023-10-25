@@ -5,6 +5,7 @@ import {
   SegmentError,
 } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { None, Option, Some } from 'option-pattern/option';
 
 export class MemoryError extends Error {}
 
@@ -40,12 +41,12 @@ export class Memory {
     return new Ok(true as const);
   }
 
-  get(address: Relocatable): Result<MaybeRelocatable, VMError> {
+  get(address: Relocatable): Option<MaybeRelocatable> {
     const value = this.data.get(address);
     if (value === undefined) {
-      return new Err(UnknownAddressError);
+      return new None();
     }
-    return new Ok(value);
+    return new Some(value);
   }
 
   incrementNumSegments() {

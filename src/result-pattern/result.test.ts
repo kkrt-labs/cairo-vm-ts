@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import { Err, Ok, Result, UnwrapError, VMError } from './result';
+import { Err, Ok, VMError } from './result';
 import { FeltError } from 'primitives/felt';
 
 describe('Result', () => {

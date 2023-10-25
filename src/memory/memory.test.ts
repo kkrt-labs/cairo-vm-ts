@@ -1,19 +1,16 @@
 import { test, expect, describe } from 'bun:test';
-import { Memory, UnknownAddressError, WriteOnceError } from './memory';
-import {
-  MaybeRelocatable,
-  Relocatable,
-  SegmentError,
-} from 'primitives/relocatable';
+import { Memory, WriteOnceError } from './memory';
+import { Relocatable, SegmentError } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
+import { None } from 'option-pattern/option';
 
 describe('Memory', () => {
   describe('get', () => {
-    test('should return error if address is not written to', () => {
+    test('should return None if address is not written to', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
-      const result = memory.get(address).unwrapErr();
-      expect(result).toEqual(UnknownAddressError);
+      const result = memory.get(address);
+      expect(result).toEqual(new None());
     });
 
     test('should return the value at the address', () => {
