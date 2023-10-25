@@ -3,7 +3,7 @@
 // representing the first one with this struct is enougth.
 
 import { Int16, SignedInteger16 } from 'primitives/int';
-import { Uint64 } from 'primitives/uint';
+import { Uint32, Uint64, UnsignedInteger } from 'primitives/uint';
 
 export class InstructionError extends Error {}
 
@@ -359,5 +359,12 @@ export class Instruction {
       fpUpdate,
       opcode
     );
+  }
+
+  size(): Uint32 {
+    if (this.op1Src == Op1Src.Imm) {
+      return UnsignedInteger.TWO_UINT32;
+    }
+    return UnsignedInteger.ONE_UINT32;
   }
 }

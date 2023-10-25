@@ -5,6 +5,9 @@ export class RelocatableError extends Error {}
 
 export type MaybeRelocatable = Relocatable | Felt;
 
+export const RelocatableConversionError =
+  'RelocatableError: cannot convert to relocatable';
+
 export const OffsetOverflow = 'RelocatableError: offset overflow';
 
 export const OffsetUnderflow = 'RelocatableError: offset overflow';
@@ -71,6 +74,21 @@ export class Relocatable {
 
   getOffset(): Uint32 {
     return this.offset;
+  }
+
+  static isRelocatable(
+    maybeRelocatable: MaybeRelocatable
+  ): maybeRelocatable is Relocatable {
+    return maybeRelocatable instanceof Relocatable;
+  }
+
+  static getRelocatable(
+    maybeRelocatable: MaybeRelocatable
+  ): Relocatable | undefined {
+    if (Relocatable.isRelocatable(maybeRelocatable)) {
+      return maybeRelocatable;
+    }
+    return undefined;
   }
 }
 

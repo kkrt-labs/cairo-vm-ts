@@ -1,6 +1,9 @@
 import { NumberConversionError, Uint32, Uint64, UnsignedInteger } from './uint';
+import { MaybeRelocatable } from './relocatable';
 
 export class FeltError extends Error {}
+
+export const ForbiddenOperation = 'Felt: forbidden operation';
 
 export class Felt {
   private inner: bigint;
@@ -15,16 +18,22 @@ export class Felt {
     this.inner = _inner;
   }
 
-  add(other: Felt): Felt {
-    return new Felt((this.inner + other.inner) % Felt.PRIME);
+  add(other: MaybeRelocatable): Felt {
+    if (other instanceof Felt) {
+      return new Felt((this.inner + other.inner) % Felt.PRIME);
+    }
+    throw new FeltError(ForbiddenOperation);
   }
 
-  sub(other: Felt): Felt {
-    let result = this.inner - other.inner;
-    if (result < 0n) {
-      result += Felt.PRIME;
+  sub(other: MaybeRelocatable): Felt {
+    if (other instanceof Felt) {
+      let result = this.inner - other.inner;
+      if (result < 0n) {
+        result += Felt.PRIME;
+      }
+      return new Felt(result);
     }
-    return new Felt(result);
+    throw new FeltError(ForbiddenOperation);
   }
 
   eq(other: Felt): boolean {

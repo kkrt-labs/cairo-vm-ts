@@ -11,6 +11,7 @@ export class SignedInteger16 {
   private static readonly BIAS: number = 2 ** 15;
   static readonly MIN_VALUE: number = -(2 ** 15);
   static readonly MAX_VALUE: number = 2 ** 15 - 1;
+  static readonly ZERO = 0 as Int16;
 
   // Returns whether the number is a safe 16-bit signed integer
   static isInt16(num: number): num is Int16 {

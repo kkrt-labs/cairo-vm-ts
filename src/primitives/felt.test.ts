@@ -53,14 +53,14 @@ describe('Felt', () => {
     test('should add two felts properly', () => {
       const a = new Felt(1000n);
       const b = new Felt(2000n);
-      const c = a.add(b);
+      const c = a.add(b).unwrap();
       const expected = new Felt(3000n);
       expect(c.eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when adding', () => {
       const a = new Felt(Felt.PRIME - 1n);
       const b = new Felt(2n);
-      const result = a.add(b);
+      const result = a.add(b).unwrap();
       const expected = new Felt(1n);
       expect(result.eq(expected)).toBeTrue();
     });
@@ -69,14 +69,14 @@ describe('Felt', () => {
     test('should sub two felts properly', () => {
       const a = new Felt(3000n);
       const b = new Felt(2000n);
-      const c = a.sub(b);
+      const c = a.sub(b).unwrap();
       const expected = new Felt(1000n);
       expect(c.eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when subtracting', () => {
       const a = new Felt(2n);
       const b = new Felt(5n);
-      const result = a.sub(b);
+      const result = a.sub(b).unwrap();
       const expected = new Felt(Felt.PRIME - 3n);
       expect(result.eq(expected)).toBeTrue();
     });

@@ -1,14 +1,18 @@
+import { Int16 } from 'primitives/int';
 import {
   ProgramCounter,
   Relocatable,
   MemoryPointer,
+  MaybeRelocatable,
 } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { Instruction, RegisterFlag } from 'vm/instruction';
+import { Op1Src, RegisterFlag } from 'vm/instruction';
 
-export const PCError = {
-  message: 'RunContextError: cannot increment PC',
-};
+export class RunContextError extends Error {}
+
+export const PCError = 'RunContextError: cannot increment PC';
+export const Op1ImmediateOffsetError =
+  'RunContextError: Op1 immediate offset should be 1';
 
 export class RunContext {
   private pc: ProgramCounter;
@@ -33,20 +37,61 @@ export class RunContext {
     return this.pc;
   }
 
-  computeDstAddress(instruction: Instruction): Relocatable {
-    const offsetIsNegative = instruction.offDst < 0 ? 1 : 0;
-
-    const offDst = UnsignedInteger.toUint32(
-      -1 * offsetIsNegative * instruction.offDst +
-        (1 - offsetIsNegative) * instruction.offDst
-    );
-
-    switch (instruction.dstReg) {
+  computeAddress(register: RegisterFlag, offset: Int16): Relocatable {
+    switch (register) {
       case RegisterFlag.AP:
-        return offsetIsNegative ? this.ap.sub(offDst) : this.ap.add(offDst);
+        return applyOffsetOnBaseAddress(this.ap, offset);
 
       case RegisterFlag.FP:
-        return offsetIsNegative ? this.fp.sub(offDst) : this.fp.add(offDst);
+        return applyOffsetOnBaseAddress(this.fp, offset);
     }
   }
+
+  computeOp1Address(
+    op1Src: Op1Src,
+    op1Offset: Int16,
+    op0: MaybeRelocatable | undefined
+  ): Relocatable {
+    let baseAddr: Relocatable;
+    switch (op1Src) {
+      case Op1Src.AP:
+        baseAddr = this.ap;
+        break;
+      case Op1Src.FP:
+        baseAddr = this.fp;
+        break;
+      case Op1Src.Imm:
+        // TODO: discuss if we want to move this to decode
+        if (op1Offset == 1) {
+          baseAddr = this.pc;
+        } else {
+          throw new RunContextError(Op1ImmediateOffsetError);
+        }
+        break;
+      case Op1Src.Op0:
+        if (op0 === undefined) {
+          throw new Error('Op0 is undefined');
+        }
+        const reloc = Relocatable.getRelocatable(op0);
+        if (reloc === undefined) {
+          throw new Error('Op0 is not relocatable');
+        }
+        baseAddr = reloc;
+    }
+
+    return applyOffsetOnBaseAddress(baseAddr, op1Offset);
+  }
+}
+
+function applyOffsetOnBaseAddress(
+  baseAddr: Relocatable,
+  offset: Int16
+): Relocatable {
+  const offsetIsNegative = offset < 0 ? 1 : 0;
+
+  const offsetAbs = UnsignedInteger.toUint32(
+    -1 * offsetIsNegative * offset + (1 - offsetIsNegative) * offset
+  );
+
+  return offsetIsNegative ? baseAddr.sub(offsetAbs) : baseAddr.add(offsetAbs);
 }
