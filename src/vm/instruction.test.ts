@@ -19,7 +19,7 @@ import {
 import { SignedInteger16 } from 'primitives/int';
 
 describe('Instruction', () => {
-  describe('Instruction.decodeInstruction', () => {
+  describe('decodeInstruction', () => {
     test('should fail with HighBitSetError', () => {
       const encodedInstructionUint64 =
         UnsignedInteger.toUint64(0x94a7800080008000n).unwrap();
