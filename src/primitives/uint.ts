@@ -85,55 +85,10 @@ export class UnsignedInteger {
     return new Err(Uint64ConversionError);
   }
 
-  static upCast(num: Uint32): Uint64 {
-    return BigInt(num) as Uint64;
-  }
-
   static downCastToUint16(num: Uint64): Result<Uint16, VMError> {
     if (num > 0xffff) {
       return new Err(Uint16ConversionError);
     }
     return new Ok(Number(num) as Uint16);
-  }
-
-  static downCastToUint32(num: Uint64): Result<Uint32, VMError> {
-    if (num > 0xffffffffn) {
-      return new Err(Uint32ConversionError);
-    }
-    return new Ok(Number(num) as Uint32);
-  }
-
-  static uint16And(lhs: Uint16, rhs: Uint16): Uint16 {
-    const result = lhs & rhs;
-    if (this.isUint16(result)) {
-      return result;
-    }
-    throw Uint64ConversionError;
-  }
-
-  static uint16Shr(lsh: Uint16, rhs: Uint16): Uint16 {
-    const result = lsh >> rhs;
-    if (this.isUint16(result)) {
-      return result;
-    }
-    throw Uint64ConversionError;
-  }
-
-  static uint64And(lhs: Uint64, rhs: Uint64): Uint64 {
-    const result = lhs & rhs;
-    if (this.isUint64(result)) {
-      return result;
-    }
-    // anding two Uint64s will always result in a Uint64
-    throw Uint64ConversionError;
-  }
-
-  static uint64Shr(lsh: Uint64, rhs: Uint64): Uint64 {
-    const result = lsh >> rhs;
-    if (this.isUint64(result)) {
-      return result;
-    }
-    // shifting right a Uint64 will always result in a Uint64
-    throw Uint64ConversionError;
   }
 }

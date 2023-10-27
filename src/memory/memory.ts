@@ -37,7 +37,7 @@ export class Memory {
     }
 
     this.data.set(address, value);
-    return new Ok(true);
+    return new Ok(true as const);
   }
 
   get(address: Relocatable): Result<MaybeRelocatable, VMError> {

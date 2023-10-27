@@ -45,14 +45,16 @@ export class SignedInteger16 {
     return new Ok(this.toInt16(num));
   }
 
-  // Convert a Uint64 represented in its biased form to a regular Int16
-  static fromBiased(num: Uint64): Result<Int16, VMError> {
-    const numUint16Result = UnsignedInteger.downCastToUint16(num);
-    if (numUint16Result.isErr()) {
-      return numUint16Result;
+  // Convert a bigint represented in its biased form to a regular Int16
+  static fromBiased(num: bigint): Result<Int16, VMError> {
+    const numUint = UnsignedInteger.toUint64(num);
+    if (numUint.isErr()) {
+      return numUint;
     }
-    return new Ok(
-      this.toInt16(numUint16Result.unwrap() - SignedInteger16.BIAS)
-    );
+    const numUint16 = UnsignedInteger.downCastToUint16(numUint.unwrap());
+    if (numUint16.isErr()) {
+      return new Err(Int16ConversionError);
+    }
+    return new Ok(this.toInt16(numUint16.unwrap() - SignedInteger16.BIAS));
   }
 }

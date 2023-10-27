@@ -17,7 +17,7 @@ export class VirtualMachine {
   constructor() {
     this.currentStep = UnsignedInteger.ZERO_UINT64;
     this.segments = new MemorySegmentManager();
-    this.runContext = new RunContext();
+    this.runContext = RunContext.default();
   }
 
   step(): Result<true, VMError> {

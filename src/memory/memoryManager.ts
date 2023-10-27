@@ -23,41 +23,34 @@ export class MemorySegmentManager {
     data: MaybeRelocatable[]
   ): Result<Relocatable, VMError> {
     for (let index = 0; index < data.length; index++) {
-      const indexResult = UnsignedInteger.toUint32(index);
-      if (indexResult.isErr()) {
-        return indexResult;
+      const indexUint = UnsignedInteger.toUint32(index);
+      if (indexUint.isErr()) {
+        return indexUint;
       }
-      const next_address = address.add(indexResult.unwrap());
+      const next_address = address.add(indexUint.unwrap());
       if (next_address.isErr()) {
         return next_address;
       }
-      const insertResult = this.memory.insert(
-        next_address.unwrap(),
-        data[index]
-      );
-      if (insertResult.isErr()) {
-        return insertResult;
+      const insert = this.memory.insert(next_address.unwrap(), data[index]);
+      if (insert.isErr()) {
+        return insert;
       }
     }
 
-    const dataLenResult = UnsignedInteger.toUint32(data.length);
-    if (dataLenResult.isErr()) {
-      return dataLenResult;
+    let dataLen = UnsignedInteger.toUint32(data.length);
+    if (dataLen.isErr()) {
+      return dataLen;
     }
-    const dataLen = dataLenResult.unwrap();
 
-    const newSegmentSizeResult = UnsignedInteger.toUint32(
-      this.getSegmentSize(address.getSegmentIndex()) + dataLen
+    const newSegmentSize = UnsignedInteger.toUint32(
+      this.getSegmentSize(address.getSegmentIndex()) + dataLen.unwrap()
     );
-    if (newSegmentSizeResult.isErr()) {
-      return newSegmentSizeResult;
+    if (newSegmentSize.isErr()) {
+      return newSegmentSize;
     }
-    this.segmentSizes.set(
-      address.getSegmentIndex(),
-      newSegmentSizeResult.unwrap()
-    );
+    this.segmentSizes.set(address.getSegmentIndex(), newSegmentSize.unwrap());
 
-    return address.add(dataLen);
+    return address.add(dataLen.unwrap());
   }
 
   getSegmentSize(segmentIndex: Uint32): Uint32 {

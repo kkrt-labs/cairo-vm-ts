@@ -2,9 +2,14 @@ import { test, expect, describe } from 'bun:test';
 import { UnsignedInteger } from 'primitives/uint';
 import {
   ApUpdate,
-  decodeInstruction,
   FpUpdate,
+  HighBitSetError,
   Instruction,
+  InvalidApUpdate,
+  InvalidOp1Src,
+  InvalidOpcode,
+  InvalidPcUpdate,
+  InvalidResultLogic,
   Op1Src,
   Opcode,
   PcUpdate,
@@ -15,6 +20,66 @@ import { SignedInteger16 } from 'primitives/int';
 
 describe('Instruction', () => {
   describe('decodeInstruction', () => {
+    test('should fail with HighBitSetError', () => {
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x94a7800080008000n).unwrap();
+      const result = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrapErr();
+
+      expect(result).toEqual(HighBitSetError);
+    });
+
+    test('should fail with InvalidOp1Src', () => {
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x294f800080008000n).unwrap();
+      const result = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrapErr();
+
+      expect(result).toEqual(InvalidOp1Src);
+    });
+
+    test('should fail with InvalidPcUpdate', () => {
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x29a8800080008000n).unwrap();
+      const result = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrapErr();
+
+      expect(result).toEqual(InvalidPcUpdate);
+    });
+
+    test('should fail with InvalidResultLogic', () => {
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x2968800080008000n).unwrap();
+      const result = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrapErr();
+
+      expect(result).toEqual(InvalidResultLogic);
+    });
+
+    test('should fail with InvalidOpcode', () => {
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x3948800080008000n).unwrap();
+      const result = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrapErr();
+
+      expect(result).toEqual(InvalidOpcode);
+    });
+
+    test('should fail with InvalidOpcode', () => {
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x2d48800080008000n).unwrap();
+      const result = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrapErr();
+
+      expect(result).toEqual(InvalidApUpdate);
+    });
+
     test('should correctly decode the cairo instruction [ap + 10] = [fp] + 42', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
@@ -26,21 +91,23 @@ describe('Instruction', () => {
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
       const encodedInstructionUint64 =
         UnsignedInteger.toUint64(encodedInstruction).unwrap();
-      const instruction = decodeInstruction(encodedInstructionUint64).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
 
-      const expected: Instruction = {
-        offDst: SignedInteger16.toInt16(10),
-        offOp0: SignedInteger16.toInt16(0),
-        offOp1: SignedInteger16.toInt16(1),
-        dstReg: RegisterFlag.ApRegisterFlag,
-        op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.Imm,
-        resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.Regular,
-        apUpdate: ApUpdate.Regular,
-        fpUpdate: FpUpdate.Regular,
-        opcode: Opcode.AssertEq,
-      };
+      const expected = new Instruction(
+        SignedInteger16.toInt16(10),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(1),
+        RegisterFlag.AP,
+        RegisterFlag.FP,
+        Op1Src.Imm,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.AssertEq
+      );
 
       expect(instruction).toEqual(expected);
     });
@@ -56,21 +123,23 @@ describe('Instruction', () => {
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
       const encodedInstructionUint64 =
         UnsignedInteger.toUint64(encodedInstruction).unwrap();
-      const instruction = decodeInstruction(encodedInstructionUint64).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
 
-      const expected: Instruction = {
-        offDst: SignedInteger16.toInt16(-7),
-        offOp0: SignedInteger16.toInt16(-1),
-        offOp1: SignedInteger16.toInt16(-1),
-        dstReg: RegisterFlag.FpRegisterFlag,
-        op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.FP,
-        resLogic: ResLogic.Unconstrained,
-        pcUpdate: PcUpdate.Jnz,
-        apUpdate: ApUpdate.Regular,
-        fpUpdate: FpUpdate.Regular,
-        opcode: Opcode.NoOp,
-      };
+      const expected = new Instruction(
+        SignedInteger16.toInt16(-7),
+        SignedInteger16.toInt16(-1),
+        SignedInteger16.toInt16(-1),
+        RegisterFlag.FP,
+        RegisterFlag.FP,
+        Op1Src.FP,
+        ResLogic.Unconstrained,
+        PcUpdate.Jnz,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
 
       expect(instruction).toEqual(expected);
     });
@@ -86,21 +155,23 @@ describe('Instruction', () => {
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
       const encodedInstructionUint64 =
         UnsignedInteger.toUint64(encodedInstruction).unwrap();
-      const instruction = decodeInstruction(encodedInstructionUint64).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
 
-      const expected: Instruction = {
-        offDst: SignedInteger16.toInt16(-1),
-        offOp0: SignedInteger16.toInt16(4),
-        offOp1: SignedInteger16.toInt16(0),
-        dstReg: RegisterFlag.FpRegisterFlag,
-        op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.FP,
-        resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.Regular,
-        apUpdate: ApUpdate.Add,
-        fpUpdate: FpUpdate.Regular,
-        opcode: Opcode.NoOp,
-      };
+      const expected = new Instruction(
+        SignedInteger16.toInt16(-1),
+        SignedInteger16.toInt16(4),
+        SignedInteger16.toInt16(0),
+        RegisterFlag.FP,
+        RegisterFlag.FP,
+        Op1Src.FP,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Add,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
 
       expect(instruction).toEqual(expected);
     });
@@ -116,67 +187,173 @@ describe('Instruction', () => {
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
       const encodedInstructionUint64 =
         UnsignedInteger.toUint64(encodedInstruction).unwrap();
-      const instruction = decodeInstruction(encodedInstructionUint64).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
 
-      const expected: Instruction = {
-        offDst: SignedInteger16.toInt16(0),
-        offOp0: SignedInteger16.toInt16(1),
-        offOp1: SignedInteger16.toInt16(4),
-        dstReg: RegisterFlag.ApRegisterFlag,
-        op0Reg: RegisterFlag.ApRegisterFlag,
-        op1Src: Op1Src.FP,
-        resLogic: ResLogic.Op1,
-        pcUpdate: PcUpdate.Jump,
-        apUpdate: ApUpdate.Add2,
-        fpUpdate: FpUpdate.ApPlus2,
-        opcode: Opcode.Call,
-      };
+      const expected = new Instruction(
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(1),
+        SignedInteger16.toInt16(4),
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.FP,
+        ResLogic.Op1,
+        PcUpdate.Jump,
+        ApUpdate.Add2,
+        FpUpdate.ApPlus2,
+        Opcode.Call
+      );
 
       expect(instruction).toEqual(expected);
     });
 
-    test('should correctly decode the cairo instruction RET from LC example', () => {
+    test('should correctly decode the cairo instruction CALL - ported from lambdaclass/cairo-vm_in_go', () => {
+      // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L58
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x14a7800080008000n).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
+
+      const expected = new Instruction(
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        RegisterFlag.FP,
+        RegisterFlag.FP,
+        Op1Src.Imm,
+        ResLogic.Add,
+        PcUpdate.Jump,
+        ApUpdate.Add,
+        FpUpdate.ApPlus2,
+        Opcode.Call
+      );
+
+      expect(instruction).toEqual(expected);
+    });
+
+    test('should correctly decode the cairo instruction RET - ported from lambdaclass/cairo-vm_in_go', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L97
       const encodedInstructionUint64 =
         UnsignedInteger.toUint64(0x2948800080008000n).unwrap();
-      const instruction = decodeInstruction(encodedInstructionUint64).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
 
-      const expected: Instruction = {
-        offDst: SignedInteger16.toInt16(0),
-        offOp0: SignedInteger16.toInt16(0),
-        offOp1: SignedInteger16.toInt16(0),
-        dstReg: RegisterFlag.ApRegisterFlag,
-        op0Reg: RegisterFlag.ApRegisterFlag,
-        op1Src: Op1Src.FP,
-        resLogic: ResLogic.Mul,
-        pcUpdate: PcUpdate.JumpRel,
-        apUpdate: ApUpdate.Add1,
-        fpUpdate: FpUpdate.Dst,
-        opcode: Opcode.Ret,
-      };
+      const expected = new Instruction(
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.FP,
+        ResLogic.Mul,
+        PcUpdate.JumpRel,
+        ApUpdate.Add1,
+        FpUpdate.Dst,
+        Opcode.Ret
+      );
 
       expect(instruction).toEqual(expected);
     });
 
-    test('should correctly decode the cairo instruction CALL from LC example', () => {
-      //https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L58
+    test('should correctly decode the cairo instruction ASSERT_EQ 1 - ported from lambdaclass/cairo-vm_in_go', () => {
+      // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L136
       const encodedInstructionUint64 =
-        UnsignedInteger.toUint64(0x14a7800080008000n).unwrap();
-      const instruction = decodeInstruction(encodedInstructionUint64).unwrap();
+        UnsignedInteger.toUint64(0x4a50800080008000n).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
 
-      const expected: Instruction = {
-        offDst: SignedInteger16.toInt16(0),
-        offOp0: SignedInteger16.toInt16(0),
-        offOp1: SignedInteger16.toInt16(0),
-        dstReg: RegisterFlag.FpRegisterFlag,
-        op0Reg: RegisterFlag.FpRegisterFlag,
-        op1Src: Op1Src.Imm,
-        resLogic: ResLogic.Add,
-        pcUpdate: PcUpdate.Jump,
-        apUpdate: ApUpdate.Add,
-        fpUpdate: FpUpdate.ApPlus2,
-        opcode: Opcode.Call,
-      };
+      const expected = new Instruction(
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Mul,
+        PcUpdate.Jnz,
+        ApUpdate.Add1,
+        FpUpdate.Regular,
+        Opcode.AssertEq
+      );
+
+      expect(instruction).toEqual(expected);
+    });
+
+    test('should correctly decode the cairo instruction ASSERT_EQ 2 - ported from lambdaclass/cairo-vm_in_go', () => {
+      // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L175
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x4200800080008000n).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
+
+      const expected = new Instruction(
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Op0,
+        ResLogic.Unconstrained,
+        PcUpdate.Jnz,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.AssertEq
+      );
+
+      expect(instruction).toEqual(expected);
+    });
+
+    test('should correctly decode the cairo instruction NoOp 1 - ported from lambdaclass/cairo-vm_in_go', () => {
+      // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L214
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x0000800080008000n).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
+
+      const expected = new Instruction(
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0),
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Op0,
+        ResLogic.Op1,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      expect(instruction).toEqual(expected);
+    });
+
+    test('should correctly decode the negative offsets', () => {
+      // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L253
+      const encodedInstructionUint64 =
+        UnsignedInteger.toUint64(0x0000800180007fffn).unwrap();
+      const instruction = Instruction.decodeInstruction(
+        encodedInstructionUint64
+      ).unwrap();
+
+      const expected = new Instruction(
+        SignedInteger16.toInt16(-1),
+        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(1),
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Op0,
+        ResLogic.Op1,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
 
       expect(instruction).toEqual(expected);
     });
