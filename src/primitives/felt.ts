@@ -1,11 +1,8 @@
-import { Result, Err, VMError } from 'result-pattern/result';
 import { NumberConversionError, Uint32, Uint64, UnsignedInteger } from './uint';
 
 export class FeltError extends Error {}
 
 export class Felt {
-  // TODO: should check for PRIME overflow.
-  // TODO: put private to make sure nothing is broken once this is added
   private inner: bigint;
   static PRIME: bigint =
     0x800000000000011000000000000000000000000000000000000000000000001n;
@@ -38,14 +35,14 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint32(): Result<Uint32, VMError> {
+  toUint32(): Uint32 {
     if (this.inner > Number.MAX_SAFE_INTEGER) {
-      return new Err(NumberConversionError);
+      throw new FeltError(NumberConversionError);
     }
     return UnsignedInteger.toUint32(Number(this.inner));
   }
 
-  toUint64(): Result<Uint64, VMError> {
+  toUint64(): Uint64 {
     return UnsignedInteger.toUint64(this.inner);
   }
 

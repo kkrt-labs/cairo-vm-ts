@@ -1,24 +1,17 @@
-import { Result, Ok, Err, VMError } from 'result-pattern/result';
 import { Felt } from './felt';
 import { Uint32, UnsignedInteger } from './uint';
 
+export class RelocatableError extends Error {}
+
 export type MaybeRelocatable = Relocatable | Felt;
 
-export const OffsetOverflow = {
-  message: 'RelocatableError: offset overflow',
-};
+export const OffsetOverflow = 'RelocatableError: offset overflow';
 
-export const OffsetUnderflow = {
-  message: 'RelocatableError: offset overflow',
-};
+export const OffsetUnderflow = 'RelocatableError: offset overflow';
 
-export const ForbiddenOperation = {
-  message: 'RelocatableError: forbidden operation',
-};
+export const ForbiddenOperation = 'RelocatableError: forbidden operation';
 
-export const SegmentError = {
-  message: 'RelocatableError: segment error',
-};
+export const SegmentError = 'RelocatableError: segment error';
 
 export class Relocatable {
   private segmentIndex: Uint32;
@@ -26,76 +19,50 @@ export class Relocatable {
 
   constructor(segmentIndex: number, offset: number) {
     const segmentIndexUint = UnsignedInteger.toUint32(segmentIndex);
-    if (segmentIndexUint.isErr()) {
-      throw segmentIndexUint.unwrapErr();
-    }
     const offsetUint = UnsignedInteger.toUint32(offset);
-    if (offsetUint.isErr()) {
-      throw offsetUint.unwrapErr();
-    }
-    this.segmentIndex = segmentIndexUint.unwrap();
-    this.offset = offsetUint.unwrap();
+    this.segmentIndex = segmentIndexUint;
+    this.offset = offsetUint;
   }
 
-  add(other: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
+  add(other: MaybeRelocatable | Uint32): Relocatable {
     if (other instanceof Felt) {
       const num = other.toUint32();
-      if (num.isErr()) {
-        return num;
+      if (this.getOffset() + num > Number.MAX_SAFE_INTEGER) {
+        throw new RelocatableError(OffsetOverflow);
       }
-      if (this.getOffset() + num.unwrap() > Number.MAX_SAFE_INTEGER) {
-        return new Err(OffsetOverflow);
-      }
-      return new Ok(
-        new Relocatable(this.getSegmentIndex(), this.getOffset() + num.unwrap())
-      );
+      return new Relocatable(this.getSegmentIndex(), this.getOffset() + num);
     }
 
     if (other instanceof Relocatable) {
-      return new Err(ForbiddenOperation);
+      throw new RelocatableError(ForbiddenOperation);
     }
 
-    return new Ok(
-      new Relocatable(this.getSegmentIndex(), this.getOffset() + other)
-    );
+    return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
   }
 
-  sub(other: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
+  sub(other: MaybeRelocatable | Uint32): Relocatable {
     if (other instanceof Felt) {
       const delta = other.toUint32();
 
-      if (delta.isErr()) {
-        return delta;
+      if (this.getOffset() < delta) {
+        throw new RelocatableError(OffsetUnderflow);
       }
-
-      if (this.getOffset() < delta.unwrap()) {
-        return new Err(OffsetUnderflow);
-      }
-      return new Ok(
-        new Relocatable(
-          this.getSegmentIndex(),
-          this.getOffset() - delta.unwrap()
-        )
-      );
+      return new Relocatable(this.getSegmentIndex(), this.getOffset() - delta);
     }
 
     if (other instanceof Relocatable) {
       if (this.offset < other.offset) {
-        return new Err(OffsetUnderflow);
+        throw new RelocatableError(OffsetUnderflow);
       }
 
       if (this.segmentIndex !== other.segmentIndex) {
-        return new Err(SegmentError);
+        throw new RelocatableError(SegmentError);
       }
 
-      return new Ok(
-        new Relocatable(this.segmentIndex, this.offset - other.offset)
-      );
+      return new Relocatable(this.segmentIndex, this.offset - other.offset);
     }
 
-    return new Ok(
-      new Relocatable(this.getSegmentIndex(), this.getOffset() - other)
-    );
+    return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 
   getSegmentIndex(): Uint32 {

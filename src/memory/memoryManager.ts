@@ -1,7 +1,6 @@
 import { Uint32, UnsignedInteger } from 'primitives/uint';
 import { Memory } from './memory';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
-import { Result, VMError } from 'result-pattern/result';
 
 export class MemorySegmentManager {
   private segmentSizes: Map<Uint32, Uint32>;
@@ -18,39 +17,21 @@ export class MemorySegmentManager {
     return ptr;
   }
 
-  loadData(
-    address: Relocatable,
-    data: MaybeRelocatable[]
-  ): Result<Relocatable, VMError> {
+  loadData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
     for (let index = 0; index < data.length; index++) {
       const indexUint = UnsignedInteger.toUint32(index);
-      if (indexUint.isErr()) {
-        return indexUint;
-      }
-      const next_address = address.add(indexUint.unwrap());
-      if (next_address.isErr()) {
-        return next_address;
-      }
-      const insert = this.memory.insert(next_address.unwrap(), data[index]);
-      if (insert.isErr()) {
-        return insert;
-      }
+      const next_address = address.add(indexUint);
+      this.memory.insert(next_address, data[index]);
     }
 
     let dataLen = UnsignedInteger.toUint32(data.length);
-    if (dataLen.isErr()) {
-      return dataLen;
-    }
 
     const newSegmentSize = UnsignedInteger.toUint32(
-      this.getSegmentSize(address.getSegmentIndex()) + dataLen.unwrap()
+      this.getSegmentSize(address.getSegmentIndex()) + dataLen
     );
-    if (newSegmentSize.isErr()) {
-      return newSegmentSize;
-    }
-    this.segmentSizes.set(address.getSegmentIndex(), newSegmentSize.unwrap());
+    this.segmentSizes.set(address.getSegmentIndex(), newSegmentSize);
 
-    return address.add(dataLen.unwrap());
+    return address.add(dataLen);
   }
 
   getSegmentSize(segmentIndex: Uint32): Uint32 {
