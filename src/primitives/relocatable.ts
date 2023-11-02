@@ -140,8 +140,8 @@ export class Relocatable {
     };
   }
 
-  div(_: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
-    return new Err(ForbiddenOperation);
+  div(_: MaybeRelocatable | Uint32): undefined {
+    return undefined;
   }
 
   getSegmentIndex(): Uint32 {
