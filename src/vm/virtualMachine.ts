@@ -8,6 +8,10 @@ import { BaseError, ErrorType } from 'result/error';
 import { EndOfInstructionsError, InstructionError } from 'result/memory';
 import { Result } from 'result/result';
 
+export const DeductionError = {
+  message: 'VMError: failed to deduce operands',
+};
+
 export class VirtualMachine {
   private runContext: RunContext;
   private currentStep: Uint64;

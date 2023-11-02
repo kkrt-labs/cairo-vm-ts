@@ -59,6 +59,17 @@ export class Felt {
     };
   }
 
+  div(other: MaybeRelocatable): Felt {
+    if (other instanceof Felt) {
+      if (other.inner == 0n) {
+        throw new FeltError(ForbiddenOperation);
+      }
+      let result = this.inner / other.inner;
+      return new Felt(result);
+    }
+    throw new FeltError(ForbiddenOperation);
+  }
+
   eq(other: Felt): boolean {
     return this.inner == other.inner;
   }

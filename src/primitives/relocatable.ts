@@ -133,6 +133,10 @@ export class Relocatable {
     };
   }
 
+  div(_: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
+    return new Err(ForbiddenOperation);
+  }
+
   getSegmentIndex(): Uint32 {
     return this.segmentIndex;
   }
