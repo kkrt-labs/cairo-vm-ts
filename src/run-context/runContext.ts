@@ -13,6 +13,9 @@ export class RunContextError extends Error {}
 export const PCError = 'RunContextError: cannot increment PC';
 export const Op1ImmediateOffsetError =
   'RunContextError: Op1 immediate offset should be 1';
+export const Op0NotRelocatable =
+  'RunContextError: Op0 is not relocatable. Cannot compute Op1 address';
+export const Op0Undefined = 'RunContextError: Op0 is undefined';
 
 export class RunContext {
   private pc: ProgramCounter;
@@ -70,11 +73,11 @@ export class RunContext {
         break;
       case Op1Src.Op0:
         if (op0 === undefined) {
-          throw new Error('Op0 is undefined');
+          throw new RunContextError(Op0Undefined);
         }
         const reloc = Relocatable.getRelocatable(op0);
         if (reloc === undefined) {
-          throw new Error('Op0 is not relocatable');
+          throw new RunContextError(Op0NotRelocatable);
         }
         baseAddr = reloc;
     }
