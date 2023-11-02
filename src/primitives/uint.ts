@@ -28,6 +28,7 @@ export class UnsignedInteger {
   static readonly ZERO_UINT32: Uint32 = 0 as Uint32;
   static readonly ONE_UINT32: Uint32 = 1 as Uint32;
   static readonly TWO_UINT32: Uint32 = 2 as Uint32;
+  static readonly MAX_UINT32: Uint32 = 0xffffffff as Uint32;
 
   static readonly ZERO_UINT64: Uint64 = 0n as Uint64;
 

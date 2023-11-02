@@ -30,7 +30,7 @@ export class Relocatable {
   add(other: MaybeRelocatable | Uint32): Relocatable {
     if (other instanceof Felt) {
       const num = other.toUint32();
-      if (this.getOffset() + num > Number.MAX_SAFE_INTEGER) {
+      if (this.getOffset() + num > UnsignedInteger.MAX_UINT32) {
         throw new RelocatableError(OffsetOverflow);
       }
       return new Relocatable(this.getSegmentIndex(), this.getOffset() + num);
@@ -68,8 +68,8 @@ export class Relocatable {
     return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 
-  div(_: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
-    return new Err(ForbiddenOperation);
+  div(_: MaybeRelocatable | Uint32): undefined {
+    return undefined;
   }
 
   getSegmentIndex(): Uint32 {

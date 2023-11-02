@@ -42,8 +42,7 @@ export class Memory {
   }
 
   incrementNumSegments(): void {
-    const newNumSegments = UnsignedInteger.toUint32(this.numSegments + 1);
-    this.numSegments = newNumSegments;
+    this.numSegments = UnsignedInteger.toUint32(this.numSegments + 1);
   }
 
   getNumSegments(): Uint32 {
