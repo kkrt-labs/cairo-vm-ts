@@ -4,7 +4,6 @@ import {
   MemoryPointer,
 } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { Result, Err, VMError, Ok } from 'result-pattern/result';
 import { Instruction, RegisterFlag } from 'vm/instruction';
 
 export const PCError = {
@@ -26,20 +25,15 @@ export class RunContext {
     this.fp = new MemoryPointer(fp);
   }
 
-  incrementPc(instructionSize: Uint32): Result<Relocatable, VMError> {
-    const res = this.pc.add(instructionSize);
-    if (res.isErr()) {
-      return new Err(Err.composeErrors([res.unwrapErr(), PCError]));
-    }
-
-    return res;
+  incrementPc(instructionSize: Uint32): Relocatable {
+    return this.pc.add(instructionSize);
   }
 
   getPc() {
     return this.pc;
   }
 
-  computeDstAddress(instruction: Instruction): Result<Relocatable, VMError> {
+  computeDstAddress(instruction: Instruction): Relocatable {
     const offsetIsNegative = instruction.offDst < 0 ? 1 : 0;
 
     const offDst = UnsignedInteger.toUint32(
@@ -47,20 +41,12 @@ export class RunContext {
         (1 - offsetIsNegative) * instruction.offDst
     );
 
-    if (offDst.isErr()) {
-      return offDst;
-    }
-
     switch (instruction.dstReg) {
       case RegisterFlag.AP:
-        return offsetIsNegative
-          ? this.ap.sub(offDst.unwrap())
-          : this.ap.add(offDst.unwrap());
+        return offsetIsNegative ? this.ap.sub(offDst) : this.ap.add(offDst);
 
       case RegisterFlag.FP:
-        return offsetIsNegative
-          ? this.fp.sub(offDst.unwrap())
-          : this.fp.add(offDst.unwrap());
+        return offsetIsNegative ? this.fp.sub(offDst) : this.fp.add(offDst);
     }
   }
 }

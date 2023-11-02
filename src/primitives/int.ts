@@ -1,11 +1,11 @@
-import { Err, Ok, Result, VMError } from 'result-pattern/result';
-import { Uint16, Uint64, UnsignedInteger } from './uint';
+import { UnsignedInteger } from './uint';
 
 export type Int16 = number & { _intBrand: void };
 
-export const Int16ConversionError: VMError = {
-  message: 'Int16Error: Expected a byte array of length 2.',
-};
+export class Int16Error extends Error {}
+
+export const Int16ConversionError =
+  'Int16Error: Expected a byte array of length 2.';
 
 export class SignedInteger16 {
   private static readonly BIAS: number = 2 ** 15;
@@ -29,11 +29,9 @@ export class SignedInteger16 {
   }
 
   // Convert a biased byte array representation (2 bytes) in little-endian format to an Int16
-  static fromBiasedLittleEndianBytes(
-    bytes: Uint8Array
-  ): Result<Int16, VMError> {
+  static fromBiasedLittleEndianBytes(bytes: Uint8Array): Int16 {
     if (bytes.length !== 2) {
-      return new Err(Int16ConversionError);
+      throw new Int16Error(Int16ConversionError);
     }
 
     // Convert little-endian bytes to a 16-bit number
@@ -42,19 +40,13 @@ export class SignedInteger16 {
     // Subtract the bias
     num -= SignedInteger16.BIAS;
 
-    return new Ok(this.toInt16(num));
+    return this.toInt16(num);
   }
 
   // Convert a bigint represented in its biased form to a regular Int16
-  static fromBiased(num: bigint): Result<Int16, VMError> {
+  static fromBiased(num: bigint): Int16 {
     const numUint = UnsignedInteger.toUint64(num);
-    if (numUint.isErr()) {
-      return numUint;
-    }
-    const numUint16 = UnsignedInteger.downCastToUint16(numUint.unwrap());
-    if (numUint16.isErr()) {
-      return new Err(Int16ConversionError);
-    }
-    return new Ok(this.toInt16(numUint16.unwrap() - SignedInteger16.BIAS));
+    const numUint16 = UnsignedInteger.downCastToUint16(numUint);
+    return this.toInt16(numUint16 - SignedInteger16.BIAS);
   }
 }

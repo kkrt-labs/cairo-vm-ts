@@ -1,23 +1,20 @@
-import { Ok, Err, VMError, Result } from 'result-pattern/result';
 import {
   MaybeRelocatable,
   Relocatable,
   SegmentError,
 } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { None, Option, Some } from 'option-pattern/option';
 
 export class MemoryError extends Error {}
 
-export const UnknownAddressError = {
-  message:
-    'MemoryError: tried to access memory at unknown or uninitialized address',
-};
+export const UnknownAddressError =
+  'MemoryError: tried to access memory at unknown or uninitialized address';
 
-export const WriteOnceError = {
-  message:
-    'MemoryError: tried to write existing memory. Can only write to memory once.',
-};
+export const WriteOnceError =
+  'MemoryError: tried to write existing memory. Can only write to memory once.';
+
+export const SegmentIncrementError =
+  'MemoryError: error incrementing number of segments';
 
 export class Memory {
   data: Map<Relocatable, MaybeRelocatable>;
@@ -28,35 +25,25 @@ export class Memory {
     this.numSegments = UnsignedInteger.ZERO_UINT32;
   }
 
-  insert(address: Relocatable, value: MaybeRelocatable): Result<true, VMError> {
+  insert(address: Relocatable, value: MaybeRelocatable): void {
     if (address.getSegmentIndex() >= this.numSegments) {
-      return new Err(SegmentError);
+      throw new MemoryError(SegmentError);
     }
 
     if (this.data.get(address) !== undefined) {
-      return new Err(WriteOnceError);
+      throw new MemoryError(WriteOnceError);
     }
 
     this.data.set(address, value);
-    return new Ok(true as const);
   }
 
-  get(address: Relocatable): Option<MaybeRelocatable> {
-    const value = this.data.get(address);
-    if (value === undefined) {
-      return new None();
-    }
-    return new Some(value);
+  get(address: Relocatable): MaybeRelocatable | undefined {
+    return this.data.get(address);
   }
 
-  incrementNumSegments() {
+  incrementNumSegments(): void {
     const newNumSegments = UnsignedInteger.toUint32(this.numSegments + 1);
-    if (newNumSegments.isErr()) {
-      throw new MemoryError(
-        'MemoryError: error incrementing number of segments'
-      );
-    }
-    this.numSegments = newNumSegments.unwrap();
+    this.numSegments = newNumSegments;
   }
 
   getNumSegments(): Uint32 {

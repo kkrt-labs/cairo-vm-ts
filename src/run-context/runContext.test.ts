@@ -17,8 +17,8 @@ describe('RunContext', () => {
   describe('incrementPc', () => {
     test('should successfully increment pc', () => {
       const ctx = RunContext.default();
-      const instructionSize = UnsignedInteger.toUint32(2).unwrap();
-      const result = ctx.incrementPc(instructionSize).unwrap();
+      const instructionSize = UnsignedInteger.toUint32(2);
+      const result = ctx.incrementPc(instructionSize);
 
       expect(result.getOffset()).toEqual(2);
       expect(result.getSegmentIndex()).toEqual(0);
@@ -47,8 +47,8 @@ describe('RunContext', () => {
 
       const dstAddr = runContext.computeDstAddress(instruction);
 
-      expect(dstAddr.unwrap().getSegmentIndex()).toEqual(1);
-      expect(dstAddr.unwrap().getOffset()).toEqual(6);
+      expect(dstAddr.getSegmentIndex()).toEqual(1);
+      expect(dstAddr.getOffset()).toEqual(6);
     });
 
     test('should compute dst addr for ap register', () => {
@@ -70,8 +70,8 @@ describe('RunContext', () => {
 
       const dstAddr = runContext.computeDstAddress(instruction);
 
-      expect(dstAddr.unwrap().getSegmentIndex()).toEqual(1);
-      expect(dstAddr.unwrap().getOffset()).toEqual(7);
+      expect(dstAddr.getSegmentIndex()).toEqual(1);
+      expect(dstAddr.getOffset()).toEqual(7);
     });
   });
 });

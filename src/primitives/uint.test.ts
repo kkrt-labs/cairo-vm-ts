@@ -23,13 +23,12 @@ describe('UnsignedInteger', () => {
 
   describe('toUint16', () => {
     test('should convert a valid bigint to Uint16', () => {
-      const result = UnsignedInteger.toUint16(5).unwrap();
+      const result = UnsignedInteger.toUint16(5);
       expect(result).toEqual(5);
     });
 
-    test('should return an Uint16ConversionError for negative numbers', () => {
-      const result = UnsignedInteger.toUint16(-5).unwrapErr();
-      expect(result).toEqual(Uint16ConversionError);
+    test('should throw an error Uint16ConversionError for negative numbers', () => {
+      expect(() => UnsignedInteger.toUint16(-5)).toThrow(Uint16ConversionError);
     });
   });
 
@@ -49,13 +48,12 @@ describe('UnsignedInteger', () => {
 
   describe('toUint32', () => {
     test('should convert a valid bigint to Uint32', () => {
-      const result = UnsignedInteger.toUint32(5).unwrap();
+      const result = UnsignedInteger.toUint32(5);
       expect(result).toEqual(5);
     });
 
-    test('should return an Uint32ConversionError for negative numbers', () => {
-      const result = UnsignedInteger.toUint32(-5).unwrapErr();
-      expect(result).toEqual(Uint32ConversionError);
+    test('should throw an error Uint32ConversionError for negative numbers', () => {
+      expect(() => UnsignedInteger.toUint32(-5)).toThrow(Uint32ConversionError);
     });
   });
 
@@ -71,26 +69,28 @@ describe('UnsignedInteger', () => {
 
   describe('toUint64', () => {
     test('should convert a valid bigint to Uint64', () => {
-      const result = UnsignedInteger.toUint64(5n).unwrap();
+      const result = UnsignedInteger.toUint64(5n);
       expect(result).toEqual(5n);
     });
 
-    test('should return an Uint64ConversionError for negative bigints', () => {
-      const result = UnsignedInteger.toUint64(-5n).unwrapErr();
-      expect(result).toEqual(Uint64ConversionError);
+    test('should throw an error Uint64ConversionError for negative bigints', () => {
+      expect(() => UnsignedInteger.toUint64(-5n)).toThrow(
+        Uint64ConversionError
+      );
     });
   });
 
   describe('downCastToUint16', () => {
     test('should convert a Uint64 to a Uint16', () => {
-      const value = UnsignedInteger.toUint64(5n).unwrap();
-      const result = UnsignedInteger.downCastToUint16(value).unwrap();
+      const value = UnsignedInteger.toUint64(5n);
+      const result = UnsignedInteger.downCastToUint16(value);
       expect(result).toEqual(5);
     });
-    test('should return an Uint16ConversionError for values > 0xffff', () => {
-      const value = UnsignedInteger.toUint64(0x10000n).unwrap();
-      const result = UnsignedInteger.downCastToUint16(value).unwrapErr();
-      expect(result).toEqual(Uint16ConversionError);
+    test('should throw an error Uint16ConversionError for values > 0xffff', () => {
+      const value = UnsignedInteger.toUint64(0x10000n);
+      expect(() => UnsignedInteger.downCastToUint16(value)).toThrow(
+        Uint16ConversionError
+      );
     });
   });
 });

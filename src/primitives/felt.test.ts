@@ -24,7 +24,7 @@ describe('Felt', () => {
   describe('conversions', () => {
     test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
       const felt = new Felt(10n);
-      const result = felt.toUint64().unwrap();
+      const result = felt.toUint64();
       expect(result).toEqual(10n);
     });
     test('should convert correctly a felt to its string representation', () => {
@@ -82,10 +82,9 @@ describe('Felt', () => {
     });
   });
   describe('toUint32', () => {
-    test('should return an error if the felt is larger than the max safe integer', () => {
+    test('should throw an error if the felt is larger than the max safe integer', () => {
       const a = new Felt(2n ** 53n);
-      const result = a.toUint32().unwrapErr();
-      expect(result).toEqual(NumberConversionError);
+      expect(() => a.toUint32()).toThrow(NumberConversionError);
     });
   });
 });

@@ -29,25 +29,22 @@ describe('SignedInteger16', () => {
   describe('fromBiasedLittleEndianBytes', () => {
     test('should convert a biased little-endian byte array to Int16', () => {
       const bytes = new Uint8Array([0xff, 0x7f]); // Represents 2^15-1 in little-endian biased representation
-      const result =
-        SignedInteger16.fromBiasedLittleEndianBytes(bytes).unwrap();
+      const result = SignedInteger16.fromBiasedLittleEndianBytes(bytes);
       expect(result).toEqual(-1); // Due to the bias subtraction
     });
 
-    test('should return an Err for byte array of length 1', () => {
-      const result = SignedInteger16.fromBiasedLittleEndianBytes(
-        new Uint8Array([0xff])
-      ).unwrapErr();
-
-      expect(result).toEqual(Int16ConversionError);
+    test('should throw an error for byte array of length 1', () => {
+      expect(() =>
+        SignedInteger16.fromBiasedLittleEndianBytes(new Uint8Array([0xff]))
+      ).toThrow(Int16ConversionError);
     });
 
-    test('should return an Err for byte array of length 3', () => {
-      const result = SignedInteger16.fromBiasedLittleEndianBytes(
-        new Uint8Array([0xff, 0x7f, 0xff])
-      ).unwrapErr();
-
-      expect(result).toEqual(Int16ConversionError);
+    test('should throw an error for byte array of length 3', () => {
+      expect(() =>
+        SignedInteger16.fromBiasedLittleEndianBytes(
+          new Uint8Array([0xff, 0x7f, 0xff])
+        )
+      ).toThrow(Int16ConversionError);
     });
   });
 });

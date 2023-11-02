@@ -1,6 +1,6 @@
 // Using type brands to create a Uint64 type. No runtime overhead
 
-import { Err, Ok, Result, VMError } from 'result-pattern/result';
+export class UintError extends Error {}
 
 // <https://michalzalecki.com/nominal-typing-in-typescript/#approach-2-brands>
 type Uint<T extends 16 | 32 | 64> = T extends 64
@@ -12,25 +12,17 @@ export type Uint16 = Uint<16>;
 export type Uint32 = Uint<32>;
 export type Uint64 = Uint<64>;
 
-export const Uint16ConversionError = {
-  message:
-    'Uint16ConversionError: cannot convert to Uint16, as underlying number < 0 or > 2^16',
-};
+export const Uint16ConversionError =
+  'Uint16ConversionError: cannot convert to Uint16, as underlying number < 0 or > 2^16';
 
-export const Uint32ConversionError = {
-  message:
-    'Uint32ConversionError: cannot convert to Uint32, as underlying number < 0 or > 2^32',
-};
+export const Uint32ConversionError =
+  'Uint32ConversionError: cannot convert to Uint32, as underlying number < 0 or > 2^32';
 
-export const NumberConversionError = {
-  message:
-    'NumberConversionError: cannot convert to number, as underlying bigint < 0 or > Number.MAX_SAFE_INTEGER',
-};
+export const NumberConversionError =
+  'NumberConversionError: cannot convert to number, as underlying bigint < 0 or > Number.MAX_SAFE_INTEGER';
 
-export const Uint64ConversionError = {
-  message:
-    'Uint64ConversionError: cannot convert to Uint64, as underlying bigint < 0 or > 2^64',
-};
+export const Uint64ConversionError =
+  'Uint64ConversionError: cannot convert to Uint64, as underlying bigint < 0 or > 2^64';
 
 export class UnsignedInteger {
   static readonly ZERO_UINT32: Uint32 = 0 as Uint32;
@@ -64,31 +56,31 @@ export class UnsignedInteger {
     return false;
   }
 
-  static toUint16(num: number): Result<Uint16, VMError> {
+  static toUint16(num: number): Uint16 {
     if (this.isUint16(num)) {
-      return new Ok(num);
+      return num;
     }
-    return new Err(Uint16ConversionError);
+    throw new UintError(Uint16ConversionError);
   }
 
-  static toUint32(num: number): Result<Uint32, VMError> {
+  static toUint32(num: number): Uint32 {
     if (this.isUint32(num)) {
-      return new Ok(num);
+      return num;
     }
-    return new Err(Uint32ConversionError);
+    throw new UintError(Uint32ConversionError);
   }
 
-  static toUint64(num: bigint): Result<Uint64, VMError> {
+  static toUint64(num: bigint): Uint64 {
     if (this.isUint64(num)) {
-      return new Ok(num);
+      return num;
     }
-    return new Err(Uint64ConversionError);
+    throw new UintError(Uint64ConversionError);
   }
 
-  static downCastToUint16(num: Uint64): Result<Uint16, VMError> {
+  static downCastToUint16(num: Uint64): Uint16 {
     if (num > 0xffff) {
-      return new Err(Uint16ConversionError);
+      throw new UintError(Uint16ConversionError);
     }
-    return new Ok(Number(num) as Uint16);
+    return Number(num) as Uint16;
   }
 }
