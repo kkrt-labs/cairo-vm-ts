@@ -3,7 +3,7 @@ import { Felt } from 'primitives/felt';
 import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { RunContext } from 'run-context/runContext';
 import { Instruction, Opcode, ResLogic } from './instruction';
-import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
+import { MaybeRelocatable } from 'primitives/relocatable';
 
 export class MemoryError extends Error {}
 
@@ -11,6 +11,10 @@ export const InstructionError =
   'VMError: VM Instruction must be a Field Element';
 
 export const EndOfInstructionsError = 'VMError: reached end of instructions';
+
+export const DeductionError = {
+  message: 'VMError: failed to deduce operands',
+};
 
 export class VirtualMachine {
   private runContext: RunContext;
@@ -83,31 +87,31 @@ export class VirtualMachine {
   ): MaybeRelocatable | undefined {
     // We can deduce the first operand from the destination and the second
     // operand, based on which opcode is used.
-    let op0: MaybeRelocatable;
     switch (instruction.opcode) {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
       case Opcode.Call:
         try {
-          op0 = this.runContext.getPc().add(instruction.size());
-        } catch (e) {
-          return undefined;
-        }
-        break;
+          return this.runContext.getPc().add(instruction.size());
+        } catch {}
+      // If the opcode is an assert eq, then we can deduce the first operand
+      // based on the result logic.
       case Opcode.AssertEq:
         switch (instruction.resLogic) {
           case ResLogic.Add:
-            if (dst === undefined || op1 === undefined) {
-              return undefined;
+            if (dst !== undefined && op1 !== undefined) {
+              try {
+                return dst.sub(op1);
+              } catch {}
             }
-            try {
-              op0 = dst.sub(op1);
-            } catch {
-              return undefined;
+          case ResLogic.Mul:
+            if (dst !== undefined && op1 !== undefined) {
+              return dst.div(op1);
             }
             break;
         }
     }
+    return undefined;
   }
 
   // runInstruction(instruction: Instruction): Result<true, VMError> {}

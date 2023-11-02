@@ -68,6 +68,10 @@ export class Relocatable {
     return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 
+  div(_: MaybeRelocatable | Uint32): Result<Relocatable, VMError> {
+    return new Err(ForbiddenOperation);
+  }
+
   getSegmentIndex(): Uint32 {
     return this.segmentIndex;
   }
