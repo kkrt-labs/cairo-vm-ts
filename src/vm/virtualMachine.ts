@@ -53,7 +53,7 @@ export class VirtualMachine {
   // Compute the operands of an instruction. The VM can either
   // fetch them from memory and if it fails to do so, it can
   // deduce them from the instruction itself.
-  computeOperands(instruction: Instruction) {
+  computeOperands(instruction: Instruction): Result<void> {
     // Compute the destination address based on the dstReg and
     // the offset
     const { value: dstAddr, error: dstError } = this.runContext.computeAddress(
