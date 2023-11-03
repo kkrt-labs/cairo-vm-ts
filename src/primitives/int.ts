@@ -1,11 +1,9 @@
+import { BaseError, ErrorType } from 'result/error';
 import { UnsignedInteger } from './uint';
+import { ByteArrayLengthError, OutOfRangeNumber } from 'result/primitives';
+import { Result } from 'result/result';
 
 export type Int16 = number & { _intBrand: void };
-
-export class Int16Error extends Error {}
-
-export const Int16ConversionError =
-  'Int16Error: Expected a byte array of length 2.';
 
 export class SignedInteger16 {
   private static readonly BIAS: number = 2 ** 15;
@@ -22,17 +20,23 @@ export class SignedInteger16 {
     );
   }
 
-  static toInt16(num: number): Int16 {
+  static toInt16(num: number): Result<Int16> {
     if (SignedInteger16.isInt16(num)) {
-      return num;
+      return { value: num, error: undefined };
     }
-    throw new TypeError('Number is not within the 16-bit integer range.');
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.Int16Error, OutOfRangeNumber),
+    };
   }
 
   // Convert a biased byte array representation (2 bytes) in little-endian format to an Int16
-  static fromBiasedLittleEndianBytes(bytes: Uint8Array): Int16 {
+  static fromBiasedLittleEndianBytes(bytes: Uint8Array): Result<Int16> {
     if (bytes.length !== 2) {
-      throw new Int16Error(Int16ConversionError);
+      return {
+        value: undefined,
+        error: new BaseError(ErrorType.Int16Error, ByteArrayLengthError),
+      };
     }
 
     // Convert little-endian bytes to a 16-bit number
@@ -45,9 +49,18 @@ export class SignedInteger16 {
   }
 
   // Convert a bigint represented in its biased form to a regular Int16
-  static fromBiased(num: bigint): Int16 {
-    const numUint = UnsignedInteger.toUint64(num);
-    const numUint16 = UnsignedInteger.downCastToUint16(numUint);
-    return this.toInt16(numUint16 - SignedInteger16.BIAS);
+  static fromBiased(num: bigint): Result<Int16> {
+    const { value: numUint, error: numError } = UnsignedInteger.toUint64(num);
+    if (numError !== undefined) {
+      return { value: undefined, error: numError };
+    }
+
+    const { value: numInt16, error: downcastError } =
+      UnsignedInteger.downCastToUint16(numUint);
+    if (downcastError !== undefined) {
+      return { value: undefined, error: downcastError };
+    }
+
+    return this.toInt16(numInt16 - SignedInteger16.BIAS);
   }
 }
