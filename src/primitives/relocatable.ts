@@ -140,8 +140,11 @@ export class Relocatable {
     };
   }
 
-  div(_: MaybeRelocatable | Uint32): undefined {
-    return undefined;
+  div(_: MaybeRelocatable | Uint32): Err {
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.RelocatableError, ForbiddenOperation),
+    };
   }
 
   getSegmentIndex(): Uint32 {
