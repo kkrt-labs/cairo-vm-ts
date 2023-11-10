@@ -110,7 +110,35 @@ describe('Relocatable', () => {
       expect((result as Relocatable).getSegmentIndex()).toEqual(0);
     });
   });
+
+  describe('eq', () => {
+    test('should return false for felt other', () => {
+      const a = new Relocatable(0, 0);
+      const b = new Felt(1n);
+      const eq = a.eq(b);
+      expect(eq).toBeFalse();
+    });
+    test('should return false for diff offset', () => {
+      const a = new Relocatable(0, 0);
+      const b = new Relocatable(0, 1);
+      const eq = a.eq(b);
+      expect(eq).toBeFalse();
+    });
+    test('should return false for diff segments', () => {
+      const a = new Relocatable(0, 1);
+      const b = new Relocatable(1, 1);
+      const eq = a.eq(b);
+      expect(eq).toBeFalse();
+    });
+    test('should return true for same offset and segment', () => {
+      const a = new Relocatable(0, 1);
+      const b = new Relocatable(0, 1);
+      const eq = a.eq(b);
+      expect(eq).toBeTrue();
+    });
+  });
 });
+
 describe('MemoryPointer', () => {
   describe('constructor', () => {
     test('should always set segment to 1', () => {

@@ -1,5 +1,5 @@
 import { Uint32, Uint64, UnsignedInteger } from './uint';
-import { MaybeRelocatable } from './relocatable';
+import { MaybeRelocatable, Relocatable } from './relocatable';
 import { BaseError, ErrorType } from 'result/error';
 import { Result } from 'result/result';
 import { ForbiddenOperation, OutOfRangeBigInt } from 'result/primitives';
@@ -72,7 +72,10 @@ export class Felt {
     };
   }
 
-  eq(other: Felt): boolean {
+  eq(other: MaybeRelocatable): boolean {
+    if (other instanceof Relocatable) {
+      return false;
+    }
     return this.inner == other.inner;
   }
 
