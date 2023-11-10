@@ -38,6 +38,10 @@ export class RunContext {
     return this.pc;
   }
 
+  getFp() {
+    return this.fp;
+  }
+
   computeAddress(register: RegisterFlag, offset: Int16): Result<Relocatable> {
     switch (register) {
       case RegisterFlag.AP:

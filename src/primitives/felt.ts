@@ -42,6 +42,19 @@ export class Felt {
     };
   }
 
+  mul(other: MaybeRelocatable): Result<Felt> {
+    if (other instanceof Felt) {
+      return {
+        value: new Felt((this.inner * other.inner) % Felt.PRIME),
+        error: undefined,
+      };
+    }
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.FeltError, ForbiddenOperation),
+    };
+  }
+
   div(other: MaybeRelocatable): Result<Felt> {
     if (other instanceof Felt) {
       if (other.inner === 0n) {

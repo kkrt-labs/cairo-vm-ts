@@ -46,6 +46,7 @@ describe('Felt', () => {
       expect(a.eq(b)).toBeFalse();
     });
   });
+
   describe('add', () => {
     test('should add two felts properly', () => {
       const a = new Felt(1000n);
@@ -62,6 +63,7 @@ describe('Felt', () => {
       expect((value as Felt).eq(expected)).toBeTrue();
     });
   });
+
   describe('sub', () => {
     test('should sub two felts properly', () => {
       const a = new Felt(3000n);
@@ -78,6 +80,43 @@ describe('Felt', () => {
       expect((value as Felt).eq(expected)).toBeTrue();
     });
   });
+
+  describe('mul', () => {
+    test('should multiply two felts properly', () => {
+      const a = new Felt(10n);
+      const b = new Felt(2n);
+      const { value } = a.mul(b);
+      const expected = new Felt(20n);
+      expect((value as Felt).eq(expected)).toBeTrue();
+    });
+    test('should wrap around the prime field when multiplying', () => {
+      const a = new Felt(2n ** 134n);
+      const b = new Felt(2n ** 128n);
+      const { value } = a.mul(b);
+      const expected = new Felt(
+        3618502788665912670123303560417596398778548817217653680365937596310271031297n
+      );
+      expect((value as Felt).eq(expected)).toBeTrue();
+    });
+  });
+
+  describe('div', () => {
+    test('should divide two felts properly', () => {
+      const a = new Felt(10n);
+      const b = new Felt(2n);
+      const { value } = a.div(b);
+      const expected = new Felt(5n);
+      expect((value as Felt).eq(expected)).toBeTrue();
+    });
+    test('should go to 0 if a < b in a/b', () => {
+      const a = new Felt(5n);
+      const b = new Felt(10n);
+      const { value } = a.div(b);
+      const expected = new Felt(0n);
+      expect((value as Felt).eq(expected)).toBeTrue();
+    });
+  });
+
   describe('toUint32', () => {
     test('should return an error if the felt is larger than the max safe integer', () => {
       const a = new Felt(2n ** 53n);
