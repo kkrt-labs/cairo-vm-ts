@@ -111,9 +111,9 @@ export class Instruction {
 
   static default(): Instruction {
     return new Instruction(
-      SignedInteger16.fromBiased(0n).value as Int16,
-      SignedInteger16.fromBiased(0n).value as Int16,
-      SignedInteger16.fromBiased(0n).value as Int16,
+      0 as Int16,
+      0 as Int16,
+      0 as Int16,
       RegisterFlag.AP,
       RegisterFlag.AP,
       Op1Src.Op0,

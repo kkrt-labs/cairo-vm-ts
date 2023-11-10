@@ -22,19 +22,18 @@ export class MemorySegmentManager {
     address: Relocatable,
     data: MaybeRelocatable[]
   ): Result<Relocatable> {
-    for (let index = 0; index < data.length; index++) {
+    data.forEach((d, index) => {
       const { value: indexUint, error: indexError } =
         UnsignedInteger.toUint32(index);
       if (indexError !== undefined) {
         return { value: undefined, error: indexError };
       }
-
       const { value: nextAddress, error: addrError } = address.add(indexUint);
       if (addrError !== undefined) {
         return { value: undefined, error: addrError };
       }
-      this.memory.insert(nextAddress, data[index]);
-    }
+      this.memory.insert(nextAddress, d);
+    });
 
     const { value: dataLen, error: dataLenError } = UnsignedInteger.toUint32(
       data.length

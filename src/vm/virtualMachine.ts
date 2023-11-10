@@ -4,7 +4,7 @@ import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { RunContext } from 'run-context/runContext';
 import { Instruction, Opcode, ResLogic } from './instruction';
 import { MaybeRelocatable } from 'primitives/relocatable';
-import { BaseError, ErrorType, UnknownError } from 'result/error';
+import { BaseError, ErrorType } from 'result/error';
 import { EndOfInstructionsError, InstructionError } from 'result/memory';
 import { Result } from 'result/result';
 

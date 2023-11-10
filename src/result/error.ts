@@ -1,3 +1,5 @@
+type ErrorTypeKey = (typeof ErrorType)[keyof typeof ErrorType];
+
 export const ErrorType = {
   FeltError: 'FeltError',
   RelocatableError: 'RelocatableError',
@@ -10,10 +12,10 @@ export const ErrorType = {
 } as const;
 
 export class BaseError extends Error {
-  type: string;
+  type: ErrorTypeKey;
   message: string;
 
-  constructor(type: string, message: string) {
+  constructor(type: ErrorTypeKey, message: string) {
     super(message);
     this.type = type;
     this.message = message;
