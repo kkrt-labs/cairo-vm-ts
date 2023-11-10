@@ -1,22 +1,19 @@
 import { test, expect, describe } from 'bun:test';
-import { Felt, FeltError } from './felt';
-import { NumberConversionError } from './uint';
+import { Felt } from './felt';
+import { BaseError, ErrorType } from 'result/error';
+import { OutOfRangeBigInt } from 'result/primitives';
 
 describe('Felt', () => {
   describe('constructor', () => {
     test('should throw if initializing a felt with a negative inner', () => {
       expect(() => new Felt(-10n)).toThrow(
-        new FeltError(
-          'FeltError: cannot initialize a Felt with underlying bigint negative, or greater than Felt.PRIME'
-        )
+        new BaseError(ErrorType.FeltError, OutOfRangeBigInt)
       );
     });
     test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
       const biggerThanPrime = Felt.PRIME + 1n;
       expect(() => new Felt(biggerThanPrime)).toThrow(
-        new FeltError(
-          'FeltError: cannot initialize a Felt with underlying bigint negative, or greater than Felt.PRIME'
-        )
+        new BaseError(ErrorType.FeltError, OutOfRangeBigInt)
       );
     });
   });
@@ -24,7 +21,7 @@ describe('Felt', () => {
   describe('conversions', () => {
     test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
       const felt = new Felt(10n);
-      const result = felt.toUint64();
+      const { value: result } = felt.toUint64();
       expect(result).toEqual(10n);
     });
     test('should convert correctly a felt to its string representation', () => {
@@ -53,38 +50,41 @@ describe('Felt', () => {
     test('should add two felts properly', () => {
       const a = new Felt(1000n);
       const b = new Felt(2000n);
-      const c = a.add(b);
+      const { value } = a.add(b);
       const expected = new Felt(3000n);
-      expect(c.eq(expected)).toBeTrue();
+      expect((value as Felt).eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when adding', () => {
       const a = new Felt(Felt.PRIME - 1n);
       const b = new Felt(2n);
-      const result = a.add(b);
+      const { value } = a.add(b);
       const expected = new Felt(1n);
-      expect(result.eq(expected)).toBeTrue();
+      expect((value as Felt).eq(expected)).toBeTrue();
     });
   });
   describe('sub', () => {
     test('should sub two felts properly', () => {
       const a = new Felt(3000n);
       const b = new Felt(2000n);
-      const c = a.sub(b);
+      const { value } = a.sub(b);
       const expected = new Felt(1000n);
-      expect(c.eq(expected)).toBeTrue();
+      expect((value as Felt).eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when subtracting', () => {
       const a = new Felt(2n);
       const b = new Felt(5n);
-      const result = a.sub(b);
+      const { value } = a.sub(b);
       const expected = new Felt(Felt.PRIME - 3n);
-      expect(result.eq(expected)).toBeTrue();
+      expect((value as Felt).eq(expected)).toBeTrue();
     });
   });
   describe('toUint32', () => {
-    test('should throw an error if the felt is larger than the max safe integer', () => {
+    test('should return an error if the felt is larger than the max safe integer', () => {
       const a = new Felt(2n ** 53n);
-      expect(() => a.toUint32()).toThrow(NumberConversionError);
+      const { error } = a.toUint32();
+      expect(error).toEqual(
+        new BaseError(ErrorType.FeltError, OutOfRangeBigInt)
+      );
     });
   });
 });

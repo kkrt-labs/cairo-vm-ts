@@ -1,72 +1,98 @@
 import { test, expect, describe } from 'bun:test';
-import { UnsignedInteger } from 'primitives/uint';
+import { Uint64, UnsignedInteger } from 'primitives/uint';
 import {
   ApUpdate,
   FpUpdate,
-  HighBitSetError,
   Instruction,
-  InvalidApUpdate,
-  InvalidOp1Src,
-  InvalidOpcode,
-  InvalidPcUpdate,
-  InvalidResultLogic,
   Op1Src,
   Opcode,
   PcUpdate,
   RegisterFlag,
   ResLogic,
 } from './instruction';
-import { SignedInteger16 } from 'primitives/int';
+import { Int16, SignedInteger16 } from 'primitives/int';
+import { BaseError, ErrorType } from 'result/error';
+import {
+  HighBitSetError,
+  InvalidApUpdate,
+  InvalidOp1Src,
+  InvalidOpcode,
+  InvalidPcUpdate,
+  InvalidResultLogic,
+} from 'result/instruction';
 
 describe('Instruction', () => {
   describe('decodeInstruction', () => {
     test('should throw an error HighBitSetError', () => {
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x94a7800080008000n);
 
-      expect(() =>
-        Instruction.decodeInstruction(encodedInstructionUint64)
-      ).toThrow(HighBitSetError);
+      const { error } = Instruction.decodeInstruction(
+        encodedInstructionUint64 as Uint64
+      );
+      expect(error).toEqual(
+        new BaseError(ErrorType.InstructionError, HighBitSetError)
+      );
     });
 
     test('should throw an error InvalidOp1Src', () => {
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x294f800080008000n);
-      expect(() =>
-        Instruction.decodeInstruction(encodedInstructionUint64)
-      ).toThrow(InvalidOp1Src);
+
+      const { error } = Instruction.decodeInstruction(
+        encodedInstructionUint64 as Uint64
+      );
+      expect(error).toEqual(
+        new BaseError(ErrorType.InstructionError, InvalidOp1Src)
+      );
     });
 
     test('should throw an error InvalidPcUpdate', () => {
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x29a8800080008000n);
-      expect(() =>
-        Instruction.decodeInstruction(encodedInstructionUint64)
-      ).toThrow(InvalidPcUpdate);
+
+      const { error } = Instruction.decodeInstruction(
+        encodedInstructionUint64 as Uint64
+      );
+      expect(error).toEqual(
+        new BaseError(ErrorType.InstructionError, InvalidPcUpdate)
+      );
     });
 
     test('should throw an error InvalidResultLogic', () => {
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x2968800080008000n);
-      expect(() =>
-        Instruction.decodeInstruction(encodedInstructionUint64)
-      ).toThrow(InvalidResultLogic);
+
+      const { error } = Instruction.decodeInstruction(
+        encodedInstructionUint64 as Uint64
+      );
+      expect(error).toEqual(
+        new BaseError(ErrorType.InstructionError, InvalidResultLogic)
+      );
     });
 
     test('should throw an error InvalidOpcode', () => {
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x3948800080008000n);
-      expect(() =>
-        Instruction.decodeInstruction(encodedInstructionUint64)
-      ).toThrow(InvalidOpcode);
+
+      const { error } = Instruction.decodeInstruction(
+        encodedInstructionUint64 as Uint64
+      );
+      expect(error).toEqual(
+        new BaseError(ErrorType.InstructionError, InvalidOpcode)
+      );
     });
 
-    test('should throw an error with InvalidOpcode', () => {
-      const encodedInstructionUint64 =
+    test('should throw an error with InvalidApUpdate', () => {
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x2d48800080008000n);
-      expect(() =>
-        Instruction.decodeInstruction(encodedInstructionUint64)
-      ).toThrow(InvalidApUpdate);
+
+      const { error } = Instruction.decodeInstruction(
+        encodedInstructionUint64 as Uint64
+      );
+      expect(error).toEqual(
+        new BaseError(ErrorType.InstructionError, InvalidApUpdate)
+      );
     });
 
     test('should correctly decode the cairo instruction [ap + 10] = [fp] + 42', () => {
@@ -78,16 +104,16 @@ describe('Instruction', () => {
 
       const flag = 0b0100000000100110n << (3n * shift);
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(encodedInstruction);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(10),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(1),
+        SignedInteger16.toInt16(10).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(1).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.FP,
         Op1Src.Imm,
@@ -98,7 +124,7 @@ describe('Instruction', () => {
         Opcode.AssertEq
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction jmp rel [fp - 1] if [fp - 7] != 0', () => {
@@ -110,16 +136,16 @@ describe('Instruction', () => {
 
       const flag = 0b0000001000001011n << (3n * shift);
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(encodedInstruction);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(-7),
-        SignedInteger16.toInt16(-1),
-        SignedInteger16.toInt16(-1),
+        SignedInteger16.toInt16(-7).value as Int16,
+        SignedInteger16.toInt16(-1).value as Int16,
+        SignedInteger16.toInt16(-1).value as Int16,
         RegisterFlag.FP,
         RegisterFlag.FP,
         Op1Src.FP,
@@ -130,7 +156,7 @@ describe('Instruction', () => {
         Opcode.NoOp
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction ap += [fp + 4] + [fp]', () => {
@@ -142,16 +168,16 @@ describe('Instruction', () => {
 
       const flag = 0b0000010000101011n << (3n * shift);
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(encodedInstruction);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(-1),
-        SignedInteger16.toInt16(4),
-        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(-1).value as Int16,
+        SignedInteger16.toInt16(4).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
         RegisterFlag.FP,
         RegisterFlag.FP,
         Op1Src.FP,
@@ -162,7 +188,7 @@ describe('Instruction', () => {
         Opcode.NoOp
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction call abs [fp + 4]', () => {
@@ -174,16 +200,16 @@ describe('Instruction', () => {
 
       const flag = 0b0001000010001000n << (3n * shift);
       const encodedInstruction = offDst | offOp0 | offOp1 | flag;
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(encodedInstruction);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(1),
-        SignedInteger16.toInt16(4),
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(1).value as Int16,
+        SignedInteger16.toInt16(4).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.FP,
@@ -194,21 +220,21 @@ describe('Instruction', () => {
         Opcode.Call
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction CALL - ported from lambdaclass/cairo-vm_in_go', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L58
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x14a7800080008000n);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
         RegisterFlag.FP,
         RegisterFlag.FP,
         Op1Src.Imm,
@@ -219,21 +245,21 @@ describe('Instruction', () => {
         Opcode.Call
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction RET - ported from lambdaclass/cairo-vm_in_go', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L97
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x2948800080008000n);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.FP,
@@ -244,21 +270,21 @@ describe('Instruction', () => {
         Opcode.Ret
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction ASSERT_EQ 1 - ported from lambdaclass/cairo-vm_in_go', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L136
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x4a50800080008000n);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -269,21 +295,21 @@ describe('Instruction', () => {
         Opcode.AssertEq
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction ASSERT_EQ 2 - ported from lambdaclass/cairo-vm_in_go', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L175
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x4200800080008000n);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Op0,
@@ -294,21 +320,21 @@ describe('Instruction', () => {
         Opcode.AssertEq
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the cairo instruction NoOp 1 - ported from lambdaclass/cairo-vm_in_go', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L214
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x0000800080008000n);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(0),
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Op0,
@@ -319,21 +345,21 @@ describe('Instruction', () => {
         Opcode.NoOp
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
 
     test('should correctly decode the negative offsets', () => {
       // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction_test.go#L253
-      const encodedInstructionUint64 =
+      const { value: encodedInstructionUint64 } =
         UnsignedInteger.toUint64(0x0000800180007fffn);
       const instruction = Instruction.decodeInstruction(
-        encodedInstructionUint64
+        encodedInstructionUint64 as Uint64
       );
 
       const expected = new Instruction(
-        SignedInteger16.toInt16(-1),
-        SignedInteger16.toInt16(0),
-        SignedInteger16.toInt16(1),
+        SignedInteger16.toInt16(-1).value as Int16,
+        SignedInteger16.toInt16(0).value as Int16,
+        SignedInteger16.toInt16(1).value as Int16,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Op0,
@@ -344,7 +370,7 @@ describe('Instruction', () => {
         Opcode.NoOp
       );
 
-      expect(instruction).toEqual(expected);
+      expect(instruction.value).toEqual(expected);
     });
   });
 });

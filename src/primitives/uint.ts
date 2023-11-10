@@ -1,6 +1,12 @@
 // Using type brands to create a Uint64 type. No runtime overhead
 
-export class UintError extends Error {}
+import { BaseError, ErrorType } from 'result/error';
+import {
+  Uint16ConversionError,
+  Uint32ConversionError,
+  Uint64ConversionError,
+} from 'result/primitives';
+import { Result } from 'result/result';
 
 // <https://michalzalecki.com/nominal-typing-in-typescript/#approach-2-brands>
 type Uint<T extends 16 | 32 | 64> = T extends 64
@@ -12,20 +18,11 @@ export type Uint16 = Uint<16>;
 export type Uint32 = Uint<32>;
 export type Uint64 = Uint<64>;
 
-export const Uint16ConversionError =
-  'Uint16ConversionError: cannot convert to Uint16, as underlying number < 0 or > 2^16';
-
-export const Uint32ConversionError =
-  'Uint32ConversionError: cannot convert to Uint32, as underlying number < 0 or > 2^32';
-
-export const NumberConversionError =
-  'NumberConversionError: cannot convert to number, as underlying bigint < 0 or > Number.MAX_SAFE_INTEGER';
-
-export const Uint64ConversionError =
-  'Uint64ConversionError: cannot convert to Uint64, as underlying bigint < 0 or > 2^64';
-
 export class UnsignedInteger {
   static readonly ZERO_UINT32: Uint32 = 0 as Uint32;
+  static readonly ONE_UINT32: Uint32 = 1 as Uint32;
+  static readonly TWO_UINT32: Uint32 = 2 as Uint32;
+  static readonly MAX_UINT32: Uint32 = 0xffffffff as Uint32;
 
   static readonly ZERO_UINT64: Uint64 = 0n as Uint64;
 
@@ -56,31 +53,43 @@ export class UnsignedInteger {
     return false;
   }
 
-  static toUint16(num: number): Uint16 {
+  static toUint16(num: number): Result<Uint16> {
     if (this.isUint16(num)) {
-      return num;
+      return { value: num, error: undefined };
     }
-    throw new UintError(Uint16ConversionError);
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.UintError, Uint16ConversionError),
+    };
   }
 
-  static toUint32(num: number): Uint32 {
+  static toUint32(num: number): Result<Uint32> {
     if (this.isUint32(num)) {
-      return num;
+      return { value: num, error: undefined };
     }
-    throw new UintError(Uint32ConversionError);
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.UintError, Uint32ConversionError),
+    };
   }
 
-  static toUint64(num: bigint): Uint64 {
+  static toUint64(num: bigint): Result<Uint64> {
     if (this.isUint64(num)) {
-      return num;
+      return { value: num, error: undefined };
     }
-    throw new UintError(Uint64ConversionError);
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.UintError, Uint64ConversionError),
+    };
   }
 
-  static downCastToUint16(num: Uint64): Uint16 {
+  static downCastToUint16(num: Uint64): Result<Uint16> {
     if (num > 0xffff) {
-      throw new UintError(Uint16ConversionError);
+      return {
+        value: undefined,
+        error: new BaseError(ErrorType.UintError, Uint16ConversionError),
+      };
     }
-    return Number(num) as Uint16;
+    return { value: Number(num) as Uint16, error: undefined };
   }
 }

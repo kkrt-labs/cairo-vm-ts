@@ -2,26 +2,18 @@
 // Some instructions spread over two words when they use an immediate value, so
 // representing the first one with this struct is enougth.
 
+import { BaseError, ErrorType } from 'result/error';
+import {
+  HighBitSetError,
+  InvalidApUpdate,
+  InvalidOp1Src,
+  InvalidOpcode,
+  InvalidPcUpdate,
+  InvalidResultLogic,
+} from 'result/instruction';
 import { Int16, SignedInteger16 } from 'primitives/int';
-import { Uint64 } from 'primitives/uint';
-
-export class InstructionError extends Error {}
-
-const DECODING_ERRORS = {
-  HIGH_BIT_SET: 'High bit is not zero',
-  INVALID_OP1_SRC: 'Invalid Operand 1 Source',
-  INVALID_PC_UPDATE: 'Invalid PC Update',
-  INVALID_AP_UPDATE: 'Invalid AP Update',
-  INVALID_RES_LOGIC: 'Invalid Result Logic',
-  INVALID_OPCODE: 'Invalid Opcode',
-} as const;
-
-export const HighBitSetError = `InstructionDecodingError: ${DECODING_ERRORS.HIGH_BIT_SET}`;
-export const InvalidOp1Src = `InstructionDecodingError: ${DECODING_ERRORS.INVALID_OP1_SRC}`;
-export const InvalidPcUpdate = `InstructionDecodingError: ${DECODING_ERRORS.INVALID_PC_UPDATE}`;
-export const InvalidApUpdate = `InstructionDecodingError: ${DECODING_ERRORS.INVALID_AP_UPDATE}`;
-export const InvalidResultLogic = `InstructionDecodingError: ${DECODING_ERRORS.INVALID_RES_LOGIC}`;
-export const InvalidOpcode = `InstructionDecodingError: ${DECODING_ERRORS.INVALID_OPCODE}`;
+import { Uint32, Uint64, UnsignedInteger } from 'primitives/uint';
+import { Result } from 'result/result';
 
 //  Structure of the 63-bit that form the first word of each instruction.
 //  See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
@@ -117,6 +109,22 @@ export class Instruction {
   // The opcode
   public opcode: Opcode;
 
+  static default(): Instruction {
+    return new Instruction(
+      0 as Int16,
+      0 as Int16,
+      0 as Int16,
+      RegisterFlag.AP,
+      RegisterFlag.AP,
+      Op1Src.Op0,
+      ResLogic.Op1,
+      PcUpdate.Regular,
+      ApUpdate.Regular,
+      FpUpdate.Regular,
+      Opcode.NoOp
+    );
+  }
+
   constructor(
     offsetDst: Int16,
     offsetOp0: Int16,
@@ -143,7 +151,7 @@ export class Instruction {
     this.opcode = opcode;
   }
 
-  static decodeInstruction(encodedInstruction: Uint64): Instruction {
+  static decodeInstruction(encodedInstruction: Uint64): Result<Instruction> {
     // mask for the high bit of a 64-bit number
     const highBit = 1n << 63n;
     // dstReg is located at bits 0-0. We apply a mask of 0x01 (0b1)
@@ -176,7 +184,10 @@ export class Instruction {
     const opcodeOff = 12n;
 
     if ((highBit & encodedInstruction) !== 0n) {
-      throw new InstructionError(HighBitSetError);
+      return {
+        value: undefined,
+        error: new BaseError(ErrorType.InstructionError, HighBitSetError),
+      };
     }
 
     // mask for the 16 least significant bits of a 64-bit number
@@ -184,15 +195,26 @@ export class Instruction {
     const shift = 16n;
 
     // Get the offset by masking and shifting the encoded instruction
-    const offsetDst = SignedInteger16.fromBiased(encodedInstruction & mask);
+    const { value: offsetDst, error: dstError } = SignedInteger16.fromBiased(
+      encodedInstruction & mask
+    );
+    if (dstError !== undefined) {
+      return { value: undefined, error: dstError };
+    }
     let shiftedEncodedInstruction = encodedInstruction >> shift;
-    const offsetOp0 = SignedInteger16.fromBiased(
+    const { value: offsetOp0, error: op0Error } = SignedInteger16.fromBiased(
       shiftedEncodedInstruction & mask
     );
+    if (op0Error !== undefined) {
+      return { value: undefined, error: op0Error };
+    }
     shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-    const offsetOp1 = SignedInteger16.fromBiased(
+    const { value: offsetOp1, error: op1Error } = SignedInteger16.fromBiased(
       shiftedEncodedInstruction & mask
     );
+    if (op1Error !== undefined) {
+      return { value: undefined, error: op1Error };
+    }
 
     // Get the flags by shifting the encoded instruction
     const flags = shiftedEncodedInstruction >> shift;
@@ -234,7 +256,10 @@ export class Instruction {
         op1Src = Op1Src.AP;
         break;
       default:
-        throw new InstructionError(InvalidOp1Src);
+        return {
+          value: undefined,
+          error: new BaseError(ErrorType.InstructionError, InvalidOp1Src),
+        };
     }
 
     const pcUpdateNum = (flags & pcUpdateMask) >> pcUpdateOff;
@@ -257,7 +282,10 @@ export class Instruction {
         pcUpdate = PcUpdate.Jnz;
         break;
       default:
-        throw new InstructionError(InvalidPcUpdate);
+        return {
+          value: undefined,
+          error: new BaseError(ErrorType.InstructionError, InvalidPcUpdate),
+        };
     }
 
     const resLogicNum = (flags & resLogicMask) >> resLogicOff;
@@ -281,7 +309,10 @@ export class Instruction {
         resLogic = ResLogic.Mul;
         break;
       default:
-        throw new InstructionError(InvalidResultLogic);
+        return {
+          value: undefined,
+          error: new BaseError(ErrorType.InstructionError, InvalidResultLogic),
+        };
     }
 
     const opcodeNum = (flags & opcodeMask) >> opcodeOff;
@@ -304,7 +335,10 @@ export class Instruction {
         opcode = Opcode.AssertEq;
         break;
       default:
-        throw new InstructionError(InvalidOpcode);
+        return {
+          value: undefined,
+          error: new BaseError(ErrorType.InstructionError, InvalidOpcode),
+        };
     }
 
     const apUpdateNum = (flags & apUpdateMask) >> apUpdateOff;
@@ -328,7 +362,10 @@ export class Instruction {
         apUpdate = ApUpdate.Add1;
         break;
       default:
-        throw new InstructionError(InvalidApUpdate);
+        return {
+          value: undefined,
+          error: new BaseError(ErrorType.InstructionError, InvalidApUpdate),
+        };
     }
 
     let fpUpdate: FpUpdate;
@@ -346,18 +383,28 @@ export class Instruction {
         fpUpdate = FpUpdate.Regular;
     }
 
-    return new Instruction(
-      offsetDst,
-      offsetOp0,
-      offsetOp1,
-      dstReg,
-      op0Reg,
-      op1Src,
-      resLogic,
-      pcUpdate,
-      apUpdate,
-      fpUpdate,
-      opcode
-    );
+    return {
+      value: new Instruction(
+        offsetDst,
+        offsetOp0,
+        offsetOp1,
+        dstReg,
+        op0Reg,
+        op1Src,
+        resLogic,
+        pcUpdate,
+        apUpdate,
+        fpUpdate,
+        opcode
+      ),
+      error: undefined,
+    };
+  }
+
+  size(): Uint32 {
+    if (this.op1Src == Op1Src.Imm) {
+      return UnsignedInteger.TWO_UINT32;
+    }
+    return UnsignedInteger.ONE_UINT32;
   }
 }
