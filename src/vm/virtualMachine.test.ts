@@ -1,10 +1,26 @@
 import { test, expect, describe } from 'bun:test';
-import { Instruction, Opcode, ResLogic } from './instruction';
-import { VirtualMachine } from './virtualMachine';
+import {
+  Instruction,
+  Opcode,
+  ResLogic,
+  Op1Src,
+  PcUpdate,
+  ApUpdate,
+  FpUpdate,
+  RegisterFlag,
+} from './instruction';
+import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
 import { BaseError, ErrorType } from 'result/error';
 import { ForbiddenOperation } from 'result/primitives';
+import { Int16 } from 'primitives/int';
+import {
+  DiffAssertValuesError,
+  InvalidDstOperand,
+  InvalidOperand0,
+  UnconstrainedResError,
+} from 'result/virtualMachine';
 
 function getInstructionWithOpcodeAndResLogic(
   opcode: Opcode,
@@ -354,6 +370,147 @@ describe('VirtualMachine', () => {
 
       const { value: dst } = vm.deduceDst(instruction, undefined);
       expect(dst).toBeUndefined();
+    });
+  });
+
+  describe('opcodeAssertions', () => {
+    test('should return UnconstrainedResError on assert eq opcode and undefined res operand', () => {
+      const instruction: Instruction = new Instruction(
+        1 as Int16,
+        2 as Int16,
+        3 as Int16,
+        RegisterFlag.FP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.ApPlus2,
+        Opcode.AssertEq
+      );
+
+      const operands: Operands = {
+        dst: new Felt(8n),
+        res: undefined,
+        op0: new Felt(9n),
+        op1: new Felt(10n),
+      };
+      const vm = new VirtualMachine();
+
+      const { error } = vm.opcodeAssertion(instruction, operands);
+      expect(error).toEqual(
+        new BaseError(ErrorType.VMError, UnconstrainedResError)
+      );
+    });
+    test('should return DiffAssertError on assert eq opcode and res != dst felts', () => {
+      const instruction: Instruction = new Instruction(
+        1 as Int16,
+        2 as Int16,
+        3 as Int16,
+        RegisterFlag.FP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.ApPlus2,
+        Opcode.AssertEq
+      );
+
+      const operands: Operands = {
+        dst: new Felt(9n),
+        res: new Felt(8n),
+        op0: new Felt(9n),
+        op1: new Felt(10n),
+      };
+      const vm = new VirtualMachine();
+
+      const { error } = vm.opcodeAssertion(instruction, operands);
+      expect(error).toEqual(
+        new BaseError(ErrorType.VMError, DiffAssertValuesError)
+      );
+    });
+    test('should return DiffAssertError on assert eq opcode and res != dst relocatables', () => {
+      const instruction: Instruction = new Instruction(
+        1 as Int16,
+        2 as Int16,
+        3 as Int16,
+        RegisterFlag.FP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.ApPlus2,
+        Opcode.AssertEq
+      );
+
+      const operands: Operands = {
+        dst: new Relocatable(1, 2),
+        res: new Relocatable(1, 3),
+        op0: new Felt(9n),
+        op1: new Felt(10n),
+      };
+      const vm = new VirtualMachine();
+
+      const { error } = vm.opcodeAssertion(instruction, operands);
+      expect(error).toEqual(
+        new BaseError(ErrorType.VMError, DiffAssertValuesError)
+      );
+    });
+    test('should return InvalidOperand0 on call opcode and pc != op0', () => {
+      const instruction: Instruction = new Instruction(
+        1 as Int16,
+        2 as Int16,
+        3 as Int16,
+        RegisterFlag.FP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.ApPlus2,
+        Opcode.Call
+      );
+
+      const operands: Operands = {
+        dst: new Relocatable(1, 2),
+        res: new Relocatable(1, 3),
+        op0: new Felt(9n),
+        op1: new Felt(10n),
+      };
+      const vm = new VirtualMachine();
+
+      const { error } = vm.opcodeAssertion(instruction, operands);
+      expect(error).toEqual(new BaseError(ErrorType.VMError, InvalidOperand0));
+    });
+    test('should return InvalidDstError on call opcode and fp != dst', () => {
+      const instruction: Instruction = new Instruction(
+        1 as Int16,
+        2 as Int16,
+        3 as Int16,
+        RegisterFlag.FP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.ApPlus2,
+        Opcode.Call
+      );
+
+      const operands: Operands = {
+        dst: new Relocatable(1, 2),
+        res: new Relocatable(1, 3),
+        op0: new Relocatable(0, 1),
+        op1: new Felt(10n),
+      };
+      const vm = new VirtualMachine();
+
+      const { error } = vm.opcodeAssertion(instruction, operands);
+      expect(error).toEqual(
+        new BaseError(ErrorType.VMError, InvalidDstOperand)
+      );
     });
   });
 });

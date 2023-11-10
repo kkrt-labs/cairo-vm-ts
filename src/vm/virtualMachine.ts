@@ -5,8 +5,16 @@ import { RunContext } from 'run-context/runContext';
 import { Instruction, Opcode, ResLogic } from './instruction';
 import { MaybeRelocatable } from 'primitives/relocatable';
 import { BaseError, ErrorType } from 'result/error';
-import { EndOfInstructionsError, InstructionError } from 'result/memory';
+import { InstructionError } from 'result/memory';
+
 import { Result } from 'result/result';
+import {
+  DiffAssertValuesError,
+  EndOfInstructionsError,
+  InvalidDstOperand,
+  InvalidOperand0,
+  UnconstrainedResError,
+} from 'result/virtualMachine';
 
 export type Operands = {
   op0: MaybeRelocatable | undefined;
@@ -290,6 +298,47 @@ export class VirtualMachine {
       // For a call instruction, we have dst = fp.
       case Opcode.Call:
         return { value: this.runContext.getFp(), error: undefined };
+    }
+    return { value: undefined, error: undefined };
+  }
+
+  opcodeAssertion(instruction: Instruction, operands: Operands): Result<void> {
+    switch (instruction.opcode) {
+      case Opcode.AssertEq:
+        if (operands.res === undefined) {
+          return {
+            value: undefined,
+            error: new BaseError(ErrorType.VMError, UnconstrainedResError),
+          };
+        }
+        if (operands.dst !== operands.res) {
+          return {
+            value: undefined,
+            error: new BaseError(ErrorType.VMError, DiffAssertValuesError),
+          };
+        }
+        break;
+      case Opcode.Call:
+        const { value: returnPc, error: returnPcError } = this.runContext
+          .getPc()
+          .add(instruction.size());
+        if (returnPcError !== undefined) {
+          return { value: undefined, error: returnPcError };
+        }
+        if (operands.op0 === undefined || !returnPc.eq(operands.op0)) {
+          return {
+            value: undefined,
+            error: new BaseError(ErrorType.VMError, InvalidOperand0),
+          };
+        }
+        const fp = this.runContext.getFp();
+        if (fp !== operands.dst) {
+          return {
+            value: undefined,
+            error: new BaseError(ErrorType.VMError, InvalidDstOperand),
+          };
+        }
+        break;
     }
     return { value: undefined, error: undefined };
   }
