@@ -302,8 +302,13 @@ export class VirtualMachine {
     return { value: undefined, error: undefined };
   }
 
+  // When using the assert or the call opcode, we need to assert that the following
+  // conditions are met:
+  //    - For assert eq, res = dst
+  //    - For call, op0 = pc + instruction size and dst = fp
   opcodeAssertion(instruction: Instruction, operands: Operands): Result<void> {
     switch (instruction.opcode) {
+      // For a assert eq, check that res is defined and equals dst.
       case Opcode.AssertEq:
         if (operands.res === undefined) {
           return {
@@ -318,6 +323,7 @@ export class VirtualMachine {
           };
         }
         break;
+      // For a call, check that op0 = pc + instruction size and dst = fp.
       case Opcode.Call:
         const { value: returnPc, error: returnPcError } = this.runContext
           .getPc()
