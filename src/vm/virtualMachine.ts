@@ -111,7 +111,8 @@ export class VirtualMachine {
       res = deducedRes;
     }
 
-    // If op1 is undefined, then we can deduce it from the instruction, dst and op0
+    // If operand 1 is undefined, then we can deduce it from the instruction,
+    // destination and operand 0.
     // We also deduce the result based on the result logic
     if (op1 === undefined) {
       const { value: deducedValues, error: deducedOp1Error } = this.deduceOp1(
@@ -190,7 +191,9 @@ export class VirtualMachine {
         }
         return { value: [value, undefined], error: undefined };
       // If the opcode is an assert eq, then we can deduce the first operand
-      // based on the result logic.
+      // based on the result logic. For add, res = op0 + op1. For mul,
+      // res = op0 * op1. We also know that the result is the same as
+      // the destination operand.
       case Opcode.AssertEq:
         switch (instruction.resLogic) {
           case ResLogic.Add:
@@ -221,11 +224,11 @@ export class VirtualMachine {
     op0: MaybeRelocatable | undefined
   ): Result<[MaybeRelocatable | undefined, MaybeRelocatable | undefined]> {
     // We can deduce the second operand from the destination and the first
-    // operand, based on the result logic, only if the opcode is an assert eq.
+    // operand, based on the result logic, only if the opcode is an assert eq
+    // because this is the only opcode that allows us to assume dst = res.
     if (instruction.opcode === Opcode.AssertEq) {
       switch (instruction.resLogic) {
-        // If the result logic is op1, then the second operand is the same as
-        // the first destination.
+        // If the result logic is op1, then res = op1 = dst.
         case ResLogic.Op1:
           return { value: [dst, dst], error: undefined };
         // If the result logic is add, then the second operand is the destination
@@ -255,6 +258,8 @@ export class VirtualMachine {
     return { value: [undefined, undefined], error: undefined };
   }
 
+  // Compute the result of an instruction based on result logic
+  // for the instruction.
   computeRes(
     instruction: Instruction,
     op0: MaybeRelocatable,
@@ -272,18 +277,20 @@ export class VirtualMachine {
     }
   }
 
+  // Deduce the destination of an instruction. We can only deduce
+  // for assert eq and call instructions.
   deduceDst(
     instruction: Instruction,
     res: MaybeRelocatable | undefined
   ): Result<MaybeRelocatable | undefined> {
     switch (instruction.opcode) {
+      // As stated above, for an assert eq instruction, we have res = dst.
       case Opcode.AssertEq:
         return { value: res, error: undefined };
+      // For a call instruction, we have dst = fp.
       case Opcode.Call:
         return { value: this.runContext.getFp(), error: undefined };
     }
     return { value: undefined, error: undefined };
   }
-
-  // runInstruction(instruction: Instruction): Result<true, VMError> {}
 }
