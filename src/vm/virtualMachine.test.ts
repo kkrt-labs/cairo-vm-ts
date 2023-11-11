@@ -373,6 +373,8 @@ describe('VirtualMachine', () => {
     });
   });
 
+  // Test cases reproduced from:
+  // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L572
   describe('opcodeAssertions', () => {
     test('should return UnconstrainedResError on assert eq opcode and undefined res operand', () => {
       const instruction: Instruction = new Instruction(
