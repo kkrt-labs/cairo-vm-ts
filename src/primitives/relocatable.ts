@@ -126,6 +126,13 @@ export class Relocatable {
     };
   }
 
+  mul(_: MaybeRelocatable | Uint32): Err {
+    return {
+      value: undefined,
+      error: new BaseError(ErrorType.RelocatableError, ForbiddenOperation),
+    };
+  }
+
   div(_: MaybeRelocatable | Uint32): Err {
     return {
       value: undefined,

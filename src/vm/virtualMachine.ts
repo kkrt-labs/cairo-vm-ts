@@ -8,6 +8,13 @@ import { BaseError, ErrorType } from 'result/error';
 import { EndOfInstructionsError, InstructionError } from 'result/memory';
 import { Result } from 'result/result';
 
+export type Operands = {
+  op0: MaybeRelocatable | undefined;
+  op1: MaybeRelocatable | undefined;
+  res: MaybeRelocatable | undefined;
+  dst: MaybeRelocatable | undefined;
+};
+
 export class VirtualMachine {
   private runContext: RunContext;
   private currentStep: Uint64;
@@ -49,7 +56,8 @@ export class VirtualMachine {
   // Compute the operands of an instruction. The VM can either
   // fetch them from memory and if it fails to do so, it can
   // deduce them from the instruction itself.
-  computeOperands(instruction: Instruction): Result<void> {
+  computeOperands(instruction: Instruction): Result<Operands> {
+    let res: MaybeRelocatable | undefined;
     // Compute the destination address based on the dstReg and
     // the offset
     const { value: dstAddr, error: dstError } = this.runContext.computeAddress(
@@ -59,7 +67,7 @@ export class VirtualMachine {
     if (dstError !== undefined) {
       return { value: undefined, error: dstError };
     }
-    const dst = this.segments.memory.get(dstAddr);
+    let dst = this.segments.memory.get(dstAddr);
 
     // Compute the first operand address based on the op0Reg and
     // the offset
@@ -70,7 +78,7 @@ export class VirtualMachine {
     if (op0Error !== undefined) {
       return { value: undefined, error: op0Error };
     }
-    const op0 = this.segments.memory.get(op0Addr);
+    let op0 = this.segments.memory.get(op0Addr);
 
     // Compute the second operand address based on the op1Src and
     // the offset
@@ -83,9 +91,84 @@ export class VirtualMachine {
     if (op1Error !== undefined) {
       return { value: undefined, error: op1Error };
     }
-    const op1 = this.segments.memory.get(op1Addr);
+    let op1 = this.segments.memory.get(op1Addr);
 
-    return { value: undefined, error: undefined };
+    // If op0 is undefined, then we can deduce it from the instruction, dst and op1
+    // We also deduce the result based on the result logic
+    if (op0 === undefined) {
+      const { value: deducedValues, error: deducedOp0Error } = this.deduceOp0(
+        instruction,
+        dst,
+        op1
+      );
+      if (deducedOp0Error !== undefined) {
+        return { value: undefined, error: deducedOp0Error };
+      }
+      const [deducedOp0, deducedRes] = deducedValues;
+      if (deducedOp0 !== undefined) {
+        this.segments.memory.insert(op0Addr, deducedOp0);
+      }
+      res = deducedRes;
+    }
+
+    // If operand 1 is undefined, then we can deduce it from the instruction,
+    // destination and operand 0.
+    // We also deduce the result based on the result logic
+    if (op1 === undefined) {
+      const { value: deducedValues, error: deducedOp1Error } = this.deduceOp1(
+        instruction,
+        dst,
+        op0
+      );
+      if (deducedOp1Error !== undefined) {
+        return { value: undefined, error: deducedOp1Error };
+      }
+      const [deducedOp1, deducedRes] = deducedValues;
+      if (deducedOp1 !== undefined) {
+        this.segments.memory.insert(op1Addr, deducedOp1);
+      }
+      if (res === undefined) {
+        res = deducedRes;
+      }
+    }
+
+    // If res is still undefined, then we can compute it from op0 and op1
+    if (res === undefined) {
+      const { value: computedRes, error: computedResError } = this.computeRes(
+        instruction,
+        op0 as MaybeRelocatable,
+        op1 as MaybeRelocatable
+      );
+      if (computedResError !== undefined) {
+        return { value: undefined, error: computedResError };
+      }
+      res = computedRes;
+    }
+
+    // If dst is undefined, then we can deduce it from the instruction and res
+    if (dst === undefined) {
+      const { value: deducedDst, error: deducedDstError } = this.deduceDst(
+        instruction,
+        res
+      );
+      if (deducedDstError !== undefined) {
+        return { value: undefined, error: deducedDstError };
+      }
+      if (deducedDst !== undefined) {
+        this.segments.memory.insert(dstAddr, deducedDst);
+      }
+      dst = deducedDst;
+    }
+
+    return {
+      value: {
+        op0,
+        op1,
+        res,
+        dst,
+      },
+      error: undefined,
+    };
   }
 
   // Deduce the operands of an instruction based on the instruction
@@ -108,7 +191,9 @@ export class VirtualMachine {
         }
         return { value: [value, undefined], error: undefined };
       // If the opcode is an assert eq, then we can deduce the first operand
-      // based on the result logic.
+      // based on the result logic. For add, res = op0 + op1. For mul,
+      // res = op0 * op1. We also know that the result is the same as
+      // the destination operand.
       case Opcode.AssertEq:
         switch (instruction.resLogic) {
           case ResLogic.Add:
@@ -133,5 +218,79 @@ export class VirtualMachine {
     return { value: [undefined, undefined], error: undefined };
   }
 
-  // runInstruction(instruction: Instruction): Result<true, VMError> {}
+  deduceOp1(
+    instruction: Instruction,
+    dst: MaybeRelocatable | undefined,
+    op0: MaybeRelocatable | undefined
+  ): Result<[MaybeRelocatable | undefined, MaybeRelocatable | undefined]> {
+    // We can deduce the second operand from the destination and the first
+    // operand, based on the result logic, only if the opcode is an assert eq
+    // because this is the only opcode that allows us to assume dst = res.
+    if (instruction.opcode === Opcode.AssertEq) {
+      switch (instruction.resLogic) {
+        // If the result logic is op1, then res = op1 = dst.
+        case ResLogic.Op1:
+          return { value: [dst, dst], error: undefined };
+        // If the result logic is add, then the second operand is the destination
+        // operand subtracted from the first operand.
+        case ResLogic.Add:
+          if (dst !== undefined && op0 !== undefined) {
+            const { value, error } = dst.sub(op0);
+            if (error !== undefined) {
+              return { value: undefined, error };
+            }
+            return { value: [value, dst], error: undefined };
+          }
+          break;
+        // If the result logic is mul, then the second operand is the destination
+        // operand divided from the first operand.
+        case ResLogic.Mul:
+          if (dst !== undefined && op0 !== undefined) {
+            const { value, error } = dst.div(op0);
+            if (error !== undefined) {
+              return { value: [undefined, undefined], error: undefined };
+            }
+            return { value: [value, dst], error: undefined };
+          }
+          break;
+      }
+    }
+    return { value: [undefined, undefined], error: undefined };
+  }
+
+  // Compute the result of an instruction based on result logic
+  // for the instruction.
+  computeRes(
+    instruction: Instruction,
+    op0: MaybeRelocatable,
+    op1: MaybeRelocatable
+  ): Result<MaybeRelocatable | undefined> {
+    switch (instruction.resLogic) {
+      case ResLogic.Op1:
+        return { value: op1, error: undefined };
+      case ResLogic.Add:
+        return op0.add(op1);
+      case ResLogic.Mul:
+        return op0.mul(op1);
+      case ResLogic.Unconstrained:
+        return { value: undefined, error: undefined };
+    }
+  }
+
+  // Deduce the destination of an instruction. We can only deduce
+  // for assert eq and call instructions.
+  deduceDst(
+    instruction: Instruction,
+    res: MaybeRelocatable | undefined
+  ): Result<MaybeRelocatable | undefined> {
+    switch (instruction.opcode) {
+      // As stated above, for an assert eq instruction, we have res = dst.
+      case Opcode.AssertEq:
+        return { value: res, error: undefined };
+      // For a call instruction, we have dst = fp.
+      case Opcode.Call:
+        return { value: this.runContext.getFp(), error: undefined };
+    }
+    return { value: undefined, error: undefined };
+  }
 }
