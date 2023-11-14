@@ -140,6 +140,19 @@ export class Relocatable {
     };
   }
 
+  eq(other: MaybeRelocatable): boolean {
+    if (other instanceof Felt) {
+      return false;
+    }
+    if (
+      other.offset === this.offset &&
+      other.segmentIndex === this.segmentIndex
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   getSegmentIndex(): Uint32 {
     return this.segmentIndex;
   }
