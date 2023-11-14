@@ -1,5 +1,5 @@
 import { Uint32, Uint64, UnsignedInteger } from './uint';
-import { MaybeRelocatable } from './relocatable';
+import { MaybeRelocatable, Relocatable } from './relocatable';
 import { Result } from 'result/result';
 import {
   ForbiddenOperation,

@@ -30,8 +30,13 @@ export class RunContext {
     this.fp = new MemoryPointer(fp);
   }
 
-  incrementPc(instructionSize: Uint32): Result<Relocatable> {
-    return this.pc.add(instructionSize);
+  incrementPc(instructionSize: Uint32): Result<void> {
+    const { value: newPc, error: newPcError } = this.pc.add(instructionSize);
+    if (newPcError !== undefined) {
+      return { value: undefined, error: newPcError };
+    }
+    this.pc = newPc;
+    return { value: undefined, error: undefined };
   }
 
   // Computes the address of the relocatable based on a register flag (ap or fp)
