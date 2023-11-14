@@ -1,7 +1,7 @@
 // Using type brands to create a Uint64 type. No runtime overhead
 
-import { BaseError, ErrorType } from 'result/error';
 import {
+  PrimitiveError,
   Uint16ConversionError,
   Uint32ConversionError,
   Uint64ConversionError,
@@ -59,7 +59,7 @@ export class UnsignedInteger {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.UintError, Uint16ConversionError),
+      error: new PrimitiveError(Uint16ConversionError),
     };
   }
 
@@ -69,7 +69,7 @@ export class UnsignedInteger {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.UintError, Uint32ConversionError),
+      error: new PrimitiveError(Uint32ConversionError),
     };
   }
 
@@ -79,7 +79,7 @@ export class UnsignedInteger {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.UintError, Uint64ConversionError),
+      error: new PrimitiveError(Uint64ConversionError),
     };
   }
 
@@ -87,7 +87,7 @@ export class UnsignedInteger {
     if (num > 0xffff) {
       return {
         value: undefined,
-        error: new BaseError(ErrorType.UintError, Uint16ConversionError),
+        error: new PrimitiveError(Uint16ConversionError),
       };
     }
     return { value: Number(num) as Uint16, error: undefined };

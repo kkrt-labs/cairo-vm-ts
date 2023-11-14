@@ -11,9 +11,9 @@ import {
   ResLogic,
 } from './instruction';
 import { Int16, SignedInteger16 } from 'primitives/int';
-import { BaseError, ErrorType } from 'result/error';
 import {
   HighBitSetError,
+  InstructionError,
   InvalidApUpdate,
   InvalidOp1Src,
   InvalidOpcode,
@@ -30,9 +30,7 @@ describe('Instruction', () => {
       const { error } = Instruction.decodeInstruction(
         encodedInstructionUint64 as Uint64
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.InstructionError, HighBitSetError)
-      );
+      expect(error).toEqual(new InstructionError(HighBitSetError));
     });
 
     test('should throw an error InvalidOp1Src', () => {
@@ -42,9 +40,7 @@ describe('Instruction', () => {
       const { error } = Instruction.decodeInstruction(
         encodedInstructionUint64 as Uint64
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.InstructionError, InvalidOp1Src)
-      );
+      expect(error).toEqual(new InstructionError(InvalidOp1Src));
     });
 
     test('should throw an error InvalidPcUpdate', () => {
@@ -54,9 +50,7 @@ describe('Instruction', () => {
       const { error } = Instruction.decodeInstruction(
         encodedInstructionUint64 as Uint64
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.InstructionError, InvalidPcUpdate)
-      );
+      expect(error).toEqual(new InstructionError(InvalidPcUpdate));
     });
 
     test('should throw an error InvalidResultLogic', () => {
@@ -66,9 +60,7 @@ describe('Instruction', () => {
       const { error } = Instruction.decodeInstruction(
         encodedInstructionUint64 as Uint64
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.InstructionError, InvalidResultLogic)
-      );
+      expect(error).toEqual(new InstructionError(InvalidResultLogic));
     });
 
     test('should throw an error InvalidOpcode', () => {
@@ -78,9 +70,7 @@ describe('Instruction', () => {
       const { error } = Instruction.decodeInstruction(
         encodedInstructionUint64 as Uint64
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.InstructionError, InvalidOpcode)
-      );
+      expect(error).toEqual(new InstructionError(InvalidOpcode));
     });
 
     test('should throw an error with InvalidApUpdate', () => {
@@ -90,9 +80,7 @@ describe('Instruction', () => {
       const { error } = Instruction.decodeInstruction(
         encodedInstructionUint64 as Uint64
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.InstructionError, InvalidApUpdate)
-      );
+      expect(error).toEqual(new InstructionError(InvalidApUpdate));
     });
 
     test('should correctly decode the cairo instruction [ap + 10] = [fp] + 42', () => {

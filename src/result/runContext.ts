@@ -1,3 +1,5 @@
+export class RunContextError extends Error {}
+
 export const PCError = 'Cannot increment PC';
 export const Op1ImmediateOffsetError = 'Op1 immediate offset should be 1';
 export const Op0NotRelocatable =

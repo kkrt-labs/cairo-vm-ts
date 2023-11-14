@@ -4,7 +4,6 @@ import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
 import { SegmentError } from 'result/primitives';
 import { WriteOnceError } from 'result/memory';
-import { BaseError, ErrorType } from 'result/error';
 
 describe('Memory', () => {
   describe('get', () => {

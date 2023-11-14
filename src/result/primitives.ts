@@ -1,3 +1,5 @@
+export class PrimitiveError extends Error {}
+
 // Felt and Relocatable errors
 export const ForbiddenOperation = 'Forbidden operation';
 export const OffsetOverflow = 'Offset overflow';

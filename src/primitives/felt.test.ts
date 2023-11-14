@@ -1,19 +1,19 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
-import { BaseError, ErrorType } from 'result/error';
-import { OutOfRangeBigInt } from 'result/primitives';
+import { OutOfRangeBigInt, PrimitiveError } from 'result/primitives';
+import { Relocatable } from './relocatable';
 
 describe('Felt', () => {
   describe('constructor', () => {
     test('should throw if initializing a felt with a negative inner', () => {
       expect(() => new Felt(-10n)).toThrow(
-        new BaseError(ErrorType.FeltError, OutOfRangeBigInt)
+        new PrimitiveError(OutOfRangeBigInt)
       );
     });
     test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
       const biggerThanPrime = Felt.PRIME + 1n;
       expect(() => new Felt(biggerThanPrime)).toThrow(
-        new BaseError(ErrorType.FeltError, OutOfRangeBigInt)
+        new PrimitiveError(OutOfRangeBigInt)
       );
     });
   });
@@ -121,9 +121,20 @@ describe('Felt', () => {
     test('should return an error if the felt is larger than the max safe integer', () => {
       const a = new Felt(2n ** 53n);
       const { error } = a.toUint32();
-      expect(error).toEqual(
-        new BaseError(ErrorType.FeltError, OutOfRangeBigInt)
-      );
+      expect(error).toEqual(new PrimitiveError(OutOfRangeBigInt));
+    });
+  });
+
+  describe('getFelt', () => {
+    test('should return the felt', () => {
+      const a = new Felt(5n);
+      const result = Felt.getFelt(a);
+      expect(result).toEqual(a);
+    });
+    test('should return undefined', () => {
+      const a = new Relocatable(0, 1);
+      const result = Felt.getFelt(a);
+      expect(result).toBeUndefined();
     });
   });
 });
