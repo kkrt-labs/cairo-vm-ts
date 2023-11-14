@@ -42,7 +42,7 @@ export type Operands = {
 };
 
 export class VirtualMachine {
-  private runContext: RunContext;
+  runContext: RunContext;
   private currentStep: Uint64;
   private segments: MemorySegmentManager;
 
@@ -50,10 +50,6 @@ export class VirtualMachine {
     this.currentStep = UnsignedInteger.ZERO_UINT64;
     this.segments = new MemorySegmentManager();
     this.runContext = RunContext.default();
-  }
-
-  getRunContext(): RunContext {
-    return this.runContext;
   }
 
   step(): void {
@@ -377,6 +373,7 @@ export class VirtualMachine {
             error: new VirtualMachineError(UnconstrainedResError),
           };
         }
+        // We check that res in a felt
         const resFeltJmpRel = Felt.getFelt(operands.res);
         if (resFeltJmpRel === undefined) {
           return {
@@ -392,8 +389,8 @@ export class VirtualMachine {
         this.runContext.pc = pc;
         break;
       // If the pc update logic is jnz, then we check if the destination
-      // is zero. If it is, then we increment the pc by the instruction.
-      // If it is not, then we add the first operand to the pc.
+      // is zero. If it is, then we increment the pc by the instruction (default)
+      // If it is not, then we add the op1 to the pc.
       case PcUpdate.Jnz:
         if (operands.dst === undefined) {
           return {
