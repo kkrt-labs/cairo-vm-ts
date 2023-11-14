@@ -16,6 +16,13 @@ import {
   UnconstrainedResError,
 } from 'result/virtualMachine';
 
+// operand 0 is the first operand in the right side of the computation
+// operand 1 is the second operand in the right side of the computation
+// res is the result of the computation
+// dst is the destination of the computation i.e. the left side of the computation
+// Example:
+// assert [fp - 3] = [ap + 7] * [ap + 8]
+// In this case, op0 = [ap + 7], op1 = [ap + 8], res = op0 * op1, dst = [fp - 3]
 export type Operands = {
   op0: MaybeRelocatable | undefined;
   op1: MaybeRelocatable | undefined;
@@ -309,6 +316,8 @@ export class VirtualMachine {
   opcodeAssertion(instruction: Instruction, operands: Operands): Result<void> {
     switch (instruction.opcode) {
       // For a assert eq, check that res is defined and equals dst.
+      // This is because dst represents the left side of the computation, and
+      // res represents the right side of the computation.
       case Opcode.AssertEq:
         if (operands.res === undefined) {
           return {
@@ -324,6 +333,8 @@ export class VirtualMachine {
         }
         break;
       // For a call, check that op0 = pc + instruction size and dst = fp.
+      // op0 is used to store the return pc (the address of the instruction
+      // following the call instruction). dst is used to store the frame pointer.
       case Opcode.Call:
         const { value: returnPc, error: returnPcError } = this.runContext
           .getPc()
