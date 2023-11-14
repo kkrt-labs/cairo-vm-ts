@@ -52,6 +52,10 @@ export class VirtualMachine {
     this.runContext = RunContext.default();
   }
 
+  getRunContext(): RunContext {
+    return this.runContext;
+  }
+
   step(): void {
     const maybeEncodedInstruction = this.segments.memory.get(
       this.runContext.pc
