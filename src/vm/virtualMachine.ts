@@ -373,7 +373,7 @@ export class VirtualMachine {
             error: new VirtualMachineError(UnconstrainedResError),
           };
         }
-        // We check that res in a felt
+        // We check that res is a felt
         const resFeltJmpRel = Felt.getFelt(operands.res);
         if (resFeltJmpRel === undefined) {
           return {
@@ -443,7 +443,7 @@ export class VirtualMachine {
         this.runContext.fp = apPlus2;
         break;
       // If the fp update logic is dst, then we add the destination
-      // to the fp is dst if a felt, or set the fp to the destination
+      // to fp if dst is a felt, or set the fp to the destination
       // if a relocatable.
       case FpUpdate.Dst:
         if (operands.dst === undefined) {
