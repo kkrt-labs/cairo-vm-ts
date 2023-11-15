@@ -1,16 +1,20 @@
 import { Uint32, Uint64, UnsignedInteger } from './uint';
 import { MaybeRelocatable, Relocatable } from './relocatable';
-import { BaseError, ErrorType } from 'result/error';
 import { Result } from 'result/result';
-import { ForbiddenOperation, OutOfRangeBigInt } from 'result/primitives';
+import {
+  ForbiddenOperation,
+  OutOfRangeBigInt,
+  PrimitiveError,
+} from 'result/primitives';
 
 export class Felt {
   private inner: bigint;
   static PRIME: bigint =
     0x800000000000011000000000000000000000000000000000000000000000001n;
+  static ZERO: Felt = new Felt(0n);
   constructor(_inner: bigint) {
     if (_inner < 0n || _inner > Felt.PRIME) {
-      throw new BaseError(ErrorType.FeltError, OutOfRangeBigInt);
+      throw new PrimitiveError(OutOfRangeBigInt);
     }
     this.inner = _inner;
   }
@@ -24,7 +28,7 @@ export class Felt {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.FeltError, ForbiddenOperation),
+      error: new PrimitiveError(ForbiddenOperation),
     };
   }
 
@@ -38,7 +42,7 @@ export class Felt {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.FeltError, ForbiddenOperation),
+      error: new PrimitiveError(ForbiddenOperation),
     };
   }
 
@@ -51,7 +55,7 @@ export class Felt {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.FeltError, ForbiddenOperation),
+      error: new PrimitiveError(ForbiddenOperation),
     };
   }
 
@@ -60,7 +64,7 @@ export class Felt {
       if (other.inner === 0n) {
         return {
           value: undefined,
-          error: new BaseError(ErrorType.FeltError, ForbiddenOperation),
+          error: new PrimitiveError(ForbiddenOperation),
         };
       }
       let result = this.inner / other.inner;
@@ -68,7 +72,7 @@ export class Felt {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.FeltError, ForbiddenOperation),
+      error: new PrimitiveError(ForbiddenOperation),
     };
   }
 
@@ -87,7 +91,7 @@ export class Felt {
     if (this.inner > Number.MAX_SAFE_INTEGER) {
       return {
         value: undefined,
-        error: new BaseError(ErrorType.FeltError, OutOfRangeBigInt),
+        error: new PrimitiveError(OutOfRangeBigInt),
       };
     }
     return UnsignedInteger.toUint32(Number(this.inner));
@@ -99,5 +103,16 @@ export class Felt {
 
   toHexString(): string {
     return this.inner.toString(16);
+  }
+
+  static isFelt(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Felt {
+    return maybeRelocatable instanceof Felt;
+  }
+
+  static getFelt(maybeRelocatable: MaybeRelocatable): Felt | undefined {
+    if (Felt.isFelt(maybeRelocatable)) {
+      return maybeRelocatable;
+    }
+    return undefined;
   }
 }

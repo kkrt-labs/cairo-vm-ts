@@ -1,8 +1,8 @@
-import { BaseError, ErrorType } from 'result/error';
 import {
   Op0NotRelocatable,
   Op0Undefined,
   Op1ImmediateOffsetError,
+  RunContextError,
 } from 'result/runContext';
 import { Int16 } from 'primitives/int';
 import {
@@ -16,9 +16,9 @@ import { Op1Src, RegisterFlag } from 'vm/instruction';
 import { Result } from 'result/result';
 
 export class RunContext {
-  private pc: ProgramCounter;
-  private ap: MemoryPointer;
-  private fp: MemoryPointer;
+  pc: ProgramCounter;
+  ap: MemoryPointer;
+  fp: MemoryPointer;
 
   static default() {
     return new RunContext(0, 0, 0);
@@ -30,16 +30,13 @@ export class RunContext {
     this.fp = new MemoryPointer(fp);
   }
 
-  incrementPc(instructionSize: Uint32): Result<Relocatable> {
-    return this.pc.add(instructionSize);
-  }
-
-  getPc() {
-    return this.pc;
-  }
-
-  getFp() {
-    return this.fp;
+  incrementPc(instructionSize: Uint32): Result<void> {
+    const { value: newPc, error: newPcError } = this.pc.add(instructionSize);
+    if (newPcError !== undefined) {
+      return { value: undefined, error: newPcError };
+    }
+    this.pc = newPc;
+    return { value: undefined, error: undefined };
   }
 
   // Computes the address of the relocatable based on a register flag (ap or fp)
@@ -79,10 +76,7 @@ export class RunContext {
         } else {
           return {
             value: undefined,
-            error: new BaseError(
-              ErrorType.RunContextError,
-              Op1ImmediateOffsetError
-            ),
+            error: new RunContextError(Op1ImmediateOffsetError),
           };
         }
         break;
@@ -92,14 +86,14 @@ export class RunContext {
         if (op0 === undefined) {
           return {
             value: undefined,
-            error: new BaseError(ErrorType.RunContextError, Op0Undefined),
+            error: new RunContextError(Op0Undefined),
           };
         }
         const reloc = Relocatable.getRelocatable(op0);
         if (reloc === undefined) {
           return {
             value: undefined,
-            error: new BaseError(ErrorType.RunContextError, Op0NotRelocatable),
+            error: new RunContextError(Op0NotRelocatable),
           };
         }
         baseAddr = reloc;

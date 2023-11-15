@@ -1,3 +1,5 @@
+export class MemoryError extends Error {}
+
 export const UnknownAddressError =
   'Access memory at unknown or uninitialized address';
 export const WriteOnceError =

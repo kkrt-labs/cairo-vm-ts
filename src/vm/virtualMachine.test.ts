@@ -1,26 +1,28 @@
 import { test, expect, describe } from 'bun:test';
 import {
-  Instruction,
-  Opcode,
-  ResLogic,
-  Op1Src,
-  PcUpdate,
   ApUpdate,
   FpUpdate,
+  Instruction,
+  Op1Src,
+  Opcode,
+  PcUpdate,
   RegisterFlag,
+  ResLogic,
 } from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { BaseError, ErrorType } from 'result/error';
 import { ForbiddenOperation } from 'result/primitives';
-import { Int16 } from 'primitives/int';
 import {
   DiffAssertValuesError,
+  ExpectedFelt,
   InvalidDstOperand,
   InvalidOperand0,
   UnconstrainedResError,
+  VirtualMachineError,
 } from 'result/virtualMachine';
+import { Int16 } from 'primitives/int';
+import { RunContext } from 'run-context/runContext';
 
 function getInstructionWithOpcodeAndResLogic(
   opcode: Opcode,
@@ -283,9 +285,7 @@ describe('VirtualMachine', () => {
       const op1 = new Relocatable(1, 2);
 
       const { error } = vm.computeRes(instruction, op0, op1);
-      expect(error).toEqual(
-        new BaseError(ErrorType.RelocatableError, ForbiddenOperation)
-      );
+      expect(error).toEqual(new VirtualMachineError(ForbiddenOperation));
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
@@ -309,9 +309,7 @@ describe('VirtualMachine', () => {
       const op1 = new Relocatable(1, 2);
 
       const { error } = vm.computeRes(instruction, op0, op1);
-      expect(error).toEqual(
-        new BaseError(ErrorType.RelocatableError, ForbiddenOperation)
-      );
+      expect(error).toEqual(new VirtualMachineError(ForbiddenOperation));
     });
     test('should return undefined with res logic unconstrained', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
@@ -400,9 +398,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       const { error } = vm.opcodeAssertion(instruction, operands);
-      expect(error).toEqual(
-        new BaseError(ErrorType.VMError, UnconstrainedResError)
-      );
+      expect(error).toEqual(new VirtualMachineError(UnconstrainedResError));
     });
     test('should return DiffAssertError on assert eq opcode and res != dst felts', () => {
       const instruction: Instruction = new Instruction(
@@ -428,9 +424,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       const { error } = vm.opcodeAssertion(instruction, operands);
-      expect(error).toEqual(
-        new BaseError(ErrorType.VMError, DiffAssertValuesError)
-      );
+      expect(error).toEqual(new VirtualMachineError(DiffAssertValuesError));
     });
     test('should return DiffAssertError on assert eq opcode and res != dst relocatables', () => {
       const instruction: Instruction = new Instruction(
@@ -456,9 +450,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       const { error } = vm.opcodeAssertion(instruction, operands);
-      expect(error).toEqual(
-        new BaseError(ErrorType.VMError, DiffAssertValuesError)
-      );
+      expect(error).toEqual(new VirtualMachineError(DiffAssertValuesError));
     });
     test('should return InvalidOperand0 on call opcode and pc != op0', () => {
       const instruction: Instruction = new Instruction(
@@ -484,7 +476,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       const { error } = vm.opcodeAssertion(instruction, operands);
-      expect(error).toEqual(new BaseError(ErrorType.VMError, InvalidOperand0));
+      expect(error).toEqual(new VirtualMachineError(InvalidOperand0));
     });
     test('should return InvalidDstError on call opcode and fp != dst', () => {
       const instruction: Instruction = new Instruction(
@@ -510,9 +502,654 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       const { error } = vm.opcodeAssertion(instruction, operands);
-      expect(error).toEqual(
-        new BaseError(ErrorType.VMError, InvalidDstOperand)
+      expect(error).toEqual(new VirtualMachineError(InvalidDstOperand));
+    });
+  });
+
+  // Test cases reproduced from:
+  // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L284
+  describe('updatePc', () => {
+    test('regular', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
       );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(new Relocatable(0, 1));
+    });
+    test('regular with imm', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Imm,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(new Relocatable(0, 2));
+    });
+    test('jmp res relocatable', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Jump,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Relocatable(0, 5),
+        dst: undefined,
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(operands.res);
+    });
+    test('jmp res felt', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Jump,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Felt(0n),
+        dst: undefined,
+      };
+
+      const { error } = vm.updatePc(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(ExpectedFelt));
+    });
+    test('jmp without res', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Jump,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      const { error } = vm.updatePc(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(UnconstrainedResError));
+    });
+    test('jmp rel res felt', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.JumpRel,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Felt(5n),
+        dst: undefined,
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(new Relocatable(0, 5));
+    });
+    test('jmp rel res relocatable', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.JumpRel,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Relocatable(0, 5),
+        dst: undefined,
+      };
+
+      const { error } = vm.updatePc(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(ExpectedFelt));
+    });
+    test('jmp rel res relocatable', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.JumpRel,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      const { error } = vm.updatePc(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(UnconstrainedResError));
+    });
+    test('jnz des is zero no imm', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Jnz,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: new Felt(0n),
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(new Relocatable(0, 1));
+    });
+    test('jnz des is zero imm', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Imm,
+        ResLogic.Unconstrained,
+        PcUpdate.Jnz,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: new Felt(0n),
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(new Relocatable(0, 2));
+    });
+    test('jnz des not zero op1 felt', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Imm,
+        ResLogic.Unconstrained,
+        PcUpdate.Jnz,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: new Felt(3n),
+        res: undefined,
+        dst: new Felt(1n),
+      };
+
+      vm.updatePc(instruction, operands);
+      expect(vm.runContext.pc).toEqual(new Relocatable(0, 3));
+    });
+    test('jnz des not zero op1 relocatable', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.Imm,
+        ResLogic.Unconstrained,
+        PcUpdate.Jnz,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: new Relocatable(0, 0),
+        res: undefined,
+        dst: new Felt(1n),
+      };
+
+      const { error } = vm.updatePc(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(ExpectedFelt));
+    });
+  });
+
+  // Test cases reproduced from:
+  // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L160
+  describe('updateFp', () => {
+    test('regular', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updateFp(instruction, operands);
+      expect(vm.runContext.fp).toEqual(new Relocatable(1, 0));
+    });
+    test('dst felt', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Dst,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: new Felt(9n),
+      };
+
+      vm.updateFp(instruction, operands);
+      expect(vm.runContext.fp).toEqual(new Relocatable(1, 9));
+    });
+    test('dst relocatable', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Dst,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: new Relocatable(1, 9),
+      };
+
+      vm.updateFp(instruction, operands);
+      expect(vm.runContext.fp).toEqual(new Relocatable(1, 9));
+    });
+    test('ap plus 2', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.ApPlus2,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      vm.runContext.ap = new Relocatable(1, 7);
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updateFp(instruction, operands);
+      expect(vm.runContext.fp).toEqual(new Relocatable(1, 9));
+    });
+  });
+
+  // Test cases reproduced from:
+  // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L213
+  describe('updateAp', () => {
+    test('regular', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updateAp(instruction, operands);
+      expect(vm.runContext.ap).toEqual(new Relocatable(1, 0));
+    });
+    test('add 2', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Add2,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updateAp(instruction, operands);
+      expect(vm.runContext.ap).toEqual(new Relocatable(1, 2));
+    });
+    test('add 1', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Add1,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      vm.updateAp(instruction, operands);
+      expect(vm.runContext.ap).toEqual(new Relocatable(1, 1));
+    });
+    test('add res felt', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Add,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Felt(5n),
+        dst: undefined,
+      };
+
+      vm.updateAp(instruction, operands);
+      expect(vm.runContext.ap).toEqual(new Relocatable(1, 5));
+    });
+    test('add res relocatable', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Add,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Relocatable(0, 0),
+        dst: undefined,
+      };
+
+      const { error } = vm.updateAp(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(ExpectedFelt));
+    });
+    test('add no res', () => {
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Add,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+
+      const vm = new VirtualMachine();
+      const operands: Operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      const { error } = vm.updateAp(instruction, operands);
+      expect(error).toEqual(new VirtualMachineError(UnconstrainedResError));
+    });
+  });
+
+  // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L122
+  describe('updateRegisters', () => {
+    test('should keep ap/fp the same', () => {
+      const vm = new VirtualMachine();
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.Regular,
+        ApUpdate.Regular,
+        FpUpdate.Regular,
+        Opcode.NoOp
+      );
+      const operands = {
+        op0: undefined,
+        op1: undefined,
+        res: undefined,
+        dst: undefined,
+      };
+
+      const { error } = vm.updateRegisters(instruction, operands);
+      expect(error).toBeUndefined();
+
+      expect(vm.runContext).toEqual(new RunContext(1, 0, 0));
+    });
+    test('should update the register with mixed types', () => {
+      const vm = new VirtualMachine();
+      vm.runContext = new RunContext(4, 5, 6);
+      const instruction = new Instruction(
+        0 as Int16,
+        0 as Int16,
+        0 as Int16,
+        RegisterFlag.AP,
+        RegisterFlag.AP,
+        Op1Src.AP,
+        ResLogic.Unconstrained,
+        PcUpdate.JumpRel,
+        ApUpdate.Add2,
+        FpUpdate.Dst,
+        Opcode.NoOp
+      );
+      const operands = {
+        op0: undefined,
+        op1: undefined,
+        res: new Felt(8n),
+        dst: new Relocatable(1, 11),
+      };
+
+      const { error } = vm.updateRegisters(instruction, operands);
+      expect(error).toBeUndefined();
+
+      expect(vm.runContext).toEqual(new RunContext(12, 7, 11));
     });
   });
 });

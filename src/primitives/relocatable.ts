@@ -1,10 +1,10 @@
-import { BaseError, ErrorType } from 'result/error';
 import { Felt } from './felt';
 import { Uint32, UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
   OffsetOverflow,
   OffsetUnderflow,
+  PrimitiveError,
   SegmentError,
 } from 'result/primitives';
 import { Err, Result } from 'result/result';
@@ -30,9 +30,9 @@ export class Relocatable {
     this.offset = offsetUint;
   }
 
-  add(other: MaybeRelocatable): Result<MaybeRelocatable>;
-  add(other: Felt | Uint32): Result<Relocatable>;
   add(other: Relocatable): Err;
+  add(other: Felt | Uint32): Result<Relocatable>;
+  add(other: MaybeRelocatable): Result<MaybeRelocatable>;
 
   add(other: MaybeRelocatable | Uint32): Result<MaybeRelocatable> {
     if (other instanceof Felt) {
@@ -44,7 +44,7 @@ export class Relocatable {
       if (this.getOffset() + num > UnsignedInteger.MAX_UINT32) {
         return {
           value: undefined,
-          error: new BaseError(ErrorType.RelocatableError, OffsetOverflow),
+          error: new PrimitiveError(OffsetOverflow),
         };
       }
       return {
@@ -56,7 +56,7 @@ export class Relocatable {
     if (other instanceof Relocatable) {
       return {
         value: undefined,
-        error: new BaseError(ErrorType.RelocatableError, ForbiddenOperation),
+        error: new PrimitiveError(ForbiddenOperation),
       };
     }
 
@@ -80,7 +80,7 @@ export class Relocatable {
       if (this.getOffset() < delta) {
         return {
           value: undefined,
-          error: new BaseError(ErrorType.RelocatableError, OffsetUnderflow),
+          error: new PrimitiveError(OffsetUnderflow),
         };
       }
       return {
@@ -96,14 +96,14 @@ export class Relocatable {
       if (this.offset < other.offset) {
         return {
           value: undefined,
-          error: new BaseError(ErrorType.RelocatableError, OffsetUnderflow),
+          error: new PrimitiveError(OffsetUnderflow),
         };
       }
 
       if (this.segmentIndex !== other.segmentIndex) {
         return {
           value: undefined,
-          error: new BaseError(ErrorType.RelocatableError, SegmentError),
+          error: new PrimitiveError(SegmentError),
         };
       }
 
@@ -116,7 +116,7 @@ export class Relocatable {
     if (this.getOffset() < other) {
       return {
         value: undefined,
-        error: new BaseError(ErrorType.RelocatableError, OffsetUnderflow),
+        error: new PrimitiveError(OffsetUnderflow),
       };
     }
 
@@ -129,14 +129,14 @@ export class Relocatable {
   mul(_: MaybeRelocatable | Uint32): Err {
     return {
       value: undefined,
-      error: new BaseError(ErrorType.RelocatableError, ForbiddenOperation),
+      error: new PrimitiveError(ForbiddenOperation),
     };
   }
 
   div(_: MaybeRelocatable | Uint32): Err {
     return {
       value: undefined,
-      error: new BaseError(ErrorType.RelocatableError, ForbiddenOperation),
+      error: new PrimitiveError(ForbiddenOperation),
     };
   }
 

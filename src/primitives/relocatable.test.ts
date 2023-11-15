@@ -2,10 +2,10 @@ import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
 import { Relocatable, MemoryPointer, ProgramCounter } from './relocatable';
 import { Uint32, UnsignedInteger } from './uint';
-import { BaseError, ErrorType } from 'result/error';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
+  PrimitiveError,
   SegmentError,
 } from 'result/primitives';
 
@@ -30,9 +30,7 @@ describe('Relocatable', () => {
       const a = new Relocatable(1, 2);
       const b = new Relocatable(1, 3);
       const { error } = a.sub(b);
-      expect(error).toEqual(
-        new BaseError(ErrorType.RelocatableError, OffsetUnderflow)
-      );
+      expect(error).toEqual(new PrimitiveError(OffsetUnderflow));
     });
 
     test('should return an error SegmentError when segments are different', () => {
@@ -40,9 +38,7 @@ describe('Relocatable', () => {
       const b = new Relocatable(2, 5);
       const { error } = a.sub(b);
 
-      expect(error).toEqual(
-        new BaseError(ErrorType.RelocatableError, SegmentError)
-      );
+      expect(error).toEqual(new PrimitiveError(SegmentError));
     });
 
     test('should subtract a Felt from a Relocatable', () => {
@@ -57,9 +53,7 @@ describe('Relocatable', () => {
       const relocatable = new Relocatable(0, 5);
       const felt = new Felt(10n);
       const { error } = relocatable.sub(felt);
-      expect(error).toEqual(
-        new BaseError(ErrorType.RelocatableError, OffsetUnderflow)
-      );
+      expect(error).toEqual(new PrimitiveError(OffsetUnderflow));
     });
 
     test('should subtract a Relocatable', () => {
@@ -91,9 +85,7 @@ describe('Relocatable', () => {
       const a = new Relocatable(0, 10);
       const b = new Relocatable(0, 5);
       const { error } = a.add(b);
-      expect(error).toEqual(
-        new BaseError(ErrorType.RelocatableError, ForbiddenOperation)
-      );
+      expect(error).toEqual(new PrimitiveError(ForbiddenOperation));
     });
     test('should add a Felt to a Relocatable', () => {
       const relocatable = new Relocatable(0, 5);
@@ -135,6 +127,19 @@ describe('Relocatable', () => {
       const b = new Relocatable(0, 1);
       const eq = a.eq(b);
       expect(eq).toBeTrue();
+    });
+  });
+
+  describe('getRelocatable', () => {
+    test('should return the relocatable itself', () => {
+      const relocatable = new Relocatable(0, 5);
+      const result = Relocatable.getRelocatable(relocatable);
+      expect(result).toEqual(relocatable);
+    });
+    test('should return undefined', () => {
+      const relocatable = new Felt(5n);
+      const result = Relocatable.getRelocatable(relocatable);
+      expect(result).toBeUndefined();
     });
   });
 });

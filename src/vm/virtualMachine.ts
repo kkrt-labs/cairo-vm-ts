@@ -1,19 +1,30 @@
 import { MemorySegmentManager } from 'memory/memoryManager';
+import {
+  ExpectedFelt,
+  ExpectedRelocatable,
+  InvalidDstOperand,
+  InvalidOperand1,
+  UnconstrainedResError,
+  VirtualMachineError,
+} from 'result/virtualMachine';
 import { Felt } from 'primitives/felt';
 import { Uint64, UnsignedInteger } from 'primitives/uint';
 import { RunContext } from 'run-context/runContext';
-import { Instruction, Opcode, ResLogic } from './instruction';
-import { MaybeRelocatable } from 'primitives/relocatable';
-import { BaseError, ErrorType } from 'result/error';
+import {
+  ApUpdate,
+  FpUpdate,
+  Instruction,
+  Opcode,
+  PcUpdate,
+  ResLogic,
+} from './instruction';
+import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'result/memory';
-
 import { Result } from 'result/result';
 import {
   DiffAssertValuesError,
   EndOfInstructionsError,
-  InvalidDstOperand,
   InvalidOperand0,
-  UnconstrainedResError,
 } from 'result/virtualMachine';
 
 // operand 0 is the first operand in the right side of the computation
@@ -31,7 +42,7 @@ export type Operands = {
 };
 
 export class VirtualMachine {
-  private runContext: RunContext;
+  runContext: RunContext;
   private currentStep: Uint64;
   private segments: MemorySegmentManager;
 
@@ -43,17 +54,17 @@ export class VirtualMachine {
 
   step(): void {
     const maybeEncodedInstruction = this.segments.memory.get(
-      this.runContext.getPc()
+      this.runContext.pc
     );
 
     if (maybeEncodedInstruction === undefined) {
-      throw new BaseError(ErrorType.MemoryError, EndOfInstructionsError);
+      throw new VirtualMachineError(EndOfInstructionsError);
     }
 
     const encodedInstruction = maybeEncodedInstruction;
 
     if (!(encodedInstruction instanceof Felt)) {
-      throw new BaseError(ErrorType.MemoryError, InstructionError);
+      throw new VirtualMachineError(InstructionError);
     }
 
     const { value: encodedInstructionUint, error } =
@@ -199,7 +210,7 @@ export class VirtualMachine {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
       case Opcode.Call:
-        const pc = this.runContext.getPc();
+        const pc = this.runContext.pc;
         const { value, error } = pc.add(instruction.size());
         if (error !== undefined) {
           return { value: undefined, error };
@@ -304,7 +315,206 @@ export class VirtualMachine {
         return { value: res, error: undefined };
       // For a call instruction, we have dst = fp.
       case Opcode.Call:
-        return { value: this.runContext.getFp(), error: undefined };
+        return { value: this.runContext.fp, error: undefined };
+    }
+    return { value: undefined, error: undefined };
+  }
+
+  // Update the registers based on the instruction.
+  updateRegisters(instruction: Instruction, operands: Operands): Result<void> {
+    const { error: pcError } = this.updatePc(instruction, operands);
+    if (pcError !== undefined) {
+      return { value: undefined, error: pcError };
+    }
+
+    const { error: fpError } = this.updateFp(instruction, operands);
+    if (fpError !== undefined) {
+      return { value: undefined, error: fpError };
+    }
+
+    return this.updateAp(instruction, operands);
+  }
+
+  // Update the pc update logic based on the instruction.
+  updatePc(instruction: Instruction, operands: Operands): Result<void> {
+    switch (instruction.pcUpdate) {
+      // If the pc update logic is regular, then we increment the pc by
+      // the instruction size.
+      case PcUpdate.Regular:
+        const { error } = this.runContext.incrementPc(instruction.size());
+        if (error !== undefined) {
+          return { value: undefined, error };
+        }
+        break;
+      // If the pc update logic is jump, then we set the pc to the
+      // result.
+      case PcUpdate.Jump:
+        if (operands.res === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(UnconstrainedResError),
+          };
+        }
+        const resRelocatableJmp = Relocatable.getRelocatable(operands.res);
+        if (resRelocatableJmp === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(ExpectedRelocatable),
+          };
+        }
+        this.runContext.pc = resRelocatableJmp;
+        break;
+      // If the pc update logic is jump rel, then we add the result
+      // to the pc.
+      case PcUpdate.JumpRel:
+        if (operands.res === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(UnconstrainedResError),
+          };
+        }
+        // We check that res is a felt
+        const resFeltJmpRel = Felt.getFelt(operands.res);
+        if (resFeltJmpRel === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(ExpectedFelt),
+          };
+        }
+        const { value: pc, error: pcError } =
+          this.runContext.pc.add(resFeltJmpRel);
+        if (pcError !== undefined) {
+          return { value: undefined, error: pcError };
+        }
+        this.runContext.pc = pc;
+        break;
+      // If the pc update logic is jnz, then we check if the destination
+      // is zero. If it is, then we increment the pc by the instruction (default)
+      // If it is not, then we add the op1 to the pc.
+      case PcUpdate.Jnz:
+        if (operands.dst === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(InvalidDstOperand),
+          };
+        }
+        const dst = Felt.getFelt(operands.dst);
+        if (dst !== undefined && dst.eq(Felt.ZERO)) {
+          const { error } = this.runContext.incrementPc(instruction.size());
+          if (error !== undefined) {
+            return { value: undefined, error };
+          }
+        } else {
+          if (operands.op1 === undefined) {
+            return {
+              value: undefined,
+              error: new VirtualMachineError(InvalidOperand1),
+            };
+          }
+          const op1 = Felt.getFelt(operands.op1);
+          if (op1 === undefined) {
+            return {
+              value: undefined,
+              error: new VirtualMachineError(ExpectedFelt),
+            };
+          }
+          const { value: pc, error: pcError } = this.runContext.pc.add(op1);
+          if (pcError !== undefined) {
+            return { value: undefined, error: pcError };
+          }
+          this.runContext.pc = pc;
+        }
+        break;
+    }
+    return { value: undefined, error: undefined };
+  }
+
+  // Update the fp based on the fp update logic of the instruction.
+  updateFp(instruction: Instruction, operands: Operands): Result<void> {
+    switch (instruction.fpUpdate) {
+      // If the fp update logic is ap plus 2, then we add 2 to the ap
+      case FpUpdate.ApPlus2:
+        const { value: apPlus2, error: apPlus2Error } = this.runContext.ap.add(
+          UnsignedInteger.TWO_UINT32
+        );
+        if (apPlus2Error !== undefined) {
+          return { value: undefined, error: apPlus2Error };
+        }
+        this.runContext.fp = apPlus2;
+        break;
+      // If the fp update logic is dst, then we add the destination
+      // to fp if dst is a felt, or set the fp to the destination
+      // if a relocatable.
+      case FpUpdate.Dst:
+        if (operands.dst === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(InvalidDstOperand),
+          };
+        }
+        const dstFelt = Felt.getFelt(operands.dst);
+        if (dstFelt !== undefined) {
+          const { value: newFp, error: dstError } =
+            this.runContext.fp.add(dstFelt);
+          if (dstError !== undefined) {
+            return { value: undefined, error: dstError };
+          }
+          this.runContext.fp = newFp;
+        }
+        const dstRelocatable = Relocatable.getRelocatable(operands.dst);
+        if (dstRelocatable !== undefined) {
+          this.runContext.fp = dstRelocatable;
+        }
+        break;
+    }
+    return { value: undefined, error: undefined };
+  }
+
+  // Update the ap based on the ap update logic of the instruction.
+  updateAp(instruction: Instruction, operands: Operands): Result<void> {
+    switch (instruction.apUpdate) {
+      // If the ap update logic is add, then we add the result to the ap.
+      case ApUpdate.Add:
+        if (operands.res === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(UnconstrainedResError),
+          };
+        }
+        const resFelt = Felt.getFelt(operands.res);
+        if (resFelt === undefined) {
+          return {
+            value: undefined,
+            error: new VirtualMachineError(ExpectedFelt),
+          };
+        }
+        const { value: newAp, error: apError } =
+          this.runContext.ap.add(resFelt);
+        if (apError !== undefined) {
+          return { value: undefined, error: apError };
+        }
+        this.runContext.ap = newAp;
+        break;
+      // If the ap update logic is add 1, then we add 1 to the ap.
+      case ApUpdate.Add1:
+        const { value: newAp1, error: ap1Error } = this.runContext.ap.add(
+          UnsignedInteger.ONE_UINT32
+        );
+        if (ap1Error !== undefined) {
+          return { value: undefined, error: ap1Error };
+        }
+        this.runContext.ap = newAp1;
+        break;
+      // If the ap update logic is add 2, then we add 2 to the ap.
+      case ApUpdate.Add2:
+        const { value: newAp2, error: ap2Error } = this.runContext.ap.add(
+          UnsignedInteger.TWO_UINT32
+        );
+        if (ap2Error !== undefined) {
+          return { value: undefined, error: ap2Error };
+        }
+        this.runContext.ap = newAp2;
+        break;
     }
     return { value: undefined, error: undefined };
   }
@@ -322,13 +532,13 @@ export class VirtualMachine {
         if (operands.res === undefined) {
           return {
             value: undefined,
-            error: new BaseError(ErrorType.VMError, UnconstrainedResError),
+            error: new VirtualMachineError(UnconstrainedResError),
           };
         }
         if (operands.dst !== operands.res) {
           return {
             value: undefined,
-            error: new BaseError(ErrorType.VMError, DiffAssertValuesError),
+            error: new VirtualMachineError(DiffAssertValuesError),
           };
         }
         break;
@@ -336,23 +546,22 @@ export class VirtualMachine {
       // op0 is used to store the return pc (the address of the instruction
       // following the call instruction). dst is used to store the frame pointer.
       case Opcode.Call:
-        const { value: returnPc, error: returnPcError } = this.runContext
-          .getPc()
-          .add(instruction.size());
+        const { value: returnPc, error: returnPcError } =
+          this.runContext.pc.add(instruction.size());
         if (returnPcError !== undefined) {
           return { value: undefined, error: returnPcError };
         }
         if (operands.op0 === undefined || !returnPc.eq(operands.op0)) {
           return {
             value: undefined,
-            error: new BaseError(ErrorType.VMError, InvalidOperand0),
+            error: new VirtualMachineError(InvalidOperand0),
           };
         }
-        const fp = this.runContext.getFp();
+        const fp = this.runContext.fp;
         if (fp !== operands.dst) {
           return {
             value: undefined,
-            error: new BaseError(ErrorType.VMError, InvalidDstOperand),
+            error: new VirtualMachineError(InvalidDstOperand),
           };
         }
         break;

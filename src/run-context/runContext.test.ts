@@ -5,11 +5,11 @@ import { Op1Src, RegisterFlag } from 'vm/instruction';
 import { Int16, SignedInteger16 } from 'primitives/int';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { BaseError, ErrorType } from 'result/error';
 import {
   Op0NotRelocatable,
   Op0Undefined,
   Op1ImmediateOffsetError,
+  RunContextError,
 } from 'result/runContext';
 
 describe('RunContext', () => {
@@ -17,10 +17,10 @@ describe('RunContext', () => {
     test('should successfully increment pc', () => {
       const ctx = RunContext.default();
       const { value: instructionSize } = UnsignedInteger.toUint32(2);
-      const { value: result } = ctx.incrementPc(instructionSize as Uint32);
+      const { error } = ctx.incrementPc(instructionSize as Uint32);
 
-      expect((result as Relocatable).getOffset()).toEqual(2);
-      expect((result as Relocatable).getSegmentIndex()).toEqual(0);
+      expect(error).toBeUndefined();
+      expect(ctx.pc).toEqual(new Relocatable(0, 2));
     });
   });
 
@@ -108,9 +108,7 @@ describe('RunContext', () => {
         offset as Int16,
         undefined
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.RunContextError, Op1ImmediateOffsetError)
-      );
+      expect(error).toEqual(new RunContextError(Op1ImmediateOffsetError));
     });
 
     test('should compute op1 addr for op1 src op0 with op0 relocatable', () => {
@@ -136,9 +134,7 @@ describe('RunContext', () => {
         offset as Int16,
         new Felt(7n)
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.RunContextError, Op0NotRelocatable)
-      );
+      expect(error).toEqual(new RunContextError(Op0NotRelocatable));
     });
 
     test('should return an error Op0Undefined for op1 src op0 with op0 undefined', () => {
@@ -150,9 +146,7 @@ describe('RunContext', () => {
         offset as Int16,
         undefined
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.RunContextError, Op0Undefined)
-      );
+      expect(error).toEqual(new RunContextError(Op0Undefined));
     });
   });
 
@@ -210,9 +204,7 @@ describe('RunContext', () => {
         offset as Int16,
         undefined
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.RunContextError, Op1ImmediateOffsetError)
-      );
+      expect(error).toEqual(new RunContextError(Op1ImmediateOffsetError));
     });
 
     test('should compute op1 addr for op1 src op0 with op0 relocatable', () => {
@@ -238,9 +230,7 @@ describe('RunContext', () => {
         offset as Int16,
         new Felt(7n)
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.RunContextError, Op0NotRelocatable)
-      );
+      expect(error).toEqual(new RunContextError(Op0NotRelocatable));
     });
 
     test('should return an error Op0Undefined for op1 src op0 with op0 undefined', () => {
@@ -252,9 +242,7 @@ describe('RunContext', () => {
         offset as Int16,
         undefined
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.RunContextError, Op0Undefined)
-      );
+      expect(error).toEqual(new RunContextError(Op0Undefined));
     });
   });
 });

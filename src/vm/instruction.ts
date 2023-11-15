@@ -2,8 +2,8 @@
 // Some instructions spread over two words when they use an immediate value, so
 // representing the first one with this struct is enougth.
 
-import { BaseError, ErrorType } from 'result/error';
 import {
+  InstructionError,
   HighBitSetError,
   InvalidApUpdate,
   InvalidOp1Src,
@@ -186,7 +186,7 @@ export class Instruction {
     if ((highBit & encodedInstruction) !== 0n) {
       return {
         value: undefined,
-        error: new BaseError(ErrorType.InstructionError, HighBitSetError),
+        error: new InstructionError(HighBitSetError),
       };
     }
 
@@ -198,6 +198,8 @@ export class Instruction {
     const { value: offsetDst, error: dstError } = SignedInteger16.fromBiased(
       encodedInstruction & mask
     );
+
+    // If it is not, then we add the first operand to the pc.
     if (dstError !== undefined) {
       return { value: undefined, error: dstError };
     }
@@ -258,7 +260,7 @@ export class Instruction {
       default:
         return {
           value: undefined,
-          error: new BaseError(ErrorType.InstructionError, InvalidOp1Src),
+          error: new InstructionError(InvalidOp1Src),
         };
     }
 
@@ -284,7 +286,7 @@ export class Instruction {
       default:
         return {
           value: undefined,
-          error: new BaseError(ErrorType.InstructionError, InvalidPcUpdate),
+          error: new InstructionError(InvalidPcUpdate),
         };
     }
 
@@ -311,7 +313,7 @@ export class Instruction {
       default:
         return {
           value: undefined,
-          error: new BaseError(ErrorType.InstructionError, InvalidResultLogic),
+          error: new InstructionError(InvalidResultLogic),
         };
     }
 
@@ -337,7 +339,7 @@ export class Instruction {
       default:
         return {
           value: undefined,
-          error: new BaseError(ErrorType.InstructionError, InvalidOpcode),
+          error: new InstructionError(InvalidOpcode),
         };
     }
 
@@ -364,7 +366,7 @@ export class Instruction {
       default:
         return {
           value: undefined,
-          error: new BaseError(ErrorType.InstructionError, InvalidApUpdate),
+          error: new InstructionError(InvalidApUpdate),
         };
     }
 

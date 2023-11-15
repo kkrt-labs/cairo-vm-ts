@@ -1,6 +1,9 @@
-import { BaseError, ErrorType } from 'result/error';
 import { UnsignedInteger } from './uint';
-import { ByteArrayLengthError, OutOfRangeNumber } from 'result/primitives';
+import {
+  ByteArrayLengthError,
+  OutOfRangeNumber,
+  PrimitiveError,
+} from 'result/primitives';
 import { Result } from 'result/result';
 
 export type Int16 = number & { _intBrand: void };
@@ -26,7 +29,7 @@ export class SignedInteger16 {
     }
     return {
       value: undefined,
-      error: new BaseError(ErrorType.Int16Error, OutOfRangeNumber),
+      error: new PrimitiveError(OutOfRangeNumber),
     };
   }
 
@@ -35,7 +38,7 @@ export class SignedInteger16 {
     if (bytes.length !== 2) {
       return {
         value: undefined,
-        error: new BaseError(ErrorType.Int16Error, ByteArrayLengthError),
+        error: new PrimitiveError(ByteArrayLengthError),
       };
     }
 

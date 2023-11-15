@@ -1,7 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { SignedInteger16 } from './int'; // adjust the import path accordingly
-import { BaseError, ErrorType } from 'result/error';
-import { ByteArrayLengthError } from 'result/primitives';
+import { ByteArrayLengthError, PrimitiveError } from 'result/primitives';
 
 describe('SignedInteger16', () => {
   describe('isInt16', () => {
@@ -40,18 +39,14 @@ describe('SignedInteger16', () => {
       const { error } = SignedInteger16.fromBiasedLittleEndianBytes(
         new Uint8Array([0xff])
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.Int16Error, ByteArrayLengthError)
-      );
+      expect(error).toEqual(new PrimitiveError(ByteArrayLengthError));
     });
 
     test('should return an error for byte array of length 3', () => {
       const { error } = SignedInteger16.fromBiasedLittleEndianBytes(
         new Uint8Array([0xff, 0x7f, 0xff])
       );
-      expect(error).toEqual(
-        new BaseError(ErrorType.Int16Error, ByteArrayLengthError)
-      );
+      expect(error).toEqual(new PrimitiveError(ByteArrayLengthError));
     });
   });
 });
