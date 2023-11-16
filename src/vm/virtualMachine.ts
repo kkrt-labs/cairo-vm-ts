@@ -44,7 +44,7 @@ export type Operands = {
 export class VirtualMachine {
   runContext: RunContext;
   private currentStep: Uint64;
-  private segments: MemorySegmentManager;
+  segments: MemorySegmentManager;
 
   constructor() {
     this.currentStep = UnsignedInteger.ZERO_UINT64;
@@ -52,11 +52,10 @@ export class VirtualMachine {
     this.runContext = RunContext.default();
   }
 
-  step(): void {
+  step(): Result<void> {
     const maybeEncodedInstruction = this.segments.memory.get(
       this.runContext.pc
     );
-
     if (maybeEncodedInstruction === undefined) {
       throw new VirtualMachineError(EndOfInstructionsError);
     }
@@ -72,11 +71,51 @@ export class VirtualMachine {
     if (error !== undefined) {
       throw error;
     }
-    // decode and run instruction
-    const instruction = Instruction.decodeInstruction(encodedInstructionUint);
 
-    // return this.runInstruction();
-    throw new Error('TODO: Not Implemented');
+    // decode and run instruction
+    const { value: instruction, error: decodingError } =
+      Instruction.decodeInstruction(encodedInstructionUint);
+    if (decodingError !== undefined) {
+      throw decodingError;
+    }
+
+    return this.runInstruction(instruction);
+  }
+
+  // Run the current instruction
+  runInstruction(instruction: Instruction): Result<void> {
+    const { value: operands, error: operandsError } =
+      this.computeOperands(instruction);
+    if (operandsError !== undefined) {
+      return { value: undefined, error: operandsError };
+    }
+
+    const { error: opcodeAssertionError } = this.opcodeAssertion(
+      instruction,
+      operands
+    );
+    if (opcodeAssertionError !== undefined) {
+      return { value: undefined, error: opcodeAssertionError };
+    }
+    // TODO should update the trace here
+
+    const { error: updateRegistersError } = this.updateRegisters(
+      instruction,
+      operands
+    );
+    if (updateRegistersError !== undefined) {
+      return { value: undefined, error: updateRegistersError };
+    }
+
+    const { value: newStep, error: stepError } = UnsignedInteger.toUint64(
+      this.currentStep + UnsignedInteger.ONE_UINT64
+    );
+    if (stepError !== undefined) {
+      return { value: undefined, error: stepError };
+    }
+    this.currentStep = newStep;
+
+    return { value: undefined, error: undefined };
   }
 
   // Compute the operands of an instruction. The VM can either
@@ -132,8 +171,9 @@ export class VirtualMachine {
       }
       const [deducedOp0, deducedRes] = deducedValues;
       if (deducedOp0 !== undefined) {
-        this.segments.memory.insert(op0Addr, deducedOp0);
+        this.segments.insert(op0Addr, deducedOp0);
       }
+      op0 = deducedOp0;
       res = deducedRes;
     }
 
@@ -151,7 +191,7 @@ export class VirtualMachine {
       }
       const [deducedOp1, deducedRes] = deducedValues;
       if (deducedOp1 !== undefined) {
-        this.segments.memory.insert(op1Addr, deducedOp1);
+        this.segments.insert(op1Addr, deducedOp1);
       }
       if (res === undefined) {
         res = deducedRes;
@@ -181,7 +221,7 @@ export class VirtualMachine {
         return { value: undefined, error: deducedDstError };
       }
       if (deducedDst !== undefined) {
-        this.segments.memory.insert(dstAddr, deducedDst);
+        this.segments.insert(dstAddr, deducedDst);
       }
       dst = deducedDst;
     }
