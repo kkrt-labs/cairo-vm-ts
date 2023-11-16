@@ -5,4 +5,4 @@ COMPILED_CAIRO_0_FILES:=$(CAIRO_0_FILES:%.cairo=%.json)
 compile: $(COMPILED_CAIRO_0_FILES)
 
 %.json: %.cairo
-	cairo-compile $< --output $@
+	poetry run cairo-compile $< --output $@
