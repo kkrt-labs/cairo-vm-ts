@@ -8,7 +8,7 @@ import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
 
 export class Memory {
-  data: Map<Relocatable, MaybeRelocatable>;
+  private data: Map<string, MaybeRelocatable>;
   private numSegments: Uint32;
 
   constructor() {
@@ -21,15 +21,16 @@ export class Memory {
       throw new MemoryError(SegmentError);
     }
 
-    if (this.data.get(address) !== undefined) {
+    const addressString = `${address.getSegmentIndex()}:${address.getOffset()}`;
+    if (this.data.get(addressString) !== undefined) {
       throw new MemoryError(WriteOnceError);
     }
-
-    this.data.set(address, value);
+    this.data.set(addressString, value);
   }
 
   get(address: Relocatable): MaybeRelocatable | undefined {
-    return this.data.get(address);
+    const addressString = `${address.getSegmentIndex()}:${address.getOffset()}`;
+    return this.data.get(addressString);
   }
 
   incrementNumSegments(): void {

@@ -11,7 +11,7 @@ describe('Memory', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
       const result = memory.get(address);
-      expect(result).toEqual(undefined);
+      expect(result).toBeUndefined();
     });
 
     test('should return the value at the address', () => {
@@ -20,7 +20,8 @@ describe('Memory', () => {
       const address = new Relocatable(0, 0);
       const value = new Felt(10n);
       memory.insert(address, value);
-      let result = memory.get(address);
+      const addressCopy = new Relocatable(0, 0);
+      let result = memory.get(addressCopy);
       expect(result).toEqual(value);
     });
   });
