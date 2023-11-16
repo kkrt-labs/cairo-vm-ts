@@ -280,8 +280,9 @@ export class VirtualMachine {
             }
             break;
         }
+      default:
+        return { value: [undefined, undefined], error: undefined };
     }
-    return { value: [undefined, undefined], error: undefined };
   }
 
   deduceOp1(
@@ -289,37 +290,38 @@ export class VirtualMachine {
     dst: MaybeRelocatable | undefined,
     op0: MaybeRelocatable | undefined
   ): Result<[MaybeRelocatable | undefined, MaybeRelocatable | undefined]> {
+    if (instruction.opcode !== Opcode.AssertEq) {
+      return { value: [undefined, undefined], error: undefined };
+    }
     // We can deduce the second operand from the destination and the first
     // operand, based on the result logic, only if the opcode is an assert eq
     // because this is the only opcode that allows us to assume dst = res.
-    if (instruction.opcode === Opcode.AssertEq) {
-      switch (instruction.resLogic) {
-        // If the result logic is op1, then res = op1 = dst.
-        case ResLogic.Op1:
-          return { value: [dst, dst], error: undefined };
-        // If the result logic is add, then the second operand is the destination
-        // operand subtracted from the first operand.
-        case ResLogic.Add:
-          if (dst !== undefined && op0 !== undefined) {
-            const { value, error } = dst.sub(op0);
-            if (error !== undefined) {
-              return { value: undefined, error };
-            }
-            return { value: [value, dst], error: undefined };
+    switch (instruction.resLogic) {
+      // If the result logic is op1, then res = op1 = dst.
+      case ResLogic.Op1:
+        return { value: [dst, dst], error: undefined };
+      // If the result logic is add, then the second operand is the destination
+      // operand subtracted from the first operand.
+      case ResLogic.Add:
+        if (dst !== undefined && op0 !== undefined) {
+          const { value, error } = dst.sub(op0);
+          if (error !== undefined) {
+            return { value: undefined, error };
           }
-          break;
-        // If the result logic is mul, then the second operand is the destination
-        // operand divided from the first operand.
-        case ResLogic.Mul:
-          if (dst !== undefined && op0 !== undefined) {
-            const { value, error } = dst.div(op0);
-            if (error !== undefined) {
-              return { value: [undefined, undefined], error: undefined };
-            }
-            return { value: [value, dst], error: undefined };
+          return { value: [value, dst], error: undefined };
+        }
+        break;
+      // If the result logic is mul, then the second operand is the destination
+      // operand divided from the first operand.
+      case ResLogic.Mul:
+        if (dst !== undefined && op0 !== undefined) {
+          const { value, error } = dst.div(op0);
+          if (error !== undefined) {
+            return { value: [undefined, undefined], error: undefined };
           }
-          break;
-      }
+          return { value: [value, dst], error: undefined };
+        }
+        break;
     }
     return { value: [undefined, undefined], error: undefined };
   }
@@ -356,8 +358,9 @@ export class VirtualMachine {
       // For a call instruction, we have dst = fp.
       case Opcode.Call:
         return { value: this.runContext.fp, error: undefined };
+      default:
+        return { value: undefined, error: undefined };
     }
-    return { value: undefined, error: undefined };
   }
 
   // Update the registers based on the instruction.

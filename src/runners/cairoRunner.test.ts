@@ -16,7 +16,7 @@ describe('cairoRunner', () => {
   describe('constructor', () => {
     test('should construct', () => {
       const runner = new CairoRunner(PROGRAM);
-      expect(runner.getMainOffset()).toEqual(26 as Uint32);
+      expect(runner.getMainOffset()).toEqual(0 as Uint32);
     });
   });
 
@@ -24,14 +24,14 @@ describe('cairoRunner', () => {
     test('should return the value of the 10th fibonacci number', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.initialize();
-      const finalPc = new Relocatable(0, 30);
+      const finalPc = new Relocatable(0, 12);
       const { error } = runner.runUntilPc(finalPc);
       const executionSize = runner.getVm().segments.getSegmentSize(1 as Uint32);
       const executionEnd = runner.getExecutionBase().add(executionSize).value;
 
       expect(error).toBeUndefined();
       expect(runner.getVm().segments.memory.get(executionEnd)).toEqual(
-        new Felt(55n)
+        new Felt(144n)
       );
     });
   });

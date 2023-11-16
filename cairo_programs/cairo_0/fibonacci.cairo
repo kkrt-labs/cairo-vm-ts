@@ -1,17 +1,19 @@
-func fibonacci(n : felt) -> (result : felt){
-  alloc_locals;
-  if (n == 0){
-    return (result=0);
-  }
-  if (n == 1){
-    return (result=1);
-  }
-  let (local x) = fibonacci(n - 1);
-  let (local y) = fibonacci(n - 2);
-  return (result= x + y);
-}
-
 func main{}() {
-    let (fib) = fibonacci(10);
-    return();
+    // Set the counter
+    [ap] = 10, ap++;
+    // Initialize the Fibonacci sequence with (1, 1).
+    [ap] = 1, ap++;
+    [ap] = 1, ap++;
+
+    body:
+    // Decrease one from the iteration counter.
+    [ap] = [ap - 3] - 1, ap++;
+    // Copy the last Fibonacci item.
+    [ap] = [ap - 2], ap++;
+    // Compute the next Fibonacci item.
+    [ap] = [ap - 3] + [ap - 4], ap++;
+    // If the iteration counter is not zero, jump to body.
+    jmp body if [ap - 3] != 0;
+
+    ret;
 }
