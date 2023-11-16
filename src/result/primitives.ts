@@ -3,7 +3,7 @@ export class PrimitiveError extends Error {}
 // Felt and Relocatable errors
 export const ForbiddenOperation = 'Forbidden operation';
 export const OffsetOverflow = 'Offset overflow';
-export const OffsetUnderflow = 'Offset overflow';
+export const OffsetUnderflow = 'Offset underflow';
 export const SegmentError = 'Segment error';
 export const OutOfRangeBigInt =
   'Underlying bigint negative, or greater than Felt.PRIME';

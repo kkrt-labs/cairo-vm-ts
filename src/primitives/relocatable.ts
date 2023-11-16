@@ -7,7 +7,7 @@ import {
   PrimitiveError,
   SegmentError,
 } from 'result/primitives';
-import { Err, Result } from 'result/result';
+import { Err, Result, Ok } from 'result/result';
 
 export type MaybeRelocatable = Relocatable | Felt;
 
@@ -31,24 +31,27 @@ export class Relocatable {
   }
 
   add(other: Relocatable): Err;
-  add(other: Felt | Uint32): Result<Relocatable>;
+  add(other: Felt): Result<Relocatable>;
+  add(other: Uint32): Ok<Relocatable>;
   add(other: MaybeRelocatable): Result<MaybeRelocatable>;
 
   add(other: MaybeRelocatable | Uint32): Result<MaybeRelocatable> {
     if (other instanceof Felt) {
-      const { value: num, error } = other.toUint32();
-      if (error !== undefined) {
-        return { value: undefined, error };
+      const offsetFelt = new Felt(BigInt(this.getOffset()));
+      const { value: sum, error: sumError } = offsetFelt.add(other);
+      if (sumError !== undefined) {
+        return { value: undefined, error: sumError };
       }
 
-      if (this.getOffset() + num > UnsignedInteger.MAX_UINT32) {
+      const { value: sumUint32, error: uint32Error } = sum.toUint32();
+      if (uint32Error !== undefined) {
         return {
           value: undefined,
-          error: new PrimitiveError(OffsetOverflow),
+          error: uint32Error,
         };
       }
       return {
-        value: new Relocatable(this.getSegmentIndex(), this.getOffset() + num),
+        value: new Relocatable(this.getSegmentIndex(), sumUint32),
         error: undefined,
       };
     }
@@ -67,7 +70,8 @@ export class Relocatable {
   }
 
   sub(other: MaybeRelocatable): Result<MaybeRelocatable>;
-  sub(other: Felt | Uint32): Result<Relocatable>;
+  sub(other: Felt): Result<Relocatable>;
+  sub(other: Uint32): Ok<Relocatable>;
   sub(other: Relocatable): Result<Felt>;
 
   sub(other: MaybeRelocatable | Uint32): Result<MaybeRelocatable> {
