@@ -19,7 +19,7 @@ export class MemorySegmentManager {
     return ptr;
   }
 
-  loadData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
+  setData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
     for (const [index, d] of data.entries()) {
       const nextAddress = address.add(index);
       this.insert_inner(nextAddress, d);

@@ -29,12 +29,12 @@ describe('MemoryManager', () => {
       expect(memoryManager.memory.getNumSegments()).toEqual(1);
     });
   });
-  describe('loadData', () => {
+  describe('setData', () => {
     test('should return the final state of the pointer', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      const newAddress = memoryManager.loadData(address, DATA);
+      const newAddress = memoryManager.setData(address, DATA);
 
       expect(newAddress).toEqual(new Relocatable(0, 5));
     });
@@ -42,7 +42,7 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      memoryManager.loadData(address, DATA);
+      memoryManager.setData(address, DATA);
 
       expect([...memoryManager.memory.data.values()]).toEqual(DATA);
     });
@@ -50,7 +50,7 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      memoryManager.loadData(address, DATA);
+      memoryManager.setData(address, DATA);
 
       expect(memoryManager.getSegmentSize(0)).toEqual(5);
     });

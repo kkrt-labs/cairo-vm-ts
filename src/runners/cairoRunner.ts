@@ -86,9 +86,9 @@ export class CairoRunner {
   initializeState(entrypoint: number, stack: Relocatable[]): void {
     this.initialPc = this.programBase.add(entrypoint);
 
-    this.vm.segments.loadData(this.programBase, this.program.data);
+    this.vm.segments.setData(this.programBase, this.program.data);
 
-    this.vm.segments.loadData(this.executionBase, stack);
+    this.vm.segments.setData(this.executionBase, stack);
   }
 
   // Initialize the VM.
