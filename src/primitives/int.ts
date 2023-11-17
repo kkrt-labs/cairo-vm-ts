@@ -26,29 +26,11 @@ export class SignedInteger16 {
     }
   }
 
-  // Convert a biased byte array representation (2 bytes) in little-endian format to an Int16
-  static fromBiasedLittleEndianBytes(bytes: Uint8Array): number {
-    if (bytes.length !== 2) {
-      throw new PrimitiveError(ByteArrayLengthError);
-    }
-
-    // Convert little-endian bytes to a 16-bit number
-    let num = bytes[0] + (bytes[1] << 8);
-
-    // Subtract the bias
-    num -= SignedInteger16.BIAS;
-    this.ensureInt16(num);
-    return num;
-  }
-
   // Convert a bigint represented in its biased form to a regular Int16
   static fromBiased(num: bigint): number {
-    UnsignedInteger.ensureUint64(num);
-
     const value = UnsignedInteger.downCastToUint16(num);
 
     const result = value - SignedInteger16.BIAS;
-    this.ensureInt16(result);
     return result;
   }
 }

@@ -26,26 +26,4 @@ describe('SignedInteger16', () => {
       expect(SignedInteger16.isInt16(5.5)).toBe(false);
     });
   });
-
-  describe('fromBiasedLittleEndianBytes', () => {
-    test('should convert a biased little-endian byte array to Int16', () => {
-      const bytes = new Uint8Array([0xff, 0x7f]); // Represents 2^15-1 in little-endian biased representation
-      const result = SignedInteger16.fromBiasedLittleEndianBytes(bytes);
-      expect(result).toEqual(-1); // Due to the bias subtraction
-    });
-
-    test('should throw an error for byte array of length 1', () => {
-      expect(() =>
-        SignedInteger16.fromBiasedLittleEndianBytes(new Uint8Array([0xff]))
-      ).toThrow(new PrimitiveError(ByteArrayLengthError));
-    });
-
-    test('should throw an error for byte array of length 3', () => {
-      expect(() =>
-        SignedInteger16.fromBiasedLittleEndianBytes(
-          new Uint8Array([0xff, 0xff, 0xff])
-        )
-      ).toThrow(new PrimitiveError(ByteArrayLengthError));
-    });
-  });
 });

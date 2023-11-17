@@ -54,7 +54,7 @@ export class UnsignedInteger {
   }
 
   static downCastToUint16(num: bigint): number {
-    if (num > 0xffffn) {
+    if (num > 0xffffn || num < 0n) {
       throw new PrimitiveError(Uint16ConversionError);
     }
     return Number(num);
