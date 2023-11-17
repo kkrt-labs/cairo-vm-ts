@@ -60,16 +60,14 @@ export class VirtualMachine {
       throw new VirtualMachineError(EndOfInstructionsError);
     }
 
-    const encodedInstruction = maybeEncodedInstruction;
-
-    if (!(encodedInstruction instanceof Felt)) {
+    if (!(maybeEncodedInstruction instanceof Felt)) {
       throw new VirtualMachineError(InstructionError);
     }
 
-    const encodedInstructionUint = encodedInstruction.toUint64();
+    const encodedInstruction = maybeEncodedInstruction.toUint64();
 
     // decode and run instruction
-    const instruction = Instruction.decodeInstruction(encodedInstructionUint);
+    const instruction = Instruction.decodeInstruction(encodedInstruction);
 
     return this.runInstruction(instruction);
   }

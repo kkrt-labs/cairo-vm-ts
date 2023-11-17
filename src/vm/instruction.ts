@@ -110,9 +110,9 @@ export class Instruction {
 
   static default(): Instruction {
     return new Instruction(
-      0 as number,
-      0 as number,
-      0 as number,
+      0,
+      0,
+      0,
       RegisterFlag.AP,
       RegisterFlag.AP,
       Op1Src.Op0,
@@ -137,6 +137,9 @@ export class Instruction {
     fpUpdate: FpUpdate,
     opcode: Opcode
   ) {
+    SignedInteger16.ensureInt16(offsetDst);
+    SignedInteger16.ensureInt16(offsetOp0);
+    SignedInteger16.ensureInt16(offsetOp1);
     this.offDst = offsetDst;
     this.offOp0 = offsetOp0;
     this.offOp1 = offsetOp1;
