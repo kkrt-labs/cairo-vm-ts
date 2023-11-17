@@ -44,7 +44,7 @@ export type Operands = {
 export class VirtualMachine {
   runContext: RunContext;
   private currentStep: Uint64;
-  private segments: MemorySegmentManager;
+  segments: MemorySegmentManager;
 
   constructor() {
     this.currentStep = UnsignedInteger.ZERO_UINT64;
@@ -52,11 +52,10 @@ export class VirtualMachine {
     this.runContext = RunContext.default();
   }
 
-  step(): void {
+  step(): Result<void> {
     const maybeEncodedInstruction = this.segments.memory.get(
       this.runContext.pc
     );
-
     if (maybeEncodedInstruction === undefined) {
       throw new VirtualMachineError(EndOfInstructionsError);
     }
@@ -72,11 +71,51 @@ export class VirtualMachine {
     if (error !== undefined) {
       throw error;
     }
-    // decode and run instruction
-    const instruction = Instruction.decodeInstruction(encodedInstructionUint);
 
-    // return this.runInstruction();
-    throw new Error('TODO: Not Implemented');
+    // decode and run instruction
+    const { value: instruction, error: decodingError } =
+      Instruction.decodeInstruction(encodedInstructionUint);
+    if (decodingError !== undefined) {
+      throw decodingError;
+    }
+
+    return this.runInstruction(instruction);
+  }
+
+  // Run the current instruction
+  runInstruction(instruction: Instruction): Result<void> {
+    const { value: operands, error: operandsError } =
+      this.computeOperands(instruction);
+    if (operandsError !== undefined) {
+      return { value: undefined, error: operandsError };
+    }
+
+    const { error: opcodeAssertionError } = this.opcodeAssertion(
+      instruction,
+      operands
+    );
+    if (opcodeAssertionError !== undefined) {
+      return { value: undefined, error: opcodeAssertionError };
+    }
+    // TODO should update the trace here
+
+    const { error: updateRegistersError } = this.updateRegisters(
+      instruction,
+      operands
+    );
+    if (updateRegistersError !== undefined) {
+      return { value: undefined, error: updateRegistersError };
+    }
+
+    const { value: newStep, error: stepError } = UnsignedInteger.toUint64(
+      this.currentStep + UnsignedInteger.ONE_UINT64
+    );
+    if (stepError !== undefined) {
+      return { value: undefined, error: stepError };
+    }
+    this.currentStep = newStep;
+
+    return { value: undefined, error: undefined };
   }
 
   // Compute the operands of an instruction. The VM can either
@@ -132,8 +171,9 @@ export class VirtualMachine {
       }
       const [deducedOp0, deducedRes] = deducedValues;
       if (deducedOp0 !== undefined) {
-        this.segments.memory.insert(op0Addr, deducedOp0);
+        this.segments.insert(op0Addr, deducedOp0);
       }
+      op0 = deducedOp0;
       res = deducedRes;
     }
 
@@ -151,7 +191,7 @@ export class VirtualMachine {
       }
       const [deducedOp1, deducedRes] = deducedValues;
       if (deducedOp1 !== undefined) {
-        this.segments.memory.insert(op1Addr, deducedOp1);
+        this.segments.insert(op1Addr, deducedOp1);
       }
       if (res === undefined) {
         res = deducedRes;
@@ -181,7 +221,7 @@ export class VirtualMachine {
         return { value: undefined, error: deducedDstError };
       }
       if (deducedDst !== undefined) {
-        this.segments.memory.insert(dstAddr, deducedDst);
+        this.segments.insert(dstAddr, deducedDst);
       }
       dst = deducedDst;
     }
@@ -240,8 +280,9 @@ export class VirtualMachine {
             }
             break;
         }
+      default:
+        return { value: [undefined, undefined], error: undefined };
     }
-    return { value: [undefined, undefined], error: undefined };
   }
 
   deduceOp1(
@@ -249,37 +290,38 @@ export class VirtualMachine {
     dst: MaybeRelocatable | undefined,
     op0: MaybeRelocatable | undefined
   ): Result<[MaybeRelocatable | undefined, MaybeRelocatable | undefined]> {
+    if (instruction.opcode !== Opcode.AssertEq) {
+      return { value: [undefined, undefined], error: undefined };
+    }
     // We can deduce the second operand from the destination and the first
     // operand, based on the result logic, only if the opcode is an assert eq
     // because this is the only opcode that allows us to assume dst = res.
-    if (instruction.opcode === Opcode.AssertEq) {
-      switch (instruction.resLogic) {
-        // If the result logic is op1, then res = op1 = dst.
-        case ResLogic.Op1:
-          return { value: [dst, dst], error: undefined };
-        // If the result logic is add, then the second operand is the destination
-        // operand subtracted from the first operand.
-        case ResLogic.Add:
-          if (dst !== undefined && op0 !== undefined) {
-            const { value, error } = dst.sub(op0);
-            if (error !== undefined) {
-              return { value: undefined, error };
-            }
-            return { value: [value, dst], error: undefined };
+    switch (instruction.resLogic) {
+      // If the result logic is op1, then res = op1 = dst.
+      case ResLogic.Op1:
+        return { value: [dst, dst], error: undefined };
+      // If the result logic is add, then the second operand is the destination
+      // operand subtracted from the first operand.
+      case ResLogic.Add:
+        if (dst !== undefined && op0 !== undefined) {
+          const { value, error } = dst.sub(op0);
+          if (error !== undefined) {
+            return { value: undefined, error };
           }
-          break;
-        // If the result logic is mul, then the second operand is the destination
-        // operand divided from the first operand.
-        case ResLogic.Mul:
-          if (dst !== undefined && op0 !== undefined) {
-            const { value, error } = dst.div(op0);
-            if (error !== undefined) {
-              return { value: [undefined, undefined], error: undefined };
-            }
-            return { value: [value, dst], error: undefined };
+          return { value: [value, dst], error: undefined };
+        }
+        break;
+      // If the result logic is mul, then the second operand is the destination
+      // operand divided from the first operand.
+      case ResLogic.Mul:
+        if (dst !== undefined && op0 !== undefined) {
+          const { value, error } = dst.div(op0);
+          if (error !== undefined) {
+            return { value: [undefined, undefined], error: undefined };
           }
-          break;
-      }
+          return { value: [value, dst], error: undefined };
+        }
+        break;
     }
     return { value: [undefined, undefined], error: undefined };
   }
@@ -316,8 +358,9 @@ export class VirtualMachine {
       // For a call instruction, we have dst = fp.
       case Opcode.Call:
         return { value: this.runContext.fp, error: undefined };
+      default:
+        return { value: undefined, error: undefined };
     }
-    return { value: undefined, error: undefined };
   }
 
   // Update the registers based on the instruction.

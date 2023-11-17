@@ -577,7 +577,7 @@ describe('VirtualMachine', () => {
       );
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
+      const operands = {
         op0: undefined,
         op1: undefined,
         res: new Relocatable(0, 5),

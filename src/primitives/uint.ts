@@ -25,6 +25,7 @@ export class UnsignedInteger {
   static readonly MAX_UINT32: Uint32 = 0xffffffff as Uint32;
 
   static readonly ZERO_UINT64: Uint64 = 0n as Uint64;
+  static readonly ONE_UINT64: Uint64 = 1n as Uint64;
 
   // Returns whether the number is a safe unsigned integer,
   // i.e. a positive number between 0 and 2^32

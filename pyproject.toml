@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "cairo-vm-ts"
+version = "0.1.0"
+description = ""
+authors = ["Gregory Edison <gregory.edison1993@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+cairo-lang = "^0.12.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
