@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
-import { OutOfRangeBigInt, PrimitiveError } from 'result/primitives';
+import { OutOfRangeBigInt, PrimitiveError } from 'errors/primitives';
 import { Relocatable } from './relocatable';
 
 describe('Felt', () => {
@@ -21,7 +21,7 @@ describe('Felt', () => {
   describe('conversions', () => {
     test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
       const felt = new Felt(10n);
-      const { value: result } = felt.toUint64();
+      const result = felt.toUint64();
       expect(result).toEqual(10n);
     });
     test('should convert correctly a felt to its string representation', () => {
@@ -51,16 +51,16 @@ describe('Felt', () => {
     test('should add two felts properly', () => {
       const a = new Felt(1000n);
       const b = new Felt(2000n);
-      const { value } = a.add(b);
+      const result = a.add(b);
       const expected = new Felt(3000n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when adding', () => {
       const a = new Felt(Felt.PRIME - 1n);
       const b = new Felt(2n);
-      const { value } = a.add(b);
+      const result = a.add(b);
       const expected = new Felt(1n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
   });
 
@@ -68,16 +68,16 @@ describe('Felt', () => {
     test('should sub two felts properly', () => {
       const a = new Felt(3000n);
       const b = new Felt(2000n);
-      const { value } = a.sub(b);
+      const result = a.sub(b);
       const expected = new Felt(1000n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when subtracting', () => {
       const a = new Felt(2n);
       const b = new Felt(5n);
-      const { value } = a.sub(b);
+      const result = a.sub(b);
       const expected = new Felt(Felt.PRIME - 3n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
   });
 
@@ -85,18 +85,18 @@ describe('Felt', () => {
     test('should multiply two felts properly', () => {
       const a = new Felt(10n);
       const b = new Felt(2n);
-      const { value } = a.mul(b);
+      const result = a.mul(b);
       const expected = new Felt(20n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
     test('should wrap around the prime field when multiplying', () => {
       const a = new Felt(2n ** 134n);
       const b = new Felt(2n ** 128n);
-      const { value } = a.mul(b);
+      const result = a.mul(b);
       const expected = new Felt(
         3618502788665912670123303560417596398778548817217653680365937596310271031297n
       );
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
   });
 
@@ -104,37 +104,23 @@ describe('Felt', () => {
     test('should divide two felts properly', () => {
       const a = new Felt(10n);
       const b = new Felt(2n);
-      const { value } = a.div(b);
+      const result = a.div(b);
       const expected = new Felt(5n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
     test('should go to 0 if a < b in a/b', () => {
       const a = new Felt(5n);
       const b = new Felt(10n);
-      const { value } = a.div(b);
+      const result = a.div(b);
       const expected = new Felt(0n);
-      expect((value as Felt).eq(expected)).toBeTrue();
+      expect(result.eq(expected)).toBeTrue();
     });
   });
 
   describe('toUint32', () => {
-    test('should return an error if the felt is larger than the max safe integer', () => {
+    test('should throw an error if the felt is larger than the max safe integer', () => {
       const a = new Felt(2n ** 53n);
-      const { error } = a.toUint32();
-      expect(error).toEqual(new PrimitiveError(OutOfRangeBigInt));
-    });
-  });
-
-  describe('getFelt', () => {
-    test('should return the felt', () => {
-      const a = new Felt(5n);
-      const result = Felt.getFelt(a);
-      expect(result).toEqual(a);
-    });
-    test('should return undefined', () => {
-      const a = new Relocatable(0, 1);
-      const result = Felt.getFelt(a);
-      expect(result).toBeUndefined();
+      expect(() => a.toUint32()).toThrow(new PrimitiveError(OutOfRangeBigInt));
     });
   });
 });

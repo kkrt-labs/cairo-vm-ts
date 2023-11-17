@@ -2,9 +2,9 @@ import { describe, test, expect } from 'bun:test';
 import { MemorySegmentManager } from './memoryManager';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { SegmentError } from 'result/primitives';
-import { WriteOnceError } from 'result/memory';
+import { UnsignedInteger } from 'primitives/uint';
+import { SegmentError } from 'errors/primitives';
+import { WriteOnceError } from 'errors/memory';
 
 const DATA = [
   new Relocatable(0, 0),
@@ -27,7 +27,7 @@ describe('MemoryManager', () => {
       memoryManager.addSegment();
 
       expect(memoryManager.memory.getNumSegments()).toEqual(
-        UnsignedInteger.toUint32(1).value as Uint32
+        UnsignedInteger.toUint32(1)
       );
     });
   });
@@ -36,9 +36,9 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      const { value: loadedAddress } = memoryManager.loadData(address, DATA);
+      const newAddress = memoryManager.loadData(address, DATA);
 
-      expect(loadedAddress).toEqual(new Relocatable(0, 5));
+      expect(newAddress).toEqual(new Relocatable(0, 5));
     });
     test('should load the data in memory', () => {
       const memoryManager = new MemorySegmentManager();
@@ -57,7 +57,7 @@ describe('MemoryManager', () => {
       const segmentAddress = UnsignedInteger.ZERO_UINT32;
 
       expect(memoryManager.getSegmentSize(segmentAddress)).toEqual(
-        UnsignedInteger.toUint32(5).value as Uint32
+        UnsignedInteger.toUint32(5)
       );
     });
   });

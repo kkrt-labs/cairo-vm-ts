@@ -10,16 +10,14 @@ import {
   Op0Undefined,
   Op1ImmediateOffsetError,
   RunContextError,
-} from 'result/runContext';
+} from 'errors/runContext';
 
 describe('RunContext', () => {
   describe('incrementPc', () => {
     test('should successfully increment pc', () => {
       const ctx = RunContext.default();
-      const { value: instructionSize } = UnsignedInteger.toUint32(2);
-      const { error } = ctx.incrementPc(instructionSize as Uint32);
-
-      expect(error).toBeUndefined();
+      const instructionSize = UnsignedInteger.toUint32(2);
+      ctx.incrementPc(instructionSize as Uint32);
       expect(ctx.pc).toEqual(new Relocatable(0, 2));
     });
   });
@@ -29,28 +27,22 @@ describe('RunContext', () => {
   describe('computeDstAddress', () => {
     test('should compute dst addr for ap register', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: dstAddr } = runContext.computeAddress(
-        RegisterFlag.AP,
-        offset as Int16
-      );
+      const dstAddr = runContext.computeAddress(RegisterFlag.AP, offset);
 
-      expect((dstAddr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((dstAddr as Relocatable).getOffset()).toEqual(6);
+      expect(dstAddr.getSegmentIndex()).toEqual(1);
+      expect(dstAddr.getOffset()).toEqual(6);
     });
 
     test('should compute dst addr for fp register', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: dstAddr } = runContext.computeAddress(
-        RegisterFlag.FP,
-        offset as Int16
-      );
+      const dstAddr = runContext.computeAddress(RegisterFlag.FP, offset);
 
-      expect((dstAddr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((dstAddr as Relocatable).getOffset()).toEqual(7);
+      expect(dstAddr.getSegmentIndex()).toEqual(1);
+      expect(dstAddr.getOffset()).toEqual(7);
     });
   });
 
@@ -59,94 +51,85 @@ describe('RunContext', () => {
   describe('computeOp1Address', () => {
     test('should compute op1 addr for fp register', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.FP,
-        offset as Int16,
+        offset,
         undefined
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(7);
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(7);
     });
 
     test('should compute op1 addr for ap register', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.AP,
-        offset as Int16,
+        offset,
         undefined
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(6);
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(6);
     });
 
     test('should compute op1 addr for op1 src imm', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.Imm,
-        offset as Int16,
+        offset,
         undefined
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(0);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(5);
+      expect(op1Addr.getSegmentIndex()).toEqual(0);
+      expect(op1Addr.getOffset()).toEqual(5);
     });
 
-    test('should return an error Op1ImmediateOffsetError for op1 src imm with incorrect offset', () => {
+    test('should throw an error Op1ImmediateOffsetError for op1 src imm with incorrect offset', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(2);
+      const offset = SignedInteger16.toInt16(2);
 
-      const { error } = runContext.computeOp1Address(
-        Op1Src.Imm,
-        offset as Int16,
-        undefined
-      );
-      expect(error).toEqual(new RunContextError(Op1ImmediateOffsetError));
+      expect(() =>
+        runContext.computeOp1Address(Op1Src.Imm, offset, undefined)
+      ).toThrow(new RunContextError(Op1ImmediateOffsetError));
     });
 
     test('should compute op1 addr for op1 src op0 with op0 relocatable', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.Op0,
-        offset as Int16,
+        offset,
         new Relocatable(1, 7)
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(8);
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(8);
     });
 
-    test('should return an error Op0NotRelocatable for op1 src op0 with op0 felt', () => {
+    test('should throw an error Op0NotRelocatable for op1 src op0 with op0 felt', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { error } = runContext.computeOp1Address(
-        Op1Src.Op0,
-        offset as Int16,
-        new Felt(7n)
-      );
-      expect(error).toEqual(new RunContextError(Op0NotRelocatable));
+      expect(() =>
+        runContext.computeOp1Address(Op1Src.Op0, offset, new Felt(7n))
+      ).toThrow(new RunContextError(Op0NotRelocatable));
     });
 
-    test('should return an error Op0Undefined for op1 src op0 with op0 undefined', () => {
+    test('should throw an error Op0Undefined for op1 src op0 with op0 undefined', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { error } = runContext.computeOp1Address(
-        Op1Src.Op0,
-        offset as Int16,
-        undefined
-      );
-      expect(error).toEqual(new RunContextError(Op0Undefined));
+      expect(() =>
+        runContext.computeOp1Address(Op1Src.Op0, offset, undefined)
+      ).toThrow(new RunContextError(Op0Undefined));
     });
   });
 
@@ -155,94 +138,85 @@ describe('RunContext', () => {
   describe('computeOp1Address', () => {
     test('should compute op1 addr for fp register', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.FP,
-        offset as Int16,
+        offset,
         undefined
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(7);
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(7);
     });
 
     test('should compute op1 addr for ap register', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.AP,
-        offset as Int16,
+        offset,
         undefined
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(6);
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(6);
     });
 
     test('should compute op1 addr for op1 src imm', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.Imm,
-        offset as Int16,
+        offset,
         undefined
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(0);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(5);
+      expect(op1Addr.getSegmentIndex()).toEqual(0);
+      expect(op1Addr.getOffset()).toEqual(5);
     });
 
-    test('should return an error Op1ImmediateOffsetError for op1 src imm with incorrect offset', () => {
+    test('should throw an error Op1ImmediateOffsetError for op1 src imm with incorrect offset', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(2);
+      const offset = SignedInteger16.toInt16(2);
 
-      const { error } = runContext.computeOp1Address(
-        Op1Src.Imm,
-        offset as Int16,
-        undefined
-      );
-      expect(error).toEqual(new RunContextError(Op1ImmediateOffsetError));
+      expect(() =>
+        runContext.computeOp1Address(Op1Src.Imm, offset, undefined)
+      ).toThrow(new RunContextError(Op1ImmediateOffsetError));
     });
 
     test('should compute op1 addr for op1 src op0 with op0 relocatable', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { value: op1Addr } = runContext.computeOp1Address(
+      const op1Addr = runContext.computeOp1Address(
         Op1Src.Op0,
-        offset as Int16,
+        offset,
         new Relocatable(1, 7)
       );
 
-      expect((op1Addr as Relocatable).getSegmentIndex()).toEqual(1);
-      expect((op1Addr as Relocatable).getOffset()).toEqual(8);
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(8);
     });
 
-    test('should return an error Op0NotRelocatable for op1 src op0 with op0 felt', () => {
+    test('should throw an error Op0NotRelocatable for op1 src op0 with op0 felt', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { error } = runContext.computeOp1Address(
-        Op1Src.Op0,
-        offset as Int16,
-        new Felt(7n)
-      );
-      expect(error).toEqual(new RunContextError(Op0NotRelocatable));
+      expect(() =>
+        runContext.computeOp1Address(Op1Src.Op0, offset, new Felt(7n))
+      ).toThrow(new RunContextError(Op0NotRelocatable));
     });
 
-    test('should return an error Op0Undefined for op1 src op0 with op0 undefined', () => {
+    test('should throw an error Op0Undefined for op1 src op0 with op0 undefined', () => {
       const runContext = new RunContext(4, 5, 6);
-      const { value: offset } = SignedInteger16.toInt16(1);
+      const offset = SignedInteger16.toInt16(1);
 
-      const { error } = runContext.computeOp1Address(
-        Op1Src.Op0,
-        offset as Int16,
-        undefined
-      );
-      expect(error).toEqual(new RunContextError(Op0Undefined));
+      expect(() =>
+        runContext.computeOp1Address(Op1Src.Op0, offset, undefined)
+      ).toThrow(new RunContextError(Op0Undefined));
     });
   });
 });

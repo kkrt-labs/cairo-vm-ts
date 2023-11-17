@@ -3,7 +3,7 @@ import {
   Op0Undefined,
   Op1ImmediateOffsetError,
   RunContextError,
-} from 'result/runContext';
+} from 'errors/runContext';
 import { Int16 } from 'primitives/int';
 import {
   ProgramCounter,
@@ -13,7 +13,6 @@ import {
 } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
 import { Op1Src, RegisterFlag } from 'vm/instruction';
-import { Result } from 'result/result';
 
 export class RunContext {
   pc: ProgramCounter;
@@ -30,18 +29,13 @@ export class RunContext {
     this.fp = new MemoryPointer(fp);
   }
 
-  incrementPc(instructionSize: Uint32): Result<void> {
-    const { value: newPc, error: newPcError } = this.pc.add(instructionSize);
-    if (newPcError !== undefined) {
-      return { value: undefined, error: newPcError };
-    }
-    this.pc = newPc;
-    return { value: undefined, error: undefined };
+  incrementPc(instructionSize: Uint32): void {
+    this.pc = this.pc.add(instructionSize);
   }
 
   // Computes the address of the relocatable based on a register flag (ap or fp)
   // and an offset to apply to this register.
-  computeAddress(register: RegisterFlag, offset: Int16): Result<Relocatable> {
+  computeAddress(register: RegisterFlag, offset: Int16): Relocatable {
     switch (register) {
       case RegisterFlag.AP:
         return applyOffsetOnBaseAddress(this.ap, offset);
@@ -57,7 +51,7 @@ export class RunContext {
     op1Src: Op1Src,
     op1Offset: Int16,
     op0: MaybeRelocatable | undefined
-  ): Result<Relocatable> {
+  ): Relocatable {
     // We start by computing the base address based on the source for
     // operand 1.
     let baseAddr: Relocatable;
@@ -74,29 +68,20 @@ export class RunContext {
         if (op1Offset == 1) {
           baseAddr = this.pc;
         } else {
-          return {
-            value: undefined,
-            error: new RunContextError(Op1ImmediateOffsetError),
-          };
+          throw new RunContextError(Op1ImmediateOffsetError);
         }
         break;
       case Op1Src.Op0:
         // In case of operand 0 as the source, we have to check that
         // operand 0 is not undefined.
         if (op0 === undefined) {
-          return {
-            value: undefined,
-            error: new RunContextError(Op0Undefined),
-          };
+          throw new RunContextError(Op0Undefined);
         }
-        const reloc = Relocatable.getRelocatable(op0);
-        if (reloc === undefined) {
-          return {
-            value: undefined,
-            error: new RunContextError(Op0NotRelocatable),
-          };
+
+        if (!Relocatable.isRelocatable(op0)) {
+          throw new RunContextError(Op0NotRelocatable);
         }
-        baseAddr = reloc;
+        baseAddr = op0;
     }
 
     // We then apply the offset to the base address.
@@ -108,15 +93,12 @@ export class RunContext {
 function applyOffsetOnBaseAddress(
   baseAddr: Relocatable,
   offset: Int16
-): Result<Relocatable> {
+): Relocatable {
   const offsetIsNegative = offset < 0 ? 1 : 0;
 
-  const { value, error } = UnsignedInteger.toUint32(
+  const value = UnsignedInteger.toUint32(
     -1 * offsetIsNegative * offset + (1 - offsetIsNegative) * offset
   );
-  if (error !== undefined) {
-    return { value: undefined, error };
-  }
 
   return offsetIsNegative ? baseAddr.sub(value) : baseAddr.add(value);
 }

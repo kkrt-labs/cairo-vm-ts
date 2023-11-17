@@ -3,8 +3,7 @@ import {
   ByteArrayLengthError,
   OutOfRangeNumber,
   PrimitiveError,
-} from 'result/primitives';
-import { Result } from 'result/result';
+} from 'errors/primitives';
 
 export type Int16 = number & { _intBrand: void };
 
@@ -23,23 +22,17 @@ export class SignedInteger16 {
     );
   }
 
-  static toInt16(num: number): Result<Int16> {
-    if (SignedInteger16.isInt16(num)) {
-      return { value: num, error: undefined };
+  static toInt16(num: number): Int16 {
+    if (!this.isInt16(num)) {
+      throw new PrimitiveError(OutOfRangeNumber);
     }
-    return {
-      value: undefined,
-      error: new PrimitiveError(OutOfRangeNumber),
-    };
+    return num;
   }
 
   // Convert a biased byte array representation (2 bytes) in little-endian format to an Int16
-  static fromBiasedLittleEndianBytes(bytes: Uint8Array): Result<Int16> {
+  static fromBiasedLittleEndianBytes(bytes: Uint8Array): Int16 {
     if (bytes.length !== 2) {
-      return {
-        value: undefined,
-        error: new PrimitiveError(ByteArrayLengthError),
-      };
+      throw new PrimitiveError(ByteArrayLengthError);
     }
 
     // Convert little-endian bytes to a 16-bit number
@@ -52,18 +45,11 @@ export class SignedInteger16 {
   }
 
   // Convert a bigint represented in its biased form to a regular Int16
-  static fromBiased(num: bigint): Result<Int16> {
-    const { value: numUint, error: numError } = UnsignedInteger.toUint64(num);
-    if (numError !== undefined) {
-      return { value: undefined, error: numError };
-    }
+  static fromBiased(num: bigint): Int16 {
+    const numUint = UnsignedInteger.toUint64(num);
 
-    const { value: numInt16, error: downcastError } =
-      UnsignedInteger.downCastToUint16(numUint);
-    if (downcastError !== undefined) {
-      return { value: undefined, error: downcastError };
-    }
+    const value = UnsignedInteger.downCastToUint16(numUint);
 
-    return this.toInt16(numInt16 - SignedInteger16.BIAS);
+    return this.toInt16(value - SignedInteger16.BIAS);
   }
 }

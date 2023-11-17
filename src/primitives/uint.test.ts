@@ -5,7 +5,7 @@ import {
   Uint16ConversionError,
   Uint32ConversionError,
   Uint64ConversionError,
-} from 'result/primitives';
+} from 'errors/primitives';
 
 describe('UnsignedInteger', () => {
   describe('isUint16', () => {
@@ -24,13 +24,14 @@ describe('UnsignedInteger', () => {
 
   describe('toUint16', () => {
     test('should convert a valid bigint to Uint16', () => {
-      const { value: result } = UnsignedInteger.toUint16(5);
+      const result = UnsignedInteger.toUint16(5);
       expect(result).toEqual(5);
     });
 
-    test('should return an error Uint16ConversionError for negative numbers', () => {
-      const { error } = UnsignedInteger.toUint16(-5);
-      expect(error).toEqual(new PrimitiveError(Uint16ConversionError));
+    test('should throw an error Uint16ConversionError for negative numbers', () => {
+      expect(() => UnsignedInteger.toUint16(-5)).toThrow(
+        new PrimitiveError(Uint16ConversionError)
+      );
     });
   });
 
@@ -50,13 +51,14 @@ describe('UnsignedInteger', () => {
 
   describe('toUint32', () => {
     test('should convert a valid bigint to Uint32', () => {
-      const { value: result } = UnsignedInteger.toUint32(5);
+      const result = UnsignedInteger.toUint32(5);
       expect(result).toEqual(5);
     });
 
-    test('should return an error Uint32ConversionError for negative numbers', () => {
-      const { error } = UnsignedInteger.toUint32(-5);
-      expect(error).toEqual(new PrimitiveError(Uint32ConversionError));
+    test('should throw an error Uint32ConversionError for negative numbers', () => {
+      expect(() => UnsignedInteger.toUint32(-5)).toThrow(
+        new PrimitiveError(Uint32ConversionError)
+      );
     });
   });
 
@@ -72,28 +74,28 @@ describe('UnsignedInteger', () => {
 
   describe('toUint64', () => {
     test('should convert a valid bigint to Uint64', () => {
-      const { value: result } = UnsignedInteger.toUint64(5n);
+      const result = UnsignedInteger.toUint64(5n);
       expect(result).toEqual(5n);
     });
 
-    test('should return an error Uint64ConversionError for negative bigints', () => {
-      const { error } = UnsignedInteger.toUint64(-5n);
-      expect(error).toEqual(new PrimitiveError(Uint64ConversionError));
+    test('should throw an error Uint64ConversionError for negative bigints', () => {
+      expect(() => UnsignedInteger.toUint64(-5n)).toThrow(
+        new PrimitiveError(Uint64ConversionError)
+      );
     });
   });
 
   describe('downCastToUint16', () => {
     test('should convert a Uint64 to a Uint16', () => {
-      const { value } = UnsignedInteger.toUint64(5n);
-      const { value: result } = UnsignedInteger.downCastToUint16(
-        value as Uint64
-      );
+      const value = UnsignedInteger.toUint64(5n);
+      const result = UnsignedInteger.downCastToUint16(value);
       expect(result).toEqual(5);
     });
-    test('should return an error Uint16ConversionError for values > 0xffff', () => {
-      const { value } = UnsignedInteger.toUint64(0x10000n);
-      const { error } = UnsignedInteger.downCastToUint16(value as Uint64);
-      expect(error).toEqual(new PrimitiveError(Uint16ConversionError));
+    test('should throw an error Uint16ConversionError for values > 0xffff', () => {
+      const value = UnsignedInteger.toUint64(0x10000n);
+      expect(() => UnsignedInteger.downCastToUint16(value)).toThrow(
+        new PrimitiveError(Uint16ConversionError)
+      );
     });
   });
 });
