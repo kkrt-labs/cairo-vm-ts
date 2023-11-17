@@ -25,11 +25,10 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.initialize();
       const finalPc = new Relocatable(0, 12);
-      const { error } = runner.runUntilPc(finalPc);
+      runner.runUntilPc(finalPc);
       const executionSize = runner.getVm().segments.getSegmentSize(1 as Uint32);
-      const executionEnd = runner.getExecutionBase().add(executionSize).value;
+      const executionEnd = runner.getExecutionBase().add(executionSize);
 
-      expect(error).toBeUndefined();
       expect(runner.getVm().segments.memory.get(executionEnd)).toEqual(
         new Felt(144n)
       );
@@ -71,7 +70,7 @@ describe('cairoRunner', () => {
       expect(runner.getVm().segments.memory.get(executionBase)).toEqual(
         stack[0]
       );
-      const executionBasePlusOne = executionBase.add(1 as Uint32).value;
+      const executionBasePlusOne = executionBase.add(1 as Uint32);
       expect(runner.getVm().segments.memory.get(executionBasePlusOne)).toEqual(
         stack[1]
       );

@@ -1,6 +1,5 @@
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { Result } from 'result/result';
 import { Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 
@@ -20,13 +19,7 @@ export class CairoRunner {
     const mainIdentifier = program.identifiers.get('__main__.main');
     let mainOffset = 0 as Uint32;
     if (mainIdentifier !== undefined && mainIdentifier.pc !== undefined) {
-      const { value: offset, error } = UnsignedInteger.toUint32(
-        mainIdentifier.pc
-      );
-      if (error !== undefined) {
-        throw new Error('Invalid main offset');
-      }
-      mainOffset = offset;
+      mainOffset = UnsignedInteger.toUint32(mainIdentifier.pc);
     }
 
     this.vm = new VirtualMachine();
@@ -40,7 +33,7 @@ export class CairoRunner {
   }
 
   // Initialize the runner with the program and stack.
-  initialize(): Result<Relocatable> {
+  initialize(): Relocatable {
     this.initializeSegments();
     const result = this.initializeMainEntrypoint();
     this.initializeVm();
@@ -49,14 +42,10 @@ export class CairoRunner {
   }
 
   // Run until the given PC is reached.
-  runUntilPc(end: Relocatable): Result<void> {
+  runUntilPc(end: Relocatable): void {
     while (this.vm.runContext.pc.getOffset() < end.getOffset()) {
-      const { error } = this.vm.step();
-      if (error !== undefined) {
-        return { value: undefined, error };
-      }
+      this.vm.step();
     }
-    return { value: undefined, error: undefined };
   }
 
   // Initialize the program and execution segments.
@@ -66,7 +55,7 @@ export class CairoRunner {
   }
 
   // Initialize the main entrypoint.
-  initializeMainEntrypoint(): Result<Relocatable> {
+  initializeMainEntrypoint(): Relocatable {
     const stack: Relocatable[] = [];
     const return_fp = this.vm.segments.addSegment();
     return this.initializeFunctionEntrypoint(this.mainOffset, stack, return_fp);
@@ -77,61 +66,30 @@ export class CairoRunner {
     entrypoint: Uint32,
     stack: Relocatable[],
     return_fp: Relocatable
-  ): Result<Relocatable> {
-    const end = this.vm.segments.addSegment();
-    stack.push(return_fp, end);
+  ): Relocatable {
+    const finalPc = this.vm.segments.addSegment();
+    stack.push(return_fp, finalPc);
 
-    const { value: length, error: lengthError } = UnsignedInteger.toUint32(
-      stack.length
-    );
-    if (lengthError !== undefined) {
-      return { value: undefined, error: lengthError };
-    }
+    const length = UnsignedInteger.toUint32(stack.length);
 
-    const { value: initialFp, error: executionBaseError } =
-      this.executionBase.add(length);
-    if (executionBaseError !== undefined) {
-      return { value: undefined, error: executionBaseError };
-    }
+    const initialFp = this.executionBase.add(length);
 
     this.initialFp = initialFp;
     this.initialAp = initialFp;
-    this.finalPc = end;
+    this.finalPc = finalPc;
 
-    const { error: initializeStateError } = this.initializeState(
-      entrypoint,
-      stack
-    );
-    if (initializeStateError !== undefined) {
-      return { value: undefined, error: initializeStateError };
-    }
+    this.initializeState(entrypoint, stack);
 
-    return { value: end, error: undefined };
+    return finalPc;
   }
 
   // Initialize the runner state.
-  initializeState(entrypoint: Uint32, stack: Relocatable[]): Result<void> {
-    this.initialPc = this.programBase;
-    this.initialPc = this.initialPc.add(entrypoint).value;
+  initializeState(entrypoint: Uint32, stack: Relocatable[]): void {
+    this.initialPc = this.programBase.add(entrypoint);
 
-    const { error: loadProgramError } = this.vm.segments.loadData(
-      this.programBase,
-      this.program.data
-    );
+    this.vm.segments.loadData(this.programBase, this.program.data);
 
-    if (loadProgramError !== undefined) {
-      return { value: undefined, error: loadProgramError };
-    }
-
-    const { error: loadStackError } = this.vm.segments.loadData(
-      this.executionBase,
-      stack
-    );
-    if (loadStackError !== undefined) {
-      return { value: undefined, error: loadStackError };
-    }
-
-    return { value: undefined, error: undefined };
+    this.vm.segments.loadData(this.executionBase, stack);
   }
 
   // Initialize the VM.
