@@ -1,5 +1,5 @@
 import { Felt } from './felt';
-import { Uint32, UnsignedInteger } from './uint';
+import { UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
@@ -10,21 +10,21 @@ import {
 export type MaybeRelocatable = Relocatable | Felt;
 
 export class Relocatable {
-  private segmentIndex: Uint32;
-  private offset: Uint32;
+  private segmentIndex: number;
+  private offset: number;
 
   constructor(segmentIndex: number, offset: number) {
-    const segmentUint = UnsignedInteger.toUint32(segmentIndex);
-    const offsetUint = UnsignedInteger.toUint32(offset);
-    this.segmentIndex = segmentUint;
-    this.offset = offsetUint;
+    UnsignedInteger.ensureUint32(segmentIndex);
+    UnsignedInteger.ensureUint32(offset);
+    this.segmentIndex = segmentIndex;
+    this.offset = offset;
   }
 
   add(other: Felt): Relocatable;
-  add(other: Uint32): Relocatable;
+  add(other: number): Relocatable;
   add(other: Relocatable): never;
   add(other: MaybeRelocatable): MaybeRelocatable;
-  add(other: MaybeRelocatable | Uint32): MaybeRelocatable {
+  add(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
       const offset = new Felt(BigInt(this.getOffset()));
       const newOffset = offset.add(other).toUint32();
@@ -36,14 +36,15 @@ export class Relocatable {
       throw new PrimitiveError(ForbiddenOperation);
     }
 
+    UnsignedInteger.ensureUint32(other);
     return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
   }
 
   sub(other: Felt): Relocatable;
-  sub(other: Uint32): Relocatable;
+  sub(other: number): Relocatable;
   sub(other: Relocatable): Felt;
   sub(other: MaybeRelocatable): MaybeRelocatable;
-  sub(other: MaybeRelocatable | Uint32): MaybeRelocatable {
+  sub(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
       const delta = other.toUint32();
 
@@ -69,6 +70,7 @@ export class Relocatable {
       throw new PrimitiveError(OffsetUnderflow);
     }
 
+    UnsignedInteger.ensureUint32(other);
     return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 
@@ -85,11 +87,11 @@ export class Relocatable {
     return false;
   }
 
-  getSegmentIndex(): Uint32 {
+  getSegmentIndex(): number {
     return this.segmentIndex;
   }
 
-  getOffset(): Uint32 {
+  getOffset(): number {
     return this.offset;
   }
 

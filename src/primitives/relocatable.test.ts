@@ -1,7 +1,7 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
 import { Relocatable, MemoryPointer, ProgramCounter } from './relocatable';
-import { Uint32, UnsignedInteger } from './uint';
+import { UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
@@ -93,7 +93,7 @@ describe('Relocatable', () => {
     });
     test('should add a positive number correctly to a relocatable', () => {
       const relocatable = new Relocatable(0, 5);
-      const result = relocatable.add(5 as Uint32);
+      const result = relocatable.add(5);
       expect(result.getOffset()).toEqual(10);
       expect(result.getSegmentIndex()).toEqual(0);
     });

@@ -8,7 +8,7 @@ import {
   VirtualMachineError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Uint64, UnsignedInteger } from 'primitives/uint';
+import { UnsignedInteger } from 'primitives/uint';
 import { RunContext } from 'run-context/runContext';
 import {
   ApUpdate,
@@ -43,11 +43,11 @@ export type Operands = {
 
 export class VirtualMachine {
   runContext: RunContext;
-  private currentStep: Uint64;
+  private currentStep: bigint;
   segments: MemorySegmentManager;
 
   constructor() {
-    this.currentStep = UnsignedInteger.ZERO_UINT64;
+    this.currentStep = 0n;
     this.segments = new MemorySegmentManager();
     this.runContext = RunContext.default();
   }
@@ -84,11 +84,8 @@ export class VirtualMachine {
 
     this.updateRegisters(instruction, operands);
 
-    const newStep = UnsignedInteger.toUint64(
-      this.currentStep + UnsignedInteger.ONE_UINT64
-    );
-
-    this.currentStep = newStep;
+    this.currentStep += 1n;
+    UnsignedInteger.ensureUint64(this.currentStep);
 
     return;
   }
@@ -380,7 +377,7 @@ export class VirtualMachine {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
       case FpUpdate.ApPlus2:
-        const apPlus2 = this.runContext.ap.add(UnsignedInteger.TWO_UINT32);
+        const apPlus2 = this.runContext.ap.add(2);
 
         this.runContext.fp = apPlus2;
         break;
@@ -417,11 +414,11 @@ export class VirtualMachine {
         break;
       // If the ap update logic is add 1, then we add 1 to the ap.
       case ApUpdate.Add1:
-        this.runContext.ap = this.runContext.ap.add(UnsignedInteger.ONE_UINT32);
+        this.runContext.ap = this.runContext.ap.add(1);
         break;
       // If the ap update logic is add 2, then we add 2 to the ap.
       case ApUpdate.Add2:
-        this.runContext.ap = this.runContext.ap.add(UnsignedInteger.TWO_UINT32);
+        this.runContext.ap = this.runContext.ap.add(2);
         break;
     }
   }

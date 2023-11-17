@@ -26,9 +26,7 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
 
-      expect(memoryManager.memory.getNumSegments()).toEqual(
-        UnsignedInteger.toUint32(1)
-      );
+      expect(memoryManager.memory.getNumSegments()).toEqual(1);
     });
   });
   describe('loadData', () => {
@@ -54,11 +52,7 @@ describe('MemoryManager', () => {
       const address = new Relocatable(0, 0);
       memoryManager.loadData(address, DATA);
 
-      const segmentAddress = UnsignedInteger.ZERO_UINT32;
-
-      expect(memoryManager.getSegmentSize(segmentAddress)).toEqual(
-        UnsignedInteger.toUint32(5)
-      );
+      expect(memoryManager.getSegmentSize(0)).toEqual(5);
     });
   });
 

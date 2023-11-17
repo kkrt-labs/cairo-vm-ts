@@ -1,4 +1,4 @@
-import { Uint32, Uint64, UnsignedInteger } from './uint';
+import { UnsignedInteger } from './uint';
 import { MaybeRelocatable, Relocatable } from './relocatable';
 
 import {
@@ -64,15 +64,17 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint32(): Uint32 {
+  toUint32(): number {
     if (this.inner > Number.MAX_SAFE_INTEGER) {
       throw new PrimitiveError(OutOfRangeBigInt);
     }
-    return UnsignedInteger.toUint32(Number(this.inner));
+    UnsignedInteger.ensureUint32(Number(this.inner));
+    return Number(this.inner);
   }
 
-  toUint64(): Uint64 {
-    return UnsignedInteger.toUint64(this.inner);
+  toUint64(): bigint {
+    UnsignedInteger.ensureUint64(this.inner);
+    return this.inner;
   }
 
   toHexString(): string {

@@ -1,5 +1,5 @@
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
-import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { UnsignedInteger } from 'primitives/uint';
 import { Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 
@@ -12,14 +12,15 @@ export class CairoRunner {
   private initialAp: Relocatable;
   private initialFp: Relocatable;
   private finalPc: Relocatable;
-  private mainOffset: Uint32;
+  private mainOffset: number;
 
   constructor(program: Program) {
     this.program = program;
     const mainIdentifier = program.identifiers.get('__main__.main');
-    let mainOffset = 0 as Uint32;
+    let mainOffset = 0;
     if (mainIdentifier !== undefined && mainIdentifier.pc !== undefined) {
-      mainOffset = UnsignedInteger.toUint32(mainIdentifier.pc);
+      UnsignedInteger.ensureUint32(mainIdentifier.pc);
+      mainOffset = mainIdentifier.pc;
     }
 
     this.vm = new VirtualMachine();
@@ -63,16 +64,14 @@ export class CairoRunner {
 
   // Initialize a function entrypoint.
   initializeFunctionEntrypoint(
-    entrypoint: Uint32,
+    entrypoint: number,
     stack: Relocatable[],
     return_fp: Relocatable
   ): Relocatable {
     const finalPc = this.vm.segments.addSegment();
     stack.push(return_fp, finalPc);
 
-    const length = UnsignedInteger.toUint32(stack.length);
-
-    const initialFp = this.executionBase.add(length);
+    const initialFp = this.executionBase.add(stack.length);
 
     this.initialFp = initialFp;
     this.initialAp = initialFp;
@@ -84,7 +83,7 @@ export class CairoRunner {
   }
 
   // Initialize the runner state.
-  initializeState(entrypoint: Uint32, stack: Relocatable[]): void {
+  initializeState(entrypoint: number, stack: Relocatable[]): void {
     this.initialPc = this.programBase.add(entrypoint);
 
     this.vm.segments.loadData(this.programBase, this.program.data);
@@ -127,7 +126,7 @@ export class CairoRunner {
     return this.finalPc;
   }
 
-  getMainOffset(): Uint32 {
+  getMainOffset(): number {
     return this.mainOffset;
   }
 }

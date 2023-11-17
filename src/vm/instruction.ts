@@ -11,8 +11,8 @@ import {
   InvalidPcUpdate,
   InvalidResultLogic,
 } from 'errors/instruction';
-import { Int16, SignedInteger16 } from 'primitives/int';
-import { Uint32, Uint64, UnsignedInteger } from 'primitives/uint';
+import { SignedInteger16 } from 'primitives/int';
+import { UnsignedInteger } from 'primitives/uint';
 
 //  Structure of the 63-bit that form the first word of each instruction.
 //  See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
@@ -88,9 +88,9 @@ export enum Opcode {
 
 export class Instruction {
   // The offset to add or sub to ap/fp to obtain the Destination Operand
-  public offDst: Int16;
-  public offOp0: Int16;
-  public offOp1: Int16;
+  public offDst: number;
+  public offOp0: number;
+  public offOp1: number;
   // The register to use as the Destination Operand
   public dstReg: DstRegister;
   // The register to use as the Operand 0
@@ -110,9 +110,9 @@ export class Instruction {
 
   static default(): Instruction {
     return new Instruction(
-      0 as Int16,
-      0 as Int16,
-      0 as Int16,
+      0 as number,
+      0 as number,
+      0 as number,
       RegisterFlag.AP,
       RegisterFlag.AP,
       Op1Src.Op0,
@@ -125,9 +125,9 @@ export class Instruction {
   }
 
   constructor(
-    offsetDst: Int16,
-    offsetOp0: Int16,
-    offsetOp1: Int16,
+    offsetDst: number,
+    offsetOp0: number,
+    offsetOp1: number,
     desReg: DstRegister,
     op0Reg: Op0Register,
     op1Src: Op1Src,
@@ -150,7 +150,8 @@ export class Instruction {
     this.opcode = opcode;
   }
 
-  static decodeInstruction(encodedInstruction: Uint64): Instruction {
+  static decodeInstruction(encodedInstruction: bigint): Instruction {
+    UnsignedInteger.ensureUint64(encodedInstruction);
     // mask for the high bit of a 64-bit number
     const highBit = 1n << 63n;
     // dstReg is located at bits 0-0. We apply a mask of 0x01 (0b1)
@@ -370,10 +371,10 @@ export class Instruction {
     );
   }
 
-  size(): Uint32 {
+  size(): number {
     if (this.op1Src == Op1Src.Imm) {
-      return UnsignedInteger.TWO_UINT32;
+      return 2;
     }
-    return UnsignedInteger.ONE_UINT32;
+    return 1;
   }
 }

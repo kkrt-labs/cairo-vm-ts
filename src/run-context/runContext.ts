@@ -4,14 +4,14 @@ import {
   Op1ImmediateOffsetError,
   RunContextError,
 } from 'errors/runContext';
-import { Int16 } from 'primitives/int';
+import { SignedInteger16 } from 'primitives/int';
 import {
   ProgramCounter,
   Relocatable,
   MemoryPointer,
   MaybeRelocatable,
 } from 'primitives/relocatable';
-import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { UnsignedInteger } from 'primitives/uint';
 import { Op1Src, RegisterFlag } from 'vm/instruction';
 
 export class RunContext {
@@ -29,13 +29,13 @@ export class RunContext {
     this.fp = new MemoryPointer(fp);
   }
 
-  incrementPc(instructionSize: Uint32): void {
+  incrementPc(instructionSize: number): void {
     this.pc = this.pc.add(instructionSize);
   }
 
   // Computes the address of the relocatable based on a register flag (ap or fp)
   // and an offset to apply to this register.
-  computeAddress(register: RegisterFlag, offset: Int16): Relocatable {
+  computeAddress(register: RegisterFlag, offset: number): Relocatable {
     switch (register) {
       case RegisterFlag.AP:
         return applyOffsetOnBaseAddress(this.ap, offset);
@@ -49,9 +49,10 @@ export class RunContext {
   // apply to the source and the operand 0.
   computeOp1Address(
     op1Src: Op1Src,
-    op1Offset: Int16,
+    op1Offset: number,
     op0: MaybeRelocatable | undefined
   ): Relocatable {
+    SignedInteger16.ensureInt16(op1Offset);
     // We start by computing the base address based on the source for
     // operand 1.
     let baseAddr: Relocatable;
@@ -92,13 +93,15 @@ export class RunContext {
 // Applies an offset to a base address The offset can be negative.
 function applyOffsetOnBaseAddress(
   baseAddr: Relocatable,
-  offset: Int16
+  offset: number
 ): Relocatable {
+  SignedInteger16.ensureInt16(offset);
   const offsetIsNegative = offset < 0 ? 1 : 0;
 
-  const value = UnsignedInteger.toUint32(
-    -1 * offsetIsNegative * offset + (1 - offsetIsNegative) * offset
-  );
+  const value =
+    -1 * offsetIsNegative * offset + (1 - offsetIsNegative) * offset;
+
+  UnsignedInteger.ensureUint32(value);
 
   return offsetIsNegative ? baseAddr.sub(value) : baseAddr.add(value);
 }

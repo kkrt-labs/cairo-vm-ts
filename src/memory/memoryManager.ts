@@ -1,11 +1,11 @@
-import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { UnsignedInteger } from 'primitives/uint';
 import { Memory } from './memory';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { MemoryError, WriteOnceError } from 'errors/memory';
 import { SegmentError } from 'errors/primitives';
 
 export class MemorySegmentManager {
-  private segmentSizes: Map<Uint32, Uint32>;
+  private segmentSizes: Map<number, number>;
   memory: Memory;
 
   constructor() {
@@ -21,19 +21,17 @@ export class MemorySegmentManager {
 
   loadData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
     for (const [index, d] of data.entries()) {
-      const nextAddress = address.add(UnsignedInteger.toUint32(index));
+      const nextAddress = address.add(index);
       this.insert_inner(nextAddress, d);
     }
 
-    const dataLen = UnsignedInteger.toUint32(data.length);
-
-    const newSegmentSize = UnsignedInteger.toUint32(
-      this.getSegmentSize(address.getSegmentIndex()) + dataLen
-    );
+    const newSegmentSize =
+      this.getSegmentSize(address.getSegmentIndex()) + data.length;
+    UnsignedInteger.ensureUint32(newSegmentSize);
 
     this.segmentSizes.set(address.getSegmentIndex(), newSegmentSize);
 
-    return address.add(dataLen);
+    return address.add(data.length);
   }
 
   // Insert a value in the memory at the given address and increase
@@ -41,10 +39,8 @@ export class MemorySegmentManager {
   insert(address: Relocatable, value: MaybeRelocatable): void {
     this.insert_inner(address, value);
     if (address.getOffset() > this.getSegmentSize(address.getSegmentIndex())) {
-      const newSize = UnsignedInteger.toUint32(
-        address.getOffset() + UnsignedInteger.ONE_UINT32
-      );
-      this.segmentSizes.set(address.getSegmentIndex(), newSize);
+      UnsignedInteger.ensureUint32(address.getOffset() + 1);
+      this.segmentSizes.set(address.getSegmentIndex(), address.getOffset() + 1);
     }
   }
 
@@ -60,7 +56,7 @@ export class MemorySegmentManager {
     this.memory.data.set(addressString, value);
   }
 
-  getSegmentSize(segmentIndex: Uint32): Uint32 {
-    return this.segmentSizes.get(segmentIndex) ?? UnsignedInteger.ZERO_UINT32;
+  getSegmentSize(segmentIndex: number): number {
+    return this.segmentSizes.get(segmentIndex) ?? 0;
   }
 }

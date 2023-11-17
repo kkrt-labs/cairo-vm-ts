@@ -22,7 +22,7 @@ import {
   UnconstrainedResError,
   VirtualMachineError,
 } from 'errors/virtualMachine';
-import { Int16 } from 'primitives/int';
+
 import { RunContext } from 'run-context/runContext';
 
 function getInstructionWithOpcodeAndResLogic(
@@ -362,9 +362,9 @@ describe('VirtualMachine', () => {
   describe('opcodeAssertions', () => {
     test('should throw UnconstrainedResError on assert eq opcode and undefined res operand', () => {
       const instruction: Instruction = new Instruction(
-        1 as Int16,
-        2 as Int16,
-        3 as Int16,
+        1,
+        2,
+        3,
         RegisterFlag.FP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -389,9 +389,9 @@ describe('VirtualMachine', () => {
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst felts', () => {
       const instruction: Instruction = new Instruction(
-        1 as Int16,
-        2 as Int16,
-        3 as Int16,
+        1,
+        2,
+        3,
         RegisterFlag.FP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -416,9 +416,9 @@ describe('VirtualMachine', () => {
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst relocatables', () => {
       const instruction: Instruction = new Instruction(
-        1 as Int16,
-        2 as Int16,
-        3 as Int16,
+        1,
+        2,
+        3,
         RegisterFlag.FP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -443,9 +443,9 @@ describe('VirtualMachine', () => {
     });
     test('should throw InvalidOperand0 on call opcode and pc != op0', () => {
       const instruction: Instruction = new Instruction(
-        1 as Int16,
-        2 as Int16,
-        3 as Int16,
+        1,
+        2,
+        3,
         RegisterFlag.FP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -470,9 +470,9 @@ describe('VirtualMachine', () => {
     });
     test('should throw InvalidDstError on call opcode and fp != dst', () => {
       const instruction: Instruction = new Instruction(
-        1 as Int16,
-        2 as Int16,
-        3 as Int16,
+        1,
+        2,
+        3,
         RegisterFlag.FP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -502,9 +502,9 @@ describe('VirtualMachine', () => {
   describe('updatePc', () => {
     test('regular', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -528,9 +528,9 @@ describe('VirtualMachine', () => {
     });
     test('regular with imm', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Imm,
@@ -554,9 +554,9 @@ describe('VirtualMachine', () => {
     });
     test('jmp res relocatable', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -580,9 +580,9 @@ describe('VirtualMachine', () => {
     });
     test('jmp res felt', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -607,9 +607,9 @@ describe('VirtualMachine', () => {
     });
     test('jmp without res', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -634,9 +634,9 @@ describe('VirtualMachine', () => {
     });
     test('jmp rel res felt', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -660,9 +660,9 @@ describe('VirtualMachine', () => {
     });
     test('jmp rel res relocatable', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -687,9 +687,9 @@ describe('VirtualMachine', () => {
     });
     test('jmp rel res relocatable', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -714,9 +714,9 @@ describe('VirtualMachine', () => {
     });
     test('jnz des is zero no imm', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -740,9 +740,9 @@ describe('VirtualMachine', () => {
     });
     test('jnz des is zero imm', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Imm,
@@ -766,9 +766,9 @@ describe('VirtualMachine', () => {
     });
     test('jnz des not zero op1 felt', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Imm,
@@ -792,9 +792,9 @@ describe('VirtualMachine', () => {
     });
     test('jnz des not zero op1 relocatable', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.Imm,
@@ -824,9 +824,9 @@ describe('VirtualMachine', () => {
   describe('updateFp', () => {
     test('regular', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -850,9 +850,9 @@ describe('VirtualMachine', () => {
     });
     test('dst felt', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -876,9 +876,9 @@ describe('VirtualMachine', () => {
     });
     test('dst relocatable', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -902,9 +902,9 @@ describe('VirtualMachine', () => {
     });
     test('ap plus 2', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -934,9 +934,9 @@ describe('VirtualMachine', () => {
   describe('updateAp', () => {
     test('regular', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -960,9 +960,9 @@ describe('VirtualMachine', () => {
     });
     test('add 2', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -986,9 +986,9 @@ describe('VirtualMachine', () => {
     });
     test('add 1', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -1012,9 +1012,9 @@ describe('VirtualMachine', () => {
     });
     test('add res felt', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -1038,9 +1038,9 @@ describe('VirtualMachine', () => {
     });
     test('add res relocatable', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -1065,9 +1065,9 @@ describe('VirtualMachine', () => {
     });
     test('add no res', () => {
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -1097,9 +1097,9 @@ describe('VirtualMachine', () => {
     test('should keep ap/fp the same', () => {
       const vm = new VirtualMachine();
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,
@@ -1123,9 +1123,9 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.runContext = new RunContext(4, 5, 6);
       const instruction = new Instruction(
-        0 as Int16,
-        0 as Int16,
-        0 as Int16,
+        0,
+        0,
+        0,
         RegisterFlag.AP,
         RegisterFlag.AP,
         Op1Src.AP,

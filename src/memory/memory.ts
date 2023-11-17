@@ -1,14 +1,14 @@
 import { MemoryError, SegmentIncrementError } from 'errors/memory';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
-import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { UnsignedInteger } from 'primitives/uint';
 
 export class Memory {
   data: Map<string, MaybeRelocatable>;
-  private numSegments: Uint32;
+  private numSegments: number;
 
   constructor() {
     this.data = new Map();
-    this.numSegments = UnsignedInteger.ZERO_UINT32;
+    this.numSegments = 0;
   }
 
   get(address: Relocatable): MaybeRelocatable | undefined {
@@ -18,14 +18,14 @@ export class Memory {
 
   incrementNumSegments(): void {
     try {
-      const numSegments = UnsignedInteger.toUint32(this.numSegments + 1);
-      this.numSegments = numSegments;
+      this.numSegments += 1;
+      UnsignedInteger.ensureUint32(this.numSegments);
     } catch (err) {
       throw new MemoryError(SegmentIncrementError);
     }
   }
 
-  getNumSegments(): Uint32 {
+  getNumSegments(): number {
     return this.numSegments;
   }
 }
