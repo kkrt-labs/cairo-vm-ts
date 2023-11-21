@@ -1,11 +1,11 @@
-import { Uint32, Uint64, UnsignedInteger } from './uint';
+import { UnsignedInteger } from './uint';
 import { MaybeRelocatable, Relocatable } from './relocatable';
-import { Result } from 'result/result';
+
 import {
   ForbiddenOperation,
   OutOfRangeBigInt,
   PrimitiveError,
-} from 'result/primitives';
+} from 'errors/primitives';
 
 export class Felt {
   private inner: bigint;
@@ -19,61 +19,38 @@ export class Felt {
     this.inner = _inner;
   }
 
-  add(other: MaybeRelocatable): Result<Felt> {
-    if (other instanceof Felt) {
-      return {
-        value: new Felt((this.inner + other.inner) % Felt.PRIME),
-        error: undefined,
-      };
+  add(other: MaybeRelocatable): Felt {
+    if (!(other instanceof Felt)) {
+      throw new PrimitiveError(ForbiddenOperation);
     }
-    return {
-      value: undefined,
-      error: new PrimitiveError(ForbiddenOperation),
-    };
+    return new Felt((this.inner + other.inner) % Felt.PRIME);
   }
 
-  sub(other: MaybeRelocatable): Result<Felt> {
-    if (other instanceof Felt) {
-      let result = this.inner - other.inner;
-      if (result < 0n) {
-        result += Felt.PRIME;
-      }
-      return { value: new Felt(result), error: undefined };
+  sub(other: MaybeRelocatable): Felt {
+    if (!(other instanceof Felt)) {
+      throw new PrimitiveError(ForbiddenOperation);
     }
-    return {
-      value: undefined,
-      error: new PrimitiveError(ForbiddenOperation),
-    };
+
+    let result = this.inner - other.inner;
+    if (result < 0n) {
+      result += Felt.PRIME;
+    }
+    return new Felt(result);
   }
 
-  mul(other: MaybeRelocatable): Result<Felt> {
-    if (other instanceof Felt) {
-      return {
-        value: new Felt((this.inner * other.inner) % Felt.PRIME),
-        error: undefined,
-      };
+  mul(other: MaybeRelocatable): Felt {
+    if (!(other instanceof Felt)) {
+      throw new PrimitiveError(ForbiddenOperation);
     }
-    return {
-      value: undefined,
-      error: new PrimitiveError(ForbiddenOperation),
-    };
+    return new Felt((this.inner * other.inner) % Felt.PRIME);
   }
 
-  div(other: MaybeRelocatable): Result<Felt> {
-    if (other instanceof Felt) {
-      if (other.inner === 0n) {
-        return {
-          value: undefined,
-          error: new PrimitiveError(ForbiddenOperation),
-        };
-      }
-      let result = this.inner / other.inner;
-      return { value: new Felt(result), error: undefined };
+  div(other: MaybeRelocatable): Felt {
+    if (!(other instanceof Felt) || other.inner === 0n) {
+      throw new PrimitiveError(ForbiddenOperation);
     }
-    return {
-      value: undefined,
-      error: new PrimitiveError(ForbiddenOperation),
-    };
+    let result = this.inner / other.inner;
+    return new Felt(result);
   }
 
   eq(other: MaybeRelocatable): boolean {
@@ -87,18 +64,17 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint32(): Result<Uint32> {
+  toUint32(): number {
     if (this.inner > Number.MAX_SAFE_INTEGER) {
-      return {
-        value: undefined,
-        error: new PrimitiveError(OutOfRangeBigInt),
-      };
+      throw new PrimitiveError(OutOfRangeBigInt);
     }
-    return UnsignedInteger.toUint32(Number(this.inner));
+    UnsignedInteger.ensureUint32(Number(this.inner));
+    return Number(this.inner);
   }
 
-  toUint64(): Result<Uint64> {
-    return UnsignedInteger.toUint64(this.inner);
+  toUint64(): bigint {
+    UnsignedInteger.ensureUint64(this.inner);
+    return this.inner;
   }
 
   toHexString(): string {
@@ -107,12 +83,5 @@ export class Felt {
 
   static isFelt(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Felt {
     return maybeRelocatable instanceof Felt;
-  }
-
-  static getFelt(maybeRelocatable: MaybeRelocatable): Felt | undefined {
-    if (Felt.isFelt(maybeRelocatable)) {
-      return maybeRelocatable;
-    }
-    return undefined;
   }
 }

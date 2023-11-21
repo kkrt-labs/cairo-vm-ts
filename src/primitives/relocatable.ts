@@ -1,147 +1,75 @@
 import { Felt } from './felt';
-import { Uint32, UnsignedInteger } from './uint';
+import { UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
-  OffsetOverflow,
   OffsetUnderflow,
   PrimitiveError,
   SegmentError,
-} from 'result/primitives';
-import { Err, Result, Ok } from 'result/result';
+} from 'errors/primitives';
 
 export type MaybeRelocatable = Relocatable | Felt;
 
 export class Relocatable {
-  private segmentIndex: Uint32;
-  private offset: Uint32;
+  private segmentIndex: number;
+  private offset: number;
 
   constructor(segmentIndex: number, offset: number) {
-    const { value: segmentUint, error: indexErr } =
-      UnsignedInteger.toUint32(segmentIndex);
-    const { value: offsetUint, error: offsetErr } =
-      UnsignedInteger.toUint32(offset);
-    if (indexErr !== undefined) {
-      throw indexErr;
-    }
-    if (offsetErr !== undefined) {
-      throw offsetErr;
-    }
-    this.segmentIndex = segmentUint;
-    this.offset = offsetUint;
+    UnsignedInteger.ensureUint32(segmentIndex);
+    UnsignedInteger.ensureUint32(offset);
+    this.segmentIndex = segmentIndex;
+    this.offset = offset;
   }
 
-  add(other: Relocatable): Err;
-  add(other: Felt): Result<Relocatable>;
-  add(other: Uint32): Ok<Relocatable>;
-  add(other: MaybeRelocatable): Result<MaybeRelocatable>;
-
-  add(other: MaybeRelocatable | Uint32): Result<MaybeRelocatable> {
+  add(other: Felt): Relocatable;
+  add(other: number): Relocatable;
+  add(other: Relocatable): never;
+  add(other: MaybeRelocatable): MaybeRelocatable;
+  add(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
-      const offsetFelt = new Felt(BigInt(this.getOffset()));
-      const { value: sum, error: sumError } = offsetFelt.add(other);
-      if (sumError !== undefined) {
-        return { value: undefined, error: sumError };
-      }
+      const offset = new Felt(BigInt(this.getOffset()));
+      const newOffset = offset.add(other).toUint32();
 
-      const { value: sumUint32, error: uint32Error } = sum.toUint32();
-      if (uint32Error !== undefined) {
-        return {
-          value: undefined,
-          error: uint32Error,
-        };
-      }
-      return {
-        value: new Relocatable(this.getSegmentIndex(), sumUint32),
-        error: undefined,
-      };
+      return new Relocatable(this.getSegmentIndex(), newOffset);
     }
 
     if (other instanceof Relocatable) {
-      return {
-        value: undefined,
-        error: new PrimitiveError(ForbiddenOperation),
-      };
+      throw new PrimitiveError(ForbiddenOperation);
     }
 
-    return {
-      value: new Relocatable(this.getSegmentIndex(), this.getOffset() + other),
-      error: undefined,
-    };
+    return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
   }
 
-  sub(other: MaybeRelocatable): Result<MaybeRelocatable>;
-  sub(other: Felt): Result<Relocatable>;
-  sub(other: Uint32): Ok<Relocatable>;
-  sub(other: Relocatable): Result<Felt>;
-
-  sub(other: MaybeRelocatable | Uint32): Result<MaybeRelocatable> {
+  sub(other: Felt): Relocatable;
+  sub(other: number): Relocatable;
+  sub(other: Relocatable): Felt;
+  sub(other: MaybeRelocatable): MaybeRelocatable;
+  sub(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
-      const { value: delta, error } = other.toUint32();
-      if (error !== undefined) {
-        return { value: undefined, error };
-      }
+      const delta = other.toUint32();
 
       if (this.getOffset() < delta) {
-        return {
-          value: undefined,
-          error: new PrimitiveError(OffsetUnderflow),
-        };
+        throw new PrimitiveError(OffsetUnderflow);
       }
-      return {
-        value: new Relocatable(
-          this.getSegmentIndex(),
-          this.getOffset() - delta
-        ),
-        error: undefined,
-      };
+      return new Relocatable(this.getSegmentIndex(), this.getOffset() - delta);
     }
 
     if (other instanceof Relocatable) {
       if (this.offset < other.offset) {
-        return {
-          value: undefined,
-          error: new PrimitiveError(OffsetUnderflow),
-        };
+        throw new PrimitiveError(OffsetUnderflow);
       }
 
       if (this.segmentIndex !== other.segmentIndex) {
-        return {
-          value: undefined,
-          error: new PrimitiveError(SegmentError),
-        };
+        throw new PrimitiveError(SegmentError);
       }
 
-      return {
-        value: new Felt(BigInt(this.offset - other.offset)),
-        error: undefined,
-      };
+      return new Felt(BigInt(this.offset - other.offset));
     }
 
     if (this.getOffset() < other) {
-      return {
-        value: undefined,
-        error: new PrimitiveError(OffsetUnderflow),
-      };
+      throw new PrimitiveError(OffsetUnderflow);
     }
 
-    return {
-      value: new Relocatable(this.getSegmentIndex(), this.getOffset() - other),
-      error: undefined,
-    };
-  }
-
-  mul(_: MaybeRelocatable | Uint32): Err {
-    return {
-      value: undefined,
-      error: new PrimitiveError(ForbiddenOperation),
-    };
-  }
-
-  div(_: MaybeRelocatable | Uint32): Err {
-    return {
-      value: undefined,
-      error: new PrimitiveError(ForbiddenOperation),
-    };
+    return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 
   eq(other: MaybeRelocatable): boolean {
@@ -157,11 +85,11 @@ export class Relocatable {
     return false;
   }
 
-  getSegmentIndex(): Uint32 {
+  getSegmentIndex(): number {
     return this.segmentIndex;
   }
 
-  getOffset(): Uint32 {
+  getOffset(): number {
     return this.offset;
   }
 
@@ -169,15 +97,6 @@ export class Relocatable {
     maybeRelocatable: MaybeRelocatable
   ): maybeRelocatable is Relocatable {
     return maybeRelocatable instanceof Relocatable;
-  }
-
-  static getRelocatable(
-    maybeRelocatable: MaybeRelocatable
-  ): Relocatable | undefined {
-    if (Relocatable.isRelocatable(maybeRelocatable)) {
-      return maybeRelocatable;
-    }
-    return undefined;
   }
 }
 

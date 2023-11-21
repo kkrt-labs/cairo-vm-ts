@@ -2,9 +2,9 @@ import { describe, test, expect } from 'bun:test';
 import { MemorySegmentManager } from './memoryManager';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { Uint32, UnsignedInteger } from 'primitives/uint';
-import { SegmentError } from 'result/primitives';
-import { WriteOnceError } from 'result/memory';
+import { UnsignedInteger } from 'primitives/uint';
+import { SegmentError } from 'errors/primitives';
+import { WriteOnceError } from 'errors/memory';
 
 const DATA = [
   new Relocatable(0, 0),
@@ -26,25 +26,15 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
 
-      expect(memoryManager.memory.getNumSegments()).toEqual(
-        UnsignedInteger.toUint32(1).value as Uint32
-      );
+      expect(memoryManager.memory.getNumSegments()).toEqual(1);
     });
   });
-  describe('loadData', () => {
-    test('should return the final state of the pointer', () => {
-      const memoryManager = new MemorySegmentManager();
-      memoryManager.addSegment();
-      const address = new Relocatable(0, 0);
-      const { value: loadedAddress } = memoryManager.loadData(address, DATA);
-
-      expect(loadedAddress).toEqual(new Relocatable(0, 5));
-    });
+  describe('setData', () => {
     test('should load the data in memory', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      memoryManager.loadData(address, DATA);
+      memoryManager.setData(address, DATA);
 
       expect([...memoryManager.memory.data.values()]).toEqual(DATA);
     });
@@ -52,13 +42,9 @@ describe('MemoryManager', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
       const address = new Relocatable(0, 0);
-      memoryManager.loadData(address, DATA);
+      memoryManager.setData(address, DATA);
 
-      const segmentAddress = UnsignedInteger.ZERO_UINT32;
-
-      expect(memoryManager.getSegmentSize(segmentAddress)).toEqual(
-        UnsignedInteger.toUint32(5).value as Uint32
-      );
+      expect(memoryManager.getSegmentSize(0)).toEqual(5);
     });
   });
 

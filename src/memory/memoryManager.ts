@@ -1,12 +1,11 @@
-import { Uint32, UnsignedInteger } from 'primitives/uint';
+import { UnsignedInteger } from 'primitives/uint';
 import { Memory } from './memory';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
-import { Result } from 'result/result';
-import { MemoryError, WriteOnceError } from 'result/memory';
-import { SegmentError } from 'result/primitives';
+import { MemoryError, WriteOnceError } from 'errors/memory';
+import { SegmentError } from 'errors/primitives';
 
 export class MemorySegmentManager {
-  private segmentSizes: Map<Uint32, Uint32>;
+  private segmentSizes: Map<number, number>;
   memory: Memory;
 
   constructor() {
@@ -20,40 +19,17 @@ export class MemorySegmentManager {
     return ptr;
   }
 
-  loadData(
-    address: Relocatable,
-    data: MaybeRelocatable[]
-  ): Result<Relocatable> {
+  setData(address: Relocatable, data: MaybeRelocatable[]): void {
     for (const [index, d] of data.entries()) {
-      const { value: indexUint, error: indexError } =
-        UnsignedInteger.toUint32(index);
-      if (indexError !== undefined) {
-        return { value: undefined, error: indexError };
-      }
-      const { value: nextAddress, error: addrError } = address.add(indexUint);
-      if (addrError !== undefined) {
-        return { value: undefined, error: addrError };
-      }
+      const nextAddress = address.add(index);
       this.insert_inner(nextAddress, d);
     }
 
-    const { value: dataLen, error: dataLenError } = UnsignedInteger.toUint32(
-      data.length
-    );
-    if (dataLenError !== undefined) {
-      return { value: undefined, error: dataLenError };
-    }
+    const newSegmentSize =
+      this.getSegmentSize(address.getSegmentIndex()) + data.length;
+    UnsignedInteger.ensureUint32(newSegmentSize);
 
-    const { value: newSegmentSize, error: segmentSizeError } =
-      UnsignedInteger.toUint32(
-        this.getSegmentSize(address.getSegmentIndex()) + dataLen
-      );
-    if (segmentSizeError !== undefined) {
-      return { value: undefined, error: segmentSizeError };
-    }
     this.segmentSizes.set(address.getSegmentIndex(), newSegmentSize);
-
-    return address.add(dataLen);
   }
 
   // Insert a value in the memory at the given address and increase
@@ -61,13 +37,8 @@ export class MemorySegmentManager {
   insert(address: Relocatable, value: MaybeRelocatable): void {
     this.insert_inner(address, value);
     if (address.getOffset() > this.getSegmentSize(address.getSegmentIndex())) {
-      const { value: newSize, error } = UnsignedInteger.toUint32(
-        address.getOffset() + UnsignedInteger.ONE_UINT32
-      );
-      if (error !== undefined) {
-        throw error;
-      }
-      this.segmentSizes.set(address.getSegmentIndex(), newSize);
+      UnsignedInteger.ensureUint32(address.getOffset() + 1);
+      this.segmentSizes.set(address.getSegmentIndex(), address.getOffset() + 1);
     }
   }
 
@@ -83,7 +54,7 @@ export class MemorySegmentManager {
     this.memory.data.set(addressString, value);
   }
 
-  getSegmentSize(segmentIndex: Uint32): Uint32 {
-    return this.segmentSizes.get(segmentIndex) ?? UnsignedInteger.ZERO_UINT32;
+  getSegmentSize(segmentIndex: number): number {
+    return this.segmentSizes.get(segmentIndex) ?? 0;
   }
 }
