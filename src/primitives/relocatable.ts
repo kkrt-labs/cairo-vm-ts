@@ -36,7 +36,6 @@ export class Relocatable {
       throw new PrimitiveError(ForbiddenOperation);
     }
 
-    UnsignedInteger.ensureUint32(other);
     return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
   }
 
@@ -70,7 +69,6 @@ export class Relocatable {
       throw new PrimitiveError(OffsetUnderflow);
     }
 
-    UnsignedInteger.ensureUint32(other);
     return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
   }
 

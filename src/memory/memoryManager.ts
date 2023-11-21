@@ -19,7 +19,7 @@ export class MemorySegmentManager {
     return ptr;
   }
 
-  setData(address: Relocatable, data: MaybeRelocatable[]): Relocatable {
+  setData(address: Relocatable, data: MaybeRelocatable[]): void {
     for (const [index, d] of data.entries()) {
       const nextAddress = address.add(index);
       this.insert_inner(nextAddress, d);
@@ -30,8 +30,6 @@ export class MemorySegmentManager {
     UnsignedInteger.ensureUint32(newSegmentSize);
 
     this.segmentSizes.set(address.getSegmentIndex(), newSegmentSize);
-
-    return address.add(data.length);
   }
 
   // Insert a value in the memory at the given address and increase

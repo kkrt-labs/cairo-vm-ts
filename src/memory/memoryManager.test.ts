@@ -30,14 +30,6 @@ describe('MemoryManager', () => {
     });
   });
   describe('setData', () => {
-    test('should return the final state of the pointer', () => {
-      const memoryManager = new MemorySegmentManager();
-      memoryManager.addSegment();
-      const address = new Relocatable(0, 0);
-      const newAddress = memoryManager.setData(address, DATA);
-
-      expect(newAddress).toEqual(new Relocatable(0, 5));
-    });
     test('should load the data in memory', () => {
       const memoryManager = new MemorySegmentManager();
       memoryManager.addSegment();
