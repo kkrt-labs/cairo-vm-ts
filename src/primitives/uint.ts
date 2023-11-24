@@ -3,7 +3,7 @@
 import {
   PrimitiveError,
   Uint16ConversionError,
-  Uint32ConversionError,
+  Uint53ConversionError,
   Uint64ConversionError,
 } from 'errors/primitives';
 
@@ -43,7 +43,7 @@ export class UnsignedInteger {
 
   static ensureUint53(num: number): void {
     if (!this.isUint53(num)) {
-      throw new PrimitiveError(Uint32ConversionError);
+      throw new PrimitiveError(Uint53ConversionError);
     }
   }
 

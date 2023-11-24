@@ -3,7 +3,7 @@ import { UnsignedInteger } from './uint';
 import {
   PrimitiveError,
   Uint16ConversionError,
-  Uint32ConversionError,
+  Uint53ConversionError,
   Uint64ConversionError,
 } from 'errors/primitives';
 
@@ -53,9 +53,9 @@ describe('UnsignedInteger', () => {
       expect(() => UnsignedInteger.ensureUint53(5)).not.toThrow();
     });
 
-    test('should throw an error Uint32ConversionError for negative numbers', () => {
+    test('should throw an error Uint53ConversionError for negative numbers', () => {
       expect(() => UnsignedInteger.ensureUint53(-5)).toThrow(
-        new PrimitiveError(Uint32ConversionError)
+        new PrimitiveError(Uint53ConversionError)
       );
     });
   });
