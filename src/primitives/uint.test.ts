@@ -3,7 +3,7 @@ import { UnsignedInteger } from './uint';
 import {
   PrimitiveError,
   Uint16ConversionError,
-  Uint32ConversionError,
+  Uint53ConversionError,
   Uint64ConversionError,
 } from 'errors/primitives';
 
@@ -34,28 +34,28 @@ describe('UnsignedInteger', () => {
     });
   });
 
-  describe('isUint32', () => {
+  describe('isUint53', () => {
     test('should return true for valid Uint32', () => {
-      expect(UnsignedInteger.isUint32(5)).toBe(true);
+      expect(UnsignedInteger.isUint53(5)).toBe(true);
     });
 
     test('should return false for negative bigints', () => {
-      expect(UnsignedInteger.isUint32(-5)).toBe(false);
+      expect(UnsignedInteger.isUint53(-5)).toBe(false);
     });
 
     test('should return false for decimal values', () => {
-      expect(UnsignedInteger.isUint32(1.1)).toBe(false);
+      expect(UnsignedInteger.isUint53(1.1)).toBe(false);
     });
   });
 
-  describe('ensureUint32', () => {
+  describe('ensureUint53', () => {
     test('should ensure a number is a valid Uint32', () => {
-      expect(() => UnsignedInteger.ensureUint32(5)).not.toThrow();
+      expect(() => UnsignedInteger.ensureUint53(5)).not.toThrow();
     });
 
-    test('should throw an error Uint32ConversionError for negative numbers', () => {
-      expect(() => UnsignedInteger.ensureUint32(-5)).toThrow(
-        new PrimitiveError(Uint32ConversionError)
+    test('should throw an error Uint53ConversionError for negative numbers', () => {
+      expect(() => UnsignedInteger.ensureUint53(-5)).toThrow(
+        new PrimitiveError(Uint53ConversionError)
       );
     });
   });

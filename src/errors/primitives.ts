@@ -13,9 +13,7 @@ export const OutOfRangeNumber = 'Underlying number out of range';
 // Uint errors
 export const Uint16ConversionError =
   'Cannot convert to Uint16, as underlying number < 0 or > 2^16';
-export const Uint32ConversionError =
-  'Cannot convert to Uint32, as underlying number < 0 or > 2^32';
-export const NumberConversionError =
-  'Cannot convert to number, as underlying bigint < 0 or > Number.MAX_SAFE_INTEGER';
+export const Uint53ConversionError =
+  'Cannot convert to Uint53, as underlying number < 0 or > Number.MAX_SAFE_INTEGER OR is not an integer';
 export const Uint64ConversionError =
   'Cannot convert to Uint64, as underlying bigint < 0 or > 2^64';

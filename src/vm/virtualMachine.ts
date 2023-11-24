@@ -1,4 +1,3 @@
-import { MemorySegmentManager } from 'memory/memoryManager';
 import {
   ExpectedFelt,
   ExpectedRelocatable,
@@ -26,6 +25,7 @@ import {
   EndOfInstructionsError,
   InvalidOperand0,
 } from 'errors/virtualMachine';
+import { Memory } from 'memory/memory';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -44,18 +44,16 @@ export type Operands = {
 export class VirtualMachine {
   runContext: RunContext;
   private currentStep: bigint;
-  segments: MemorySegmentManager;
+  memory: Memory;
 
   constructor() {
     this.currentStep = 0n;
-    this.segments = new MemorySegmentManager();
+    this.memory = new Memory();
     this.runContext = RunContext.default();
   }
 
   step(): void {
-    const maybeEncodedInstruction = this.segments.memory.get(
-      this.runContext.pc
-    );
+    const maybeEncodedInstruction = this.memory.get(this.runContext.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new VirtualMachineError(EndOfInstructionsError);
     }
@@ -100,7 +98,7 @@ export class VirtualMachine {
       instruction.offDst
     );
 
-    let dst = this.segments.memory.get(dstAddr);
+    let dst = this.memory.get(dstAddr);
 
     // Compute the first operand address based on the op0Reg and
     // the offset
@@ -109,7 +107,7 @@ export class VirtualMachine {
       instruction.offOp0
     );
 
-    let op0 = this.segments.memory.get(op0Addr);
+    let op0 = this.memory.get(op0Addr);
 
     // Compute the second operand address based on the op1Src and
     // the offset
@@ -119,7 +117,7 @@ export class VirtualMachine {
       op0
     );
 
-    let op1 = this.segments.memory.get(op1Addr);
+    let op1 = this.memory.get(op1Addr);
 
     // If op0 is undefined, then we can deduce it from the instruction, dst and op1
     // We also deduce the result based on the result logic
@@ -128,7 +126,7 @@ export class VirtualMachine {
 
       const [deducedOp0, deducedRes] = deducedValues;
       if (deducedOp0 !== undefined) {
-        this.segments.insert(op0Addr, deducedOp0);
+        this.memory.write(op0Addr, deducedOp0);
       }
       op0 = deducedOp0;
       res = deducedRes;
@@ -142,7 +140,7 @@ export class VirtualMachine {
 
       const [deducedOp1, deducedRes] = deducedValues;
       if (deducedOp1 !== undefined) {
-        this.segments.insert(op1Addr, deducedOp1);
+        this.memory.write(op1Addr, deducedOp1);
       }
       if (res === undefined) {
         res = deducedRes;
@@ -165,7 +163,7 @@ export class VirtualMachine {
       const deducedDst = this.deduceDst(instruction, res);
 
       if (deducedDst !== undefined) {
-        this.segments.insert(dstAddr, deducedDst);
+        this.memory.write(dstAddr, deducedDst);
       }
       dst = deducedDst;
     }
