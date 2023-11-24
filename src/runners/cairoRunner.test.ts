@@ -28,10 +28,6 @@ describe('cairoRunner', () => {
       const executionSize = runner.getVm().memory.getSegmentSize(1);
       const executionEnd = runner.getExecutionBase().add(executionSize);
 
-      console.log(
-        `Execution end: ${executionEnd.getSegmentIndex()}:${executionEnd.getOffset()}`
-      );
-
       expect(runner.getVm().memory.get(executionEnd.sub(1))).toEqual(
         new Felt(144n)
       );

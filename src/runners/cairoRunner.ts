@@ -50,14 +50,16 @@ export class CairoRunner {
           `AP: ${this.vm.runContext.ap.getSegmentIndex()}:${this.vm.runContext.ap.getOffset()}`
         );
         console.log(
-          `[ap - 1]: ${this.vm.memory.get(this.vm.runContext.ap.sub(1))}`
-        );
-        console.log(
           `FP: ${this.vm.runContext.fp.getSegmentIndex()}:${this.vm.runContext.fp.getOffset()}`
         );
         console.log(
           `PC: ${this.vm.runContext.pc.getSegmentIndex()}:${this.vm.runContext.pc.getOffset()}`
         );
+
+        console.log(
+          `[ap - 1]: ${this.vm.memory.get(this.vm.runContext.ap.sub(1))}`
+        );
+        console.log(`[fp]: ${this.vm.memory.get(this.vm.runContext.fp)}`);
       }
     }
   }
