@@ -32,7 +32,9 @@ describe('cairoRunner', () => {
         `Execution end: ${executionEnd.getSegmentIndex()}:${executionEnd.getOffset()}`
       );
 
-      expect(runner.getVm().memory.get(executionEnd)).toEqual(new Felt(144n));
+      expect(runner.getVm().memory.get(executionEnd.sub(1))).toEqual(
+        new Felt(144n)
+      );
     });
   });
 
