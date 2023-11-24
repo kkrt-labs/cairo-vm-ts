@@ -19,8 +19,8 @@ export class UnsignedInteger {
 
   // Returns whether the number is a safe unsigned integer,
   // i.e. a positive number between 0 and 2^32
-  static isUint32(num: number): boolean {
-    if (num >= 0 && num < 0x100000000 && Number.isInteger(num)) {
+  static isUint53(num: number): boolean {
+    if (num >= 0 && num < Number.MAX_SAFE_INTEGER && Number.isInteger(num)) {
       return true;
     }
     return false;
@@ -41,8 +41,8 @@ export class UnsignedInteger {
     }
   }
 
-  static ensureUint32(num: number): void {
-    if (!this.isUint32(num)) {
+  static ensureUint53(num: number): void {
+    if (!this.isUint53(num)) {
       throw new PrimitiveError(Uint32ConversionError);
     }
   }

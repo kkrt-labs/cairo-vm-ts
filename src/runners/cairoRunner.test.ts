@@ -3,7 +3,6 @@ import { parseProgram } from 'vm/program';
 import * as fs from 'fs';
 import { CairoRunner } from './cairoRunner';
 import { Relocatable } from 'primitives/relocatable';
-import { Uint32 } from 'primitives/uint';
 import { Felt } from 'primitives/felt';
 
 const FIBONACCI_PROGRAM_STRING = fs.readFileSync(
@@ -16,7 +15,7 @@ describe('cairoRunner', () => {
   describe('constructor', () => {
     test('should construct', () => {
       const runner = new CairoRunner(PROGRAM);
-      expect(runner.getMainOffset()).toEqual(0 as Uint32);
+      expect(runner.getMainOffset()).toEqual(0);
     });
   });
 
@@ -25,13 +24,15 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.initialize();
       const finalPc = new Relocatable(0, 12);
-      runner.runUntilPc(finalPc);
-      const executionSize = runner.getVm().segments.getSegmentSize(1 as Uint32);
+      runner.runUntilPc(finalPc, true);
+      const executionSize = runner.getVm().memory.getSegmentSize(1);
       const executionEnd = runner.getExecutionBase().add(executionSize);
 
-      expect(runner.getVm().segments.memory.get(executionEnd)).toEqual(
-        new Felt(144n)
+      console.log(
+        `Execution end: ${executionEnd.getSegmentIndex()}:${executionEnd.getOffset()}`
       );
+
+      expect(runner.getVm().memory.get(executionEnd)).toEqual(new Felt(144n));
     });
   });
 
@@ -61,19 +62,15 @@ describe('cairoRunner', () => {
     test('should initialize the state', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.initializeSegments();
-      const entrypoint = 5 as Uint32;
+      const entrypoint = 5;
       const stack = [new Relocatable(2, 0), new Relocatable(3, 0)];
       runner.initializeState(entrypoint, stack);
 
       expect(runner.getInitialPc()).toEqual(new Relocatable(0, 5));
       const executionBase = runner.getExecutionBase();
-      expect(runner.getVm().segments.memory.get(executionBase)).toEqual(
-        stack[0]
-      );
-      const executionBasePlusOne = executionBase.add(1 as Uint32);
-      expect(runner.getVm().segments.memory.get(executionBasePlusOne)).toEqual(
-        stack[1]
-      );
+      expect(runner.getVm().memory.get(executionBase)).toEqual(stack[0]);
+      const executionBasePlusOne = executionBase.add(1);
+      expect(runner.getVm().memory.get(executionBasePlusOne)).toEqual(stack[1]);
     });
   });
 });

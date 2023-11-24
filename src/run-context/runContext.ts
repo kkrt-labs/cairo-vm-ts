@@ -101,7 +101,7 @@ function applyOffsetOnBaseAddress(
   const value =
     -1 * offsetIsNegative * offset + (1 - offsetIsNegative) * offset;
 
-  UnsignedInteger.ensureUint32(value);
+  UnsignedInteger.ensureUint53(value);
 
   return offsetIsNegative ? baseAddr.sub(value) : baseAddr.add(value);
 }

@@ -14,8 +14,8 @@ export class Relocatable {
   private offset: number;
 
   constructor(segmentIndex: number, offset: number) {
-    UnsignedInteger.ensureUint32(segmentIndex);
-    UnsignedInteger.ensureUint32(offset);
+    UnsignedInteger.ensureUint53(segmentIndex);
+    UnsignedInteger.ensureUint53(offset);
     this.segmentIndex = segmentIndex;
     this.offset = offset;
   }
@@ -27,7 +27,7 @@ export class Relocatable {
   add(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
       const offset = new Felt(BigInt(this.getOffset()));
-      const newOffset = offset.add(other).toUint32();
+      const newOffset = offset.add(other).toUint53();
 
       return new Relocatable(this.getSegmentIndex(), newOffset);
     }
@@ -45,7 +45,7 @@ export class Relocatable {
   sub(other: MaybeRelocatable): MaybeRelocatable;
   sub(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
-      const delta = other.toUint32();
+      const delta = other.toUint53();
 
       if (this.getOffset() < delta) {
         throw new PrimitiveError(OffsetUnderflow);

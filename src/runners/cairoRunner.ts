@@ -19,7 +19,6 @@ export class CairoRunner {
     const mainIdentifier = program.identifiers.get('__main__.main');
     let mainOffset = 0;
     if (mainIdentifier !== undefined && mainIdentifier.pc !== undefined) {
-      UnsignedInteger.ensureUint32(mainIdentifier.pc);
       mainOffset = mainIdentifier.pc;
     }
 
@@ -33,7 +32,7 @@ export class CairoRunner {
     this.mainOffset = mainOffset;
   }
 
-  // Initialize the runner with the program and stack.
+  // Initialize the runner with the program and values.
   initialize(): Relocatable {
     this.initializeSegments();
     const result = this.initializeMainEntrypoint();
@@ -43,52 +42,66 @@ export class CairoRunner {
   }
 
   // Run until the given PC is reached.
-  runUntilPc(end: Relocatable): void {
-    while (this.vm.runContext.pc.getOffset() < end.getOffset()) {
+  runUntilPc(finalPc: Relocatable, verbose: boolean = false): void {
+    while (this.vm.runContext.pc.getOffset() < finalPc.getOffset()) {
       this.vm.step();
+      if (verbose) {
+        console.log(
+          `AP: ${this.vm.runContext.ap.getSegmentIndex()}:${this.vm.runContext.ap.getOffset()}`
+        );
+        console.log(
+          `[ap - 1]: ${this.vm.memory.get(this.vm.runContext.ap.sub(1))}`
+        );
+        console.log(
+          `FP: ${this.vm.runContext.fp.getSegmentIndex()}:${this.vm.runContext.fp.getOffset()}`
+        );
+        console.log(
+          `PC: ${this.vm.runContext.pc.getSegmentIndex()}:${this.vm.runContext.pc.getOffset()}`
+        );
+      }
     }
   }
 
-  // Initialize the program and execution segments.
+  // Initialize the program and execution segments (resp. segment 0 and 1) in memory.
   initializeSegments(): void {
-    this.programBase = this.vm.segments.addSegment();
-    this.executionBase = this.vm.segments.addSegment();
+    this.programBase = new Relocatable(0, 0);
+    this.executionBase = this.vm.memory.addSegment();
   }
 
   // Initialize the main entrypoint.
   initializeMainEntrypoint(): Relocatable {
-    const stack: Relocatable[] = [];
-    const return_fp = this.vm.segments.addSegment();
-    return this.initializeFunctionEntrypoint(this.mainOffset, stack, return_fp);
+    const returnFp = this.vm.memory.addSegment();
+    return this.initializeFunctionEntrypoint(this.mainOffset, returnFp);
   }
 
   // Initialize a function entrypoint.
   initializeFunctionEntrypoint(
     entrypoint: number,
-    stack: Relocatable[],
-    return_fp: Relocatable
+    returnFp: Relocatable
   ): Relocatable {
-    const finalPc = this.vm.segments.addSegment();
-    stack.push(return_fp, finalPc);
+    const finalPc = this.vm.memory.addSegment();
+    const values = [returnFp, finalPc];
 
-    const initialFp = this.executionBase.add(stack.length);
-
-    this.initialFp = initialFp;
-    this.initialAp = initialFp;
+    this.initialFp = this.executionBase.add(values.length);
+    this.initialAp = this.getInitialFp();
     this.finalPc = finalPc;
 
-    this.initializeState(entrypoint, stack);
+    this.initializeState(entrypoint, values);
 
     return finalPc;
   }
 
   // Initialize the runner state.
-  initializeState(entrypoint: number, stack: Relocatable[]): void {
+  initializeState(entrypoint: number, initialValues: Relocatable[]): void {
     this.initialPc = this.programBase.add(entrypoint);
 
-    this.vm.segments.setData(this.programBase, this.program.data);
+    // Initialize the program segment.
+    // This sets the bytecode of your Cairo program in Memory, at segment 0.
+    this.vm.memory.setData(this.programBase, this.program.data);
 
-    this.vm.segments.setData(this.executionBase, stack);
+    // Initialize the execution segment.
+    // This sets the initial values in Memory, at segment 1.
+    this.vm.memory.setData(this.executionBase, initialValues);
   }
 
   // Initialize the VM.
@@ -103,27 +116,45 @@ export class CairoRunner {
   }
 
   getProgramBase(): Relocatable {
-    return this.programBase;
+    return new Relocatable(
+      this.programBase.getSegmentIndex(),
+      this.programBase.getOffset()
+    );
   }
 
   getExecutionBase(): Relocatable {
-    return this.executionBase;
+    return new Relocatable(
+      this.executionBase.getSegmentIndex(),
+      this.executionBase.getOffset()
+    );
   }
 
   getInitialPc(): Relocatable {
-    return this.initialPc;
+    return new Relocatable(
+      this.initialPc.getSegmentIndex(),
+      this.initialPc.getOffset()
+    );
   }
 
   getInitialAp(): Relocatable {
-    return this.initialAp;
+    return new Relocatable(
+      this.initialAp.getSegmentIndex(),
+      this.initialAp.getOffset()
+    );
   }
 
   getInitialFp(): Relocatable {
-    return this.initialFp;
+    return new Relocatable(
+      this.initialFp.getSegmentIndex(),
+      this.initialFp.getOffset()
+    );
   }
 
   getFinalPc(): Relocatable {
-    return this.finalPc;
+    return new Relocatable(
+      this.finalPc.getSegmentIndex(),
+      this.finalPc.getOffset()
+    );
   }
 
   getMainOffset(): number {

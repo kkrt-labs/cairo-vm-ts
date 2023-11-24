@@ -64,11 +64,11 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint32(): number {
+  toUint53(): number {
     if (this.inner > Number.MAX_SAFE_INTEGER) {
       throw new PrimitiveError(OutOfRangeBigInt);
     }
-    UnsignedInteger.ensureUint32(Number(this.inner));
+
     return Number(this.inner);
   }
 
