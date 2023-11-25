@@ -36,7 +36,7 @@ Read so far up to
 - Run `bun test` to run all tests
 
 ## Introduction to Cairo VM
-Cairo VM, a Turing-complete and STARK-friendly CPU architecture, is integral to blockchain and cryptographic computations. It represents statements as polynomial equations over a finite field, essential for handling complex cryptographic proofs.
+Cairo VM is an advanced virtual CPU architecture designed for blockchain technology and cryptographic operations. It's Turing-complete and STARK-friendly, efficiently handling complex program statements as polynomial equations over a finite field. This feature is crucial for secure and effective cryptographic proof management in blockchain applications, making Cairo VM a key player in the realm of decentralized computing.
 
 ## Register-Based VM
 Cairo VM's register-based architecture allows for quicker data access and reduced stack interaction, enhancing computational efficiency and performance in cryptographic operations.
