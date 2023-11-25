@@ -177,11 +177,11 @@ graph TD
 ```mermaid
 graph TD
     subgraph RunContext
-        RC -->|increments PC| fn_incrementPc[fn_incrementPc]
+        RC[RunContext] -->|increments PC| fn_incrementPc[fn_incrementPc]
         fn_incrementPc -->|calls fn_add| PC[ProgramCounter]
-        RC -->|computes address| fn_computeAddress[fn_computeAddress]
+        RC[RunContext] -->|computes address| fn_computeAddress[fn_computeAddress]
         fn_computeAddress -->|calls applyOffsetOnBaseAddress| applyOffsetOnBaseAddress
-        RC -->|computes op1 address| fn_computeOp1Address[fn_computeOp1Address]
+        RC[RunContext] -->|computes op1 address| fn_computeOp1Address[fn_computeOp1Address]
         fn_computeOp1Address -->|calls applyOffsetOnBaseAddress| applyOffsetOnBaseAddress
     end
 ```
@@ -198,13 +198,13 @@ graph TD
 ```mermaid
 graph TD
     subgraph MemorySegmentManager
-        MSM -->|adds segment| fn_addSegment[fn_addSegment]
-        MSM -->|sets data in memory| fn_setData[fn_setData]
-        MSM -->|inserts value into memory| fn_insert[fn_insert]
+        MSM[MemorySegmentManager] -->|adds segment| fn_addSegment[fn_addSegment]
+        MSM[MemorySegmentManager] -->|sets data in memory| fn_setData[fn_setData]
+        MSM[MemorySegmentManager] -->|inserts value into memory| fn_insert[fn_insert]
         fn_setData -->|calls insert_inner| fn_insert_inner
         fn_insert -->|calls insert_inner| fn_insert_inner
         fn_insert -->|updates segment size| UnsignedInt[unsigned integer]
-        MSM -->|manages| Memory[Memory]
+        MSM[MemorySegmentManager] -->|manages| Memory[Memory]
         fn_addSegment -->|calls incrementNumSegments in| Memory
         fn_insert_inner -->|sets data in| Memory
     end
