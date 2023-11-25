@@ -39,7 +39,7 @@ Read so far up to
 Cairo VM is an advanced virtual CPU architecture designed for blockchain technology and cryptographic operations. It's Turing-complete and STARK-friendly, efficiently handling complex program statements as polynomial equations over a finite field. This feature is crucial for secure and effective cryptographic proof management in blockchain applications, making Cairo VM a key player in the realm of decentralized computing.
 
 ## Register-Based VM
-Cairo VM's register-based architecture allows for quicker data access and reduced stack interaction, enhancing computational efficiency and performance in cryptographic operations.
+Cairo VM's register-based architecture allows for quicker data access compared to stack based interaction, enhancing computational efficiency and performance in cryptographic operations.
 
 ## Detailed Architecture Overview
 - **Finite Field Operations**: Core to Cairo VM's computational power for cryptographic aspects of STARKs.
@@ -111,7 +111,7 @@ graph TD
     end
 
 ```
-- **Overview**: The Cairo VM TS Flow diagram illustrates the interconnectivity and operational dynamics of the various classes within the Cairo VM TypeScript implementation. It showcases how each class contributes to the overall functioning of the VM, detailing the interactions between the VirtualMachine, RunContext, MemorySegmentManager, Memory, and CairoRunner classes. This flowchart is an invaluable tool for understanding the architecture and inner workings of the Cairo VM, highlighting the orchestration of instruction execution, memory management, and execution control within this sophisticated virtual environment.
+- **Overview**: The Cairo VM TS Flow diagram illustrates the interconnectivity and operational dynamics of the various classes within the Cairo VM TypeScript implementation. It showcases how each class contributes to the overall functioning of the VM, detailing the interactions between the VirtualMachine, RunContext, MemorySegmentManager, Memory, and CairoRunner classes. This flowchart is a tool for understanding the architecture and inner workings of the Cairo VM, highlighting the orchestration of instruction execution, memory management, and execution control within this sophisticated virtual environment.
 
 
 
@@ -133,15 +133,15 @@ graph TD
 
 
 - **Main Functions**:
-    - `initialize`: Sets up the Cairo VM by initializing the necessary segments and the main entry point. It also configures the VM with the program data and stack, preparing it for execution. This function lays the groundwork for the VM's operational environment.
+    - `initialize`: Sets up the Cairo VM by initializing the necessary segments and the main entry point. This function lays the groundwork for the VM's operational environment.
 
     - `runUntilPc`: Controls the execution of the VM until a specified program counter (PC) is reached. It repeatedly invokes the VM's step function, progressing through the program instructions until the end condition is met.
 
     - `initializeSegments`: Responsible for creating the program and execution segments in the VM's memory. This function allocates the necessary memory space for the program's execution, setting the stage for the instructions to be loaded and executed.
 
-    - `initializeMainEntrypoint`: Initializes the main function entry point of the program. This includes setting up the initial stack frame and determining the final PC for the main function.
+    - `initializeMainEntrypoint`: Initializes the main function entry point of the program. This includes setting up the initial registers and determining the final PC for the main function.
 
-    - `initializeFunctionEntrypoint`: Sets up a function entry point in the VM. This involves preparing the stack and frame pointer for the function call and calculating the final PC for the function.
+    - `initializeFunctionEntrypoint`: Sets up a function entry point in the VM. This involves preparing the registers for the function call and calculating the final PC for the function.
 
     - `initializeState`: Configures the initial state of the VM, including setting the initial PC, AP, and FP, and loading the program data into the VM's memory.
 
@@ -163,7 +163,7 @@ graph TD
         fn_UpdateRegisterFunctions -->|updates using| RC
     end
 ```
-- **Overview**: At the heart of Cairo VM's TS implementation lies the VirtualMachineClass, a complex and sophisticated engine driving the core functionalities of the VM. This class is intricately involved in the processing of each instruction, from decoding the bytecode to executing the corresponding operations. It adeptly manages the interplay between memory, computation, and state transitions, ensuring that each instruction is executed in accordance with the VM's operational principles. The VirtualMachineClass is the linchpin in the VM's ability to execute Cairo programs, deftly handling the complexities of a register-based virtual environment.
+- **Overview**: At the heart of Cairo VM's TS implementation lies the VirtualMachineClass, a complex and sophisticated engine driving the core functionalities of the VM. This class is intricately involved in the processing of each instruction, from decoding the bytecode to executing the corresponding operations. It adeptly manages the interplay between memory, computation, and state transitions.
 
 - **Functions**:
     - `fn_step`: This function acts as the heartbeat of the VirtualMachine, propelling the execution process forward. It retrieves the next encoded instruction from memory, decodes it, and then proceeds to run the instruction. The function embodies the cycle of fetch-decode-execute, pivotal in the VM's operation, and ensures that the VM advances through the program correctly.
