@@ -3,11 +3,9 @@ import {
   ApUpdate,
   FpUpdate,
   Instruction,
-  Op1Src,
   Opcode,
   PcUpdate,
-  RegisterFlag,
-  ResLogic,
+  ResultLogic,
 } from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
@@ -26,13 +24,13 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 
-function getInstructionWithOpcodeAndResLogic(
+function getInstructionWithOpcodeAndResultLogic(
   opcode: Opcode,
-  resLogic: ResLogic
+  resultLogic: ResultLogic
 ): Instruction {
   const instruction = Instruction.default();
   instruction.opcode = opcode;
-  instruction.resLogic = resLogic;
+  instruction.resultLogic = resultLogic;
   return instruction;
 }
 
@@ -41,206 +39,206 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L16
   describe('deduceOp0', () => {
     test('should return undefined for return opcode', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Ret,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'return',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
 
       const op0 = vm.deduceOp0(instruction, undefined, undefined);
-      expect(op0).toEqual([undefined, undefined]);
+      expect(op0).toBeUndefined();
     });
 
     test('should deduce op0 for assert eq res logic mul', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(6n);
       const op1 = new Felt(3n);
 
       const op0 = vm.deduceOp0(instruction, dst, op1);
-      expect(op0).toEqual([new Felt(2n), dst]);
+      expect(op0).toEqual(new Felt(2n));
     });
 
     test('should return undefined for assert eq res logic mul with op1 = 0', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(6n);
       const op1 = new Felt(0n);
 
       const value = vm.deduceOp0(instruction, dst, op1);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should return undefined for assert eq res logic mul with relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const dst = new Relocatable(1, 2);
       const op1 = new Relocatable(1, 3);
 
       const value = vm.deduceOp0(instruction, dst, op1);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should return undefined for assert eq res logic mul with undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp0(instruction, undefined, undefined);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should deduce op0 and res for assert eq res logic add with felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(7n);
       const op1 = new Felt(5n);
 
       const value = vm.deduceOp0(instruction, dst, op1);
-      expect(value).toEqual([new Felt(2n), dst]);
+      expect(value).toEqual(new Felt(2n));
     });
 
     test('should deduce op0 and res for assert eq res logic add with relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
       const dst = new Relocatable(1, 6);
       const op1 = new Relocatable(1, 2);
 
       const value = vm.deduceOp0(instruction, dst, op1);
-      expect(value).toEqual([new Felt(4n), dst]);
+      expect(value).toEqual(new Felt(4n));
     });
 
     test('should return undefined for assert eq res logic add with undefined dst and op1', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp0(instruction, undefined, undefined);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should deduce op0 for call', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Call,
-        ResLogic.Unconstrained
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'call',
+        'unconstrained'
       );
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp0(instruction, undefined, undefined);
-      expect(value).toEqual([new Relocatable(0, 1), undefined]);
+      expect(value).toEqual(new Relocatable(0, 1));
     });
   });
 
   describe('deduceOp1', () => {
     test('should return undefined for return opcode', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Ret,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'return',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
 
       const op1 = vm.deduceOp1(instruction, undefined, undefined);
-      expect(op1).toEqual([undefined, undefined]);
+      expect(op1).toBeUndefined();
     });
 
     test('should deduce op1 for assert eq res logic add', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(3n);
       const op0 = new Felt(2n);
 
       const op1 = vm.deduceOp1(instruction, dst, op0);
-      expect(op1).toEqual([new Felt(1n), dst]);
+      expect(op1).toEqual(new Felt(1n));
     });
 
     test('should return undefined for assert eq res logic add with op0 and dst undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp1(instruction, undefined, undefined);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should deduce op1 for assert eq res logic mul with felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(4n);
       const op0 = new Felt(2n);
 
       const op1 = vm.deduceOp1(instruction, dst, op0);
-      expect(op1).toEqual([new Felt(2n), dst]);
+      expect(op1).toEqual(new Felt(2n));
     });
 
     test('should return undefined for assert eq res logic mul with op0 = 0', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(4n);
       const op0 = new Felt(0n);
 
       const value = vm.deduceOp1(instruction, dst, op0);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should deduce op1 and res for assert eq res logic op1 with dst undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Op1
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op1'
       );
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp1(instruction, undefined, undefined);
-      expect(value).toEqual([undefined, undefined]);
+      expect(value).toBeUndefined();
     });
 
     test('should deduce op1 and res for assert eq res logic op1 with dst', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Op1
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(7n);
 
       const value = vm.deduceOp1(instruction, dst, undefined);
-      expect(value).toEqual([dst, dst]);
+      expect(value).toEqual(dst);
     });
   });
 
   describe('computeRes', () => {
     test('should deduce res with res logic op1', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Op1
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op1'
       );
       const vm = new VirtualMachine();
       const op0 = new Felt(2n);
@@ -250,9 +248,9 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(op1);
     });
     test('should deduce res with res logic add with op0 and op1 felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
       const op0 = new Felt(5n);
@@ -262,9 +260,9 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(new Felt(7n));
     });
     test('should throw an error with res logic add with op0 and op1 relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -275,9 +273,9 @@ describe('VirtualMachine', () => {
       );
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const op0 = new Felt(5n);
@@ -287,9 +285,9 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(new Felt(10n));
     });
     test('should throw an error with res logic mul with op0 and op1 relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'op0 * op1'
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -300,9 +298,9 @@ describe('VirtualMachine', () => {
       );
     });
     test('should return undefined with res logic unconstrained', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unconstrained
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'unconstrained'
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -315,9 +313,9 @@ describe('VirtualMachine', () => {
 
   describe('deduceDst', () => {
     test('should deduce dst for assert eq with res', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unconstrained
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'unconstrained'
       );
       const vm = new VirtualMachine();
       const res = new Felt(5n);
@@ -326,9 +324,9 @@ describe('VirtualMachine', () => {
       expect(dst).toEqual(res);
     });
     test('should deduce dst for call', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Call,
-        ResLogic.Unconstrained
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'call',
+        'unconstrained'
       );
       const vm = new VirtualMachine();
       const res = new Felt(5n);
@@ -337,9 +335,9 @@ describe('VirtualMachine', () => {
       expect(dst).toEqual(new Relocatable(1, 0));
     });
     test('should return undefined for assert eq with res undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unconstrained
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'unconstrained'
       );
       const vm = new VirtualMachine();
 
@@ -347,9 +345,9 @@ describe('VirtualMachine', () => {
       expect(dst).toBeUndefined();
     });
     test('should return undefined dst for ret', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unconstrained
+      const instruction = getInstructionWithOpcodeAndResultLogic(
+        'assert_eq',
+        'unconstrained'
       );
       const vm = new VirtualMachine();
 
@@ -368,12 +366,12 @@ describe('VirtualMachine', () => {
         3,
         'fp',
         'ap',
-        Op1Src.AP,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.ApPlus2,
-        Opcode.AssertEq
+        'ap',
+        'op0 + op1',
+        'no-op',
+        'no-op',
+        'fp = ap + 2',
+        'assert_eq'
       );
 
       const operands: Operands = {
@@ -395,12 +393,13 @@ describe('VirtualMachine', () => {
         3,
         'fp',
         'ap',
-        Op1Src.AP,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.ApPlus2,
-        Opcode.AssertEq
+
+        'ap',
+        'op0 + op1',
+        'no-op',
+        'no-op',
+        'fp = ap + 2',
+        'assert_eq'
       );
 
       const operands: Operands = {
@@ -422,12 +421,13 @@ describe('VirtualMachine', () => {
         3,
         'fp',
         'ap',
-        Op1Src.AP,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.ApPlus2,
-        Opcode.AssertEq
+
+        'ap',
+        'op0 + op1',
+        'no-op',
+        'no-op',
+        'fp = ap + 2',
+        'assert_eq'
       );
 
       const operands: Operands = {
@@ -449,12 +449,13 @@ describe('VirtualMachine', () => {
         3,
         'fp',
         'ap',
-        Op1Src.AP,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.ApPlus2,
-        Opcode.Call
+
+        'ap',
+        'op0 + op1',
+        'no-op',
+        'no-op',
+        'fp = ap + 2',
+        'call'
       );
 
       const operands: Operands = {
@@ -476,12 +477,13 @@ describe('VirtualMachine', () => {
         3,
         'fp',
         'ap',
-        Op1Src.AP,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.ApPlus2,
-        Opcode.Call
+
+        'ap',
+        'op0 + op1',
+        'no-op',
+        'no-op',
+        'fp = ap + 2',
+        'call'
       );
 
       const operands: Operands = {
@@ -508,12 +510,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -534,12 +537,12 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.Imm,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'pc',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -560,12 +563,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Jump,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = res',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -586,12 +590,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Jump,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = res',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -613,12 +618,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Jump,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = res',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -640,12 +646,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.JumpRel,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = pc + res',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -666,12 +673,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.JumpRel,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = pc + res',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -693,12 +701,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.JumpRel,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = pc + res',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -720,12 +729,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Jnz,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -746,12 +756,12 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.Imm,
-        ResLogic.Unconstrained,
-        PcUpdate.Jnz,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'pc',
+        'unconstrained',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -772,12 +782,12 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.Imm,
-        ResLogic.Unconstrained,
-        PcUpdate.Jnz,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'pc',
+        'unconstrained',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -798,12 +808,12 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.Imm,
-        ResLogic.Unconstrained,
-        PcUpdate.Jnz,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'pc',
+        'unconstrained',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -830,12 +840,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -856,12 +867,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Dst,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'fp = relocatable(dst) || fp += felt(dst)',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -882,12 +894,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Dst,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'fp = relocatable(dst) || fp += felt(dst)',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -908,12 +921,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.ApPlus2,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'fp = ap + 2',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -940,12 +954,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -966,12 +981,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Add2,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'ap += 2',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -992,12 +1008,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Add1,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'ap++',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -1018,12 +1035,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Add,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'ap = ap + res',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -1044,12 +1062,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Add,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'ap = ap + res',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -1071,12 +1090,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Add,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'ap = ap + res',
+        'no-op',
+        'no-op'
       );
 
       const vm = new VirtualMachine();
@@ -1103,12 +1123,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
       const operands = {
         op0: undefined,
@@ -1131,12 +1152,13 @@ describe('VirtualMachine', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Unconstrained,
-        PcUpdate.JumpRel,
-        ApUpdate.Add2,
-        FpUpdate.Dst,
-        Opcode.NoOp
+
+        'ap',
+        'unconstrained',
+        'pc = pc + res',
+        'ap += 2',
+        'fp = relocatable(dst) || fp += felt(dst)',
+        'no-op'
       );
       const operands = {
         op0: undefined,
@@ -1170,7 +1192,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address(Op1Src.FP, 1, undefined);
+      const op1Addr = vm.computeOp1Address('fp', 1, undefined);
 
       expect(op1Addr.getSegmentIndex()).toEqual(1);
       expect(op1Addr.getOffset()).toEqual(7);
@@ -1180,7 +1202,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address(Op1Src.AP, 1, undefined);
+      const op1Addr = vm.computeOp1Address('ap', 1, undefined);
 
       expect(op1Addr.getSegmentIndex()).toEqual(1);
       expect(op1Addr.getOffset()).toEqual(6);
@@ -1190,7 +1212,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address(Op1Src.Imm, 1, undefined);
+      const op1Addr = vm.computeOp1Address('pc', 1, undefined);
 
       expect(op1Addr.getSegmentIndex()).toEqual(0);
       expect(op1Addr.getOffset()).toEqual(5);
@@ -1200,7 +1222,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      expect(() => vm.computeOp1Address(Op1Src.Imm, 2, undefined)).toThrow(
+      expect(() => vm.computeOp1Address('pc', 2, undefined)).toThrow(
         new VirtualMachineError(Op1ImmediateOffsetError)
       );
     });
@@ -1209,11 +1231,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address(
-        Op1Src.Op0,
-        1,
-        new Relocatable(1, 7)
-      );
+      const op1Addr = vm.computeOp1Address('op0', 1, new Relocatable(1, 7));
 
       expect(op1Addr.getSegmentIndex()).toEqual(1);
       expect(op1Addr.getOffset()).toEqual(8);
@@ -1223,7 +1241,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      expect(() => vm.computeOp1Address(Op1Src.Op0, 1, new Felt(7n))).toThrow(
+      expect(() => vm.computeOp1Address('op0', 1, new Felt(7n))).toThrow(
         new VirtualMachineError(Op0NotRelocatable)
       );
     });
@@ -1232,7 +1250,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      expect(() => vm.computeOp1Address(Op1Src.Op0, 1, undefined)).toThrow(
+      expect(() => vm.computeOp1Address('op0', 1, undefined)).toThrow(
         new VirtualMachineError(Op0Undefined)
       );
     });

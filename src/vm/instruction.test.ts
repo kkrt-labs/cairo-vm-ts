@@ -4,17 +4,17 @@ import {
   ApUpdate,
   FpUpdate,
   Instruction,
-  Op1Src,
+  OperandOneSource,
   Opcode,
   PcUpdate,
-  ResLogic,
+  ResultLogic,
 } from './instruction';
 
 import {
   HighBitSetError,
   InstructionError,
   InvalidApUpdate,
-  InvalidOp1Src,
+  InvalidOperandOneSource,
   InvalidOpcode,
   InvalidPcUpdate,
   InvalidResultLogic,
@@ -28,9 +28,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidOp1Src', () => {
+    test('should throw an error InvalidOperandOneSource', () => {
       expect(() => Instruction.decodeInstruction(0x294f800080008000n)).toThrow(
-        new InstructionError(InvalidOp1Src)
+        new InstructionError(InvalidOperandOneSource)
       );
     });
 
@@ -61,12 +61,13 @@ describe('Instruction', () => {
     test('should correctly decode the cairo instruction [ap + 10] = [fp] + 42', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
-      const offDst = 10n + BIAS;
-      const offOp0 = BIAS << shift;
-      const offOp1 = (1n + BIAS) << (2n * shift);
+      const dstOffset = 10n + BIAS;
+      const operandZeroOffset = BIAS << shift;
+      const operandOneOffset = (1n + BIAS) << (2n * shift);
 
       const flag = 0b0100000000100110n << (3n * shift);
-      const encodedInstruction = offDst | offOp0 | offOp1 | flag;
+      const encodedInstruction =
+        dstOffset | operandZeroOffset | operandOneOffset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -76,12 +77,12 @@ describe('Instruction', () => {
         1,
         'ap',
         'fp',
-        Op1Src.Imm,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.AssertEq
+        'pc',
+        'op0 + op1',
+        'no-op',
+        'no-op',
+        'no-op',
+        'assert_eq'
       );
 
       expect(instruction).toEqual(expected);
@@ -90,12 +91,13 @@ describe('Instruction', () => {
     test('should correctly decode the cairo instruction jmp rel [fp - 1] if [fp - 7] != 0', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
-      const offDst = -7n + BIAS;
-      const offOp0 = (BIAS - 1n) << shift;
-      const offOp1 = (BIAS - 1n) << (2n * shift);
+      const dstOffset = -7n + BIAS;
+      const operandZeroOffset = (BIAS - 1n) << shift;
+      const operandOneOffset = (BIAS - 1n) << (2n * shift);
 
       const flag = 0b0000001000001011n << (3n * shift);
-      const encodedInstruction = offDst | offOp0 | offOp1 | flag;
+      const encodedInstruction =
+        dstOffset | operandZeroOffset | operandOneOffset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -105,12 +107,12 @@ describe('Instruction', () => {
         -1,
         'fp',
         'fp',
-        Op1Src.FP,
-        ResLogic.Unconstrained,
-        PcUpdate.Jnz,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'fp',
+        'unconstrained',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       expect(instruction).toEqual(expected);
@@ -119,12 +121,13 @@ describe('Instruction', () => {
     test('should correctly decode the cairo instruction ap += [fp + 4] + [fp]', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
-      const offDst = -1n + BIAS;
-      const offOp0 = (BIAS + 4n) << shift;
-      const offOp1 = BIAS << (2n * shift);
+      const dstOffset = -1n + BIAS;
+      const operandZeroOffset = (BIAS + 4n) << shift;
+      const operandOneOffset = BIAS << (2n * shift);
 
       const flag = 0b0000010000101011n << (3n * shift);
-      const encodedInstruction = offDst | offOp0 | offOp1 | flag;
+      const encodedInstruction =
+        dstOffset | operandZeroOffset | operandOneOffset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -134,12 +137,12 @@ describe('Instruction', () => {
         0,
         'fp',
         'fp',
-        Op1Src.FP,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Add,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'fp',
+        'op0 + op1',
+        'no-op',
+        'ap = ap + res',
+        'no-op',
+        'no-op'
       );
 
       expect(instruction).toEqual(expected);
@@ -148,12 +151,13 @@ describe('Instruction', () => {
     test('should correctly decode the cairo instruction call abs [fp + 4]', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
-      const offDst = BIAS;
-      const offOp0 = (BIAS + 1n) << shift;
-      const offOp1 = (BIAS + 4n) << (2n * shift);
+      const dstOffset = BIAS;
+      const operandZeroOffset = (BIAS + 1n) << shift;
+      const operandOneOffset = (BIAS + 4n) << (2n * shift);
 
       const flag = 0b0001000010001000n << (3n * shift);
-      const encodedInstruction = offDst | offOp0 | offOp1 | flag;
+      const encodedInstruction =
+        dstOffset | operandZeroOffset | operandOneOffset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -163,12 +167,12 @@ describe('Instruction', () => {
         4,
         'ap',
         'ap',
-        Op1Src.FP,
-        ResLogic.Op1,
-        PcUpdate.Jump,
-        ApUpdate.Add2,
-        FpUpdate.ApPlus2,
-        Opcode.Call
+        'fp',
+        'op1',
+        'pc = res',
+        'ap += 2',
+        'fp = ap + 2',
+        'call'
       );
 
       expect(instruction).toEqual(expected);
@@ -185,12 +189,12 @@ describe('Instruction', () => {
         0,
         'fp',
         'fp',
-        Op1Src.Imm,
-        ResLogic.Add,
-        PcUpdate.Jump,
-        ApUpdate.Add,
-        FpUpdate.ApPlus2,
-        Opcode.Call
+        'pc',
+        'op0 + op1',
+        'pc = res',
+        'ap = ap + res',
+        'fp = ap + 2',
+        'call'
       );
 
       expect(instruction).toEqual(expected);
@@ -207,12 +211,12 @@ describe('Instruction', () => {
         0,
         'ap',
         'ap',
-        Op1Src.FP,
-        ResLogic.Mul,
-        PcUpdate.JumpRel,
-        ApUpdate.Add1,
-        FpUpdate.Dst,
-        Opcode.Ret
+        'fp',
+        'op0 * op1',
+        'pc = pc + res',
+        'ap++',
+        'fp = relocatable(dst) || fp += felt(dst)',
+        'return'
       );
 
       expect(instruction).toEqual(expected);
@@ -229,12 +233,12 @@ describe('Instruction', () => {
         0,
         'ap',
         'ap',
-        Op1Src.AP,
-        ResLogic.Mul,
-        PcUpdate.Jnz,
-        ApUpdate.Add1,
-        FpUpdate.Regular,
-        Opcode.AssertEq
+        'ap',
+        'op0 * op1',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'ap++',
+        'no-op',
+        'assert_eq'
       );
 
       expect(instruction).toEqual(expected);
@@ -251,12 +255,12 @@ describe('Instruction', () => {
         0,
         'ap',
         'ap',
-        Op1Src.Op0,
-        ResLogic.Unconstrained,
-        PcUpdate.Jnz,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.AssertEq
+        'op0',
+        'unconstrained',
+        'res != 0 ? pc = op1 : pc += instruction_size',
+        'no-op',
+        'no-op',
+        'assert_eq'
       );
 
       expect(instruction).toEqual(expected);
@@ -273,12 +277,12 @@ describe('Instruction', () => {
         0,
         'ap',
         'ap',
-        Op1Src.Op0,
-        ResLogic.Op1,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'op0',
+        'op1',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       expect(instruction).toEqual(expected);
@@ -295,12 +299,12 @@ describe('Instruction', () => {
         1,
         'ap',
         'ap',
-        Op1Src.Op0,
-        ResLogic.Op1,
-        PcUpdate.Regular,
-        ApUpdate.Regular,
-        FpUpdate.Regular,
-        Opcode.NoOp
+        'op0',
+        'op1',
+        'no-op',
+        'no-op',
+        'no-op',
+        'no-op'
       );
 
       expect(instruction).toEqual(expected);
