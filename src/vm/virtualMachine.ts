@@ -150,12 +150,10 @@ export class VirtualMachine {
     // the offset
     // Example: const dstAddr = this.fp.add(5) == fp + 5;
     const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
-
     let dst = this.memory.get(dstAddr);
 
     // Compute the first operand address based on the operandZeroRegister and
     // the offset
-    // Example: const op0Addr = this.ap.add(-3) == [ap - 3];
     const op0Addr = this[instruction.operandZeroRegister].add(
       instruction.operandZeroOffset
     );
@@ -168,7 +166,6 @@ export class VirtualMachine {
       instruction.operandOneOffset,
       op0
     );
-
     let op1 = this.memory.get(op1Addr);
 
     // If op0 is undefined, then we can deduce it from the instruction, dst and op1
@@ -235,29 +232,29 @@ export class VirtualMachine {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
       case 'call':
-        const pc = this.pc;
-        const deducedOp0 = pc.add(instruction.size());
-        return deducedOp0;
+        // op0 = pc + 1 OR op0 = pc + 2
+        return this.pc.add(instruction.size());
+
       // If the opcode is an assert eq, then we can deduce the first operand
-      // based on the result logic. For add, res = op0 + op1. For mul,
-      // res = op0 * op1. We also know that the result is the same as
-      // the destination operand.
+      // based on the result logic.
+      // For add, res = op0 + op1 => op0 = res - op1.
+      // For mul, res = op0 * op1 => op0 = res / op1.
       case 'assert_eq':
         switch (instruction.resultLogic) {
           case 'op0 + op1':
+            // op0 = res - op1
             if (dst !== undefined && op1 !== undefined) {
-              const deducedOp0 = dst.sub(op1);
-
-              return deducedOp0;
+              return dst.sub(op1);
             }
+
           case 'op0 * op1':
             if (dst !== undefined && op1 !== undefined) {
               try {
                 if (!Felt.isFelt(dst)) {
                   throw new Error();
                 }
-                const deducedOp0 = dst.div(op1);
-                return deducedOp0;
+                // op0 = res / op1
+                return dst.div(op1);
               } catch (err) {
                 return undefined;
               }
@@ -277,32 +274,27 @@ export class VirtualMachine {
     if (instruction.opcode !== 'assert_eq') {
       return undefined;
     }
-    // We can deduce the second operand from the destination and the first
-    // operand, based on the result logic, only if the opcode is an assert eq
-    // because this is the only opcode that allows us to assume dst = res.
     switch (instruction.resultLogic) {
-      // If the result logic is op1, then res = op1 = dst.
+      // If the result logic is op1, then dst = op1.
       case 'op1':
         return dst;
-      // If the result logic is add, then the second operand is the destination
-      // operand subtracted from the first operand.
-      case 'op0 + op1':
-        if (dst !== undefined && op0 !== undefined) {
-          const deducedOp1 = dst.sub(op0);
 
-          return deducedOp1;
+      case 'op0 + op1':
+        // dst := res = op0 + op1
+        // op1 = op0 - dst
+        if (dst !== undefined && op0 !== undefined) {
+          return dst.sub(op0);
         }
         break;
-      // If the result logic is mul, then the second operand is the destination
-      // operand divided from the first operand.
       case 'op0 * op1':
+        // dst := res = op0 * op1
+        // op1 = dst / op0
         if (dst !== undefined && op0 !== undefined) {
           try {
             if (!Felt.isFelt(dst)) {
               throw new Error();
             }
-            const deducedOp1 = dst.div(op0);
-            return deducedOp1;
+            return dst.div(op0);
           } catch (err) {
             return undefined;
           }
@@ -341,10 +333,10 @@ export class VirtualMachine {
     res: MaybeRelocatable | undefined
   ): MaybeRelocatable | undefined {
     switch (instruction.opcode) {
-      // As stated above, for an assert eq instruction, we have res = dst.
+      // For an assert equal, we have dst := res
       case 'assert_eq':
         return res;
-      // For a call instruction, we have dst = fp.
+      // For a call instruction, we have dst := fp
       case 'call':
         return this.fp;
       default:
