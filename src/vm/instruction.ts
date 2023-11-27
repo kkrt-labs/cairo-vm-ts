@@ -1,6 +1,6 @@
 // Instruction is the representation of the first word of each Cairo instruction.
 // Some instructions spread over two words when they use an immediate value, so
-// representing the first one with this struct is enougth.
+// representing the first one with this struct is enough.
 
 import {
   InstructionError,
@@ -33,20 +33,20 @@ import { UnsignedInteger } from 'primitives/uint';
 // Dst & Op0 register flags
 export type RegisterFlag = 'ap' | 'fp';
 
-export type OperandOneSource = 'op0' | 'pc' | 'fp' | 'ap';
+export type Op1Source = 'op0' | 'pc' | 'fp' | 'ap';
 
 export type ResultLogic = 'op1' | 'op0 + op1' | 'op0 * op1' | 'unconstrained';
 
 export type PcUpdate =
-  | 'no-op'
+  | 'pc = pc'
   | 'pc = res'
   | 'pc = pc + res'
   | 'res != 0 ? pc = op1 : pc += instruction_size';
 
-export type ApUpdate = 'no-op' | 'ap = ap + res' | 'ap++' | 'ap += 2';
+export type ApUpdate = 'ap = ap' | 'ap = ap + res' | 'ap++' | 'ap += 2';
 
 export type FpUpdate =
-  | 'no-op'
+  | 'fp = fp'
   | 'fp = ap + 2'
   | 'fp = relocatable(dst) || fp += felt(dst)';
 
@@ -54,14 +54,14 @@ export type Opcode = 'no-op' | 'call' | 'return' | 'assert_eq';
 
 export class Instruction {
   public dstOffset: number;
-  public operandZeroOffset: number;
-  public operandOneOffset: number;
+  public op0Offset: number;
+  public op1Offset: number;
   // The register to use as the Destination Operand
   public dstRegister: RegisterFlag;
   // The register to use as the Operand 0
-  public operandZeroRegister: RegisterFlag;
+  public op0Register: RegisterFlag;
   // The source of the Operand 1
-  public operandOneSource: OperandOneSource;
+  public op1Source: Op1Source;
   // The result logic
   public resultLogic: ResultLogic;
   // The logic to use to compute the next pc
@@ -82,20 +82,20 @@ export class Instruction {
       'ap',
       'op0',
       'op1',
-      'no-op',
-      'no-op',
-      'no-op',
+      'pc = pc',
+      'ap = ap',
+      'fp = fp',
       'no-op'
     );
   }
 
   constructor(
-    offsetDst: number,
-    offsetOp0: number,
-    offsetOp1: number,
-    desReg: RegisterFlag,
-    operandZeroRegister: RegisterFlag,
-    operandOneSource: OperandOneSource,
+    dstOffset: number,
+    op0Offset: number,
+    op1Offset: number,
+    dstReg: RegisterFlag,
+    op0Register: RegisterFlag,
+    op1Source: Op1Source,
     resultLogic: ResultLogic,
     pcUpdate: PcUpdate,
     apUpdate: ApUpdate,
@@ -103,16 +103,16 @@ export class Instruction {
     opcode: Opcode
   ) {
     // Check that the offsets are 16-bit signed integers
-    SignedInteger16.ensureInt16(offsetDst);
-    SignedInteger16.ensureInt16(offsetOp0);
-    SignedInteger16.ensureInt16(offsetOp1);
+    SignedInteger16.ensureInt16(dstOffset);
+    SignedInteger16.ensureInt16(op0Offset);
+    SignedInteger16.ensureInt16(op1Offset);
 
-    this.dstOffset = offsetDst;
-    this.operandZeroOffset = offsetOp0;
-    this.operandOneOffset = offsetOp1;
-    this.dstRegister = desReg;
-    this.operandZeroRegister = operandZeroRegister;
-    this.operandOneSource = operandOneSource;
+    this.dstOffset = dstOffset;
+    this.op0Offset = op0Offset;
+    this.op1Offset = op1Offset;
+    this.dstRegister = dstReg;
+    this.op0Register = op0Register;
+    this.op1Source = op1Source;
     this.resultLogic = resultLogic;
     this.pcUpdate = pcUpdate;
     this.apUpdate = apUpdate;
@@ -126,31 +126,21 @@ export class Instruction {
 
     // Structure of the 48 first bits of an encoded instruction:
     // The 3 offsets (Dst, Op0, Op1) are 16-bit signed integers
-    // See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
-    // ┌─────────────────────────────────────────────────────────────────────────┐
-    // │                     off_dst (biased representation)                     │
-    // ├─────────────────────────────────────────────────────────────────────────┤
-    // │                     off_op0 (biased representation)                     │
-    // ├─────────────────────────────────────────────────────────────────────────┤
-    // │                     off_op1 (biased representation)                     │
-    // ├─────┼─────┼───┬───┬───┼───┬───┼───┬───┬───┼────┬────┼────┬────┬────┼────┤
-    // │  0  │  1  │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │ 11 │ 12 │ 13 │ 14 │ 15 │
-    // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
 
     // mask for the 16 least significant bits of the instruction
     const mask = 0xffffn;
     const shift = 16n;
 
     // Get the offset by masking and shifting the encoded instruction
-    const offsetDst = SignedInteger16.fromBiased(encodedInstruction & mask);
+    const dstOffset = SignedInteger16.fromBiased(encodedInstruction & mask);
 
     let shiftedEncodedInstruction = encodedInstruction >> shift;
-    const offsetOp0 = SignedInteger16.fromBiased(
+    const op0Offset = SignedInteger16.fromBiased(
       shiftedEncodedInstruction & mask
     );
 
     shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-    const offsetOp1 = SignedInteger16.fromBiased(
+    const op1Offset = SignedInteger16.fromBiased(
       shiftedEncodedInstruction & mask
     );
 
@@ -165,22 +155,16 @@ export class Instruction {
 
     // Decoding the flags and the logic of the instruction in the last 16 bits of the instruction
     // Note: the first 48 bits are reserved for the offsets of Dst, Op0 and Op1
-    // Structure of the 16 last bits of each instruction
-    // ├─────┬─────┬───────────┬───────┬───────────┬─────────┬──────────────┬────┤
-    // │ dst │ op0 │    op1    │  res  │    pc     │   ap    │    opcode    │ 0  │
-    // │ reg │ reg │    src    │ logic │  update   │ update  │              │    │
-    // ├─────┼─────┼───┬───┬───┼───┬───┼───┬───┬───┼────┬────┼────┬────┬────┼────┤
-    // │  0  │  1  │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │ 11 │ 12 │ 13 │ 14 │ 15 │
-    // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
+
     // dstRegister is located at bits 0-0. We apply a mask of 0x01 (0b1)
     // and shift 0 bits right
     const dstRegisterMask = 0x01n;
     const dstRegisterOff = 0n;
-    // operandZeroRegister is located at bits 1-1. We apply a mask of 0x02 (0b10)
+    // op0Register is located at bits 1-1. We apply a mask of 0x02 (0b10)
     // and shift 1 bit right
-    const operandZeroRegisterMask = 0x02n;
-    const operandZeroRegisterOff = 1n;
-    // OperandOneSource is located at bits 2-4. We apply a mask of 0x1c (0b11100)
+    const op0RegisterMask = 0x02n;
+    const op0RegisterOff = 1n;
+    // Op1Source is located at bits 2-4. We apply a mask of 0x1c (0b11100)
     // and shift 2 bits right
     const OperandOneSourceMask = 0x1cn;
     const OperandOneSourceOff = 2n;
@@ -210,34 +194,33 @@ export class Instruction {
       dstRegister = 'fp';
     }
     // Operand 0 register is either Ap or Fp
-    const targetRegisterFlag =
-      (flags & operandZeroRegisterMask) >> operandZeroRegisterOff;
-    let operandZeroRegister: RegisterFlag;
+    const targetRegisterFlag = (flags & op0RegisterMask) >> op0RegisterOff;
+    let op0Register: RegisterFlag;
     if (targetRegisterFlag == 0n) {
-      operandZeroRegister = 'ap';
+      op0Register = 'ap';
     } else {
-      operandZeroRegister = 'fp';
+      op0Register = 'fp';
     }
 
     const targetOperandOneSource =
       (flags & OperandOneSourceMask) >> OperandOneSourceOff;
-    let OperandOneSource: OperandOneSource;
+    let Op1Source: Op1Source;
     switch (targetOperandOneSource) {
       case 0n:
         // op1 = m(op0 + offop1)
-        OperandOneSource = 'op0';
+        Op1Source = 'op0';
         break;
       case 1n:
         // op1 = m(pc + offop1)
-        OperandOneSource = 'pc';
+        Op1Source = 'pc';
         break;
       case 2n:
         // op1 = m(fp + offop1)
-        OperandOneSource = 'fp';
+        Op1Source = 'fp';
         break;
       case 4n:
         // op1 = m(ap + offop1)
-        OperandOneSource = 'ap';
+        Op1Source = 'ap';
         break;
       default:
         throw new InstructionError(InvalidOperandOneSource);
@@ -248,7 +231,7 @@ export class Instruction {
     switch (targetPcUpdate) {
       case 0n:
         // pc = pc + instruction size
-        pcUpdate = 'no-op';
+        pcUpdate = 'pc = pc';
         break;
       case 1n:
         // pc = res
@@ -322,7 +305,7 @@ export class Instruction {
         if (opcode == 'call') {
           apUpdate = 'ap += 2';
         } else {
-          apUpdate = 'no-op';
+          apUpdate = 'ap = ap';
         }
         break;
       case 1n:
@@ -344,16 +327,16 @@ export class Instruction {
         fpUpdate = 'fp = relocatable(dst) || fp += felt(dst)';
         break;
       default:
-        fpUpdate = 'no-op';
+        fpUpdate = 'fp = fp';
     }
 
     return new Instruction(
-      offsetDst,
-      offsetOp0,
-      offsetOp1,
+      dstOffset,
+      op0Offset,
+      op1Offset,
       dstRegister,
-      operandZeroRegister,
-      OperandOneSource,
+      op0Register,
+      Op1Source,
       resultLogic,
       pcUpdate,
       apUpdate,
@@ -366,7 +349,7 @@ export class Instruction {
     // The instruction's size is 2, i.e. PC will be incremented by 2 after the instruction is executed
     // Because immediate values are located at PC + 1. They are hardcoded constants located in the bytecode,
     // "immediately" after the instruction.
-    if (this.operandOneSource == 'pc') {
+    if (this.op1Source == 'pc') {
       return 2;
     }
     return 1;

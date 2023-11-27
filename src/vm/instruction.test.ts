@@ -1,14 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 
-import {
-  ApUpdate,
-  FpUpdate,
-  Instruction,
-  OperandOneSource,
-  Opcode,
-  PcUpdate,
-  ResultLogic,
-} from './instruction';
+import { Instruction } from './instruction';
 
 import {
   HighBitSetError,
@@ -62,12 +54,11 @@ describe('Instruction', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
       const dstOffset = 10n + BIAS;
-      const operandZeroOffset = BIAS << shift;
-      const operandOneOffset = (1n + BIAS) << (2n * shift);
+      const op0Offset = BIAS << shift;
+      const op1Offset = (1n + BIAS) << (2n * shift);
 
       const flag = 0b0100000000100110n << (3n * shift);
-      const encodedInstruction =
-        dstOffset | operandZeroOffset | operandOneOffset | flag;
+      const encodedInstruction = dstOffset | op0Offset | op1Offset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -79,9 +70,9 @@ describe('Instruction', () => {
         'fp',
         'pc',
         'op0 + op1',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'assert_eq'
       );
 
@@ -92,12 +83,11 @@ describe('Instruction', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
       const dstOffset = -7n + BIAS;
-      const operandZeroOffset = (BIAS - 1n) << shift;
-      const operandOneOffset = (BIAS - 1n) << (2n * shift);
+      const op0Offset = (BIAS - 1n) << shift;
+      const op1Offset = (BIAS - 1n) << (2n * shift);
 
       const flag = 0b0000001000001011n << (3n * shift);
-      const encodedInstruction =
-        dstOffset | operandZeroOffset | operandOneOffset | flag;
+      const encodedInstruction = dstOffset | op0Offset | op1Offset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -110,8 +100,8 @@ describe('Instruction', () => {
         'fp',
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -122,12 +112,11 @@ describe('Instruction', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
       const dstOffset = -1n + BIAS;
-      const operandZeroOffset = (BIAS + 4n) << shift;
-      const operandOneOffset = BIAS << (2n * shift);
+      const op0Offset = (BIAS + 4n) << shift;
+      const op1Offset = BIAS << (2n * shift);
 
       const flag = 0b0000010000101011n << (3n * shift);
-      const encodedInstruction =
-        dstOffset | operandZeroOffset | operandOneOffset | flag;
+      const encodedInstruction = dstOffset | op0Offset | op1Offset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -139,9 +128,9 @@ describe('Instruction', () => {
         'fp',
         'fp',
         'op0 + op1',
-        'no-op',
+        'pc = pc',
         'ap = ap + res',
-        'no-op',
+        'fp = fp',
         'no-op'
       );
 
@@ -152,12 +141,11 @@ describe('Instruction', () => {
       const BIAS = 2n ** 15n;
       const shift = 16n;
       const dstOffset = BIAS;
-      const operandZeroOffset = (BIAS + 1n) << shift;
-      const operandOneOffset = (BIAS + 4n) << (2n * shift);
+      const op0Offset = (BIAS + 1n) << shift;
+      const op1Offset = (BIAS + 4n) << (2n * shift);
 
       const flag = 0b0001000010001000n << (3n * shift);
-      const encodedInstruction =
-        dstOffset | operandZeroOffset | operandOneOffset | flag;
+      const encodedInstruction = dstOffset | op0Offset | op1Offset | flag;
 
       const instruction = Instruction.decodeInstruction(encodedInstruction);
 
@@ -237,7 +225,7 @@ describe('Instruction', () => {
         'op0 * op1',
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap++',
-        'no-op',
+        'fp = fp',
         'assert_eq'
       );
 
@@ -258,8 +246,8 @@ describe('Instruction', () => {
         'op0',
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'assert_eq'
       );
 
@@ -279,9 +267,9 @@ describe('Instruction', () => {
         'ap',
         'op0',
         'op1',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -301,9 +289,9 @@ describe('Instruction', () => {
         'ap',
         'op0',
         'op1',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 

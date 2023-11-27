@@ -368,8 +368,8 @@ describe('VirtualMachine', () => {
         'ap',
         'ap',
         'op0 + op1',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = ap + 2',
         'assert_eq'
       );
@@ -396,8 +396,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'op0 + op1',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = ap + 2',
         'assert_eq'
       );
@@ -424,8 +424,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'op0 + op1',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = ap + 2',
         'assert_eq'
       );
@@ -452,8 +452,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'op0 + op1',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = ap + 2',
         'call'
       );
@@ -480,8 +480,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'op0 + op1',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = ap + 2',
         'call'
       );
@@ -513,9 +513,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -539,9 +539,9 @@ describe('VirtualMachine', () => {
         'ap',
         'pc',
         'unconstrained',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -567,8 +567,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'pc = res',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -594,8 +594,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'pc = res',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -622,8 +622,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'pc = res',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -650,8 +650,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'pc = pc + res',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -677,8 +677,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'pc = pc + res',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -705,8 +705,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'pc = pc + res',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -733,8 +733,8 @@ describe('VirtualMachine', () => {
         'ap',
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -759,8 +759,8 @@ describe('VirtualMachine', () => {
         'pc',
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -785,8 +785,8 @@ describe('VirtualMachine', () => {
         'pc',
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -811,8 +811,8 @@ describe('VirtualMachine', () => {
         'pc',
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
-        'no-op',
-        'no-op',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -843,9 +843,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -870,8 +870,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = relocatable(dst) || fp += felt(dst)',
         'no-op'
       );
@@ -897,8 +897,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = relocatable(dst) || fp += felt(dst)',
         'no-op'
       );
@@ -924,8 +924,8 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
         'fp = ap + 2',
         'no-op'
       );
@@ -957,9 +957,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
 
@@ -984,9 +984,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
+        'pc = pc',
         'ap += 2',
-        'no-op',
+        'fp = fp',
         'no-op'
       );
 
@@ -1011,9 +1011,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
+        'pc = pc',
         'ap++',
-        'no-op',
+        'fp = fp',
         'no-op'
       );
 
@@ -1038,9 +1038,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
+        'pc = pc',
         'ap = ap + res',
-        'no-op',
+        'fp = fp',
         'no-op'
       );
 
@@ -1065,9 +1065,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
+        'pc = pc',
         'ap = ap + res',
-        'no-op',
+        'fp = fp',
         'no-op'
       );
 
@@ -1093,9 +1093,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
+        'pc = pc',
         'ap = ap + res',
-        'no-op',
+        'fp = fp',
         'no-op'
       );
 
@@ -1126,9 +1126,9 @@ describe('VirtualMachine', () => {
 
         'ap',
         'unconstrained',
-        'no-op',
-        'no-op',
-        'no-op',
+        'pc = pc',
+        'ap = ap',
+        'fp = fp',
         'no-op'
       );
       const operands = {

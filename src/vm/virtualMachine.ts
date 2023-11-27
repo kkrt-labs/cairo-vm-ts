@@ -23,7 +23,7 @@ import { Memory } from 'memory/memory';
 import { SignedInteger16 } from 'primitives/int';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
-import { OperandOneSource } from 'vm/instruction';
+import { Op1Source } from 'vm/instruction';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -68,13 +68,13 @@ export class VirtualMachine {
   // Operand1 base address can be: ap, fp, pc or op0.
   // Operand1 can be ap + offset, fp + offset, pc + 1 or op0 + offset.
   computeOp1Address(
-    operandOneSource: OperandOneSource,
-    operandOneOffset: number,
+    op1Source: Op1Source,
+    op1Offset: number,
     op0: MaybeRelocatable | undefined
   ): Relocatable {
-    SignedInteger16.ensureInt16(operandOneOffset);
+    SignedInteger16.ensureInt16(op1Offset);
     let baseAddr: Relocatable;
-    switch (operandOneSource) {
+    switch (op1Source) {
       case 'ap':
         baseAddr = this.ap;
         break;
@@ -84,7 +84,7 @@ export class VirtualMachine {
       case 'pc':
         // In case of immediate as the source, the offset
         // has to be 1, otherwise we return an error.
-        if (operandOneOffset == 1) {
+        if (op1Offset == 1) {
           baseAddr = this.pc;
         } else {
           throw new VirtualMachineError(Op1ImmediateOffsetError);
@@ -104,7 +104,7 @@ export class VirtualMachine {
     }
 
     // We then apply the offset to the base address.
-    return baseAddr.add(operandOneOffset);
+    return baseAddr.add(op1Offset);
   }
 
   step(): void {
@@ -152,18 +152,16 @@ export class VirtualMachine {
     const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
     let dst = this.memory.get(dstAddr);
 
-    // Compute the first operand address based on the operandZeroRegister and
+    // Compute the first operand address based on the op0Register and
     // the offset
-    const op0Addr = this[instruction.operandZeroRegister].add(
-      instruction.operandZeroOffset
-    );
+    const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
     let op0 = this.memory.get(op0Addr);
 
-    // Compute the second operand address based on the operandOneSource and
+    // Compute the second operand address based on the op1Source and
     // the offset
     const op1Addr = this.computeOp1Address(
-      instruction.operandOneSource,
-      instruction.operandOneOffset,
+      instruction.op1Source,
+      instruction.op1Offset,
       op0
     );
     let op1 = this.memory.get(op1Addr);
@@ -358,7 +356,7 @@ export class VirtualMachine {
     switch (instruction.pcUpdate) {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
-      case 'no-op':
+      case 'pc = pc':
         this.incrementPc(instruction.size());
         break;
       // If the pc update logic is jump, then we set the pc to the
