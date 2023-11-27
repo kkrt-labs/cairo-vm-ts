@@ -5,10 +5,11 @@ import {
   InvalidOperand1,
   UnconstrainedResError,
   VirtualMachineError,
+  Op0NotRelocatable,
+  Op0Undefined,
+  Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { UnsignedInteger } from 'primitives/uint';
-import { RunContext } from 'run-context/runContext';
 import {
   ApUpdate,
   FpUpdate,
@@ -26,6 +27,10 @@ import {
   InvalidOperand0,
 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
+import { SignedInteger16 } from 'primitives/int';
+import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
+
+import { Op1Src } from 'vm/instruction';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -42,18 +47,77 @@ export type Operands = {
 };
 
 export class VirtualMachine {
-  runContext: RunContext;
   private currentStep: bigint;
   memory: Memory;
+  pc: ProgramCounter;
+  ap: MemoryPointer;
+  fp: MemoryPointer;
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
-    this.runContext = RunContext.default();
+
+    this.pc = new ProgramCounter(0);
+    this.ap = new MemoryPointer(0);
+    this.fp = new MemoryPointer(0);
+  }
+
+  setRegisters(pc: number, ap: number, fp: number): void {
+    this.pc = new ProgramCounter(pc);
+    this.ap = new MemoryPointer(ap);
+    this.fp = new MemoryPointer(fp);
+  }
+
+  incrementPc(instructionSize: number): void {
+    this.pc = this.pc.add(instructionSize);
+  }
+
+  // Computes the address of the operand 1 based on the source, an offset to
+  // apply to the source and the operand 0.
+  computeOp1Address(
+    op1Src: Op1Src,
+    op1Offset: number,
+    op0: MaybeRelocatable | undefined
+  ): Relocatable {
+    SignedInteger16.ensureInt16(op1Offset);
+    // We start by computing the base address based on the source for
+    // operand 1.
+    let baseAddr: Relocatable;
+    switch (op1Src) {
+      case Op1Src.AP:
+        baseAddr = this.ap;
+        break;
+      case Op1Src.FP:
+        baseAddr = this.fp;
+        break;
+      case Op1Src.Imm:
+        // In case of immediate as the source, the offset
+        // has to be 1, otherwise we return an error.
+        if (op1Offset == 1) {
+          baseAddr = this.pc;
+        } else {
+          throw new VirtualMachineError(Op1ImmediateOffsetError);
+        }
+        break;
+      case Op1Src.Op0:
+        // In case of operand 0 as the source, we have to check that
+        // operand 0 is not undefined.
+        if (op0 === undefined) {
+          throw new VirtualMachineError(Op0Undefined);
+        }
+
+        if (!Relocatable.isRelocatable(op0)) {
+          throw new VirtualMachineError(Op0NotRelocatable);
+        }
+        baseAddr = op0;
+    }
+
+    // We then apply the offset to the base address.
+    return baseAddr.add(op1Offset);
   }
 
   step(): void {
-    const maybeEncodedInstruction = this.memory.get(this.runContext.pc);
+    const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new VirtualMachineError(EndOfInstructionsError);
     }
@@ -81,7 +145,6 @@ export class VirtualMachine {
     this.updateRegisters(instruction, operands);
 
     this.currentStep += 1n;
-    UnsignedInteger.ensureUint64(this.currentStep);
 
     return;
   }
@@ -91,27 +154,23 @@ export class VirtualMachine {
   // deduce them from the instruction itself.
   computeOperands(instruction: Instruction): Operands {
     let res: MaybeRelocatable | undefined = undefined;
+
     // Compute the destination address based on the dstReg and
     // the offset
-    const dstAddr = this.runContext.computeAddress(
-      instruction.dstReg,
-      instruction.offDst
-    );
+    // Example: const op0Addr = this.fp.add(5) == [fp + 5];
+    const dstAddr = this[instruction.dstReg].add(instruction.offDst);
 
     let dst = this.memory.get(dstAddr);
 
     // Compute the first operand address based on the op0Reg and
     // the offset
-    const op0Addr = this.runContext.computeAddress(
-      instruction.op0Reg,
-      instruction.offOp0
-    );
-
+    // Example: const op0Addr = this.ap.add(-3) == [ap - 3];
+    const op0Addr = this[instruction.op0Reg].add(instruction.offOp0);
     let op0 = this.memory.get(op0Addr);
 
     // Compute the second operand address based on the op1Src and
     // the offset
-    const op1Addr = this.runContext.computeOp1Address(
+    const op1Addr = this.computeOp1Address(
       instruction.op1Src,
       instruction.offOp1,
       op0
@@ -189,7 +248,7 @@ export class VirtualMachine {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
       case Opcode.Call:
-        const pc = this.runContext.pc;
+        const pc = this.pc;
         const deducedOp0 = pc.add(instruction.size());
         return [deducedOp0, undefined];
       // If the opcode is an assert eq, then we can deduce the first operand
@@ -300,7 +359,7 @@ export class VirtualMachine {
         return res;
       // For a call instruction, we have dst = fp.
       case Opcode.Call:
-        return this.runContext.fp;
+        return this.fp;
       default:
         return undefined;
     }
@@ -321,7 +380,7 @@ export class VirtualMachine {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
       case PcUpdate.Regular:
-        this.runContext.incrementPc(instruction.size());
+        this.incrementPc(instruction.size());
         break;
       // If the pc update logic is jump, then we set the pc to the
       // result.
@@ -332,7 +391,7 @@ export class VirtualMachine {
         if (!Relocatable.isRelocatable(operands.res)) {
           throw new VirtualMachineError(ExpectedRelocatable);
         }
-        this.runContext.pc = operands.res;
+        this.pc = operands.res;
         break;
       // If the pc update logic is jump rel, then we add the result
       // to the pc.
@@ -344,7 +403,7 @@ export class VirtualMachine {
         if (!Felt.isFelt(operands.res)) {
           throw new VirtualMachineError(ExpectedFelt);
         }
-        this.runContext.pc = this.runContext.pc.add(operands.res);
+        this.pc = this.pc.add(operands.res);
         break;
       // If the pc update logic is jnz, then we check if the destination
       // is zero. If it is, then we increment the pc by the instruction (default)
@@ -354,7 +413,7 @@ export class VirtualMachine {
           throw new VirtualMachineError(InvalidDstOperand);
         }
         if (Felt.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
-          this.runContext.incrementPc(instruction.size());
+          this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {
             throw new VirtualMachineError(InvalidOperand1);
@@ -362,7 +421,7 @@ export class VirtualMachine {
           if (!Felt.isFelt(operands.op1)) {
             throw new VirtualMachineError(ExpectedFelt);
           }
-          this.runContext.pc = this.runContext.pc.add(operands.op1);
+          this.pc = this.pc.add(operands.op1);
         }
         break;
     }
@@ -373,9 +432,9 @@ export class VirtualMachine {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
       case FpUpdate.ApPlus2:
-        const apPlus2 = this.runContext.ap.add(2);
+        const apPlus2 = this.ap.add(2);
 
-        this.runContext.fp = apPlus2;
+        this.fp = apPlus2;
         break;
       // If the fp update logic is dst, then we add the destination
       // to fp if dst is a felt, or set the fp to the destination
@@ -385,10 +444,10 @@ export class VirtualMachine {
           throw new VirtualMachineError(InvalidDstOperand);
         }
         if (Felt.isFelt(operands.dst)) {
-          this.runContext.fp = this.runContext.fp.add(operands.dst);
+          this.fp = this.fp.add(operands.dst);
         }
         if (Relocatable.isRelocatable(operands.dst)) {
-          this.runContext.fp = operands.dst;
+          this.fp = operands.dst;
         }
         break;
     }
@@ -406,15 +465,15 @@ export class VirtualMachine {
           throw new VirtualMachineError(ExpectedFelt);
         }
 
-        this.runContext.ap = this.runContext.ap.add(operands.res);
+        this.ap = this.ap.add(operands.res);
         break;
       // If the ap update logic is add 1, then we add 1 to the ap.
       case ApUpdate.Add1:
-        this.runContext.ap = this.runContext.ap.add(1);
+        this.ap = this.ap.add(1);
         break;
       // If the ap update logic is add 2, then we add 2 to the ap.
       case ApUpdate.Add2:
-        this.runContext.ap = this.runContext.ap.add(2);
+        this.ap = this.ap.add(2);
         break;
     }
   }
@@ -440,11 +499,11 @@ export class VirtualMachine {
       // op0 is used to store the return pc (the address of the instruction
       // following the call instruction). dst is used to store the frame pointer.
       case Opcode.Call:
-        const nextPc = this.runContext.pc.add(instruction.size());
+        const nextPc = this.pc.add(instruction.size());
         if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
           throw new VirtualMachineError(InvalidOperand0);
         }
-        if (this.runContext.fp !== operands.dst) {
+        if (this.fp !== operands.dst) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
         break;

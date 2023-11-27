@@ -31,14 +31,7 @@ import { UnsignedInteger } from 'primitives/uint';
 // Source: https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction.go
 
 // Dst & Op0 register flags
-// If the flag == 0, then the offset will point to Ap
-// If the flag == 1, then the offset will point to Fp
-export enum RegisterFlag {
-  AP = 0,
-  FP = 1,
-}
-export type DstRegister = RegisterFlag;
-export type Op0Register = RegisterFlag;
+export type RegisterFlag = 'ap' | 'fp';
 
 // Op1Src
 export enum Op1Src {
@@ -92,9 +85,9 @@ export class Instruction {
   public offOp0: number;
   public offOp1: number;
   // The register to use as the Destination Operand
-  public dstReg: DstRegister;
+  public dstReg: RegisterFlag;
   // The register to use as the Operand 0
-  public op0Reg: Op0Register;
+  public op0Reg: RegisterFlag;
   // The source of the Operand 1
   public op1Src: Op1Src;
   // The result logic
@@ -113,8 +106,8 @@ export class Instruction {
       0,
       0,
       0,
-      RegisterFlag.AP,
-      RegisterFlag.AP,
+      'ap',
+      'ap',
       Op1Src.Op0,
       ResLogic.Op1,
       PcUpdate.Regular,
@@ -128,8 +121,8 @@ export class Instruction {
     offsetDst: number,
     offsetOp0: number,
     offsetOp1: number,
-    desReg: DstRegister,
-    op0Reg: Op0Register,
+    desReg: RegisterFlag,
+    op0Reg: RegisterFlag,
     op1Src: Op1Src,
     resLogic: ResLogic,
     pcUpdate: PcUpdate,
@@ -137,9 +130,11 @@ export class Instruction {
     fpUpdate: FpUpdate,
     opcode: Opcode
   ) {
+    // Check that the offsets are 16-bit signed integers
     SignedInteger16.ensureInt16(offsetDst);
     SignedInteger16.ensureInt16(offsetOp0);
     SignedInteger16.ensureInt16(offsetOp1);
+
     this.offDst = offsetDst;
     this.offOp0 = offsetOp0;
     this.offOp1 = offsetOp1;
@@ -154,9 +149,57 @@ export class Instruction {
   }
 
   static decodeInstruction(encodedInstruction: bigint): Instruction {
+    // Check that the encoded instruction fits in a 64-bit unsigned integer
     UnsignedInteger.ensureUint64(encodedInstruction);
-    // mask for the high bit of a 64-bit number
+
+    // Structure of the 48 first bits of an encoded instruction:
+    // The 3 offsets (Dst, Op0, Op1) are 16-bit signed integers
+    // See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
+    // ┌─────────────────────────────────────────────────────────────────────────┐
+    // │                     off_dst (biased representation)                     │
+    // ├─────────────────────────────────────────────────────────────────────────┤
+    // │                     off_op0 (biased representation)                     │
+    // ├─────────────────────────────────────────────────────────────────────────┤
+    // │                     off_op1 (biased representation)                     │
+    // ├─────┼─────┼───┬───┬───┼───┬───┼───┬───┬───┼────┬────┼────┬────┬────┼────┤
+    // │  0  │  1  │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │ 11 │ 12 │ 13 │ 14 │ 15 │
+    // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
+
+    // mask for the 16 least significant bits of the instruction
+    const mask = 0xffffn;
+    const shift = 16n;
+
+    // Get the offset by masking and shifting the encoded instruction
+    const offsetDst = SignedInteger16.fromBiased(encodedInstruction & mask);
+
+    let shiftedEncodedInstruction = encodedInstruction >> shift;
+    const offsetOp0 = SignedInteger16.fromBiased(
+      shiftedEncodedInstruction & mask
+    );
+
+    shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
+    const offsetOp1 = SignedInteger16.fromBiased(
+      shiftedEncodedInstruction & mask
+    );
+
+    // Get the flags by shifting the encoded instruction
+    const flags = shiftedEncodedInstruction >> shift;
+
+    // INVARIANT: The high bit of the encoded instruction must be 0
     const highBit = 1n << 63n;
+    if ((highBit & encodedInstruction) !== 0n) {
+      throw new InstructionError(HighBitSetError);
+    }
+
+    // Decoding the flags and the logic of the instruction in the last 16 bits of the instruction
+    // Note: the first 48 bits are reserved for the offsets of Dst, Op0 and Op1
+    // Structure of the 16 last bits of each instruction
+    // ├─────┬─────┬───────────┬───────┬───────────┬─────────┬──────────────┬────┤
+    // │ dst │ op0 │    op1    │  res  │    pc     │   ap    │    opcode    │ 0  │
+    // │ reg │ reg │    src    │ logic │  update   │ update  │              │    │
+    // ├─────┼─────┼───┬───┬───┼───┬───┼───┬───┬───┼────┬────┼────┬────┬────┼────┤
+    // │  0  │  1  │ 2 │ 3 │ 4 │ 5 │ 6 │ 7 │ 8 │ 9 │ 10 │ 11 │ 12 │ 13 │ 14 │ 15 │
+    // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
     // dstReg is located at bits 0-0. We apply a mask of 0x01 (0b1)
     // and shift 0 bits right
     const dstRegMask = 0x01n;
@@ -186,45 +229,21 @@ export class Instruction {
     const opcodeMask = 0x7000n;
     const opcodeOff = 12n;
 
-    if ((highBit & encodedInstruction) !== 0n) {
-      throw new InstructionError(HighBitSetError);
-    }
-
-    // mask for the 16 least significant bits of a 64-bit number
-    const mask = 0xffffn;
-    const shift = 16n;
-
-    // Get the offset by masking and shifting the encoded instruction
-    const offsetDst = SignedInteger16.fromBiased(encodedInstruction & mask);
-
-    let shiftedEncodedInstruction = encodedInstruction >> shift;
-    const offsetOp0 = SignedInteger16.fromBiased(
-      shiftedEncodedInstruction & mask
-    );
-
-    shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-    const offsetOp1 = SignedInteger16.fromBiased(
-      shiftedEncodedInstruction & mask
-    );
-
-    // Get the flags by shifting the encoded instruction
-    const flags = shiftedEncodedInstruction >> shift;
-
     // Destination register is either Ap or Fp
     const targetDstReg = (flags & dstRegMask) >> dstRegOff;
-    let dstReg: DstRegister;
+    let dstReg: RegisterFlag;
     if (targetDstReg == 0n) {
-      dstReg = RegisterFlag.AP;
+      dstReg = 'ap';
     } else {
-      dstReg = RegisterFlag.FP;
+      dstReg = 'fp';
     }
     // Operand 0 register is either Ap or Fp
-    const targetOp0Register = (flags & op0RegMask) >> op0RegOff;
-    let op0Reg: DstRegister;
-    if (targetOp0Register == 0n) {
-      op0Reg = RegisterFlag.AP;
+    const targetRegisterFlag = (flags & op0RegMask) >> op0RegOff;
+    let op0Reg: RegisterFlag;
+    if (targetRegisterFlag == 0n) {
+      op0Reg = 'ap';
     } else {
-      op0Reg = RegisterFlag.FP;
+      op0Reg = 'fp';
     }
 
     const targetOp1Src = (flags & op1SrcMask) >> op1SrcOff;
@@ -375,6 +394,9 @@ export class Instruction {
   }
 
   size(): number {
+    // The instruction's size is 2, i.e. PC will be incremented by 2 after the instruction is executed
+    // Because immediate values are located at PC + 1. They are hardcoded constants located in the bytecode,
+    // "immediately" after the instruction.
     if (this.op1Src == Op1Src.Imm) {
       return 2;
     }

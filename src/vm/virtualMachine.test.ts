@@ -21,9 +21,10 @@ import {
   InvalidOperand0,
   UnconstrainedResError,
   VirtualMachineError,
+  Op0NotRelocatable,
+  Op0Undefined,
+  Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
-
-import { RunContext } from 'run-context/runContext';
 
 function getInstructionWithOpcodeAndResLogic(
   opcode: Opcode,
@@ -365,8 +366,8 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        RegisterFlag.FP,
-        RegisterFlag.AP,
+        'fp',
+        'ap',
         Op1Src.AP,
         ResLogic.Add,
         PcUpdate.Regular,
@@ -392,8 +393,8 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        RegisterFlag.FP,
-        RegisterFlag.AP,
+        'fp',
+        'ap',
         Op1Src.AP,
         ResLogic.Add,
         PcUpdate.Regular,
@@ -419,8 +420,8 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        RegisterFlag.FP,
-        RegisterFlag.AP,
+        'fp',
+        'ap',
         Op1Src.AP,
         ResLogic.Add,
         PcUpdate.Regular,
@@ -446,8 +447,8 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        RegisterFlag.FP,
-        RegisterFlag.AP,
+        'fp',
+        'ap',
         Op1Src.AP,
         ResLogic.Add,
         PcUpdate.Regular,
@@ -473,8 +474,8 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        RegisterFlag.FP,
-        RegisterFlag.AP,
+        'fp',
+        'ap',
         Op1Src.AP,
         ResLogic.Add,
         PcUpdate.Regular,
@@ -505,8 +506,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -524,15 +525,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(new Relocatable(0, 1));
+      expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
     test('regular with imm', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.Imm,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -550,15 +551,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(new Relocatable(0, 2));
+      expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
     test('jmp res relocatable', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Jump,
@@ -576,15 +577,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(operands.res);
+      expect(vm.pc).toEqual(operands.res);
     });
     test('jmp res felt', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Jump,
@@ -610,8 +611,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Jump,
@@ -637,8 +638,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.JumpRel,
@@ -656,15 +657,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(new Relocatable(0, 5));
+      expect(vm.pc).toEqual(new Relocatable(0, 5));
     });
     test('jmp rel res relocatable', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.JumpRel,
@@ -690,8 +691,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.JumpRel,
@@ -717,8 +718,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
@@ -736,15 +737,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(new Relocatable(0, 1));
+      expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
     test('jnz des is zero imm', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.Imm,
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
@@ -762,15 +763,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(new Relocatable(0, 2));
+      expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
     test('jnz des not zero op1 felt', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.Imm,
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
@@ -788,15 +789,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updatePc(instruction, operands);
-      expect(vm.runContext.pc).toEqual(new Relocatable(0, 3));
+      expect(vm.pc).toEqual(new Relocatable(0, 3));
     });
     test('jnz des not zero op1 relocatable', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.Imm,
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
@@ -827,8 +828,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -846,15 +847,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateFp(instruction, operands);
-      expect(vm.runContext.fp).toEqual(new Relocatable(1, 0));
+      expect(vm.fp).toEqual(new Relocatable(1, 0));
     });
     test('dst felt', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -872,15 +873,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateFp(instruction, operands);
-      expect(vm.runContext.fp).toEqual(new Relocatable(1, 9));
+      expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
     test('dst relocatable', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -898,15 +899,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateFp(instruction, operands);
-      expect(vm.runContext.fp).toEqual(new Relocatable(1, 9));
+      expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
     test('ap plus 2', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -916,7 +917,7 @@ describe('VirtualMachine', () => {
       );
 
       const vm = new VirtualMachine();
-      vm.runContext.ap = new Relocatable(1, 7);
+      vm.ap = new Relocatable(1, 7);
       const operands: Operands = {
         op0: undefined,
         op1: undefined,
@@ -925,7 +926,7 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateFp(instruction, operands);
-      expect(vm.runContext.fp).toEqual(new Relocatable(1, 9));
+      expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
   });
 
@@ -937,8 +938,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -956,15 +957,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateAp(instruction, operands);
-      expect(vm.runContext.ap).toEqual(new Relocatable(1, 0));
+      expect(vm.ap).toEqual(new Relocatable(1, 0));
     });
     test('add 2', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -982,15 +983,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateAp(instruction, operands);
-      expect(vm.runContext.ap).toEqual(new Relocatable(1, 2));
+      expect(vm.ap).toEqual(new Relocatable(1, 2));
     });
     test('add 1', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -1008,15 +1009,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateAp(instruction, operands);
-      expect(vm.runContext.ap).toEqual(new Relocatable(1, 1));
+      expect(vm.ap).toEqual(new Relocatable(1, 1));
     });
     test('add res felt', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -1034,15 +1035,15 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateAp(instruction, operands);
-      expect(vm.runContext.ap).toEqual(new Relocatable(1, 5));
+      expect(vm.ap).toEqual(new Relocatable(1, 5));
     });
     test('add res relocatable', () => {
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -1068,8 +1069,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -1100,8 +1101,8 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.Regular,
@@ -1117,17 +1118,19 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateRegisters(instruction, operands);
-      expect(vm.runContext).toEqual(new RunContext(1, 0, 0));
+      expect(vm.ap).toEqual(new Relocatable(1, 0));
+      expect(vm.fp).toEqual(new Relocatable(1, 0));
+      expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
     test('should update the register with mixed types', () => {
       const vm = new VirtualMachine();
-      vm.runContext = new RunContext(4, 5, 6);
+      vm.setRegisters(4, 5, 6);
       const instruction = new Instruction(
         0,
         0,
         0,
-        RegisterFlag.AP,
-        RegisterFlag.AP,
+        'ap',
+        'ap',
         Op1Src.AP,
         ResLogic.Unconstrained,
         PcUpdate.JumpRel,
@@ -1143,7 +1146,95 @@ describe('VirtualMachine', () => {
       };
 
       vm.updateRegisters(instruction, operands);
-      expect(vm.runContext).toEqual(new RunContext(12, 7, 11));
+      const registers = {
+        pc: new Relocatable(0, 12),
+        ap: new Relocatable(1, 7),
+        fp: new Relocatable(1, 11),
+      };
+      expect({ ap: vm.ap, fp: vm.fp, pc: vm.pc }).toEqual(registers);
+    });
+  });
+
+  describe('incrementPc', () => {
+    test('should successfully increment pc', () => {
+      const vm = new VirtualMachine();
+      vm.incrementPc(2);
+      expect(vm.pc).toEqual(new Relocatable(0, 2));
+    });
+  });
+
+  // Test cases reproduced from:
+  // https://github.com/lambdaclass/cairo-vm/blob/main/vm/src/vm/context/run_context.rs#L229
+  describe('computeOp1Address', () => {
+    test('should compute op1 addr for fp register', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      const op1Addr = vm.computeOp1Address(Op1Src.FP, 1, undefined);
+
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(7);
+    });
+
+    test('should compute op1 addr for ap register', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      const op1Addr = vm.computeOp1Address(Op1Src.AP, 1, undefined);
+
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(6);
+    });
+
+    test('should compute op1 addr for op1 src imm', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      const op1Addr = vm.computeOp1Address(Op1Src.Imm, 1, undefined);
+
+      expect(op1Addr.getSegmentIndex()).toEqual(0);
+      expect(op1Addr.getOffset()).toEqual(5);
+    });
+
+    test('should throw an error Op1ImmediateOffsetError for op1 src imm with incorrect offset', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      expect(() => vm.computeOp1Address(Op1Src.Imm, 2, undefined)).toThrow(
+        new VirtualMachineError(Op1ImmediateOffsetError)
+      );
+    });
+
+    test('should compute op1 addr for op1 src op0 with op0 relocatable', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      const op1Addr = vm.computeOp1Address(
+        Op1Src.Op0,
+        1,
+        new Relocatable(1, 7)
+      );
+
+      expect(op1Addr.getSegmentIndex()).toEqual(1);
+      expect(op1Addr.getOffset()).toEqual(8);
+    });
+
+    test('should throw an error Op0NotRelocatable for op1 src op0 with op0 felt', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      expect(() => vm.computeOp1Address(Op1Src.Op0, 1, new Felt(7n))).toThrow(
+        new VirtualMachineError(Op0NotRelocatable)
+      );
+    });
+
+    test('should throw an error Op0Undefined for op1 src op0 with op0 undefined', () => {
+      const vm = new VirtualMachine();
+      vm.setRegisters(4, 5, 6);
+
+      expect(() => vm.computeOp1Address(Op1Src.Op0, 1, undefined)).toThrow(
+        new VirtualMachineError(Op0Undefined)
+      );
     });
   });
 });
