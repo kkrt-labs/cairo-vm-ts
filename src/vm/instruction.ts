@@ -124,6 +124,12 @@ export class Instruction {
     // Check that the encoded instruction fits in a 64-bit unsigned integer
     UnsignedInteger.ensureUint64(encodedInstruction);
 
+    // INVARIANT: The high bit of the encoded instruction must be 0
+    const highBit = 1n << 63n;
+    if ((highBit & encodedInstruction) !== 0n) {
+      throw new InstructionError(HighBitSetError);
+    }
+
     // Structure of the 48 first bits of an encoded instruction:
     // The 3 offsets (Dst, Op0, Op1) are 16-bit signed integers
 
@@ -147,15 +153,7 @@ export class Instruction {
     // Get the flags by shifting the encoded instruction
     const flags = shiftedEncodedInstruction >> shift;
 
-    // INVARIANT: The high bit of the encoded instruction must be 0
-    const highBit = 1n << 63n;
-    if ((highBit & encodedInstruction) !== 0n) {
-      throw new InstructionError(HighBitSetError);
-    }
-
     // Decoding the flags and the logic of the instruction in the last 16 bits of the instruction
-    // Note: the first 48 bits are reserved for the offsets of Dst, Op0 and Op1
-
     // dstRegister is located at bits 0-0. We apply a mask of 0x01 (0b1)
     // and shift 0 bits right
     const dstRegisterMask = 0x01n;
