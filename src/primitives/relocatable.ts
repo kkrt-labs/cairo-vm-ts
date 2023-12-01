@@ -82,6 +82,10 @@ export class Relocatable {
     return false;
   }
 
+  toString(): string {
+    return `${this.segment}:${this.offset}`;
+  }
+
   static isRelocatable(
     maybeRelocatable: MaybeRelocatable
   ): maybeRelocatable is Relocatable {
