@@ -43,23 +43,21 @@ export class CairoRunner {
 
   // Run until the given PC is reached.
   runUntilPc(finalPc: Relocatable, verbose: boolean = false): void {
-    while (this.vm.runContext.pc.getOffset() < finalPc.getOffset()) {
+    while (this.vm.pc.getOffset() < finalPc.getOffset()) {
       this.vm.step();
       if (verbose) {
         console.log(
-          `AP: ${this.vm.runContext.ap.getSegmentIndex()}:${this.vm.runContext.ap.getOffset()}`
+          `AP: ${this.vm.ap.getSegmentIndex()}:${this.vm.ap.getOffset()}`
         );
         console.log(
-          `FP: ${this.vm.runContext.fp.getSegmentIndex()}:${this.vm.runContext.fp.getOffset()}`
+          `FP: ${this.vm.fp.getSegmentIndex()}:${this.vm.fp.getOffset()}`
         );
         console.log(
-          `PC: ${this.vm.runContext.pc.getSegmentIndex()}:${this.vm.runContext.pc.getOffset()}`
+          `PC: ${this.vm.pc.getSegmentIndex()}:${this.vm.pc.getOffset()}`
         );
 
-        console.log(
-          `[ap - 1]: ${this.vm.memory.get(this.vm.runContext.ap.sub(1))}`
-        );
-        console.log(`[fp]: ${this.vm.memory.get(this.vm.runContext.fp)}`);
+        console.log(`[ap - 1]: ${this.vm.memory.get(this.vm.ap.sub(1))}`);
+        console.log(`[fp]: ${this.vm.memory.get(this.vm.fp)}`);
       }
     }
   }
@@ -108,9 +106,9 @@ export class CairoRunner {
 
   // Initialize the VM.
   initializeVm(): void {
-    this.vm.runContext.ap = this.initialAp;
-    this.vm.runContext.fp = this.initialFp;
-    this.vm.runContext.pc = this.initialPc;
+    this.vm.ap = this.initialAp;
+    this.vm.fp = this.initialFp;
+    this.vm.pc = this.initialPc;
   }
 
   getVm(): VirtualMachine {

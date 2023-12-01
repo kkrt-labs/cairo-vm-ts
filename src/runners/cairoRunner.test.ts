@@ -24,7 +24,7 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.initialize();
       const finalPc = new Relocatable(0, 12);
-      runner.runUntilPc(finalPc, true);
+      runner.runUntilPc(finalPc, false);
       const executionSize = runner.getVm().memory.getSegmentSize(1);
       const executionEnd = runner.getExecutionBase().add(executionSize);
 

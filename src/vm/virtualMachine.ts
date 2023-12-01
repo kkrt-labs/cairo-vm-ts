@@ -5,18 +5,12 @@ import {
   InvalidOperand1,
   UnconstrainedResError,
   VirtualMachineError,
+  Op0NotRelocatable,
+  Op0Undefined,
+  Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { UnsignedInteger } from 'primitives/uint';
-import { RunContext } from 'run-context/runContext';
-import {
-  ApUpdate,
-  FpUpdate,
-  Instruction,
-  Opcode,
-  PcUpdate,
-  ResLogic,
-} from './instruction';
+import { Instruction, Opcode, PcUpdate, ResultLogic } from './instruction';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -26,6 +20,10 @@ import {
   InvalidOperand0,
 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
+import { SignedInteger16 } from 'primitives/int';
+import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
+
+import { Op1Source } from 'vm/instruction';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -42,18 +40,75 @@ export type Operands = {
 };
 
 export class VirtualMachine {
-  runContext: RunContext;
   private currentStep: bigint;
   memory: Memory;
+  pc: ProgramCounter;
+  ap: MemoryPointer;
+  fp: MemoryPointer;
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
-    this.runContext = RunContext.default();
+
+    this.pc = new ProgramCounter(0);
+    this.ap = new MemoryPointer(0);
+    this.fp = new MemoryPointer(0);
+  }
+
+  setRegisters(pc: number, ap: number, fp: number): void {
+    this.pc = new ProgramCounter(pc);
+    this.ap = new MemoryPointer(ap);
+    this.fp = new MemoryPointer(fp);
+  }
+
+  incrementPc(instructionSize: number): void {
+    this.pc = this.pc.add(instructionSize);
+  }
+
+  // Operand1 base address can be: ap, fp, pc or op0.
+  // Operand1 can be ap + offset, fp + offset, pc + 1 or op0 + offset.
+  computeOp1Address(
+    op1Source: Op1Source,
+    op1Offset: number,
+    op0: MaybeRelocatable | undefined
+  ): Relocatable {
+    SignedInteger16.ensureInt16(op1Offset);
+    let baseAddr: Relocatable;
+    switch (op1Source) {
+      case 'ap':
+        baseAddr = this.ap;
+        break;
+      case 'fp':
+        baseAddr = this.fp;
+        break;
+      case 'pc':
+        // In case of immediate as the source, the offset
+        // has to be 1, otherwise we return an error.
+        if (op1Offset == 1) {
+          baseAddr = this.pc;
+        } else {
+          throw new VirtualMachineError(Op1ImmediateOffsetError);
+        }
+        break;
+      case 'op0':
+        // In case of operand 0 as the source, we have to check that
+        // operand 0 is not undefined.
+        if (op0 === undefined) {
+          throw new VirtualMachineError(Op0Undefined);
+        }
+
+        if (!Relocatable.isRelocatable(op0)) {
+          throw new VirtualMachineError(Op0NotRelocatable);
+        }
+        baseAddr = op0;
+    }
+
+    // We then apply the offset to the base address.
+    return baseAddr.add(op1Offset);
   }
 
   step(): void {
-    const maybeEncodedInstruction = this.memory.get(this.runContext.pc);
+    const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new VirtualMachineError(EndOfInstructionsError);
     }
@@ -81,7 +136,6 @@ export class VirtualMachine {
     this.updateRegisters(instruction, operands);
 
     this.currentStep += 1n;
-    UnsignedInteger.ensureUint64(this.currentStep);
 
     return;
   }
@@ -91,63 +145,50 @@ export class VirtualMachine {
   // deduce them from the instruction itself.
   computeOperands(instruction: Instruction): Operands {
     let res: MaybeRelocatable | undefined = undefined;
-    // Compute the destination address based on the dstReg and
-    // the offset
-    const dstAddr = this.runContext.computeAddress(
-      instruction.dstReg,
-      instruction.offDst
-    );
 
+    // Compute the destination address based on the dstRegister and
+    // the offset
+    // Example: const dstAddr = this.fp.add(5) == fp + 5;
+    const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
     let dst = this.memory.get(dstAddr);
 
-    // Compute the first operand address based on the op0Reg and
+    // Compute the first operand address based on the op0Register and
     // the offset
-    const op0Addr = this.runContext.computeAddress(
-      instruction.op0Reg,
-      instruction.offOp0
-    );
-
+    const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
     let op0 = this.memory.get(op0Addr);
 
-    // Compute the second operand address based on the op1Src and
+    // Compute the second operand address based on the op1Source and
     // the offset
-    const op1Addr = this.runContext.computeOp1Address(
-      instruction.op1Src,
-      instruction.offOp1,
+    const op1Addr = this.computeOp1Address(
+      instruction.op1Source,
+      instruction.op1Offset,
       op0
     );
-
     let op1 = this.memory.get(op1Addr);
 
     // If op0 is undefined, then we can deduce it from the instruction, dst and op1
     // We also deduce the result based on the result logic
     if (op0 === undefined) {
-      const deducedValues = this.deduceOp0(instruction, dst, op1);
+      const deducedOp0 = this.deduceOp0(instruction, dst, op1);
 
-      const [deducedOp0, deducedRes] = deducedValues;
       if (deducedOp0 !== undefined) {
         this.memory.write(op0Addr, deducedOp0);
       }
       op0 = deducedOp0;
-      res = deducedRes;
     }
 
     // If operand 1 is undefined, then we can deduce it from the instruction,
     // destination and operand 0.
     // We also deduce the result based on the result logic
     if (op1 === undefined) {
-      const deducedValues = this.deduceOp1(instruction, dst, op0);
+      const deducedOp1 = this.deduceOp1(instruction, dst, op0);
 
-      const [deducedOp1, deducedRes] = deducedValues;
       if (deducedOp1 !== undefined) {
         this.memory.write(op1Addr, deducedOp1);
       }
-      if (res === undefined) {
-        res = deducedRes;
-      }
     }
 
-    // If res is still undefined, then we can compute it from op0 and op1
+    // If res is undefined, then we can compute it from op0 and op1
     if (res === undefined) {
       const computedRes = this.computeRes(
         instruction,
@@ -182,44 +223,44 @@ export class VirtualMachine {
     instruction: Instruction,
     dst: MaybeRelocatable | undefined,
     op1: MaybeRelocatable | undefined
-  ): [MaybeRelocatable | undefined, MaybeRelocatable | undefined] {
+  ): MaybeRelocatable | undefined {
     // We can deduce the first operand from the destination and the second
     // operand, based on which opcode is used.
     switch (instruction.opcode) {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
-      case Opcode.Call:
-        const pc = this.runContext.pc;
-        const deducedOp0 = pc.add(instruction.size());
-        return [deducedOp0, undefined];
-      // If the opcode is an assert eq, then we can deduce the first operand
-      // based on the result logic. For add, res = op0 + op1. For mul,
-      // res = op0 * op1. We also know that the result is the same as
-      // the destination operand.
-      case Opcode.AssertEq:
-        switch (instruction.resLogic) {
-          case ResLogic.Add:
-            if (dst !== undefined && op1 !== undefined) {
-              const deducedOp0 = dst.sub(op1);
+      case 'call':
+        // op0 = pc + 1 OR op0 = pc + 2
+        return this.pc.add(instruction.size());
 
-              return [deducedOp0, dst];
+      // If the opcode is an assert eq, then we can deduce the first operand
+      // based on the result logic.
+      // For add, res = op0 + op1 => op0 = res - op1.
+      // For mul, res = op0 * op1 => op0 = res / op1.
+      case 'assert_eq':
+        switch (instruction.resultLogic) {
+          case 'op0 + op1':
+            // op0 = res - op1
+            if (dst !== undefined && op1 !== undefined) {
+              return dst.sub(op1);
             }
-          case ResLogic.Mul:
+
+          case 'op0 * op1':
             if (dst !== undefined && op1 !== undefined) {
               try {
                 if (!Felt.isFelt(dst)) {
                   throw new Error();
                 }
-                const deducedOp0 = dst.div(op1);
-                return [deducedOp0, dst];
+                // op0 = res / op1
+                return dst.div(op1);
               } catch (err) {
-                return [undefined, undefined];
+                return undefined;
               }
             }
             break;
         }
       default:
-        return [undefined, undefined];
+        return undefined;
     }
   }
 
@@ -227,43 +268,38 @@ export class VirtualMachine {
     instruction: Instruction,
     dst: MaybeRelocatable | undefined,
     op0: MaybeRelocatable | undefined
-  ): [MaybeRelocatable | undefined, MaybeRelocatable | undefined] {
-    if (instruction.opcode !== Opcode.AssertEq) {
-      return [undefined, undefined];
+  ): MaybeRelocatable | undefined {
+    if (instruction.opcode !== 'assert_eq') {
+      return undefined;
     }
-    // We can deduce the second operand from the destination and the first
-    // operand, based on the result logic, only if the opcode is an assert eq
-    // because this is the only opcode that allows us to assume dst = res.
-    switch (instruction.resLogic) {
-      // If the result logic is op1, then res = op1 = dst.
-      case ResLogic.Op1:
-        return [dst, dst];
-      // If the result logic is add, then the second operand is the destination
-      // operand subtracted from the first operand.
-      case ResLogic.Add:
-        if (dst !== undefined && op0 !== undefined) {
-          const deducedOp1 = dst.sub(op0);
+    switch (instruction.resultLogic) {
+      // If the result logic is op1, then dst = op1.
+      case 'op1':
+        return dst;
 
-          return [deducedOp1, dst];
+      case 'op0 + op1':
+        // dst := res = op0 + op1
+        // op1 = op0 - dst
+        if (dst !== undefined && op0 !== undefined) {
+          return dst.sub(op0);
         }
         break;
-      // If the result logic is mul, then the second operand is the destination
-      // operand divided from the first operand.
-      case ResLogic.Mul:
+      case 'op0 * op1':
+        // dst := res = op0 * op1
+        // op1 = dst / op0
         if (dst !== undefined && op0 !== undefined) {
           try {
             if (!Felt.isFelt(dst)) {
               throw new Error();
             }
-            const deducedOp1 = dst.div(op0);
-            return [deducedOp1, dst];
+            return dst.div(op0);
           } catch (err) {
-            return [undefined, undefined];
+            return undefined;
           }
         }
         break;
     }
-    return [undefined, undefined];
+    return undefined;
   }
 
   // Compute the result of an instruction based on result logic
@@ -273,17 +309,17 @@ export class VirtualMachine {
     op0: MaybeRelocatable,
     op1: MaybeRelocatable
   ): MaybeRelocatable | undefined {
-    switch (instruction.resLogic) {
-      case ResLogic.Op1:
+    switch (instruction.resultLogic) {
+      case 'op1':
         return op1;
-      case ResLogic.Add:
+      case 'op0 + op1':
         return op0.add(op1);
-      case ResLogic.Mul:
+      case 'op0 * op1':
         if (!Felt.isFelt(op0)) {
           throw new VirtualMachineError(ExpectedFelt);
         }
         return op0.mul(op1);
-      case ResLogic.Unconstrained:
+      case 'unconstrained':
         return undefined;
     }
   }
@@ -295,12 +331,12 @@ export class VirtualMachine {
     res: MaybeRelocatable | undefined
   ): MaybeRelocatable | undefined {
     switch (instruction.opcode) {
-      // As stated above, for an assert eq instruction, we have res = dst.
-      case Opcode.AssertEq:
+      // For an assert equal, we have dst := res
+      case 'assert_eq':
         return res;
-      // For a call instruction, we have dst = fp.
-      case Opcode.Call:
-        return this.runContext.fp;
+      // For a call instruction, we have dst := fp
+      case 'call':
+        return this.fp;
       default:
         return undefined;
     }
@@ -312,7 +348,7 @@ export class VirtualMachine {
 
     this.updateFp(instruction, operands);
 
-    return this.updateAp(instruction, operands);
+    this.updateAp(instruction, operands);
   }
 
   // Update the pc update logic based on the instruction.
@@ -320,23 +356,23 @@ export class VirtualMachine {
     switch (instruction.pcUpdate) {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
-      case PcUpdate.Regular:
-        this.runContext.incrementPc(instruction.size());
+      case 'pc = pc':
+        this.incrementPc(instruction.size());
         break;
       // If the pc update logic is jump, then we set the pc to the
       // result.
-      case PcUpdate.Jump:
+      case 'pc = res':
         if (operands.res === undefined) {
           throw new VirtualMachineError(UnconstrainedResError);
         }
         if (!Relocatable.isRelocatable(operands.res)) {
           throw new VirtualMachineError(ExpectedRelocatable);
         }
-        this.runContext.pc = operands.res;
+        this.pc = operands.res;
         break;
       // If the pc update logic is jump rel, then we add the result
       // to the pc.
-      case PcUpdate.JumpRel:
+      case 'pc = pc + res':
         if (operands.res === undefined) {
           throw new VirtualMachineError(UnconstrainedResError);
         }
@@ -344,17 +380,17 @@ export class VirtualMachine {
         if (!Felt.isFelt(operands.res)) {
           throw new VirtualMachineError(ExpectedFelt);
         }
-        this.runContext.pc = this.runContext.pc.add(operands.res);
+        this.pc = this.pc.add(operands.res);
         break;
       // If the pc update logic is jnz, then we check if the destination
       // is zero. If it is, then we increment the pc by the instruction (default)
       // If it is not, then we add the op1 to the pc.
-      case PcUpdate.Jnz:
+      case 'res != 0 ? pc = op1 : pc += instruction_size':
         if (operands.dst === undefined) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
         if (Felt.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
-          this.runContext.incrementPc(instruction.size());
+          this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {
             throw new VirtualMachineError(InvalidOperand1);
@@ -362,7 +398,7 @@ export class VirtualMachine {
           if (!Felt.isFelt(operands.op1)) {
             throw new VirtualMachineError(ExpectedFelt);
           }
-          this.runContext.pc = this.runContext.pc.add(operands.op1);
+          this.pc = this.pc.add(operands.op1);
         }
         break;
     }
@@ -372,23 +408,21 @@ export class VirtualMachine {
   updateFp(instruction: Instruction, operands: Operands): void {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
-      case FpUpdate.ApPlus2:
-        const apPlus2 = this.runContext.ap.add(2);
-
-        this.runContext.fp = apPlus2;
+      case 'fp = ap + 2':
+        this.fp = this.ap.add(2);
         break;
       // If the fp update logic is dst, then we add the destination
       // to fp if dst is a felt, or set the fp to the destination
       // if a relocatable.
-      case FpUpdate.Dst:
+      case 'fp = relocatable(dst) || fp += felt(dst)':
         if (operands.dst === undefined) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
         if (Felt.isFelt(operands.dst)) {
-          this.runContext.fp = this.runContext.fp.add(operands.dst);
+          this.fp = this.fp.add(operands.dst);
         }
         if (Relocatable.isRelocatable(operands.dst)) {
-          this.runContext.fp = operands.dst;
+          this.fp = operands.dst;
         }
         break;
     }
@@ -398,7 +432,7 @@ export class VirtualMachine {
   updateAp(instruction: Instruction, operands: Operands): void {
     switch (instruction.apUpdate) {
       // If the ap update logic is add, then we add the result to the ap.
-      case ApUpdate.Add:
+      case 'ap = ap + res':
         if (operands.res === undefined) {
           throw new VirtualMachineError(UnconstrainedResError);
         }
@@ -406,15 +440,15 @@ export class VirtualMachine {
           throw new VirtualMachineError(ExpectedFelt);
         }
 
-        this.runContext.ap = this.runContext.ap.add(operands.res);
+        this.ap = this.ap.add(operands.res);
         break;
       // If the ap update logic is add 1, then we add 1 to the ap.
-      case ApUpdate.Add1:
-        this.runContext.ap = this.runContext.ap.add(1);
+      case 'ap++':
+        this.ap = this.ap.add(1);
         break;
       // If the ap update logic is add 2, then we add 2 to the ap.
-      case ApUpdate.Add2:
-        this.runContext.ap = this.runContext.ap.add(2);
+      case 'ap += 2':
+        this.ap = this.ap.add(2);
         break;
     }
   }
@@ -428,7 +462,7 @@ export class VirtualMachine {
       // For a assert eq, check that res is defined and equals dst.
       // This is because dst represents the left side of the computation, and
       // res represents the right side of the computation.
-      case Opcode.AssertEq:
+      case 'assert_eq':
         if (operands.res === undefined) {
           throw new VirtualMachineError(UnconstrainedResError);
         }
@@ -439,12 +473,12 @@ export class VirtualMachine {
       // For a call, check that op0 = pc + instruction size and dst = fp.
       // op0 is used to store the return pc (the address of the instruction
       // following the call instruction). dst is used to store the frame pointer.
-      case Opcode.Call:
-        const nextPc = this.runContext.pc.add(instruction.size());
+      case 'call':
+        const nextPc = this.pc.add(instruction.size());
         if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
           throw new VirtualMachineError(InvalidOperand0);
         }
-        if (this.runContext.fp !== operands.dst) {
+        if (this.fp !== operands.dst) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
         break;
