@@ -9,7 +9,7 @@ import {
   InvalidOperandOneSource,
   InvalidOpcode,
   InvalidPcUpdate,
-  InvalidResultLogic,
+  InvalidOpLogic,
 } from 'errors/instruction';
 import { SignedInteger16 } from 'primitives/int';
 import { UnsignedInteger } from 'primitives/uint';
@@ -35,7 +35,7 @@ export type RegisterFlag = 'ap' | 'fp';
 
 export type Op1Source = 'op0' | 'pc' | 'fp' | 'ap';
 
-export type ResultLogic = 'op1' | 'op0 + op1' | 'op0 * op1' | 'unconstrained';
+export type OpLogic = 'op1' | 'op0 + op1' | 'op0 * op1' | 'unconstrained';
 
 export type PcUpdate =
   | 'pc = pc'
@@ -63,7 +63,7 @@ export class Instruction {
   // The source of the Operand 1
   public op1Source: Op1Source;
   // The result logic
-  public resultLogic: ResultLogic;
+  public opLogic: OpLogic;
   // The logic to use to compute the next pc
   public pcUpdate: PcUpdate;
   // The logic to use to compute the next ap
@@ -96,7 +96,7 @@ export class Instruction {
     dstReg: RegisterFlag,
     op0Register: RegisterFlag,
     op1Source: Op1Source,
-    resultLogic: ResultLogic,
+    opLogic: OpLogic,
     pcUpdate: PcUpdate,
     apUpdate: ApUpdate,
     fpUpdate: FpUpdate,
@@ -113,7 +113,7 @@ export class Instruction {
     this.dstRegister = dstReg;
     this.op0Register = op0Register;
     this.op1Source = op1Source;
-    this.resultLogic = resultLogic;
+    this.opLogic = opLogic;
     this.pcUpdate = pcUpdate;
     this.apUpdate = apUpdate;
     this.fpUpdate = fpUpdate;
@@ -166,10 +166,10 @@ export class Instruction {
     // and shift 2 bits right
     const OperandOneSourceMask = 0x1cn;
     const OperandOneSourceOff = 2n;
-    // resultLogic is located at bits 5-6. We apply a mask of 0x60 (0b1100000)
+    // opLogic is located at bits 5-6. We apply a mask of 0x60 (0b1100000)
     // and shift 5 bits right
-    const resultLogicMask = 0x60n;
-    const resultLogicOff = 5n;
+    const opLogicMask = 0x60n;
+    const opLogicOff = 5n;
     // pcUpdate is located at bits 7-9. We apply a mask of 0x380 (0b1110000000)
     // and shift 7 bits right
     const pcUpdateMask = 0x0380n;
@@ -247,28 +247,28 @@ export class Instruction {
         throw new InstructionError(InvalidPcUpdate);
     }
 
-    const targetResultLogic = (flags & resultLogicMask) >> resultLogicOff;
-    let resultLogic: ResultLogic;
-    switch (targetResultLogic) {
+    const targetOpLogic = (flags & opLogicMask) >> opLogicOff;
+    let opLogic: OpLogic;
+    switch (targetOpLogic) {
       case 0n:
         // if pc_update == jnz and res_logic == 0 then
         // res is unconstrained else res = op1
         if (pcUpdate == 'res != 0 ? pc = op1 : pc += instruction_size') {
-          resultLogic = 'unconstrained';
+          opLogic = 'unconstrained';
         } else {
-          resultLogic = 'op1';
+          opLogic = 'op1';
         }
         break;
       case 1n:
         // res = op0 + op1
-        resultLogic = 'op0 + op1';
+        opLogic = 'op0 + op1';
         break;
       case 2n:
         // res = op0 * op1
-        resultLogic = 'op0 * op1';
+        opLogic = 'op0 * op1';
         break;
       default:
-        throw new InstructionError(InvalidResultLogic);
+        throw new InstructionError(InvalidOpLogic);
     }
 
     const targetOpcode = (flags & opcodeMask) >> opcodeOff;
@@ -335,7 +335,7 @@ export class Instruction {
       dstRegister,
       op0Register,
       Op1Source,
-      resultLogic,
+      opLogic,
       pcUpdate,
       apUpdate,
       fpUpdate,

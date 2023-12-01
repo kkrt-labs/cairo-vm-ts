@@ -43,18 +43,12 @@ export class CairoRunner {
 
   // Run until the given PC is reached.
   runUntilPc(finalPc: Relocatable, verbose: boolean = false): void {
-    while (this.vm.pc.getOffset() < finalPc.getOffset()) {
+    while (this.vm.pc.offset < finalPc.offset) {
       this.vm.step();
       if (verbose) {
-        console.log(
-          `AP: ${this.vm.ap.getSegmentIndex()}:${this.vm.ap.getOffset()}`
-        );
-        console.log(
-          `FP: ${this.vm.fp.getSegmentIndex()}:${this.vm.fp.getOffset()}`
-        );
-        console.log(
-          `PC: ${this.vm.pc.getSegmentIndex()}:${this.vm.pc.getOffset()}`
-        );
+        console.log(`AP: ${this.vm.ap.segment}:${this.vm.ap.offset}`);
+        console.log(`FP: ${this.vm.fp.segment}:${this.vm.fp.offset}`);
+        console.log(`PC: ${this.vm.pc.segment}:${this.vm.pc.offset}`);
 
         console.log(`[ap - 1]: ${this.vm.memory.get(this.vm.ap.sub(1))}`);
         console.log(`[fp]: ${this.vm.memory.get(this.vm.fp)}`);
@@ -116,45 +110,30 @@ export class CairoRunner {
   }
 
   getProgramBase(): Relocatable {
-    return new Relocatable(
-      this.programBase.getSegmentIndex(),
-      this.programBase.getOffset()
-    );
+    return new Relocatable(this.programBase.segment, this.programBase.offset);
   }
 
   getExecutionBase(): Relocatable {
     return new Relocatable(
-      this.executionBase.getSegmentIndex(),
-      this.executionBase.getOffset()
+      this.executionBase.segment,
+      this.executionBase.offset
     );
   }
 
   getInitialPc(): Relocatable {
-    return new Relocatable(
-      this.initialPc.getSegmentIndex(),
-      this.initialPc.getOffset()
-    );
+    return new Relocatable(this.initialPc.segment, this.initialPc.offset);
   }
 
   getInitialAp(): Relocatable {
-    return new Relocatable(
-      this.initialAp.getSegmentIndex(),
-      this.initialAp.getOffset()
-    );
+    return new Relocatable(this.initialAp.segment, this.initialAp.offset);
   }
 
   getInitialFp(): Relocatable {
-    return new Relocatable(
-      this.initialFp.getSegmentIndex(),
-      this.initialFp.getOffset()
-    );
+    return new Relocatable(this.initialFp.segment, this.initialFp.offset);
   }
 
   getFinalPc(): Relocatable {
-    return new Relocatable(
-      this.finalPc.getSegmentIndex(),
-      this.finalPc.getOffset()
-    );
+    return new Relocatable(this.finalPc.segment, this.finalPc.offset);
   }
 
   getMainOffset(): number {

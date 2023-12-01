@@ -10,7 +10,7 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction, Opcode, PcUpdate, ResultLogic } from './instruction';
+import { Instruction, Opcode, PcUpdate, OpLogic } from './instruction';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -238,7 +238,7 @@ export class VirtualMachine {
       // For add, res = op0 + op1 => op0 = res - op1.
       // For mul, res = op0 * op1 => op0 = res / op1.
       case 'assert_eq':
-        switch (instruction.resultLogic) {
+        switch (instruction.opLogic) {
           case 'op0 + op1':
             // op0 = res - op1
             if (dst !== undefined && op1 !== undefined) {
@@ -272,7 +272,7 @@ export class VirtualMachine {
     if (instruction.opcode !== 'assert_eq') {
       return undefined;
     }
-    switch (instruction.resultLogic) {
+    switch (instruction.opLogic) {
       // If the result logic is op1, then dst = op1.
       case 'op1':
         return dst;
@@ -309,7 +309,7 @@ export class VirtualMachine {
     op0: MaybeRelocatable,
     op1: MaybeRelocatable
   ): MaybeRelocatable | undefined {
-    switch (instruction.resultLogic) {
+    switch (instruction.opLogic) {
       case 'op1':
         return op1;
       case 'op0 + op1':
