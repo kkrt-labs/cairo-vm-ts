@@ -10,7 +10,7 @@ export class Memory {
   }
 
   get(address: Relocatable): MaybeRelocatable | undefined {
-    return this.data[address.getSegmentIndex()][address.getOffset()];
+    return this.data[address.segment][address.offset];
   }
 
   addSegment(): Relocatable {
@@ -31,20 +31,20 @@ export class Memory {
   // Insert a value in the memory at the given address and increase
   // the segment size by 1.
   write(address: Relocatable, value: MaybeRelocatable): void {
-    if (address.getSegmentIndex() >= this.getSegmentNumber()) {
+    if (address.segment >= this.getSegmentNumber()) {
       throw new MemoryError(
-        `${SegmentError}: trying to insert at segment ${address.getSegmentIndex()} while there are only ${this.getSegmentNumber()} segments.`
+        `${SegmentError}: trying to insert at segment ${
+          address.segment
+        } while there are only ${this.getSegmentNumber()} segments.`
       );
     }
-    if (
-      this.data[address.getSegmentIndex()][address.getOffset()] !== undefined
-    ) {
+    if (this.data[address.segment][address.offset] !== undefined) {
       throw new MemoryError(WriteOnceError);
     }
-    this.data[address.getSegmentIndex()][address.getOffset()] = value;
+    this.data[address.segment][address.offset] = value;
   }
 
-  getSegmentSize(segmentIndex: number): number {
-    return this.data[segmentIndex]?.length ?? 0;
+  getSegmentSize(segment: number): number {
+    return this.data[segment]?.length ?? 0;
   }
 }

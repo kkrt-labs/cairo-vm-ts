@@ -9,7 +9,7 @@ import {
   InvalidOperandOneSource,
   InvalidOpcode,
   InvalidPcUpdate,
-  InvalidResultLogic,
+  InvalidOpLogic,
 } from 'errors/instruction';
 
 describe('Instruction', () => {
@@ -32,9 +32,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidResultLogic', () => {
+    test('should throw an error InvalidOpLogic', () => {
       expect(() => Instruction.decodeInstruction(0x2968800080008000n)).toThrow(
-        new InstructionError(InvalidResultLogic)
+        new InstructionError(InvalidOpLogic)
       );
     });
 

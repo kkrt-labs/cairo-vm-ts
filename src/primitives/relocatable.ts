@@ -10,13 +10,13 @@ import {
 export type MaybeRelocatable = Relocatable | Felt;
 
 export class Relocatable {
-  private segmentIndex: number;
-  private offset: number;
+  segment: number;
+  offset: number;
 
-  constructor(segmentIndex: number, offset: number) {
-    UnsignedInteger.ensureUint53(segmentIndex);
+  constructor(segment: number, offset: number) {
+    UnsignedInteger.ensureUint53(segment);
     UnsignedInteger.ensureUint53(offset);
-    this.segmentIndex = segmentIndex;
+    this.segment = segment;
     this.offset = offset;
   }
 
@@ -26,17 +26,17 @@ export class Relocatable {
   add(other: MaybeRelocatable): MaybeRelocatable;
   add(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
-      const offset = new Felt(BigInt(this.getOffset()));
+      const offset = new Felt(BigInt(this.offset));
       const newOffset = offset.add(other).toUint53();
 
-      return new Relocatable(this.getSegmentIndex(), newOffset);
+      return new Relocatable(this.segment, newOffset);
     }
 
     if (other instanceof Relocatable) {
       throw new PrimitiveError(ForbiddenOperation);
     }
 
-    return new Relocatable(this.getSegmentIndex(), this.getOffset() + other);
+    return new Relocatable(this.segment, this.offset + other);
   }
 
   sub(other: Felt): Relocatable;
@@ -47,10 +47,10 @@ export class Relocatable {
     if (other instanceof Felt) {
       const delta = other.toUint53();
 
-      if (this.getOffset() < delta) {
+      if (this.offset < delta) {
         throw new PrimitiveError(OffsetUnderflow);
       }
-      return new Relocatable(this.getSegmentIndex(), this.getOffset() - delta);
+      return new Relocatable(this.segment, this.offset - delta);
     }
 
     if (other instanceof Relocatable) {
@@ -58,39 +58,32 @@ export class Relocatable {
         throw new PrimitiveError(OffsetUnderflow);
       }
 
-      if (this.segmentIndex !== other.segmentIndex) {
+      if (this.segment !== other.segment) {
         throw new PrimitiveError(SegmentError);
       }
 
       return new Felt(BigInt(this.offset - other.offset));
     }
 
-    if (this.getOffset() < other) {
+    if (this.offset < other) {
       throw new PrimitiveError(OffsetUnderflow);
     }
 
-    return new Relocatable(this.getSegmentIndex(), this.getOffset() - other);
+    return new Relocatable(this.segment, this.offset - other);
   }
 
   eq(other: MaybeRelocatable): boolean {
     if (other instanceof Felt) {
       return false;
     }
-    if (
-      other.offset === this.offset &&
-      other.segmentIndex === this.segmentIndex
-    ) {
+    if (other.offset === this.offset && other.segment === this.segment) {
       return true;
     }
     return false;
   }
 
-  getSegmentIndex(): number {
-    return this.segmentIndex;
-  }
-
-  getOffset(): number {
-    return this.offset;
+  toString(): string {
+    return `${this.segment}:${this.offset}`;
   }
 
   static isRelocatable(
