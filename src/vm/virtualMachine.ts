@@ -85,18 +85,18 @@ export class VirtualMachine {
         if (op1Offset == 1) {
           baseAddr = this.pc;
         } else {
-          throw new VirtualMachineError(Op1ImmediateOffsetError);
+          throw new Op1ImmediateOffsetError();
         }
         break;
       case 'op0':
         // In case of operand 0 as the source, we have to check that
         // operand 0 is not undefined.
         if (op0 === undefined) {
-          throw new VirtualMachineError(Op0Undefined);
+          throw new Op0Undefined();
         }
 
         if (!Relocatable.isRelocatable(op0)) {
-          throw new VirtualMachineError(Op0NotRelocatable);
+          throw new Op0NotRelocatable();
         }
         baseAddr = op0;
     }
@@ -108,7 +108,7 @@ export class VirtualMachine {
   step(): void {
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
-      throw new VirtualMachineError(EndOfInstructionsError);
+      throw new EndOfInstructionsError();
     }
 
     if (!(maybeEncodedInstruction instanceof Felt)) {
@@ -314,7 +314,7 @@ export class VirtualMachine {
         return op0.add(op1);
       case 'op0 * op1':
         if (!Felt.isFelt(op0)) {
-          throw new VirtualMachineError(ExpectedFelt);
+          throw new ExpectedFelt();
         }
         return op0.mul(op1);
       case 'unconstrained':
@@ -361,10 +361,10 @@ export class VirtualMachine {
       // result.
       case 'pc = res':
         if (operands.res === undefined) {
-          throw new VirtualMachineError(UnconstrainedResError);
+          throw new UnconstrainedResError();
         }
         if (!Relocatable.isRelocatable(operands.res)) {
-          throw new VirtualMachineError(ExpectedRelocatable);
+          throw new ExpectedRelocatable();
         }
         this.pc = operands.res;
         break;
@@ -372,11 +372,11 @@ export class VirtualMachine {
       // to the pc.
       case 'pc = pc + res':
         if (operands.res === undefined) {
-          throw new VirtualMachineError(UnconstrainedResError);
+          throw new UnconstrainedResError();
         }
 
         if (!Felt.isFelt(operands.res)) {
-          throw new VirtualMachineError(ExpectedFelt);
+          throw new ExpectedFelt();
         }
         this.pc = this.pc.add(operands.res);
         break;
@@ -385,16 +385,16 @@ export class VirtualMachine {
       // If it is not, then we add the op1 to the pc.
       case 'res != 0 ? pc = op1 : pc += instruction_size':
         if (operands.dst === undefined) {
-          throw new VirtualMachineError(InvalidDstOperand);
+          throw new InvalidDstOperand();
         }
         if (Felt.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
           this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {
-            throw new VirtualMachineError(InvalidOp1);
+            throw new InvalidOp1();
           }
           if (!Felt.isFelt(operands.op1)) {
-            throw new VirtualMachineError(ExpectedFelt);
+            throw new ExpectedFelt();
           }
           this.pc = this.pc.add(operands.op1);
         }
@@ -414,7 +414,7 @@ export class VirtualMachine {
       // if a relocatable.
       case 'fp = relocatable(dst) || fp += felt(dst)':
         if (operands.dst === undefined) {
-          throw new VirtualMachineError(InvalidDstOperand);
+          throw new InvalidDstOperand();
         }
         if (Felt.isFelt(operands.dst)) {
           this.fp = this.fp.add(operands.dst);
@@ -432,10 +432,10 @@ export class VirtualMachine {
       // If the ap update logic is add, then we add the result to the ap.
       case 'ap = ap + res':
         if (operands.res === undefined) {
-          throw new VirtualMachineError(UnconstrainedResError);
+          throw new UnconstrainedResError();
         }
         if (!Felt.isFelt(operands.res)) {
-          throw new VirtualMachineError(ExpectedFelt);
+          throw new ExpectedFelt();
         }
 
         this.ap = this.ap.add(operands.res);
@@ -462,10 +462,10 @@ export class VirtualMachine {
       // res represents the right side of the computation.
       case 'assert_eq':
         if (operands.res === undefined) {
-          throw new VirtualMachineError(UnconstrainedResError);
+          throw new UnconstrainedResError();
         }
         if (operands.dst !== operands.res) {
-          throw new VirtualMachineError(DiffAssertValuesError);
+          throw new DiffAssertValuesError();
         }
         break;
       // For a call, check that op0 = pc + instruction size and dst = fp.
@@ -474,10 +474,10 @@ export class VirtualMachine {
       case 'call':
         const nextPc = this.pc.add(instruction.size());
         if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
-          throw new VirtualMachineError(InvalidOp0);
+          throw new InvalidOp0();
         }
         if (this.fp !== operands.dst) {
-          throw new VirtualMachineError(InvalidDstOperand);
+          throw new InvalidDstOperand();
         }
         break;
     }

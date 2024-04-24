@@ -1,15 +1,25 @@
 export class VirtualMachineError extends Error {}
 
-export const EndOfInstructionsError = 'End of instructions';
-export const UnconstrainedResError = 'Result is unconstrained';
-export const DiffAssertValuesError = 'Assert values are different';
-export const InvalidDstOperand = 'Invalid destination operand';
-export const InvalidOp0 = 'Invalid operand 0';
-export const InvalidOp1 = 'Invalid operand 1';
-export const ExpectedRelocatable = 'Expected relocatable';
-export const ExpectedFelt = 'Expected felt';
+/** End of instructions */
+export class EndOfInstructionsError extends VirtualMachineError {}
+/** Result is unconstrained */
+export class UnconstrainedResError extends VirtualMachineError {}
+/** Assert values are different */
+export class DiffAssertValuesError extends VirtualMachineError {}
+/** Invalid destination operand */
+export class InvalidDstOperand extends VirtualMachineError {}
+/** Invalid operand 0 */
+export class InvalidOp0 extends VirtualMachineError {}
+/** Invalid operand 1 */
+export class InvalidOp1 extends VirtualMachineError {}
+/** Expected relocatable */
+export class ExpectedRelocatable extends VirtualMachineError {}
+/** Expected felt */
+export class ExpectedFelt extends VirtualMachineError {}
 
-export const Op1ImmediateOffsetError = 'Op1 immediate offset should be 1';
-export const Op0NotRelocatable =
-  'Op0 is not relocatable. Cannot compute Op1 address';
-export const Op0Undefined = 'Op0 is undefined';
+/** Op1 immediate offset should be 1 */
+export class Op1ImmediateOffsetError extends VirtualMachineError {}
+/** Op0 is not relocatable. Cannot compute Op1 address */
+export class Op0NotRelocatable extends VirtualMachineError {}
+/** Op0 is undefined */
+export class Op0Undefined extends VirtualMachineError {}
