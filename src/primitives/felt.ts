@@ -64,7 +64,7 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint53(): number {
+  toNumber(): number {
     if (this.inner > Number.MAX_SAFE_INTEGER) {
       throw new PrimitiveError(OutOfRangeBigInt);
     }

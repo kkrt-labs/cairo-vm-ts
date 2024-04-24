@@ -117,10 +117,10 @@ describe('Felt', () => {
     });
   });
 
-  describe('toUint53', () => {
+  describe('toNumber', () => {
     test('should throw an error if the felt is larger than the max safe integer', () => {
       const a = new Felt(2n ** 53n);
-      expect(() => a.toUint53()).toThrow(new PrimitiveError(OutOfRangeBigInt));
+      expect(() => a.toNumber()).toThrow(new PrimitiveError(OutOfRangeBigInt));
     });
   });
 });
