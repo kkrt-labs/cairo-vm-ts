@@ -4,7 +4,6 @@ import { Instruction } from './instruction';
 
 import {
   HighBitSetError,
-  InstructionError,
   InvalidApUpdate,
   InvalidOperandOneSource,
   InvalidOpcode,
@@ -16,37 +15,37 @@ describe('Instruction', () => {
   describe('decodeInstruction', () => {
     test('should throw an error HighBitSetError', () => {
       expect(() => Instruction.decodeInstruction(0x94a7800080008000n)).toThrow(
-        new InstructionError(HighBitSetError)
+        new HighBitSetError()
       );
     });
 
     test('should throw an error InvalidOperandOneSource', () => {
       expect(() => Instruction.decodeInstruction(0x294f800080008000n)).toThrow(
-        new InstructionError(InvalidOperandOneSource)
+        new InvalidOperandOneSource()
       );
     });
 
     test('should throw an error InvalidPcUpdate', () => {
       expect(() => Instruction.decodeInstruction(0x29a8800080008000n)).toThrow(
-        new InstructionError(InvalidPcUpdate)
+        new InvalidPcUpdate()
       );
     });
 
     test('should throw an error InvalidOpLogic', () => {
       expect(() => Instruction.decodeInstruction(0x2968800080008000n)).toThrow(
-        new InstructionError(InvalidOpLogic)
+        new InvalidOpLogic()
       );
     });
 
     test('should throw an error InvalidOpcode', () => {
       expect(() => Instruction.decodeInstruction(0x3948800080008000n)).toThrow(
-        new InstructionError(InvalidOpcode)
+        new InvalidOpcode()
       );
     });
 
     test('should throw an error with InvalidApUpdate', () => {
       expect(() => Instruction.decodeInstruction(0x2d48800080008000n)).toThrow(
-        new InstructionError(InvalidApUpdate)
+        new InvalidApUpdate()
       );
     });
 

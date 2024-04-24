@@ -1,8 +1,20 @@
+/** Errors related to Instruction methods */
 export class InstructionError extends Error {}
 
-export const HighBitSetError = 'High bit is not zero';
-export const InvalidOperandOneSource = 'Invalid Operand 1 Source';
-export const InvalidPcUpdate = 'Invalid PC Update';
-export const InvalidApUpdate = 'Invalid AP Update';
-export const InvalidOpLogic = 'Invalid Result Logic';
-export const InvalidOpcode = 'Invalid Opcode';
+/** High bit is not zero */
+export class HighBitSetError extends InstructionError {}
+
+/** Invalid op1 Source */
+export class InvalidOperandOneSource extends InstructionError {}
+
+/** Invalid PC Update */
+export class InvalidPcUpdate extends InstructionError {}
+
+/** Invalid AP Update */
+export class InvalidApUpdate extends InstructionError {}
+
+/** Invalid Result Logic */
+export class InvalidOpLogic extends InstructionError {}
+
+/** Invalid Opcode */
+export class InvalidOpcode extends InstructionError {}

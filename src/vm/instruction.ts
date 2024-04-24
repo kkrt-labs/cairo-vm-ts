@@ -3,7 +3,6 @@
 // representing the first one with this struct is enough.
 
 import {
-  InstructionError,
   HighBitSetError,
   InvalidApUpdate,
   InvalidOperandOneSource,
@@ -127,7 +126,7 @@ export class Instruction {
     // INVARIANT: The high bit of the encoded instruction must be 0
     const highBit = 1n << 63n;
     if ((highBit & encodedInstruction) !== 0n) {
-      throw new InstructionError(HighBitSetError);
+      throw new HighBitSetError();
     }
 
     // Structure of the 48 first bits of an encoded instruction:
@@ -217,7 +216,7 @@ export class Instruction {
         Op1Source = 'ap';
         break;
       default:
-        throw new InstructionError(InvalidOperandOneSource);
+        throw new InvalidOperandOneSource();
     }
 
     const targetPcUpdate = (flags & pcUpdateMask) >> pcUpdateOff;
@@ -240,7 +239,7 @@ export class Instruction {
         pcUpdate = 'res != 0 ? pc = op1 : pc += instruction_size';
         break;
       default:
-        throw new InstructionError(InvalidPcUpdate);
+        throw new InvalidPcUpdate();
     }
 
     const targetOpLogic = (flags & opLogicMask) >> opLogicOff;
@@ -264,7 +263,7 @@ export class Instruction {
         opLogic = 'op0 * op1';
         break;
       default:
-        throw new InstructionError(InvalidOpLogic);
+        throw new InvalidOpLogic();
     }
 
     const targetOpcode = (flags & opcodeMask) >> opcodeOff;
@@ -287,7 +286,7 @@ export class Instruction {
         opcode = 'assert_eq';
         break;
       default:
-        throw new InstructionError(InvalidOpcode);
+        throw new InvalidOpcode();
     }
 
     const targetApUpdate = (flags & apUpdateMask) >> apUpdateOff;
@@ -309,7 +308,7 @@ export class Instruction {
         apUpdate = 'ap++';
         break;
       default:
-        throw new InstructionError(InvalidApUpdate);
+        throw new InvalidApUpdate();
     }
 
     let fpUpdate: FpUpdate;
