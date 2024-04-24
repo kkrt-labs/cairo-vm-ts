@@ -2,8 +2,7 @@ import { test, expect, describe } from 'bun:test';
 import { Memory } from './memory';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { SegmentError } from 'errors/primitives';
-import { WriteOnceError } from 'errors/memory';
+import { WriteInvalidSegment, WriteOnceError } from 'errors/memory';
 
 describe('Memory', () => {
   describe('get', () => {
@@ -68,7 +67,9 @@ describe('Memory', () => {
     test('should throw SegmentError on uninitialized segment', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
-      expect(() => memory.write(address, DATA[0])).toThrow(SegmentError);
+      expect(() => memory.write(address, DATA[0])).toThrow(
+        new WriteInvalidSegment(address.segment, memory.getSegmentNumber())
+      );
     });
     test('should throw WriteOnceError on memory already written to', () => {
       const memory = new Memory();
@@ -76,7 +77,9 @@ describe('Memory', () => {
       const address = new Relocatable(0, 10);
       memory.write(address, DATA[0]);
 
-      expect(() => memory.write(address, DATA[0])).toThrow(WriteOnceError);
+      expect(() => memory.write(address, DATA[0])).toThrow(
+        new WriteOnceError()
+      );
     });
   });
 });

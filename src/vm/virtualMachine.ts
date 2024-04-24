@@ -112,7 +112,7 @@ export class VirtualMachine {
     }
 
     if (!(maybeEncodedInstruction instanceof Felt)) {
-      throw new VirtualMachineError(InstructionError);
+      throw new InstructionError();
     }
 
     const encodedInstruction = maybeEncodedInstruction.toBigInt();

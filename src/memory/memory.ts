@@ -1,5 +1,4 @@
-import { MemoryError, WriteOnceError } from 'errors/memory';
-import { SegmentError } from 'errors/primitives';
+import { WriteInvalidSegment, WriteOnceError } from 'errors/memory';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 
 export class Memory {
@@ -32,14 +31,10 @@ export class Memory {
   // the segment size by 1.
   write(address: Relocatable, value: MaybeRelocatable): void {
     if (address.segment >= this.getSegmentNumber()) {
-      throw new MemoryError(
-        `${SegmentError}: trying to insert at segment ${
-          address.segment
-        } while there are only ${this.getSegmentNumber()} segments.`
-      );
+      throw new WriteInvalidSegment(address.segment, this.getSegmentNumber());
     }
     if (this.data[address.segment][address.offset] !== undefined) {
-      throw new MemoryError(WriteOnceError);
+      throw new WriteOnceError();
     }
     this.data[address.segment][address.offset] = value;
   }
