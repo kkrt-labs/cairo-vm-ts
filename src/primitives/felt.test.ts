@@ -1,7 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
-import { OutOfRangeBigInt, PrimitiveError } from 'errors/primitives';
-import { Relocatable } from './relocatable';
+import { OutOfRangeBigInt } from 'errors/primitives';
 
 describe('Felt', () => {
   describe('constructor', () => {

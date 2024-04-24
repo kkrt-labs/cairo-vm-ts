@@ -1,12 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import {
-  ApUpdate,
-  FpUpdate,
-  Instruction,
-  Opcode,
-  PcUpdate,
-  OpLogic,
-} from './instruction';
+import { Instruction, Opcode, OpLogic } from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
@@ -18,7 +11,6 @@ import {
   InvalidDstOperand,
   InvalidOp0,
   UnconstrainedResError,
-  VirtualMachineError,
   Op0NotRelocatable,
   Op0Undefined,
   Op1ImmediateOffsetError,

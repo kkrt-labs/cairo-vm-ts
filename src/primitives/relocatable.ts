@@ -2,7 +2,6 @@ import { Felt } from './felt';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
-  PrimitiveError,
   SegmentError,
 } from 'errors/primitives';
 

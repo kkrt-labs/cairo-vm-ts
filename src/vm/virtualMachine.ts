@@ -4,13 +4,12 @@ import {
   InvalidDstOperand,
   InvalidOp1,
   UnconstrainedResError,
-  VirtualMachineError,
   Op0NotRelocatable,
   Op0Undefined,
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction, Opcode, PcUpdate, OpLogic } from './instruction';
+import { Instruction } from './instruction';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 

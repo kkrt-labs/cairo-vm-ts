@@ -1,10 +1,6 @@
 import { MaybeRelocatable, Relocatable } from './relocatable';
 
-import {
-  ForbiddenOperation,
-  OutOfRangeBigInt,
-  PrimitiveError,
-} from 'errors/primitives';
+import { ForbiddenOperation, OutOfRangeBigInt } from 'errors/primitives';
 
 export class Felt {
   private inner: bigint;

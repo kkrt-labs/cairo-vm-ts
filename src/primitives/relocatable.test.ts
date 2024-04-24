@@ -1,11 +1,9 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
 import { Relocatable, MemoryPointer, ProgramCounter } from './relocatable';
-import { UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
-  PrimitiveError,
   SegmentError,
 } from 'errors/primitives';
 
