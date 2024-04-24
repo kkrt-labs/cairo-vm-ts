@@ -73,6 +73,12 @@ export class Instruction {
   // The opcode
   public opcode: Opcode;
 
+  /** Value added to the offsets on encoded instructions
+   *
+   * offset = encodedOffset - BIAS
+   */
+  static readonly BIAS = BigInt(2 ** 15);
+
   static default(): Instruction {
     return new Instruction(
       0,
@@ -115,6 +121,10 @@ export class Instruction {
     this.opcode = opcode;
   }
 
+  static fromBiased(value: bigint): number {
+    return Number(value - this.BIAS);
+  }
+
   static decodeInstruction(encodedInstruction: bigint): Instruction {
     // INVARIANT: The high bit of the encoded instruction must be 0
     const highBit = 1n << 63n;
@@ -130,17 +140,13 @@ export class Instruction {
     const shift = 16n;
 
     // Get the offset by masking and shifting the encoded instruction
-    const dstOffset = SignedInteger16.fromBiased(encodedInstruction & mask);
+    const dstOffset = this.fromBiased(encodedInstruction & mask);
 
     let shiftedEncodedInstruction = encodedInstruction >> shift;
-    const op0Offset = SignedInteger16.fromBiased(
-      shiftedEncodedInstruction & mask
-    );
+    const op0Offset = this.fromBiased(shiftedEncodedInstruction & mask);
 
     shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-    const op1Offset = SignedInteger16.fromBiased(
-      shiftedEncodedInstruction & mask
-    );
+    const op1Offset = this.fromBiased(shiftedEncodedInstruction & mask);
 
     // Get the flags by shifting the encoded instruction
     const flags = shiftedEncodedInstruction >> shift;
