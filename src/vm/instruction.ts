@@ -121,9 +121,6 @@ export class Instruction {
   }
 
   static decodeInstruction(encodedInstruction: bigint): Instruction {
-    // Check that the encoded instruction fits in a 64-bit unsigned integer
-    UnsignedInteger.ensureUint64(encodedInstruction);
-
     // INVARIANT: The high bit of the encoded instruction must be 0
     const highBit = 1n << 63n;
     if ((highBit & encodedInstruction) !== 0n) {
