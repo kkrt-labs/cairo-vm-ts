@@ -116,11 +116,4 @@ describe('Felt', () => {
       expect(result.eq(expected)).toBeTrue();
     });
   });
-
-  describe('toNumber', () => {
-    test('should throw an error if the felt is larger than the max safe integer', () => {
-      const a = new Felt(2n ** 53n);
-      expect(() => a.toNumber()).toThrow(new PrimitiveError(OutOfRangeBigInt));
-    });
-  });
 });

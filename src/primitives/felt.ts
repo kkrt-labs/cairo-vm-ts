@@ -65,10 +65,6 @@ export class Felt {
   }
 
   toNumber(): number {
-    if (this.inner > Number.MAX_SAFE_INTEGER) {
-      throw new PrimitiveError(OutOfRangeBigInt);
-    }
-
     return Number(this.inner);
   }
 
