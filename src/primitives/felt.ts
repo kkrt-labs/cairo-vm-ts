@@ -13,21 +13,21 @@ export class Felt {
   static ZERO: Felt = new Felt(0n);
   constructor(_inner: bigint) {
     if (_inner < 0n || _inner > Felt.PRIME) {
-      throw new PrimitiveError(OutOfRangeBigInt);
+      throw new OutOfRangeBigInt();
     }
     this.inner = _inner;
   }
 
   add(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt)) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
     return new Felt((this.inner + other.inner) % Felt.PRIME);
   }
 
   sub(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt)) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
 
     let result = this.inner - other.inner;
@@ -39,14 +39,14 @@ export class Felt {
 
   mul(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt)) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
     return new Felt((this.inner * other.inner) % Felt.PRIME);
   }
 
   div(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt) || other.inner === 0n) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
     let result = this.inner / other.inner;
     return new Felt(result);

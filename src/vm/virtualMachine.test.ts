@@ -269,7 +269,7 @@ describe('VirtualMachine', () => {
       const op1 = new Relocatable(1, 2);
 
       expect(() => vm.computeRes(instruction, op0, op1)).toThrow(
-        new VirtualMachineError(ForbiddenOperation)
+        new ForbiddenOperation()
       );
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {

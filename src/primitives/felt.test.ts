@@ -6,15 +6,11 @@ import { Relocatable } from './relocatable';
 describe('Felt', () => {
   describe('constructor', () => {
     test('should throw if initializing a felt with a negative inner', () => {
-      expect(() => new Felt(-10n)).toThrow(
-        new PrimitiveError(OutOfRangeBigInt)
-      );
+      expect(() => new Felt(-10n)).toThrow(new OutOfRangeBigInt());
     });
     test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
       const biggerThanPrime = Felt.PRIME + 1n;
-      expect(() => new Felt(biggerThanPrime)).toThrow(
-        new PrimitiveError(OutOfRangeBigInt)
-      );
+      expect(() => new Felt(biggerThanPrime)).toThrow(new OutOfRangeBigInt());
     });
   });
 
