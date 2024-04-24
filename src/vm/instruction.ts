@@ -11,8 +11,6 @@ import {
   InvalidPcUpdate,
   InvalidOpLogic,
 } from 'errors/instruction';
-import { SignedInteger16 } from 'primitives/int';
-import { UnsignedInteger } from 'primitives/uint';
 
 //  Structure of the 63-bit that form the first word of each instruction.
 //  See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.

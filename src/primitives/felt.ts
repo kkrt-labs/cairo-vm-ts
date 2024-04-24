@@ -1,4 +1,3 @@
-import { UnsignedInteger } from './uint';
 import { MaybeRelocatable, Relocatable } from './relocatable';
 
 import {

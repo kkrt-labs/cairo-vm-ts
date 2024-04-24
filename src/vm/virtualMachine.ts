@@ -20,7 +20,6 @@ import {
   InvalidOperand0,
 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
-import { SignedInteger16 } from 'primitives/int';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
 import { Op1Source } from 'vm/instruction';

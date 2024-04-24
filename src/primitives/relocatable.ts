@@ -1,5 +1,4 @@
 import { Felt } from './felt';
-import { UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
