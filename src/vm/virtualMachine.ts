@@ -72,7 +72,6 @@ export class VirtualMachine {
     op1Offset: number,
     op0: MaybeRelocatable | undefined
   ): Relocatable {
-    SignedInteger16.ensureInt16(op1Offset);
     let baseAddr: Relocatable;
     switch (op1Source) {
       case 'ap':

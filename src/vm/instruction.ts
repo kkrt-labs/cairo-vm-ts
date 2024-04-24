@@ -102,11 +102,6 @@ export class Instruction {
     fpUpdate: FpUpdate,
     opcode: Opcode
   ) {
-    // Check that the offsets are 16-bit signed integers
-    SignedInteger16.ensureInt16(dstOffset);
-    SignedInteger16.ensureInt16(op0Offset);
-    SignedInteger16.ensureInt16(op1Offset);
-
     this.dstOffset = dstOffset;
     this.op0Offset = op0Offset;
     this.op1Offset = op1Offset;
