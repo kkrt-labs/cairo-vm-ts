@@ -63,10 +63,6 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toNumber(): number {
-    return Number(this.inner);
-  }
-
   toBigInt(): bigint {
     return this.inner;
   }

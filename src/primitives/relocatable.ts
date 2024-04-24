@@ -24,7 +24,7 @@ export class Relocatable {
   add(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
       const offset = new Felt(BigInt(this.offset));
-      const newOffset = offset.add(other).toNumber();
+      const newOffset = Number(offset.add(other));
 
       return new Relocatable(this.segment, newOffset);
     }
@@ -42,7 +42,7 @@ export class Relocatable {
   sub(other: MaybeRelocatable): MaybeRelocatable;
   sub(other: MaybeRelocatable | number): MaybeRelocatable {
     if (other instanceof Felt) {
-      const delta = other.toNumber();
+      const delta = Number(other);
 
       if (this.offset < delta) {
         throw new PrimitiveError(OffsetUnderflow);
