@@ -117,7 +117,7 @@ export class VirtualMachine {
       throw new VirtualMachineError(InstructionError);
     }
 
-    const encodedInstruction = maybeEncodedInstruction.toUint64();
+    const encodedInstruction = maybeEncodedInstruction.toBigInt();
 
     // decode and run instruction
     const instruction = Instruction.decodeInstruction(encodedInstruction);

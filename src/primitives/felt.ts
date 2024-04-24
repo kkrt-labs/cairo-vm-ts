@@ -68,7 +68,7 @@ export class Felt {
     return Number(this.inner);
   }
 
-  toUint64(): bigint {
+  toBigInt(): bigint {
     UnsignedInteger.ensureUint64(this.inner);
     return this.inner;
   }
