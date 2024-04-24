@@ -2,7 +2,7 @@ import {
   ExpectedFelt,
   ExpectedRelocatable,
   InvalidDstOperand,
-  InvalidOperand1,
+  InvalidOp1,
   UnconstrainedResError,
   VirtualMachineError,
   Op0NotRelocatable,
@@ -17,7 +17,7 @@ import { InstructionError } from 'errors/memory';
 import {
   DiffAssertValuesError,
   EndOfInstructionsError,
-  InvalidOperand0,
+  InvalidOp0,
 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
@@ -391,7 +391,7 @@ export class VirtualMachine {
           this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {
-            throw new VirtualMachineError(InvalidOperand1);
+            throw new VirtualMachineError(InvalidOp1);
           }
           if (!Felt.isFelt(operands.op1)) {
             throw new VirtualMachineError(ExpectedFelt);
@@ -474,7 +474,7 @@ export class VirtualMachine {
       case 'call':
         const nextPc = this.pc.add(instruction.size());
         if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
-          throw new VirtualMachineError(InvalidOperand0);
+          throw new VirtualMachineError(InvalidOp0);
         }
         if (this.fp !== operands.dst) {
           throw new VirtualMachineError(InvalidDstOperand);

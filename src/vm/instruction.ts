@@ -5,7 +5,7 @@
 import {
   HighBitSetError,
   InvalidApUpdate,
-  InvalidOperandOneSource,
+  InvalidOp1Source,
   InvalidOpcode,
   InvalidPcUpdate,
   InvalidOpLogic,
@@ -216,7 +216,7 @@ export class Instruction {
         Op1Source = 'ap';
         break;
       default:
-        throw new InvalidOperandOneSource();
+        throw new InvalidOp1Source();
     }
 
     const targetPcUpdate = (flags & pcUpdateMask) >> pcUpdateOff;

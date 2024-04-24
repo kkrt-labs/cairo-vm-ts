@@ -5,7 +5,7 @@ import { Instruction } from './instruction';
 import {
   HighBitSetError,
   InvalidApUpdate,
-  InvalidOperandOneSource,
+  InvalidOp1Source,
   InvalidOpcode,
   InvalidPcUpdate,
   InvalidOpLogic,
@@ -19,9 +19,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidOperandOneSource', () => {
+    test('should throw an error InvalidOp1Source', () => {
       expect(() => Instruction.decodeInstruction(0x294f800080008000n)).toThrow(
-        new InvalidOperandOneSource()
+        new InvalidOp1Source()
       );
     });
 

@@ -16,7 +16,7 @@ import {
   ExpectedFelt,
   ExpectedRelocatable,
   InvalidDstOperand,
-  InvalidOperand0,
+  InvalidOp0,
   UnconstrainedResError,
   VirtualMachineError,
   Op0NotRelocatable,
@@ -442,7 +442,7 @@ describe('VirtualMachine', () => {
         new VirtualMachineError(DiffAssertValuesError)
       );
     });
-    test('should throw InvalidOperand0 on call opcode and pc != op0', () => {
+    test('should throw InvalidOp0 on call opcode and pc != op0', () => {
       const instruction: Instruction = new Instruction(
         1,
         2,
@@ -467,7 +467,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new VirtualMachineError(InvalidOperand0)
+        new VirtualMachineError(InvalidOp0)
       );
     });
     test('should throw InvalidDstError on call opcode and fp != dst', () => {

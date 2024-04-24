@@ -5,7 +5,7 @@ export class InstructionError extends Error {}
 export class HighBitSetError extends InstructionError {}
 
 /** Invalid op1 Source */
-export class InvalidOperandOneSource extends InstructionError {}
+export class InvalidOp1Source extends InstructionError {}
 
 /** Invalid PC Update */
 export class InvalidPcUpdate extends InstructionError {}
