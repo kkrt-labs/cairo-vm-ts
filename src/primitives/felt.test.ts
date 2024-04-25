@@ -19,7 +19,7 @@ describe('Felt', () => {
   });
 
   describe('conversions', () => {
-    test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
+    test('should convert correctly a felt to a bigint', () => {
       const felt = new Felt(10n);
       const result = felt.toBigInt();
       expect(result).toEqual(10n);
