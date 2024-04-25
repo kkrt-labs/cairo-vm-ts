@@ -2,7 +2,7 @@ import { test, expect, describe } from 'bun:test';
 import { Memory } from './memory';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { SegmentOutOfBounds, WriteOnceError } from 'errors/memory';
+import { SegmentOutOfBounds, InconsistentMemory } from 'errors/memory';
 
 describe('Memory', () => {
   describe('get', () => {
@@ -71,14 +71,23 @@ describe('Memory', () => {
         new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
     });
-    test('should throw WriteOnceError on memory already written to', () => {
+    test('should not throw when reading an address twice with the same value', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
       memory.write(address, DATA[0]);
 
-      expect(() => memory.write(address, DATA[0])).toThrow(
-        new WriteOnceError()
+      expect(() => memory.write(address, DATA[0])).not.toThrow();
+    });
+
+    test('should throw InconsistentMemory on memory already constrained by a different value', () => {
+      const memory = new Memory();
+      memory.addSegment();
+      const address = new Relocatable(0, 10);
+      memory.write(address, DATA[0]);
+
+      expect(() => memory.write(address, DATA[1])).toThrow(
+        new InconsistentMemory(DATA[0], DATA[1])
       );
     });
   });

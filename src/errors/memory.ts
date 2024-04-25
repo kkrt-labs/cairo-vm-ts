@@ -1,10 +1,20 @@
+import { MaybeRelocatable } from 'primitives/relocatable';
+
 export class MemoryError extends Error {}
 
 /** Write existing memory. Can only write to memory once */
-export class WriteOnceError extends MemoryError {}
+export class InconsistentMemory extends MemoryError {
+  public readonly oldValue: MaybeRelocatable;
+  public readonly newValue: MaybeRelocatable;
 
-/** Trying to read on a segment that is not accessible (`segmentIndex >= segmentNumber`)
- */
+  constructor(oldValue: MaybeRelocatable, newValue: MaybeRelocatable) {
+    super();
+    this.oldValue = oldValue;
+    this.newValue = newValue;
+  }
+}
+
+/** Trying to read on a segment that is not accessible (`segmentIndex >= segmentNumber`) */
 export class SegmentOutOfBounds extends MemoryError {
   public readonly segmentIndex: number;
   public readonly segmentNumber: number;
