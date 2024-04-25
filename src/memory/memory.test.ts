@@ -2,7 +2,7 @@ import { test, expect, describe } from 'bun:test';
 import { Memory } from './memory';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
-import { WriteInvalidSegment, WriteOnceError } from 'errors/memory';
+import { SegmentOutOfBounds, WriteOnceError } from 'errors/memory';
 
 describe('Memory', () => {
   describe('get', () => {
@@ -64,11 +64,11 @@ describe('Memory', () => {
 
       expect(memory.get(address)).toEqual(DATA[0]);
     });
-    test('should throw SegmentError on uninitialized segment', () => {
+    test('should throw SegmentOutOfBounds on access to uninitialized segment', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
       expect(() => memory.write(address, DATA[0])).toThrow(
-        new WriteInvalidSegment(address.segment, memory.getSegmentNumber())
+        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
     });
     test('should throw WriteOnceError on memory already written to', () => {

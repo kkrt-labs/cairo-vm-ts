@@ -1,4 +1,4 @@
-import { WriteInvalidSegment, WriteOnceError } from 'errors/memory';
+import { SegmentOutOfBounds, WriteOnceError } from 'errors/memory';
 import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 
 export class Memory {
@@ -31,7 +31,7 @@ export class Memory {
   // the segment size by 1.
   write(address: Relocatable, value: MaybeRelocatable): void {
     if (address.segment >= this.getSegmentNumber()) {
-      throw new WriteInvalidSegment(address.segment, this.getSegmentNumber());
+      throw new SegmentOutOfBounds(address.segment, this.getSegmentNumber());
     }
     if (this.data[address.segment][address.offset] !== undefined) {
       throw new WriteOnceError();
