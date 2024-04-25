@@ -1,14 +1,20 @@
-import { MaybeRelocatable } from 'primitives/relocatable';
+import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
 
 export class MemoryError extends Error {}
 
-/** Write existing memory. Can only write to memory once */
+/** Read a different value (`newValue`) than the already constrained value (`oldValue`) at `address` */
 export class InconsistentMemory extends MemoryError {
+  public readonly address: Relocatable;
   public readonly oldValue: MaybeRelocatable;
   public readonly newValue: MaybeRelocatable;
 
-  constructor(oldValue: MaybeRelocatable, newValue: MaybeRelocatable) {
+  constructor(
+    address: Relocatable,
+    oldValue: MaybeRelocatable,
+    newValue: MaybeRelocatable
+  ) {
     super();
+    this.address = address;
     this.oldValue = oldValue;
     this.newValue = newValue;
   }

@@ -54,7 +54,7 @@ export class Memory {
     if (currentValue === undefined) {
       this.data[segment][offset] = value;
     } else if (currentValue !== value) {
-      throw new InconsistentMemory(this.data[segment][offset], value);
+      throw new InconsistentMemory(address, this.data[segment][offset], value);
     }
   }
 

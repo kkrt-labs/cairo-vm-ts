@@ -87,7 +87,7 @@ describe('Memory', () => {
       memory.read(address, DATA[0]);
 
       expect(() => memory.read(address, DATA[1])).toThrow(
-        new InconsistentMemory(DATA[0], DATA[1])
+        new InconsistentMemory(address, DATA[0], DATA[1])
       );
     });
   });
