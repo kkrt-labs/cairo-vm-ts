@@ -8,6 +8,16 @@ import {
 
 export type MaybeRelocatable = Relocatable | Felt;
 
+export namespace MaybeRelocatable {
+  export function isFelt(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Felt {
+    return maybeRelocatable instanceof Felt;
+  }
+
+  export function isRelocatable(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Relocatable {
+    return maybeRelocatable instanceof Relocatable;
+  }
+}
+
 export class Relocatable {
   segment: number;
   offset: number;
@@ -70,23 +80,11 @@ export class Relocatable {
   }
 
   eq(other: MaybeRelocatable): boolean {
-    if (other instanceof Felt) {
-      return false;
-    }
-    if (other.offset === this.offset && other.segment === this.segment) {
-      return true;
-    }
-    return false;
+    return !(MaybeRelocatable.isFelt(other)) && other.offset === this.offset && other.segment === this.segment;
   }
 
   toString(): string {
     return `${this.segment}:${this.offset}`;
-  }
-
-  static isRelocatable(
-    maybeRelocatable: MaybeRelocatable
-  ): maybeRelocatable is Relocatable {
-    return maybeRelocatable instanceof Relocatable;
   }
 }
 

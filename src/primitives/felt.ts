@@ -19,14 +19,14 @@ export class Felt {
   }
 
   add(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt)) {
-      throw new PrimitiveError(ForbiddenOperation);
+    if (MaybeRelocatable.isFelt(other)) {
+      return new Felt((this.inner + other.inner) % Felt.PRIME);
     }
-    return new Felt((this.inner + other.inner) % Felt.PRIME);
+    throw new PrimitiveError(ForbiddenOperation);
   }
 
   sub(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt)) {
+    if (!MaybeRelocatable.isFelt(other)) {
       throw new PrimitiveError(ForbiddenOperation);
     }
 
@@ -38,25 +38,21 @@ export class Felt {
   }
 
   mul(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt)) {
-      throw new PrimitiveError(ForbiddenOperation);
+    if (MaybeRelocatable.isFelt(other)) {
+      return new Felt((this.inner * other.inner) % Felt.PRIME);
     }
-    return new Felt((this.inner * other.inner) % Felt.PRIME);
+    throw new PrimitiveError(ForbiddenOperation);
   }
 
   div(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt) || other.inner === 0n) {
+    if (!MaybeRelocatable.isFelt(other) || other.inner === 0n) {
       throw new PrimitiveError(ForbiddenOperation);
     }
-    let result = this.inner / other.inner;
-    return new Felt(result);
+    return new Felt(this.inner / other.inner);
   }
 
   eq(other: MaybeRelocatable): boolean {
-    if (other instanceof Relocatable) {
-      return false;
-    }
-    return this.inner == other.inner;
+    return !MaybeRelocatable.isRelocatable(other) && this.inner === other.inner;
   }
 
   toString(): string {
@@ -69,9 +65,5 @@ export class Felt {
 
   toHexString(): string {
     return this.inner.toString(16);
-  }
-
-  static isFelt(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Felt {
-    return maybeRelocatable instanceof Felt;
   }
 }

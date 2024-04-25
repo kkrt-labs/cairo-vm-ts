@@ -95,7 +95,7 @@ export class VirtualMachine {
           throw new VirtualMachineError(Op0Undefined);
         }
 
-        if (!Relocatable.isRelocatable(op0)) {
+        if (!MaybeRelocatable.isRelocatable(op0)) {
           throw new VirtualMachineError(Op0NotRelocatable);
         }
         baseAddr = op0;
@@ -246,7 +246,7 @@ export class VirtualMachine {
           case 'op0 * op1':
             if (dst !== undefined && op1 !== undefined) {
               try {
-                if (!Felt.isFelt(dst)) {
+                if (!MaybeRelocatable.isFelt(dst)) {
                   throw new Error();
                 }
                 // op0 = res / op1
@@ -287,7 +287,7 @@ export class VirtualMachine {
         // op1 = dst / op0
         if (dst !== undefined && op0 !== undefined) {
           try {
-            if (!Felt.isFelt(dst)) {
+            if (!MaybeRelocatable.isFelt(dst)) {
               throw new Error();
             }
             return dst.div(op0);
@@ -313,7 +313,7 @@ export class VirtualMachine {
       case 'op0 + op1':
         return op0.add(op1);
       case 'op0 * op1':
-        if (!Felt.isFelt(op0)) {
+        if (!MaybeRelocatable.isFelt(op0)) {
           throw new VirtualMachineError(ExpectedFelt);
         }
         return op0.mul(op1);
@@ -363,7 +363,7 @@ export class VirtualMachine {
         if (operands.res === undefined) {
           throw new VirtualMachineError(UnconstrainedResError);
         }
-        if (!Relocatable.isRelocatable(operands.res)) {
+        if (!MaybeRelocatable.isRelocatable(operands.res)) {
           throw new VirtualMachineError(ExpectedRelocatable);
         }
         this.pc = operands.res;
@@ -375,7 +375,7 @@ export class VirtualMachine {
           throw new VirtualMachineError(UnconstrainedResError);
         }
 
-        if (!Felt.isFelt(operands.res)) {
+        if (!MaybeRelocatable.isFelt(operands.res)) {
           throw new VirtualMachineError(ExpectedFelt);
         }
         this.pc = this.pc.add(operands.res);
@@ -387,13 +387,13 @@ export class VirtualMachine {
         if (operands.dst === undefined) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
-        if (Felt.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
+        if (MaybeRelocatable.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
           this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {
             throw new VirtualMachineError(InvalidOperand1);
           }
-          if (!Felt.isFelt(operands.op1)) {
+          if (!MaybeRelocatable.isFelt(operands.op1)) {
             throw new VirtualMachineError(ExpectedFelt);
           }
           this.pc = this.pc.add(operands.op1);
@@ -416,10 +416,10 @@ export class VirtualMachine {
         if (operands.dst === undefined) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
-        if (Felt.isFelt(operands.dst)) {
+        if (MaybeRelocatable.isFelt(operands.dst)) {
           this.fp = this.fp.add(operands.dst);
         }
-        if (Relocatable.isRelocatable(operands.dst)) {
+        if (MaybeRelocatable.isRelocatable(operands.dst)) {
           this.fp = operands.dst;
         }
         break;
@@ -434,7 +434,7 @@ export class VirtualMachine {
         if (operands.res === undefined) {
           throw new VirtualMachineError(UnconstrainedResError);
         }
-        if (!Felt.isFelt(operands.res)) {
+        if (!MaybeRelocatable.isFelt(operands.res)) {
           throw new VirtualMachineError(ExpectedFelt);
         }
 
