@@ -8,17 +8,16 @@ export class Felt {
     0x800000000000011000000000000000000000000000000000000000000000001n;
   static ZERO: Felt = new Felt(0n);
   constructor(_inner: bigint) {
-    if (_inner < 0n || _inner > Felt.PRIME) {
-      throw new OutOfRangeBigInt();
-    }
-    this.inner = _inner;
+    while (_inner < 0n) _inner += Felt.PRIME;
+    this.inner = _inner % Felt.PRIME;
   }
 
   add(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt)) {
       throw new ForbiddenOperation();
     }
-    return new Felt((this.inner + other.inner) % Felt.PRIME);
+
+    return new Felt(this.inner + other.inner);
   }
 
   sub(other: MaybeRelocatable): Felt {
@@ -26,32 +25,30 @@ export class Felt {
       throw new ForbiddenOperation();
     }
 
-    let result = this.inner - other.inner;
-    if (result < 0n) {
-      result += Felt.PRIME;
-    }
-    return new Felt(result);
+    return new Felt(this.inner - other.inner);
   }
 
   mul(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt)) {
       throw new ForbiddenOperation();
     }
-    return new Felt((this.inner * other.inner) % Felt.PRIME);
+
+    return new Felt(this.inner * other.inner);
   }
 
   div(other: MaybeRelocatable): Felt {
     if (!(other instanceof Felt) || other.inner === 0n) {
       throw new ForbiddenOperation();
     }
-    let result = this.inner / other.inner;
-    return new Felt(result);
+
+    return new Felt(this.inner / other.inner);
   }
 
   eq(other: MaybeRelocatable): boolean {
     if (other instanceof Relocatable) {
       return false;
     }
+
     return this.inner == other.inner;
   }
 

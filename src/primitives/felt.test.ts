@@ -1,15 +1,24 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
-import { OutOfRangeBigInt } from 'errors/primitives';
 
 describe('Felt', () => {
   describe('constructor', () => {
-    test('should throw if initializing a felt with a negative inner', () => {
-      expect(() => new Felt(-10n)).toThrow(new OutOfRangeBigInt());
+    test('should properly initialize a Felt with a negative bigint as parameter', () => {
+      const negativeUnderPrime = -(Felt.PRIME + 10n);
+      const negativeEvenUnderPrime = -(Felt.PRIME + Felt.PRIME + 15n);
+      expect(new Felt(negativeUnderPrime)).toStrictEqual(
+        new Felt(Felt.PRIME - 10n)
+      );
+      expect(new Felt(negativeEvenUnderPrime)).toStrictEqual(
+        new Felt(Felt.PRIME - 15n)
+      );
     });
-    test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
+    test('should initialize a Felt with r = x % PRIME for x a bigint equal to q*PRIME + r', () => {
       const biggerThanPrime = Felt.PRIME + 1n;
-      expect(() => new Felt(biggerThanPrime)).toThrow(new OutOfRangeBigInt());
+      const evenBiggerThanPrime = Felt.PRIME + Felt.PRIME + 1n;
+      expect(new Felt(biggerThanPrime)).toStrictEqual(new Felt(1n));
+      expect(new Felt(evenBiggerThanPrime)).toStrictEqual(new Felt(1n));
+      expect(new Felt(Felt.PRIME)).toStrictEqual(new Felt(0n));
     });
   });
 
