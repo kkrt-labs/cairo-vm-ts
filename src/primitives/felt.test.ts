@@ -24,6 +24,11 @@ describe('Felt', () => {
       const result = felt.toBigInt();
       expect(result).toEqual(10n);
     });
+    test('should convert correctly a felt to a number', () => {
+      const felt = new Felt(10n);
+      const result = Number(felt);
+      expect(result).toEqual(10);
+    });
     test('should convert correctly a felt to its string representation', () => {
       const felt = new Felt(10n);
       expect(felt.toString()).toEqual('10');
