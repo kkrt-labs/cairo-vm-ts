@@ -60,14 +60,14 @@ describe('Memory', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.read(address, DATA[0]);
+      memory.assertEq(address, DATA[0]);
 
       expect(memory.get(address)).toEqual(DATA[0]);
     });
     test('should throw SegmentOutOfBounds on access to uninitialized segment', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
-      expect(() => memory.read(address, DATA[0])).toThrow(
+      expect(() => memory.assertEq(address, DATA[0])).toThrow(
         new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
     });
@@ -75,18 +75,18 @@ describe('Memory', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.read(address, DATA[0]);
+      memory.assertEq(address, DATA[0]);
 
-      expect(() => memory.read(address, DATA[0])).not.toThrow();
+      expect(() => memory.assertEq(address, DATA[0])).not.toThrow();
     });
 
     test('should throw InconsistentMemory on memory already constrained by a different value', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.read(address, DATA[0]);
+      memory.assertEq(address, DATA[0]);
 
-      expect(() => memory.read(address, DATA[1])).toThrow(
+      expect(() => memory.assertEq(address, DATA[1])).toThrow(
         new InconsistentMemory(address, DATA[0], DATA[1])
       );
     });

@@ -23,24 +23,24 @@ export class Memory {
 
   setData(address: Relocatable, data: MaybeRelocatable[]): void {
     data.forEach((value, index) => {
-      this.read(address.add(index), value);
+      this.assertEq(address.add(index), value);
     });
   }
 
   /**
-   * Read the value constrained at `address` and check the consistency of `value`
-   * @param address
-   * @param value Value expected to be read at `address`
+   * Assert that the memory cell at `address` equals `value`.
+   * - If `address` is undefined, the memory cell is replaced by `value` - Happens only once.
+   * - Any further call to `address` with `newValue` will throw if `newValue !== value`.
    *
-   * NOTE: Cairo memory is Nondeterministic-Read-Only.
+   * @param address Memory cell
+   * @param value Value to assert at `address`
    *
-   * The VM doesn't actually write to the memory, but the prover does, once.
-   * Memory cell values are constrained as the program is executed:
-   * - If the cell at `address` is `undefined`, then the first call to `read(address, value)`
-   * constrains `address` to `value`
-   * - If the cell at `address` already has a value, it cannot be changed, only read. Further calls `
+   * NOTE: Cairo memory follows a Nondeterministic-Read-Only model.
+   *
+   * NOTE2: Method equivalent to `insert()` in the rust cairo-vm
+   * and `__setitem__()` in the python cairo-vm
    */
-  read(address: Relocatable, value: MaybeRelocatable): void {
+  assertEq(address: Relocatable, value: MaybeRelocatable): void {
     const { segment, offset } = address;
     const segmentNumber = this.getSegmentNumber();
 
