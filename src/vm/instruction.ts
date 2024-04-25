@@ -11,8 +11,6 @@ import {
   InvalidPcUpdate,
   InvalidOpLogic,
 } from 'errors/instruction';
-import { SignedInteger16 } from 'primitives/int';
-import { UnsignedInteger } from 'primitives/uint';
 
 //  Structure of the 63-bit that form the first word of each instruction.
 //  See Cairo whitepaper, page 32 - https://eprint.iacr.org/2021/1063.pdf.
@@ -73,6 +71,12 @@ export class Instruction {
   // The opcode
   public opcode: Opcode;
 
+  /** Value added to the offsets on encoded instructions
+   *
+   * offset = encodedOffset - BIAS
+   */
+  static readonly BIAS = BigInt(2 ** 15);
+
   static default(): Instruction {
     return new Instruction(
       0,
@@ -102,11 +106,6 @@ export class Instruction {
     fpUpdate: FpUpdate,
     opcode: Opcode
   ) {
-    // Check that the offsets are 16-bit signed integers
-    SignedInteger16.ensureInt16(dstOffset);
-    SignedInteger16.ensureInt16(op0Offset);
-    SignedInteger16.ensureInt16(op1Offset);
-
     this.dstOffset = dstOffset;
     this.op0Offset = op0Offset;
     this.op1Offset = op1Offset;
@@ -120,10 +119,11 @@ export class Instruction {
     this.opcode = opcode;
   }
 
-  static decodeInstruction(encodedInstruction: bigint): Instruction {
-    // Check that the encoded instruction fits in a 64-bit unsigned integer
-    UnsignedInteger.ensureUint64(encodedInstruction);
+  static fromBiased(value: bigint): number {
+    return Number(value - this.BIAS);
+  }
 
+  static decodeInstruction(encodedInstruction: bigint): Instruction {
     // INVARIANT: The high bit of the encoded instruction must be 0
     const highBit = 1n << 63n;
     if ((highBit & encodedInstruction) !== 0n) {
@@ -138,17 +138,13 @@ export class Instruction {
     const shift = 16n;
 
     // Get the offset by masking and shifting the encoded instruction
-    const dstOffset = SignedInteger16.fromBiased(encodedInstruction & mask);
+    const dstOffset = this.fromBiased(encodedInstruction & mask);
 
     let shiftedEncodedInstruction = encodedInstruction >> shift;
-    const op0Offset = SignedInteger16.fromBiased(
-      shiftedEncodedInstruction & mask
-    );
+    const op0Offset = this.fromBiased(shiftedEncodedInstruction & mask);
 
     shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-    const op1Offset = SignedInteger16.fromBiased(
-      shiftedEncodedInstruction & mask
-    );
+    const op1Offset = this.fromBiased(shiftedEncodedInstruction & mask);
 
     // Get the flags by shifting the encoded instruction
     const flags = shiftedEncodedInstruction >> shift;

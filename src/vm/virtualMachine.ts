@@ -20,7 +20,6 @@ import {
   InvalidOperand0,
 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
-import { SignedInteger16 } from 'primitives/int';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
 import { Op1Source } from 'vm/instruction';
@@ -72,7 +71,6 @@ export class VirtualMachine {
     op1Offset: number,
     op0: MaybeRelocatable | undefined
   ): Relocatable {
-    SignedInteger16.ensureInt16(op1Offset);
     let baseAddr: Relocatable;
     switch (op1Source) {
       case 'ap':
@@ -117,7 +115,7 @@ export class VirtualMachine {
       throw new VirtualMachineError(InstructionError);
     }
 
-    const encodedInstruction = maybeEncodedInstruction.toUint64();
+    const encodedInstruction = maybeEncodedInstruction.toBigInt();
 
     // decode and run instruction
     const instruction = Instruction.decodeInstruction(encodedInstruction);

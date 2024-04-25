@@ -19,10 +19,15 @@ describe('Felt', () => {
   });
 
   describe('conversions', () => {
-    test('should convert correctly a felt to a number if inner is below Javascript max safe integer', () => {
+    test('should convert correctly a felt to a bigint', () => {
       const felt = new Felt(10n);
-      const result = felt.toUint64();
+      const result = felt.toBigInt();
       expect(result).toEqual(10n);
+    });
+    test('should convert correctly a felt to a number', () => {
+      const felt = new Felt(10n);
+      const result = Number(felt);
+      expect(result).toEqual(10);
     });
     test('should convert correctly a felt to its string representation', () => {
       const felt = new Felt(10n);
@@ -114,13 +119,6 @@ describe('Felt', () => {
       const result = a.div(b);
       const expected = new Felt(0n);
       expect(result.eq(expected)).toBeTrue();
-    });
-  });
-
-  describe('toUint53', () => {
-    test('should throw an error if the felt is larger than the max safe integer', () => {
-      const a = new Felt(2n ** 53n);
-      expect(() => a.toUint53()).toThrow(new PrimitiveError(OutOfRangeBigInt));
     });
   });
 });

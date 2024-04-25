@@ -1,4 +1,3 @@
-import { UnsignedInteger } from './uint';
 import { MaybeRelocatable, Relocatable } from './relocatable';
 
 import {
@@ -64,16 +63,7 @@ export class Felt {
     return this.inner.toString();
   }
 
-  toUint53(): number {
-    if (this.inner > Number.MAX_SAFE_INTEGER) {
-      throw new PrimitiveError(OutOfRangeBigInt);
-    }
-
-    return Number(this.inner);
-  }
-
-  toUint64(): bigint {
-    UnsignedInteger.ensureUint64(this.inner);
+  toBigInt(): bigint {
     return this.inner;
   }
 
