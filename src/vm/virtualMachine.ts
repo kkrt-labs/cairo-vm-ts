@@ -387,7 +387,10 @@ export class VirtualMachine {
         if (operands.dst === undefined) {
           throw new VirtualMachineError(InvalidDstOperand);
         }
-        if (MaybeRelocatable.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
+        if (
+          MaybeRelocatable.isFelt(operands.dst) &&
+          operands.dst.eq(Felt.ZERO)
+        ) {
           this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {

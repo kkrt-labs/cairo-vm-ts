@@ -9,11 +9,15 @@ import {
 export type MaybeRelocatable = Relocatable | Felt;
 
 export namespace MaybeRelocatable {
-  export function isFelt(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Felt {
+  export function isFelt(
+    maybeRelocatable: MaybeRelocatable
+  ): maybeRelocatable is Felt {
     return maybeRelocatable instanceof Felt;
   }
 
-  export function isRelocatable(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Relocatable {
+  export function isRelocatable(
+    maybeRelocatable: MaybeRelocatable
+  ): maybeRelocatable is Relocatable {
     return maybeRelocatable instanceof Relocatable;
   }
 }
@@ -80,7 +84,11 @@ export class Relocatable {
   }
 
   eq(other: MaybeRelocatable): boolean {
-    return !(MaybeRelocatable.isFelt(other)) && other.offset === this.offset && other.segment === this.segment;
+    return (
+      !MaybeRelocatable.isFelt(other) &&
+      other.offset === this.offset &&
+      other.segment === this.segment
+    );
   }
 
   toString(): string {
