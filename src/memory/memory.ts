@@ -28,17 +28,10 @@ export class Memory {
   }
 
   /**
-   * Assert that the memory cell at `address` equals `value`.
-   * - If `address` is undefined, the memory cell is replaced by `value` - Happens only once.
-   * - Any further call to `address` with `newValue` will throw if `newValue !== value`.
+   * @param address
+   * @param value
    *
-   * @param address Memory cell
-   * @param value Value to assert at `address`
-   *
-   * NOTE: Cairo memory follows a Nondeterministic-Read-Only model.
-   *
-   * NOTE2: Method equivalent to `insert()` in the rust cairo-vm
-   * and `__setitem__()` in the python cairo-vm
+   * @dev if memory at `address` is undefined, it is set to `value`
    */
   assertEq(address: Relocatable, value: MaybeRelocatable): void {
     const { segment, offset } = address;
