@@ -169,7 +169,7 @@ export class VirtualMachine {
       const deducedOp0 = this.deduceOp0(instruction, dst, op1);
 
       if (deducedOp0 !== undefined) {
-        this.memory.write(op0Addr, deducedOp0);
+        this.memory.read(op0Addr, deducedOp0);
       }
       op0 = deducedOp0;
     }
@@ -181,7 +181,7 @@ export class VirtualMachine {
       const deducedOp1 = this.deduceOp1(instruction, dst, op0);
 
       if (deducedOp1 !== undefined) {
-        this.memory.write(op1Addr, deducedOp1);
+        this.memory.read(op1Addr, deducedOp1);
       }
     }
 
@@ -201,7 +201,7 @@ export class VirtualMachine {
       const deducedDst = this.deduceDst(instruction, res);
 
       if (deducedDst !== undefined) {
-        this.memory.write(dstAddr, deducedDst);
+        this.memory.read(dstAddr, deducedDst);
       }
       dst = deducedDst;
     }

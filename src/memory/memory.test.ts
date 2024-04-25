@@ -6,7 +6,7 @@ import { SegmentOutOfBounds, InconsistentMemory } from 'errors/memory';
 
 describe('Memory', () => {
   describe('get', () => {
-    test('should return undefined if address is not written to', () => {
+    test('should return undefined if address is not constrained yet', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
       const result = memory.get(address);
@@ -55,19 +55,19 @@ describe('Memory', () => {
     });
   });
 
-  describe('write', () => {
-    test('should write a value in the memory at the given address', () => {
+  describe('read', () => {
+    test('should read a constrained value in the memory at the given address', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.write(address, DATA[0]);
+      memory.read(address, DATA[0]);
 
       expect(memory.get(address)).toEqual(DATA[0]);
     });
     test('should throw SegmentOutOfBounds on access to uninitialized segment', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
-      expect(() => memory.write(address, DATA[0])).toThrow(
+      expect(() => memory.read(address, DATA[0])).toThrow(
         new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
     });
@@ -75,18 +75,18 @@ describe('Memory', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.write(address, DATA[0]);
+      memory.read(address, DATA[0]);
 
-      expect(() => memory.write(address, DATA[0])).not.toThrow();
+      expect(() => memory.read(address, DATA[0])).not.toThrow();
     });
 
     test('should throw InconsistentMemory on memory already constrained by a different value', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.write(address, DATA[0]);
+      memory.read(address, DATA[0]);
 
-      expect(() => memory.write(address, DATA[1])).toThrow(
+      expect(() => memory.read(address, DATA[1])).toThrow(
         new InconsistentMemory(DATA[0], DATA[1])
       );
     });

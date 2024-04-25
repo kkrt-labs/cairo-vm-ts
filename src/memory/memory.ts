@@ -23,7 +23,7 @@ export class Memory {
 
   setData(address: Relocatable, data: MaybeRelocatable[]): void {
     data.forEach((value, index) => {
-      this.write(address.add(index), value);
+      this.read(address.add(index), value);
     });
   }
 
@@ -40,7 +40,7 @@ export class Memory {
    * constrains `address` to `value`
    * - If the cell at `address` already has a value, it cannot be changed, only read. Further calls `
    */
-  write(address: Relocatable, value: MaybeRelocatable): void {
+  read(address: Relocatable, value: MaybeRelocatable): void {
     const { segment, offset } = address;
     const segmentNumber = this.getSegmentNumber();
 
