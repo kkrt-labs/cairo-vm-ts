@@ -3,23 +3,28 @@ import { Felt } from './felt';
 
 describe('Felt', () => {
   describe('constructor', () => {
-    test('should properly initialize a Felt with a negative bigint as parameter', () => {
-      const negativeUnderPrime = -(Felt.PRIME + 10n);
-      const negativeEvenUnderPrime = -(Felt.PRIME + Felt.PRIME + 15n);
-      expect(new Felt(negativeUnderPrime)).toStrictEqual(
-        new Felt(Felt.PRIME - 10n)
-      );
-      expect(new Felt(negativeEvenUnderPrime)).toStrictEqual(
-        new Felt(Felt.PRIME - 15n)
-      );
-    });
-    test('should initialize a Felt with r = x % PRIME for x a bigint equal to q*PRIME + r', () => {
-      const biggerThanPrime = Felt.PRIME + 1n;
-      const evenBiggerThanPrime = Felt.PRIME + Felt.PRIME + 1n;
-      expect(new Felt(biggerThanPrime)).toStrictEqual(new Felt(1n));
-      expect(new Felt(evenBiggerThanPrime)).toStrictEqual(new Felt(1n));
-      expect(new Felt(Felt.PRIME)).toStrictEqual(new Felt(0n));
-    });
+    test.each([
+      [-10n, new Felt(Felt.PRIME - 10n)],
+      [-15n, new Felt(Felt.PRIME - 15n)],
+      [-(Felt.PRIME + 10n), new Felt(Felt.PRIME - 10n)],
+    ])(
+      'should properly initialize a Felt with a negative bigint as parameter',
+      (parameter: bigint, result: Felt) => {
+        expect(new Felt(parameter)).toStrictEqual(result);
+      }
+    );
+
+    test.each([
+      [Felt.PRIME, new Felt(0n)],
+      [Felt.PRIME + 10n, new Felt(10n)],
+      [Felt.PRIME + 15n, new Felt(15n)],
+      [Felt.PRIME * 2n + 10n, new Felt(10n)],
+    ])(
+      'should initialize a Felt with r = x % PRIME for x a bigint equal to q*PRIME + r',
+      (parameter: bigint, result: Felt) => {
+        expect(new Felt(parameter)).toStrictEqual(result);
+      }
+    );
   });
 
   describe('conversions', () => {
