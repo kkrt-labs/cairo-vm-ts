@@ -8,7 +8,9 @@ export class Felt {
     0x800000000000011000000000000000000000000000000000000000000000001n;
   static ZERO: Felt = new Felt(0n);
   constructor(_inner: bigint) {
-    while (_inner < 0n) _inner += Felt.PRIME;
+    if (_inner < 0n) {
+      _inner = (_inner % Felt.PRIME) + Felt.PRIME;
+    }
     this.inner = _inner % Felt.PRIME;
   }
 
