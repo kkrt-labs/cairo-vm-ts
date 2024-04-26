@@ -1,6 +1,7 @@
 import { MemoryError, WriteOnceError } from 'errors/memory';
 import { SegmentError } from 'errors/primitives';
-import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
+import { MaybeRelocatable } from 'primitives/maybeRelocatable';
+import { Relocatable } from 'primitives/relocatable';
 
 export class Memory {
   data: Array<Array<MaybeRelocatable>>;

@@ -1,5 +1,4 @@
-import { MaybeRelocatable, Relocatable } from './relocatable';
-
+import { MaybeRelocatable, isFelt, isRelocatable } from './maybeRelocatable';
 import {
   ForbiddenOperation,
   OutOfRangeBigInt,
@@ -19,14 +18,14 @@ export class Felt {
   }
 
   add(other: MaybeRelocatable): Felt {
-    if (!MaybeRelocatable.isFelt(other)) {
+    if (!isFelt(other)) {
       throw new PrimitiveError(ForbiddenOperation);
     }
     return new Felt((this.inner + other.inner) % Felt.PRIME);
   }
 
   sub(other: MaybeRelocatable): Felt {
-    if (!MaybeRelocatable.isFelt(other)) {
+    if (!isFelt(other)) {
       throw new PrimitiveError(ForbiddenOperation);
     }
 
@@ -38,21 +37,21 @@ export class Felt {
   }
 
   mul(other: MaybeRelocatable): Felt {
-    if (!MaybeRelocatable.isFelt(other)) {
+    if (!isFelt(other)) {
       throw new PrimitiveError(ForbiddenOperation);
     }
     return new Felt((this.inner * other.inner) % Felt.PRIME);
   }
 
   div(other: MaybeRelocatable): Felt {
-    if (!MaybeRelocatable.isFelt(other) || other.inner === 0n) {
+    if (!isFelt(other) || other.inner === 0n) {
       throw new PrimitiveError(ForbiddenOperation);
     }
     return new Felt(this.inner / other.inner);
   }
 
   eq(other: MaybeRelocatable): boolean {
-    return !MaybeRelocatable.isRelocatable(other) && this.inner === other.inner;
+    return !isRelocatable(other) && this.inner === other.inner;
   }
 
   toString(): string {
