@@ -19,10 +19,10 @@ export class Felt {
   }
 
   add(other: MaybeRelocatable): Felt {
-    if (MaybeRelocatable.isFelt(other)) {
-      return new Felt((this.inner + other.inner) % Felt.PRIME);
+    if (!MaybeRelocatable.isFelt(other)) {
+      throw new PrimitiveError(ForbiddenOperation);
     }
-    throw new PrimitiveError(ForbiddenOperation);
+    return new Felt((this.inner + other.inner) % Felt.PRIME);
   }
 
   sub(other: MaybeRelocatable): Felt {
@@ -38,10 +38,10 @@ export class Felt {
   }
 
   mul(other: MaybeRelocatable): Felt {
-    if (MaybeRelocatable.isFelt(other)) {
-      return new Felt((this.inner * other.inner) % Felt.PRIME);
+    if (!MaybeRelocatable.isFelt(other)) {
+      throw new PrimitiveError(ForbiddenOperation);
     }
-    throw new PrimitiveError(ForbiddenOperation);
+    return new Felt((this.inner * other.inner) % Felt.PRIME);
   }
 
   div(other: MaybeRelocatable): Felt {
