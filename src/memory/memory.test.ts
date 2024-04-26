@@ -55,8 +55,8 @@ describe('Memory', () => {
     });
   });
 
-  describe('read', () => {
-    test('should read a constrained value in the memory at the given address', () => {
+  describe('assertEq', () => {
+    test('should write when the value is undefined', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
@@ -64,14 +64,8 @@ describe('Memory', () => {
 
       expect(memory.get(address)).toEqual(DATA[0]);
     });
-    test('should throw SegmentOutOfBounds on access to uninitialized segment', () => {
-      const memory = new Memory();
-      const address = new Relocatable(1, 10);
-      expect(() => memory.assertEq(address, DATA[0])).toThrow(
-        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
-      );
-    });
-    test('should not throw when reading an address twice with the same value', () => {
+
+    test('should not throw when the given value is the one stored', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
@@ -80,7 +74,7 @@ describe('Memory', () => {
       expect(() => memory.assertEq(address, DATA[0])).not.toThrow();
     });
 
-    test('should throw InconsistentMemory on memory already constrained by a different value', () => {
+    test('should throw when the given value is not the one stored', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
@@ -88,6 +82,14 @@ describe('Memory', () => {
 
       expect(() => memory.assertEq(address, DATA[1])).toThrow(
         new InconsistentMemory(address, DATA[0], DATA[1])
+      );
+    });
+
+    test('should throw when the segment is not initialized', () => {
+      const memory = new Memory();
+      const address = new Relocatable(1, 10);
+      expect(() => memory.assertEq(address, DATA[0])).toThrow(
+        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
     });
   });
