@@ -1,7 +1,6 @@
-import { MemoryError, WriteOnceError } from 'errors/memory';
-import { SegmentError } from 'errors/primitives';
-import { MaybeRelocatable } from 'primitives/maybeRelocatable';
+import { InconsistentMemory, SegmentOutOfBounds } from 'errors/memory';
 import { Relocatable } from 'primitives/relocatable';
+import { MaybeRelocatable } from 'primitives/maybeRelocatable';
 
 export class Memory {
   data: Array<Array<MaybeRelocatable>>;
@@ -25,24 +24,32 @@ export class Memory {
 
   setData(address: Relocatable, data: MaybeRelocatable[]): void {
     data.forEach((value, index) => {
-      this.write(address.add(index), value);
+      this.assertEq(address.add(index), value);
     });
   }
 
-  // Insert a value in the memory at the given address and increase
-  // the segment size by 1.
-  write(address: Relocatable, value: MaybeRelocatable): void {
-    if (address.segment >= this.getSegmentNumber()) {
-      throw new MemoryError(
-        `${SegmentError}: trying to insert at segment ${
-          address.segment
-        } while there are only ${this.getSegmentNumber()} segments.`
-      );
+  /**
+   * @param address
+   * @param value
+   *
+   * @dev if memory at `address` is undefined, it is set to `value`
+   */
+  assertEq(address: Relocatable, value: MaybeRelocatable): void {
+    const { segment, offset } = address;
+    const segmentNumber = this.getSegmentNumber();
+
+    if (segment >= segmentNumber) {
+      throw new SegmentOutOfBounds(segment, segmentNumber);
     }
-    if (this.data[address.segment][address.offset] !== undefined) {
-      throw new MemoryError(WriteOnceError);
+
+    const currentValue: MaybeRelocatable | undefined =
+      this.data[segment][offset];
+
+    if (currentValue === undefined) {
+      this.data[segment][offset] = value;
+    } else if (currentValue !== value) {
+      throw new InconsistentMemory(address, this.data[segment][offset], value);
     }
-    this.data[address.segment][address.offset] = value;
   }
 
   getSegmentSize(segment: number): number {

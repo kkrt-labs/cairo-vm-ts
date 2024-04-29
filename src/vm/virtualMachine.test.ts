@@ -1,12 +1,5 @@
 import { test, expect, describe } from 'bun:test';
-import {
-  ApUpdate,
-  FpUpdate,
-  Instruction,
-  Opcode,
-  PcUpdate,
-  OpLogic,
-} from './instruction';
+import { Instruction, Opcode, OpLogic } from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
@@ -16,9 +9,8 @@ import {
   ExpectedFelt,
   ExpectedRelocatable,
   InvalidDstOperand,
-  InvalidOperand0,
+  InvalidOp0,
   UnconstrainedResError,
-  VirtualMachineError,
   Op0NotRelocatable,
   Op0Undefined,
   Op1ImmediateOffsetError,
@@ -269,7 +261,7 @@ describe('VirtualMachine', () => {
       const op1 = new Relocatable(1, 2);
 
       expect(() => vm.computeRes(instruction, op0, op1)).toThrow(
-        new VirtualMachineError(ForbiddenOperation)
+        new ForbiddenOperation()
       );
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
@@ -294,7 +286,7 @@ describe('VirtualMachine', () => {
       const op1 = new Relocatable(1, 2);
 
       expect(() => vm.computeRes(instruction, op0, op1)).toThrow(
-        new VirtualMachineError(ExpectedFelt)
+        new ExpectedFelt()
       );
     });
     test('should return undefined with res logic unconstrained', () => {
@@ -383,7 +375,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new VirtualMachineError(UnconstrainedResError)
+        new UnconstrainedResError()
       );
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst felts', () => {
@@ -411,7 +403,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new VirtualMachineError(DiffAssertValuesError)
+        new DiffAssertValuesError()
       );
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst relocatables', () => {
@@ -439,10 +431,10 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new VirtualMachineError(DiffAssertValuesError)
+        new DiffAssertValuesError()
       );
     });
-    test('should throw InvalidOperand0 on call opcode and pc != op0', () => {
+    test('should throw InvalidOp0 on call opcode and pc != op0', () => {
       const instruction: Instruction = new Instruction(
         1,
         2,
@@ -467,7 +459,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new VirtualMachineError(InvalidOperand0)
+        new InvalidOp0()
       );
     });
     test('should throw InvalidDstError on call opcode and fp != dst', () => {
@@ -495,7 +487,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
 
       expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new VirtualMachineError(InvalidDstOperand)
+        new InvalidDstOperand()
       );
     });
   });
@@ -608,7 +600,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updatePc(instruction, operands)).toThrow(
-        new VirtualMachineError(ExpectedRelocatable)
+        new ExpectedRelocatable()
       );
     });
     test('jmp without res', () => {
@@ -636,7 +628,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updatePc(instruction, operands)).toThrow(
-        new VirtualMachineError(UnconstrainedResError)
+        new UnconstrainedResError()
       );
     });
     test('jmp rel res felt', () => {
@@ -691,7 +683,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updatePc(instruction, operands)).toThrow(
-        new VirtualMachineError(ExpectedFelt)
+        new ExpectedFelt()
       );
     });
     test('jmp rel res relocatable', () => {
@@ -719,7 +711,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updatePc(instruction, operands)).toThrow(
-        new VirtualMachineError(UnconstrainedResError)
+        new UnconstrainedResError()
       );
     });
     test('jnz des is zero no imm', () => {
@@ -825,7 +817,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updatePc(instruction, operands)).toThrow(
-        new VirtualMachineError(ExpectedFelt)
+        new ExpectedFelt()
       );
     });
   });
@@ -1080,7 +1072,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updateAp(instruction, operands)).toThrow(
-        new VirtualMachineError(ExpectedFelt)
+        new ExpectedFelt()
       );
     });
     test('add no res', () => {
@@ -1108,7 +1100,7 @@ describe('VirtualMachine', () => {
       };
 
       expect(() => vm.updateAp(instruction, operands)).toThrow(
-        new VirtualMachineError(UnconstrainedResError)
+        new UnconstrainedResError()
       );
     });
   });
@@ -1223,7 +1215,7 @@ describe('VirtualMachine', () => {
       vm.setRegisters(4, 5, 6);
 
       expect(() => vm.computeOp1Address('pc', 2, undefined)).toThrow(
-        new VirtualMachineError(Op1ImmediateOffsetError)
+        new Op1ImmediateOffsetError()
       );
     });
 
@@ -1242,7 +1234,7 @@ describe('VirtualMachine', () => {
       vm.setRegisters(4, 5, 6);
 
       expect(() => vm.computeOp1Address('op0', 1, new Felt(7n))).toThrow(
-        new VirtualMachineError(Op0NotRelocatable)
+        new Op0NotRelocatable()
       );
     });
 
@@ -1251,7 +1243,7 @@ describe('VirtualMachine', () => {
       vm.setRegisters(4, 5, 6);
 
       expect(() => vm.computeOp1Address('op0', 1, undefined)).toThrow(
-        new VirtualMachineError(Op0Undefined)
+        new Op0Undefined()
       );
     });
   });

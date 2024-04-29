@@ -1,9 +1,6 @@
+import { Relocatable } from './relocatable';
 import { MaybeRelocatable, isFelt, isRelocatable } from './maybeRelocatable';
-import {
-  ForbiddenOperation,
-  OutOfRangeBigInt,
-  PrimitiveError,
-} from 'errors/primitives';
+import { ForbiddenOperation, OutOfRangeBigInt } from 'errors/primitives';
 
 export class Felt {
   private inner: bigint;
@@ -11,41 +8,39 @@ export class Felt {
     0x800000000000011000000000000000000000000000000000000000000000001n;
   static ZERO: Felt = new Felt(0n);
   constructor(_inner: bigint) {
-    if (_inner < 0n || _inner > Felt.PRIME) {
-      throw new PrimitiveError(OutOfRangeBigInt);
+    if (_inner < 0n) {
+      _inner = (_inner % Felt.PRIME) + Felt.PRIME;
     }
-    this.inner = _inner;
+    this.inner = _inner % Felt.PRIME;
   }
 
   add(other: MaybeRelocatable): Felt {
     if (!isFelt(other)) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
-    return new Felt((this.inner + other.inner) % Felt.PRIME);
+
+    return new Felt(this.inner + other.inner);
   }
 
   sub(other: MaybeRelocatable): Felt {
     if (!isFelt(other)) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
 
-    let result = this.inner - other.inner;
-    if (result < 0n) {
-      result += Felt.PRIME;
-    }
-    return new Felt(result);
+    return new Felt(this.inner - other.inner);
   }
 
   mul(other: MaybeRelocatable): Felt {
     if (!isFelt(other)) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
-    return new Felt((this.inner * other.inner) % Felt.PRIME);
+
+    return new Felt(this.inner * other.inner);
   }
 
   div(other: MaybeRelocatable): Felt {
     if (!isFelt(other) || other.inner === 0n) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
     return new Felt(this.inner / other.inner);
   }
