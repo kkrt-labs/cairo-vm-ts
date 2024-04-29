@@ -1,5 +1,5 @@
-import { MaybeRelocatable, Relocatable } from './relocatable';
-
+import { Relocatable } from './relocatable';
+import { MaybeRelocatable, isFelt, isRelocatable } from './maybeRelocatable';
 import { ForbiddenOperation, OutOfRangeBigInt } from 'errors/primitives';
 
 export class Felt {
@@ -15,7 +15,7 @@ export class Felt {
   }
 
   add(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt)) {
+    if (!isFelt(other)) {
       throw new ForbiddenOperation();
     }
 
@@ -23,7 +23,7 @@ export class Felt {
   }
 
   sub(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt)) {
+    if (!isFelt(other)) {
       throw new ForbiddenOperation();
     }
 
@@ -31,7 +31,7 @@ export class Felt {
   }
 
   mul(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt)) {
+    if (!isFelt(other)) {
       throw new ForbiddenOperation();
     }
 
@@ -39,19 +39,14 @@ export class Felt {
   }
 
   div(other: MaybeRelocatable): Felt {
-    if (!(other instanceof Felt) || other.inner === 0n) {
+    if (!isFelt(other) || other.inner === 0n) {
       throw new ForbiddenOperation();
     }
-
     return new Felt(this.inner / other.inner);
   }
 
   eq(other: MaybeRelocatable): boolean {
-    if (other instanceof Relocatable) {
-      return false;
-    }
-
-    return this.inner == other.inner;
+    return !isRelocatable(other) && this.inner === other.inner;
   }
 
   toString(): string {
@@ -64,9 +59,5 @@ export class Felt {
 
   toHexString(): string {
     return this.inner.toString(16);
-  }
-
-  static isFelt(maybeRelocatable: MaybeRelocatable): maybeRelocatable is Felt {
-    return maybeRelocatable instanceof Felt;
   }
 }

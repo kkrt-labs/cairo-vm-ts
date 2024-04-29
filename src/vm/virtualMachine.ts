@@ -10,7 +10,7 @@ import {
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
 import { Instruction } from './instruction';
-import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
+import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
 import {
@@ -22,6 +22,11 @@ import { Memory } from 'memory/memory';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
 import { Op1Source } from 'vm/instruction';
+import {
+  MaybeRelocatable,
+  isFelt,
+  isRelocatable,
+} from 'primitives/maybeRelocatable';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -94,7 +99,7 @@ export class VirtualMachine {
           throw new Op0Undefined();
         }
 
-        if (!Relocatable.isRelocatable(op0)) {
+        if (!isRelocatable(op0)) {
           throw new Op0NotRelocatable();
         }
         baseAddr = op0;
@@ -110,7 +115,7 @@ export class VirtualMachine {
       throw new EndOfInstructionsError();
     }
 
-    if (!(maybeEncodedInstruction instanceof Felt)) {
+    if (!isFelt(maybeEncodedInstruction)) {
       throw new InstructionError();
     }
 
@@ -245,7 +250,7 @@ export class VirtualMachine {
           case 'op0 * op1':
             if (dst !== undefined && op1 !== undefined) {
               try {
-                if (!Felt.isFelt(dst)) {
+                if (!isFelt(dst)) {
                   throw new Error();
                 }
                 // op0 = res / op1
@@ -286,7 +291,7 @@ export class VirtualMachine {
         // op1 = dst / op0
         if (dst !== undefined && op0 !== undefined) {
           try {
-            if (!Felt.isFelt(dst)) {
+            if (!isFelt(dst)) {
               throw new Error();
             }
             return dst.div(op0);
@@ -312,7 +317,7 @@ export class VirtualMachine {
       case 'op0 + op1':
         return op0.add(op1);
       case 'op0 * op1':
-        if (!Felt.isFelt(op0)) {
+        if (!isFelt(op0)) {
           throw new ExpectedFelt();
         }
         return op0.mul(op1);
@@ -362,7 +367,7 @@ export class VirtualMachine {
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
-        if (!Relocatable.isRelocatable(operands.res)) {
+        if (!isRelocatable(operands.res)) {
           throw new ExpectedRelocatable();
         }
         this.pc = operands.res;
@@ -374,7 +379,7 @@ export class VirtualMachine {
           throw new UnconstrainedResError();
         }
 
-        if (!Felt.isFelt(operands.res)) {
+        if (!isFelt(operands.res)) {
           throw new ExpectedFelt();
         }
         this.pc = this.pc.add(operands.res);
@@ -386,13 +391,13 @@ export class VirtualMachine {
         if (operands.dst === undefined) {
           throw new InvalidDstOperand();
         }
-        if (Felt.isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
+        if (isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
           this.incrementPc(instruction.size());
         } else {
           if (operands.op1 === undefined) {
             throw new InvalidOp1();
           }
-          if (!Felt.isFelt(operands.op1)) {
+          if (!isFelt(operands.op1)) {
             throw new ExpectedFelt();
           }
           this.pc = this.pc.add(operands.op1);
@@ -415,10 +420,10 @@ export class VirtualMachine {
         if (operands.dst === undefined) {
           throw new InvalidDstOperand();
         }
-        if (Felt.isFelt(operands.dst)) {
+        if (isFelt(operands.dst)) {
           this.fp = this.fp.add(operands.dst);
         }
-        if (Relocatable.isRelocatable(operands.dst)) {
+        if (isRelocatable(operands.dst)) {
           this.fp = operands.dst;
         }
         break;
@@ -433,7 +438,7 @@ export class VirtualMachine {
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
-        if (!Felt.isFelt(operands.res)) {
+        if (!isFelt(operands.res)) {
           throw new ExpectedFelt();
         }
 

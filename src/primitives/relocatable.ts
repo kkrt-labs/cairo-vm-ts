@@ -4,8 +4,7 @@ import {
   OffsetUnderflow,
   SegmentError,
 } from 'errors/primitives';
-
-export type MaybeRelocatable = Relocatable | Felt;
+import { MaybeRelocatable, isFelt, isRelocatable } from './maybeRelocatable';
 
 export class Relocatable {
   segment: number;
@@ -21,14 +20,14 @@ export class Relocatable {
   add(other: Relocatable): never;
   add(other: MaybeRelocatable): MaybeRelocatable;
   add(other: MaybeRelocatable | number): MaybeRelocatable {
-    if (other instanceof Felt) {
+    if (isFelt(other)) {
       const offset = new Felt(BigInt(this.offset));
       const newOffset = Number(offset.add(other));
 
       return new Relocatable(this.segment, newOffset);
     }
 
-    if (other instanceof Relocatable) {
+    if (isRelocatable(other)) {
       throw new ForbiddenOperation();
     }
 
@@ -40,7 +39,7 @@ export class Relocatable {
   sub(other: Relocatable): Felt;
   sub(other: MaybeRelocatable): MaybeRelocatable;
   sub(other: MaybeRelocatable | number): MaybeRelocatable {
-    if (other instanceof Felt) {
+    if (isFelt(other)) {
       const delta = Number(other);
 
       if (this.offset < delta) {
@@ -49,7 +48,7 @@ export class Relocatable {
       return new Relocatable(this.segment, this.offset - delta);
     }
 
-    if (other instanceof Relocatable) {
+    if (isRelocatable(other)) {
       if (this.offset < other.offset) {
         throw new OffsetUnderflow();
       }
@@ -69,23 +68,15 @@ export class Relocatable {
   }
 
   eq(other: MaybeRelocatable): boolean {
-    if (other instanceof Felt) {
-      return false;
-    }
-    if (other.offset === this.offset && other.segment === this.segment) {
-      return true;
-    }
-    return false;
+    return (
+      !isFelt(other) &&
+      other.offset === this.offset &&
+      other.segment === this.segment
+    );
   }
 
   toString(): string {
     return `${this.segment}:${this.offset}`;
-  }
-
-  static isRelocatable(
-    maybeRelocatable: MaybeRelocatable
-  ): maybeRelocatable is Relocatable {
-    return maybeRelocatable instanceof Relocatable;
   }
 }
 
