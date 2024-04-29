@@ -1,5 +1,11 @@
 import { test, expect, describe } from 'bun:test';
-import { Instruction, Opcode, OpLogic } from './instruction';
+import {
+  Instruction,
+  Op1Source,
+  Opcode,
+  OpLogic,
+  Register,
+} from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
@@ -356,9 +362,9 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        'fp',
-        'ap',
-        'ap',
+        Register.Fp,
+        Register.Ap,
+        Op1Source.Ap,
         'op0 + op1',
         'pc = pc',
         'ap = ap',
@@ -383,10 +389,9 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        'fp',
-        'ap',
-
-        'ap',
+        Register.Fp,
+        Register.Ap,
+        Op1Source.Ap,
         'op0 + op1',
         'pc = pc',
         'ap = ap',
@@ -411,10 +416,9 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        'fp',
-        'ap',
-
-        'ap',
+        Register.Fp,
+        Register.Ap,
+        Op1Source.Ap,
         'op0 + op1',
         'pc = pc',
         'ap = ap',
@@ -439,10 +443,9 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        'fp',
-        'ap',
-
-        'ap',
+        Register.Fp,
+        Register.Ap,
+        Op1Source.Ap,
         'op0 + op1',
         'pc = pc',
         'ap = ap',
@@ -467,10 +470,9 @@ describe('VirtualMachine', () => {
         1,
         2,
         3,
-        'fp',
-        'ap',
-
-        'ap',
+        Register.Fp,
+        Register.Ap,
+        Op1Source.Ap,
         'op0 + op1',
         'pc = pc',
         'ap = ap',
@@ -500,10 +502,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -527,9 +528,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'pc',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Pc,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -553,10 +554,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = res',
         'ap = ap',
@@ -580,10 +580,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = res',
         'ap = ap',
@@ -608,10 +607,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = res',
         'ap = ap',
@@ -636,10 +634,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc + res',
         'ap = ap',
@@ -663,10 +660,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc + res',
         'ap = ap',
@@ -691,10 +687,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc + res',
         'ap = ap',
@@ -719,10 +714,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
@@ -746,9 +740,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'pc',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Pc,
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
@@ -772,9 +766,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'pc',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Pc,
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
@@ -798,9 +792,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'pc',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Pc,
         'unconstrained',
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
@@ -830,10 +824,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -857,10 +850,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -884,10 +876,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -911,10 +902,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -944,10 +934,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -971,10 +960,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap += 2',
@@ -998,10 +986,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap++',
@@ -1025,10 +1012,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap + res',
@@ -1052,10 +1038,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap + res',
@@ -1080,10 +1065,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap + res',
@@ -1113,10 +1097,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc',
         'ap = ap',
@@ -1142,10 +1125,9 @@ describe('VirtualMachine', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-
-        'ap',
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
         'unconstrained',
         'pc = pc + res',
         'ap += 2',
@@ -1184,7 +1166,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address('fp', 1, undefined);
+      const op1Addr = vm.computeOp1Address(Op1Source.Fp, 1, undefined);
 
       expect(op1Addr.segment).toEqual(1);
       expect(op1Addr.offset).toEqual(7);
@@ -1194,7 +1176,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address('ap', 1, undefined);
+      const op1Addr = vm.computeOp1Address(Op1Source.Ap, 1, undefined);
 
       expect(op1Addr.segment).toEqual(1);
       expect(op1Addr.offset).toEqual(6);
@@ -1204,7 +1186,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address('pc', 1, undefined);
+      const op1Addr = vm.computeOp1Address(Op1Source.Pc, 1, undefined);
 
       expect(op1Addr.segment).toEqual(0);
       expect(op1Addr.offset).toEqual(5);
@@ -1214,7 +1196,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      expect(() => vm.computeOp1Address('pc', 2, undefined)).toThrow(
+      expect(() => vm.computeOp1Address(Op1Source.Pc, 2, undefined)).toThrow(
         new Op1ImmediateOffsetError()
       );
     });
@@ -1223,7 +1205,11 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      const op1Addr = vm.computeOp1Address('op0', 1, new Relocatable(1, 7));
+      const op1Addr = vm.computeOp1Address(
+        Op1Source.Op0,
+        1,
+        new Relocatable(1, 7)
+      );
 
       expect(op1Addr.segment).toEqual(1);
       expect(op1Addr.offset).toEqual(8);
@@ -1233,16 +1219,16 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      expect(() => vm.computeOp1Address('op0', 1, new Felt(7n))).toThrow(
-        new Op0NotRelocatable()
-      );
+      expect(() =>
+        vm.computeOp1Address(Op1Source.Op0, 1, new Felt(7n))
+      ).toThrow(new Op0NotRelocatable());
     });
 
     test('should throw an error Op0Undefined for op1 src op0 with op0 undefined', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
 
-      expect(() => vm.computeOp1Address('op0', 1, undefined)).toThrow(
+      expect(() => vm.computeOp1Address(Op1Source.Op0, 1, undefined)).toThrow(
         new Op0Undefined()
       );
     });

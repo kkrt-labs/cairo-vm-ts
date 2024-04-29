@@ -77,13 +77,13 @@ export class VirtualMachine {
   ): Relocatable {
     let baseAddr: Relocatable;
     switch (op1Source) {
-      case 'ap':
+      case Op1Source.Ap:
         baseAddr = this.ap;
         break;
-      case 'fp':
+      case Op1Source.Fp:
         baseAddr = this.fp;
         break;
-      case 'pc':
+      case Op1Source.Pc:
         // In case of immediate as the source, the offset
         // has to be 1, otherwise we return an error.
         if (op1Offset == 1) {
@@ -92,7 +92,7 @@ export class VirtualMachine {
           throw new Op1ImmediateOffsetError();
         }
         break;
-      case 'op0':
+      case Op1Source.Op0:
         // In case of operand 0 as the source, we have to check that
         // operand 0 is not undefined.
         if (op0 === undefined) {

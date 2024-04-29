@@ -33,7 +33,16 @@ export enum Register {
   Fp,
 }
 
-export type Op1Source = 'op0' | 'pc' | 'fp' | 'ap';
+/**
+ * Source from which op1 is computed
+ * op1 = [Op1Source + Op1Offset]
+ */
+export enum Op1Source {
+  Op0,
+  Pc,
+  Fp,
+  Ap,
+}
 
 export type OpLogic = 'op1' | 'op0 + op1' | 'op0 * op1' | 'unconstrained';
 
@@ -86,7 +95,7 @@ export class Instruction {
       0,
       Register.Ap,
       Register.Ap,
-      'op0',
+      Op1Source.Op0,
       'op1',
       'pc = pc',
       'ap = ap',
@@ -200,23 +209,23 @@ export class Instruction {
 
     const targetOperandOneSource =
       (flags & OperandOneSourceMask) >> OperandOneSourceOff;
-    let Op1Source: Op1Source;
+    let op1Source: Op1Source;
     switch (targetOperandOneSource) {
       case 0n:
         // op1 = m(op0 + offop1)
-        Op1Source = 'op0';
+        op1Source = Op1Source.Op0;
         break;
       case 1n:
         // op1 = m(pc + offop1)
-        Op1Source = 'pc';
+        op1Source = Op1Source.Pc;
         break;
       case 2n:
         // op1 = m(fp + offop1)
-        Op1Source = 'fp';
+        op1Source = Op1Source.Fp;
         break;
       case 4n:
         // op1 = m(ap + offop1)
-        Op1Source = 'ap';
+        op1Source = Op1Source.Ap;
         break;
       default:
         throw new InvalidOp1Source();
@@ -332,7 +341,7 @@ export class Instruction {
       op1Offset,
       dstRegister,
       op0Register,
-      Op1Source,
+      op1Source,
       opLogic,
       pcUpdate,
       apUpdate,
@@ -345,7 +354,7 @@ export class Instruction {
     // The instruction's size is 2, i.e. PC will be incremented by 2 after the instruction is executed
     // Because immediate values are located at PC + 1. They are hardcoded constants located in the bytecode,
     // "immediately" after the instruction.
-    if (this.op1Source == 'pc') {
+    if (this.op1Source == Op1Source.Pc) {
       return 2;
     }
     return 1;
