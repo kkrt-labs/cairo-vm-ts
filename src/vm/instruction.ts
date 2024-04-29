@@ -27,8 +27,7 @@ import {
 // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
 // Source: https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction.go
 
-// Dst & Op0 register flags
-// export type RegisterFlag = 'ap' | 'fp';
+/** Register flags over `dst` and `op0` */
 export enum Register {
   Ap,
   Fp,
