@@ -2,7 +2,6 @@ import { Felt } from './felt';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
-  PrimitiveError,
   SegmentError,
 } from 'errors/primitives';
 
@@ -30,7 +29,7 @@ export class Relocatable {
     }
 
     if (other instanceof Relocatable) {
-      throw new PrimitiveError(ForbiddenOperation);
+      throw new ForbiddenOperation();
     }
 
     return new Relocatable(this.segment, this.offset + other);
@@ -45,25 +44,25 @@ export class Relocatable {
       const delta = Number(other);
 
       if (this.offset < delta) {
-        throw new PrimitiveError(OffsetUnderflow);
+        throw new OffsetUnderflow();
       }
       return new Relocatable(this.segment, this.offset - delta);
     }
 
     if (other instanceof Relocatable) {
       if (this.offset < other.offset) {
-        throw new PrimitiveError(OffsetUnderflow);
+        throw new OffsetUnderflow();
       }
 
       if (this.segment !== other.segment) {
-        throw new PrimitiveError(SegmentError);
+        throw new SegmentError();
       }
 
       return new Felt(BigInt(this.offset - other.offset));
     }
 
     if (this.offset < other) {
-      throw new PrimitiveError(OffsetUnderflow);
+      throw new OffsetUnderflow();
     }
 
     return new Relocatable(this.segment, this.offset - other);

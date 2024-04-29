@@ -1,9 +1,36 @@
+import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
+
 export class MemoryError extends Error {}
 
-export const UnknownAddressError =
-  'Access memory at unknown or uninitialized address';
-export const WriteOnceError =
-  'Write existing memory. Can only write to memory once.';
-export const SegmentIncrementError = 'Error incrementing number of segments';
-export const InstructionError = 'Instruction must be a Field Element';
-export const DeductionError = 'Failed to deduce operands';
+/** Read a different value (`newValue`) than the already constrained value (`oldValue`) at `address` */
+export class InconsistentMemory extends MemoryError {
+  public readonly address: Relocatable;
+  public readonly oldValue: MaybeRelocatable;
+  public readonly newValue: MaybeRelocatable;
+
+  constructor(
+    address: Relocatable,
+    oldValue: MaybeRelocatable,
+    newValue: MaybeRelocatable
+  ) {
+    super();
+    this.address = address;
+    this.oldValue = oldValue;
+    this.newValue = newValue;
+  }
+}
+
+/** Trying to read on a segment that is not accessible (`segmentIndex >= segmentNumber`) */
+export class SegmentOutOfBounds extends MemoryError {
+  public readonly segmentIndex: number;
+  public readonly segmentNumber: number;
+
+  constructor(segment_index: number, segment_number: number) {
+    super();
+    this.segmentIndex = segment_index;
+    this.segmentNumber = segment_number;
+  }
+}
+
+/** Instruction must be a Field Element */
+export class InstructionError extends MemoryError {}

@@ -1,11 +1,9 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
 import { Relocatable, MemoryPointer, ProgramCounter } from './relocatable';
-import { UnsignedInteger } from './uint';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
-  PrimitiveError,
   SegmentError,
 } from 'errors/primitives';
 
@@ -29,13 +27,13 @@ describe('Relocatable', () => {
     test('should throw an error OffsetUnderflow when offset goes below zero', () => {
       const a = new Relocatable(1, 2);
       const b = new Relocatable(1, 3);
-      expect(() => a.sub(b)).toThrow(new PrimitiveError(OffsetUnderflow));
+      expect(() => a.sub(b)).toThrow(new OffsetUnderflow());
     });
 
     test('should throw an error SegmentError when segments are different', () => {
       const a = new Relocatable(1, 10);
       const b = new Relocatable(2, 5);
-      expect(() => a.sub(b)).toThrow(new PrimitiveError(SegmentError));
+      expect(() => a.sub(b)).toThrow(new SegmentError());
     });
 
     test('should subtract a Felt from a Relocatable', () => {
@@ -49,9 +47,7 @@ describe('Relocatable', () => {
     test('should throw an error OffsetUnderflow when subtracting a larger Felt', () => {
       const relocatable = new Relocatable(0, 5);
       const felt = new Felt(10n);
-      expect(() => relocatable.sub(felt)).toThrow(
-        new PrimitiveError(OffsetUnderflow)
-      );
+      expect(() => relocatable.sub(felt)).toThrow(new OffsetUnderflow());
     });
 
     test('should subtract a Relocatable', () => {
@@ -82,7 +78,7 @@ describe('Relocatable', () => {
     test('should throw an error ForbiddenOperation when adding an incompatible MaybeRelocatable', () => {
       const a = new Relocatable(0, 10);
       const b = new Relocatable(0, 5);
-      expect(() => a.add(b)).toThrow(new PrimitiveError(ForbiddenOperation));
+      expect(() => a.add(b)).toThrow(new ForbiddenOperation());
     });
     test('should add a Felt to a Relocatable', () => {
       const relocatable = new Relocatable(0, 5);

@@ -1,21 +1,22 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
-import { OutOfRangeBigInt, PrimitiveError } from 'errors/primitives';
-import { Relocatable } from './relocatable';
 
 describe('Felt', () => {
   describe('constructor', () => {
-    test('should throw if initializing a felt with a negative inner', () => {
-      expect(() => new Felt(-10n)).toThrow(
-        new PrimitiveError(OutOfRangeBigInt)
-      );
-    });
-    test('should throw a FeltError when initializing with a BigInt larger than PRIME', () => {
-      const biggerThanPrime = Felt.PRIME + 1n;
-      expect(() => new Felt(biggerThanPrime)).toThrow(
-        new PrimitiveError(OutOfRangeBigInt)
-      );
-    });
+    test.each([
+      [Felt.PRIME, new Felt(0n)],
+      [Felt.PRIME + 10n, new Felt(10n)],
+      [Felt.PRIME + 15n, new Felt(15n)],
+      [-10n, new Felt(Felt.PRIME - 10n)],
+      [-15n, new Felt(Felt.PRIME - 15n)],
+      [Felt.PRIME * 2n + 10n, new Felt(10n)],
+      [-(Felt.PRIME + 10n), new Felt(Felt.PRIME - 10n)],
+    ])(
+      'should properly initialize a Felt with any bigint value as parameter',
+      (parameter: bigint, result: Felt) => {
+        expect(new Felt(parameter)).toStrictEqual(result);
+      }
+    );
   });
 
   describe('conversions', () => {
