@@ -155,7 +155,7 @@ describe('VirtualMachine', () => {
     test('should deduce op1 for assert eq res logic add', () => {
       const instruction = getInstructionWithOpcodeAndOpLogic(
         'assert_eq',
-        'op0 * op1'
+        'op0 + op1'
       );
       const vm = new VirtualMachine();
       const dst = new Felt(3n);

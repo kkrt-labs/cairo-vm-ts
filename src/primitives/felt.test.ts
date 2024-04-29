@@ -107,19 +107,14 @@ describe('Felt', () => {
   });
 
   describe('div', () => {
-    test('should divide two felts properly', () => {
-      const a = new Felt(10n);
-      const b = new Felt(2n);
-      const result = a.div(b);
-      const expected = new Felt(5n);
-      expect(result.eq(expected)).toBeTrue();
-    });
-    test('should go to 0 if a < b in a/b', () => {
-      const a = new Felt(5n);
-      const b = new Felt(10n);
-      const result = a.div(b);
-      const expected = new Felt(0n);
-      expect(result.eq(expected)).toBeTrue();
+    test.each([
+      [new Felt(10n), new Felt(2n)],
+      [new Felt(5n), new Felt(10n)],
+      [new Felt(Felt.PRIME - 10n), new Felt(10n)],
+      [new Felt(10n), new Felt(Felt.PRIME - 10n)],
+    ])('should divide two felts properly', (a: Felt, b: Felt) => {
+      const result = a.div(b).mul(b);
+      expect(result).toStrictEqual(a);
     });
   });
 });

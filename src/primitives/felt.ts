@@ -42,7 +42,8 @@ export class Felt {
     if (!isFelt(other) || other.inner === 0n) {
       throw new ForbiddenOperation();
     }
-    return new Felt(this.inner / other.inner);
+
+    return this.mul(other.inv());
   }
 
   eq(other: MaybeRelocatable): boolean {
@@ -59,5 +60,29 @@ export class Felt {
 
   toHexString(): string {
     return this.inner.toString(16);
+  }
+
+  /**
+   * @dev Compute modular multiplicative inverse with
+   * Euler totient's function and Fermat's little theorem
+   */
+  private inv(): Felt {
+    return this.pow(Felt.PRIME - 2n);
+  }
+
+  /** @dev Binary Exponentiation - Iterative version */
+  private pow(exp: bigint): Felt {
+    if (exp === 0n) return new Felt(1n);
+    if (exp === 1n) return this;
+    let res = 1n;
+    let inner = this.inner;
+    while (exp !== 0n) {
+      if (exp & 1n) {
+        res = (res * inner) % Felt.PRIME;
+      }
+      inner = (inner * inner) % Felt.PRIME;
+      exp >>= 1n;
+    }
+    return new Felt(res);
   }
 }
