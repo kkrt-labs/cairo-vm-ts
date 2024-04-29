@@ -4,23 +4,15 @@ import { Felt } from './felt';
 describe('Felt', () => {
   describe('constructor', () => {
     test.each([
-      [-10n, new Felt(Felt.PRIME - 10n)],
-      [-15n, new Felt(Felt.PRIME - 15n)],
-      [-(Felt.PRIME + 10n), new Felt(Felt.PRIME - 10n)],
-    ])(
-      'should properly initialize a Felt with a negative bigint as parameter',
-      (parameter: bigint, result: Felt) => {
-        expect(new Felt(parameter)).toStrictEqual(result);
-      }
-    );
-
-    test.each([
       [Felt.PRIME, new Felt(0n)],
       [Felt.PRIME + 10n, new Felt(10n)],
       [Felt.PRIME + 15n, new Felt(15n)],
+      [-10n, new Felt(Felt.PRIME - 10n)],
+      [-15n, new Felt(Felt.PRIME - 15n)],
       [Felt.PRIME * 2n + 10n, new Felt(10n)],
+      [-(Felt.PRIME + 10n), new Felt(Felt.PRIME - 10n)],
     ])(
-      'should initialize a Felt with r = x % PRIME for x a bigint equal to q*PRIME + r',
+      'should properly initialize a Felt with any bigint value as parameter',
       (parameter: bigint, result: Felt) => {
         expect(new Felt(parameter)).toStrictEqual(result);
       }
