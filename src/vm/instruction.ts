@@ -28,7 +28,11 @@ import {
 // Source: https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction.go
 
 // Dst & Op0 register flags
-export type RegisterFlag = 'ap' | 'fp';
+// export type RegisterFlag = 'ap' | 'fp';
+export enum Register {
+  Ap,
+  Fp,
+}
 
 export type Op1Source = 'op0' | 'pc' | 'fp' | 'ap';
 
@@ -54,9 +58,9 @@ export class Instruction {
   public op0Offset: number;
   public op1Offset: number;
   // The register to use as the Destination Operand
-  public dstRegister: RegisterFlag;
+  public dstRegister: Register;
   // The register to use as the Operand 0
-  public op0Register: RegisterFlag;
+  public op0Register: Register;
   // The source of the Operand 1
   public op1Source: Op1Source;
   // The result logic
@@ -81,8 +85,8 @@ export class Instruction {
       0,
       0,
       0,
-      'ap',
-      'ap',
+      Register.Ap,
+      Register.Ap,
       'op0',
       'op1',
       'pc = pc',
@@ -96,8 +100,8 @@ export class Instruction {
     dstOffset: number,
     op0Offset: number,
     op1Offset: number,
-    dstReg: RegisterFlag,
-    op0Register: RegisterFlag,
+    dstReg: Register,
+    op0Register: Register,
     op1Source: Op1Source,
     opLogic: OpLogic,
     pcUpdate: PcUpdate,
@@ -180,19 +184,19 @@ export class Instruction {
 
     // Destination register is either Ap or Fp
     const targetdstRegister = (flags & dstRegisterMask) >> dstRegisterOff;
-    let dstRegister: RegisterFlag;
+    let dstRegister: Register;
     if (targetdstRegister == 0n) {
-      dstRegister = 'ap';
+      dstRegister = Register.Ap;
     } else {
-      dstRegister = 'fp';
+      dstRegister = Register.Fp;
     }
     // Operand 0 register is either Ap or Fp
-    const targetRegisterFlag = (flags & op0RegisterMask) >> op0RegisterOff;
-    let op0Register: RegisterFlag;
-    if (targetRegisterFlag == 0n) {
-      op0Register = 'ap';
+    const targetRegister = (flags & op0RegisterMask) >> op0RegisterOff;
+    let op0Register: Register;
+    if (targetRegister == 0n) {
+      op0Register = Register.Ap;
     } else {
-      op0Register = 'fp';
+      op0Register = Register.Fp;
     }
 
     const targetOperandOneSource =
