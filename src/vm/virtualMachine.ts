@@ -9,7 +9,7 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction } from './instruction';
+import { Instruction, Register } from './instruction';
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -151,12 +151,21 @@ export class VirtualMachine {
     // Compute the destination address based on the dstRegister and
     // the offset
     // Example: const dstAddr = this.fp.add(5) == fp + 5;
-    const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
+    // const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
+    const dstAddr =
+      instruction.dstRegister === Register.Fp
+        ? this.fp.add(instruction.dstOffset)
+        : this.ap.add(instruction.dstOffset);
     let dst = this.memory.get(dstAddr);
 
     // Compute the first operand address based on the op0Register and
     // the offset
-    const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
+    // const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
+    const op0Addr =
+      instruction.op0Register === Register.Fp
+        ? this.fp.add(instruction.op0Offset)
+        : this.ap.add(instruction.op0Offset);
+
     let op0 = this.memory.get(op0Addr);
 
     // Compute the second operand address based on the op1Source and
