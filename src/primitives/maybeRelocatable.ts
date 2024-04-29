@@ -19,7 +19,7 @@ export function isRelocatable(
   maybeRelocatable: MaybeRelocatable
 ): maybeRelocatable is Relocatable;
 export function isRelocatable(
-  maybeRelocatable: number | Relocatable
+  maybeRelocatable: Relocatable | number
 ): maybeRelocatable is Relocatable;
 export function isRelocatable(
   maybeRelocatable: MaybeRelocatable | number
