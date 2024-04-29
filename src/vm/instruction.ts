@@ -350,13 +350,8 @@ export class Instruction {
     );
   }
 
+  /** The instruction size is 2 if an immediate value, located at Pc + 1, is used. */
   size(): number {
-    // The instruction's size is 2, i.e. PC will be incremented by 2 after the instruction is executed
-    // Because immediate values are located at PC + 1. They are hardcoded constants located in the bytecode,
-    // "immediately" after the instruction.
-    if (this.op1Source == Op1Source.Pc) {
-      return 2;
-    }
-    return 1;
+    return this.op1Source == Op1Source.Pc ? 2 : 1;
   }
 }
