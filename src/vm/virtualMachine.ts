@@ -148,33 +148,38 @@ export class VirtualMachine {
   computeOperands(instruction: Instruction): Operands {
     let res: MaybeRelocatable | undefined = undefined;
 
+    const {
+      dstOffset,
+      op0Offset,
+      op1Offset,
+      dstRegister,
+      op0Register,
+      op1Source,
+    } = instruction;
+
     // Compute the destination address based on the dstRegister and
     // the offset
     // Example: const dstAddr = this.fp.add(5) == fp + 5;
     // const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
     const dstAddr =
-      instruction.dstRegister === Register.Fp
-        ? this.fp.add(instruction.dstOffset)
-        : this.ap.add(instruction.dstOffset);
+      dstRegister === Register.Fp
+        ? this.fp.add(dstOffset)
+        : this.ap.add(dstOffset);
     let dst = this.memory.get(dstAddr);
 
     // Compute the first operand address based on the op0Register and
     // the offset
     // const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
     const op0Addr =
-      instruction.op0Register === Register.Fp
-        ? this.fp.add(instruction.op0Offset)
-        : this.ap.add(instruction.op0Offset);
+      op0Register === Register.Fp
+        ? this.fp.add(op0Offset)
+        : this.ap.add(op0Offset);
 
     let op0 = this.memory.get(op0Addr);
 
     // Compute the second operand address based on the op1Source and
     // the offset
-    const op1Addr = this.computeOp1Address(
-      instruction.op1Source,
-      instruction.op1Offset,
-      op0
-    );
+    const op1Addr = this.computeOp1Address(op1Source, op1Offset, op0);
     let op1 = this.memory.get(op1Addr);
 
     // If op0 is undefined, then we can deduce it from the instruction, dst and op1
