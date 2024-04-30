@@ -45,6 +45,7 @@ export enum Register {
 
 /**
  * Source from which op1 is computed
+ *
  * op1 = [op1Source + op1Offset]
  */
 export enum Op1Source {
