@@ -8,7 +8,7 @@ import {
   InvalidOp1Source,
   InvalidOpcode,
   InvalidPcUpdate,
-  InvalidOpLogic,
+  InvalidResLogic,
 } from 'errors/instruction';
 
 describe('Instruction', () => {
@@ -31,9 +31,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidOpLogic', () => {
+    test('should throw an error InvalidResLogic', () => {
       expect(() => Instruction.decodeInstruction(0x2968800080008000n)).toThrow(
-        new InvalidOpLogic()
+        new InvalidResLogic()
       );
     });
 

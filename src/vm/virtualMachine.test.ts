@@ -3,7 +3,7 @@ import {
   Instruction,
   Op1Source,
   Opcode,
-  OpLogic,
+  ResLogic,
   Register,
 } from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
@@ -22,13 +22,13 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 
-function getInstructionWithOpcodeAndOpLogic(
+function getInstructionWithOpcodeAndResLogic(
   opcode: Opcode,
-  opLogic: OpLogic
+  resLogic: ResLogic
 ): Instruction {
   const instruction = Instruction.default();
   instruction.opcode = opcode;
-  instruction.opLogic = opLogic;
+  instruction.resLogic = resLogic;
   return instruction;
 }
 
@@ -37,7 +37,7 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L16
   describe('deduceOp0', () => {
     test('should return undefined for return opcode', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'return',
         'op0 + op1'
       );
@@ -48,7 +48,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 for assert eq res logic mul', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -61,7 +61,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with op1 = 0', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -74,7 +74,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -87,7 +87,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with undefined', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -98,7 +98,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 and res for assert eq res logic add with felts', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 + op1'
       );
@@ -111,7 +111,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 and res for assert eq res logic add with relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 + op1'
       );
@@ -124,7 +124,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic add with undefined dst and op1', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 + op1'
       );
@@ -135,7 +135,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 for call', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'call',
         'unconstrained'
       );
@@ -148,7 +148,7 @@ describe('VirtualMachine', () => {
 
   describe('deduceOp1', () => {
     test('should return undefined for return opcode', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'return',
         'op0 + op1'
       );
@@ -159,7 +159,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 for assert eq res logic add', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 + op1'
       );
@@ -172,7 +172,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic add with op0 and dst undefined', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -183,7 +183,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 for assert eq res logic mul with felts', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -196,7 +196,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with op0 = 0', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -209,7 +209,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 and res for assert eq res logic op1 with dst undefined', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op1'
       );
@@ -220,7 +220,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 and res for assert eq res logic op1 with dst', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op1'
       );
@@ -234,7 +234,7 @@ describe('VirtualMachine', () => {
 
   describe('computeRes', () => {
     test('should deduce res with res logic op1', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op1'
       );
@@ -246,7 +246,7 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(op1);
     });
     test('should deduce res with res logic add with op0 and op1 felts', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 + op1'
       );
@@ -258,7 +258,7 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(new Felt(7n));
     });
     test('should throw an error with res logic add with op0 and op1 relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 + op1'
       );
@@ -271,7 +271,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -283,7 +283,7 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(new Felt(10n));
     });
     test('should throw an error with res logic mul with op0 and op1 relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'op0 * op1'
       );
@@ -296,7 +296,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should return undefined with res logic unconstrained', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'unconstrained'
       );
@@ -311,7 +311,7 @@ describe('VirtualMachine', () => {
 
   describe('deduceDst', () => {
     test('should deduce dst for assert eq with res', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'unconstrained'
       );
@@ -322,7 +322,7 @@ describe('VirtualMachine', () => {
       expect(dst).toEqual(res);
     });
     test('should deduce dst for call', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'call',
         'unconstrained'
       );
@@ -333,7 +333,7 @@ describe('VirtualMachine', () => {
       expect(dst).toEqual(new Relocatable(1, 0));
     });
     test('should return undefined for assert eq with res undefined', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'unconstrained'
       );
@@ -343,7 +343,7 @@ describe('VirtualMachine', () => {
       expect(dst).toBeUndefined();
     });
     test('should return undefined dst for ret', () => {
-      const instruction = getInstructionWithOpcodeAndOpLogic(
+      const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
         'unconstrained'
       );

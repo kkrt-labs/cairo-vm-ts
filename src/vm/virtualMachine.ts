@@ -254,7 +254,7 @@ export class VirtualMachine {
       // For add, res = op0 + op1 => op0 = res - op1.
       // For mul, res = op0 * op1 => op0 = res / op1.
       case 'assert_eq':
-        switch (instruction.opLogic) {
+        switch (instruction.resLogic) {
           case 'op0 + op1':
             // op0 = res - op1
             if (dst !== undefined && op1 !== undefined) {
@@ -288,7 +288,7 @@ export class VirtualMachine {
     if (instruction.opcode !== 'assert_eq') {
       return undefined;
     }
-    switch (instruction.opLogic) {
+    switch (instruction.resLogic) {
       // If the result logic is op1, then dst = op1.
       case 'op1':
         return dst;
@@ -325,7 +325,7 @@ export class VirtualMachine {
     op0: MaybeRelocatable,
     op1: MaybeRelocatable
   ): MaybeRelocatable | undefined {
-    switch (instruction.opLogic) {
+    switch (instruction.resLogic) {
       case 'op1':
         return op1;
       case 'op0 + op1':

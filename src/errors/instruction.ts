@@ -14,7 +14,7 @@ export class InvalidPcUpdate extends InstructionError {}
 export class InvalidApUpdate extends InstructionError {}
 
 /** Invalid Result Logic */
-export class InvalidOpLogic extends InstructionError {}
+export class InvalidResLogic extends InstructionError {}
 
 /** Invalid Opcode */
 export class InvalidOpcode extends InstructionError {}
