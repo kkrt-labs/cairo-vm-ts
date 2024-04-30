@@ -86,10 +86,19 @@ export enum ApUpdate {
   Add2,
 }
 
-export type FpUpdate =
-  | 'fp = fp'
-  | 'fp = ap + 2'
-  | 'fp = relocatable(dst) || fp += felt(dst)';
+/**
+ * - Fp: fp = fp (Common Case)
+ * - Ap2: fp = ap + 2 (Call instruction)
+ * - Dst: fp = dst ("ret" instruction)
+ */
+export enum FpUpdate {
+  /** fp = fp (Common Case) */
+  Fp,
+  /** fp = ap + 2 (Call instruction) */
+  Ap2,
+  /** fp = dst ("ret" instruction) */
+  Dst,
+}
 
 export type Opcode = 'no-op' | 'call' | 'return' | 'assert_eq';
 
@@ -131,7 +140,7 @@ export class Instruction {
       ResLogic.Op1,
       PcUpdate.Pc,
       ApUpdate.Ap,
-      'fp = fp',
+      FpUpdate.Fp,
       'no-op'
     );
   }
@@ -358,13 +367,13 @@ export class Instruction {
     let fpUpdate: FpUpdate;
     switch (opcode) {
       case 'call':
-        fpUpdate = 'fp = ap + 2';
+        fpUpdate = FpUpdate.Ap2;
         break;
       case 'return':
-        fpUpdate = 'fp = relocatable(dst) || fp += felt(dst)';
+        fpUpdate = FpUpdate.Dst;
         break;
       default:
-        fpUpdate = 'fp = fp';
+        fpUpdate = FpUpdate.Fp;
     }
 
     return new Instruction(

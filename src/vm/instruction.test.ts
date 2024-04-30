@@ -2,6 +2,7 @@ import { test, expect, describe } from 'bun:test';
 
 import {
   ApUpdate,
+  FpUpdate,
   Instruction,
   Op1Source,
   PcUpdate,
@@ -78,7 +79,7 @@ describe('Instruction', () => {
         ResLogic.Add,
         PcUpdate.Pc,
         ApUpdate.Ap,
-        'fp = fp',
+        FpUpdate.Fp,
         'assert_eq'
       );
 
@@ -107,7 +108,7 @@ describe('Instruction', () => {
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
         ApUpdate.Ap,
-        'fp = fp',
+        FpUpdate.Fp,
         'no-op'
       );
 
@@ -136,7 +137,7 @@ describe('Instruction', () => {
         ResLogic.Add,
         PcUpdate.Pc,
         ApUpdate.AddRes,
-        'fp = fp',
+        FpUpdate.Fp,
         'no-op'
       );
 
@@ -165,7 +166,7 @@ describe('Instruction', () => {
         ResLogic.Op1,
         PcUpdate.Jump,
         ApUpdate.Add2,
-        'fp = ap + 2',
+        FpUpdate.Ap2,
         'call'
       );
 
@@ -187,7 +188,7 @@ describe('Instruction', () => {
         ResLogic.Add,
         PcUpdate.Jump,
         ApUpdate.AddRes,
-        'fp = ap + 2',
+        FpUpdate.Ap2,
         'call'
       );
 
@@ -209,7 +210,7 @@ describe('Instruction', () => {
         ResLogic.Mul,
         PcUpdate.JumpRel,
         ApUpdate.Add1,
-        'fp = relocatable(dst) || fp += felt(dst)',
+        FpUpdate.Dst,
         'return'
       );
 
@@ -231,7 +232,7 @@ describe('Instruction', () => {
         ResLogic.Mul,
         PcUpdate.Jnz,
         ApUpdate.Add1,
-        'fp = fp',
+        FpUpdate.Fp,
         'assert_eq'
       );
 
@@ -253,7 +254,7 @@ describe('Instruction', () => {
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
         ApUpdate.Ap,
-        'fp = fp',
+        FpUpdate.Fp,
         'assert_eq'
       );
 
@@ -275,7 +276,7 @@ describe('Instruction', () => {
         ResLogic.Op1,
         PcUpdate.Pc,
         ApUpdate.Ap,
-        'fp = fp',
+        FpUpdate.Fp,
         'no-op'
       );
 
@@ -297,7 +298,7 @@ describe('Instruction', () => {
         ResLogic.Op1,
         PcUpdate.Pc,
         ApUpdate.Ap,
-        'fp = fp',
+        FpUpdate.Fp,
         'no-op'
       );
 

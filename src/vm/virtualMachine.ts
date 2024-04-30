@@ -11,6 +11,7 @@ import {
 import { Felt } from 'primitives/felt';
 import {
   ApUpdate,
+  FpUpdate,
   Instruction,
   PcUpdate,
   Register,
@@ -430,13 +431,13 @@ export class VirtualMachine {
   updateFp(instruction: Instruction, operands: Operands): void {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
-      case 'fp = ap + 2':
+      case FpUpdate.Ap2:
         this.fp = this.ap.add(2);
         break;
       // If the fp update logic is dst, then we add the destination
       // to fp if dst is a felt, or set the fp to the destination
       // if a relocatable.
-      case 'fp = relocatable(dst) || fp += felt(dst)':
+      case FpUpdate.Dst:
         if (operands.dst === undefined) {
           throw new InvalidDstOperand();
         }
