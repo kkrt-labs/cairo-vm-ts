@@ -35,15 +35,33 @@ function getInstructionWithOpcodeAndResLogic(
   return instruction;
 }
 
+const instructionFromOpcodeAndResLogic = {
+  CallUnused: getInstructionWithOpcodeAndResLogic(Opcode.Call, ResLogic.Unused),
+  RetAdd: getInstructionWithOpcodeAndResLogic(Opcode.Ret, ResLogic.Add),
+  AssertEqOp1: getInstructionWithOpcodeAndResLogic(
+    Opcode.AssertEq,
+    ResLogic.Op1
+  ),
+  AssertEqAdd: getInstructionWithOpcodeAndResLogic(
+    Opcode.AssertEq,
+    ResLogic.Add
+  ),
+  AssertEqMul: getInstructionWithOpcodeAndResLogic(
+    Opcode.AssertEq,
+    ResLogic.Mul
+  ),
+  AssertEqUnused: getInstructionWithOpcodeAndResLogic(
+    Opcode.AssertEq,
+    ResLogic.Unused
+  ),
+};
+
 describe('VirtualMachine', () => {
   // Test cases reproduced from:
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L16
   describe('deduceOp0', () => {
     test('should return undefined for return opcode', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Ret,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.RetAdd;
       const vm = new VirtualMachine();
 
       const op0 = vm.deduceOp0(instruction, undefined, undefined);
@@ -51,10 +69,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 for assert eq res logic mul', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const dst = new Felt(6n);
       const op1 = new Felt(3n);
@@ -64,10 +79,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with op1 = 0', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const dst = new Felt(6n);
       const op1 = new Felt(0n);
@@ -77,10 +89,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const dst = new Relocatable(1, 2);
       const op1 = new Relocatable(1, 3);
@@ -90,10 +99,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp0(instruction, undefined, undefined);
@@ -101,10 +107,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 and res for assert eq res logic add with felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqAdd;
       const vm = new VirtualMachine();
       const dst = new Felt(7n);
       const op1 = new Felt(5n);
@@ -114,10 +117,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 and res for assert eq res logic add with relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqAdd;
       const vm = new VirtualMachine();
       const dst = new Relocatable(1, 6);
       const op1 = new Relocatable(1, 2);
@@ -127,10 +127,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic add with undefined dst and op1', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqAdd;
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp0(instruction, undefined, undefined);
@@ -138,10 +135,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op0 for call', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Call,
-        ResLogic.Unused
-      );
+      const instruction = instructionFromOpcodeAndResLogic.CallUnused;
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp0(instruction, undefined, undefined);
@@ -151,10 +145,7 @@ describe('VirtualMachine', () => {
 
   describe('deduceOp1', () => {
     test('should return undefined for return opcode', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Ret,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.RetAdd;
       const vm = new VirtualMachine();
 
       const op1 = vm.deduceOp1(instruction, undefined, undefined);
@@ -162,10 +153,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 for assert eq res logic add', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqAdd;
       const vm = new VirtualMachine();
       const dst = new Felt(3n);
       const op0 = new Felt(2n);
@@ -175,10 +163,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic add with op0 and dst undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp1(instruction, undefined, undefined);
@@ -186,10 +171,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 for assert eq res logic mul with felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const dst = new Felt(4n);
       const op0 = new Felt(2n);
@@ -199,10 +181,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should return undefined for assert eq res logic mul with op0 = 0', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const dst = new Felt(4n);
       const op0 = new Felt(0n);
@@ -212,10 +191,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 and res for assert eq res logic op1 with dst undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Op1
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqOp1;
       const vm = new VirtualMachine();
 
       const value = vm.deduceOp1(instruction, undefined, undefined);
@@ -223,10 +199,7 @@ describe('VirtualMachine', () => {
     });
 
     test('should deduce op1 and res for assert eq res logic op1 with dst', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Op1
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqOp1;
       const vm = new VirtualMachine();
       const dst = new Felt(7n);
 
@@ -237,10 +210,7 @@ describe('VirtualMachine', () => {
 
   describe('computeRes', () => {
     test('should deduce res with res logic op1', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Op1
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqOp1;
       const vm = new VirtualMachine();
       const op0 = new Felt(2n);
       const op1 = new Felt(2n);
@@ -249,10 +219,7 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(op1);
     });
     test('should deduce res with res logic add with op0 and op1 felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqAdd;
       const vm = new VirtualMachine();
       const op0 = new Felt(5n);
       const op1 = new Felt(2n);
@@ -261,10 +228,7 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(new Felt(7n));
     });
     test('should throw an error with res logic add with op0 and op1 relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Add
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqAdd;
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
       const op1 = new Relocatable(1, 2);
@@ -274,10 +238,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const op0 = new Felt(5n);
       const op1 = new Felt(2n);
@@ -286,10 +247,7 @@ describe('VirtualMachine', () => {
       expect(res).toEqual(new Felt(10n));
     });
     test('should throw an error with res logic mul with op0 and op1 relocatables', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Mul
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqMul;
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
       const op1 = new Relocatable(1, 2);
@@ -299,10 +257,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should return undefined with res logic unconstrained', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unused
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqUnused;
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
       const op1 = new Relocatable(1, 2);
@@ -314,10 +269,7 @@ describe('VirtualMachine', () => {
 
   describe('deduceDst', () => {
     test('should deduce dst for assert eq with res', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unused
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqUnused;
       const vm = new VirtualMachine();
       const res = new Felt(5n);
 
@@ -325,10 +277,7 @@ describe('VirtualMachine', () => {
       expect(dst).toEqual(res);
     });
     test('should deduce dst for call', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.Call,
-        ResLogic.Unused
-      );
+      const instruction = instructionFromOpcodeAndResLogic.CallUnused;
       const vm = new VirtualMachine();
       const res = new Felt(5n);
 
@@ -336,20 +285,14 @@ describe('VirtualMachine', () => {
       expect(dst).toEqual(new Relocatable(1, 0));
     });
     test('should return undefined for assert eq with res undefined', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unused
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqUnused;
       const vm = new VirtualMachine();
 
       const dst = vm.deduceDst(instruction, undefined);
       expect(dst).toBeUndefined();
     });
     test('should return undefined dst for ret', () => {
-      const instruction = getInstructionWithOpcodeAndResLogic(
-        Opcode.AssertEq,
-        ResLogic.Unused
-      );
+      const instruction = instructionFromOpcodeAndResLogic.AssertEqUnused;
       const vm = new VirtualMachine();
 
       const dst = vm.deduceDst(instruction, undefined);
