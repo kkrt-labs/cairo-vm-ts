@@ -9,7 +9,7 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction, Register, ResLogic } from './instruction';
+import { Instruction, PcUpdate, Register, ResLogic } from './instruction';
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -372,12 +372,12 @@ export class VirtualMachine {
     switch (instruction.pcUpdate) {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
-      case 'pc = pc':
+      case PcUpdate.Pc:
         this.incrementPc(instruction.size());
         break;
       // If the pc update logic is jump, then we set the pc to the
       // result.
-      case 'pc = res':
+      case PcUpdate.Jump:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -388,7 +388,7 @@ export class VirtualMachine {
         break;
       // If the pc update logic is jump rel, then we add the result
       // to the pc.
-      case 'pc = pc + res':
+      case PcUpdate.JumpRel:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -401,7 +401,7 @@ export class VirtualMachine {
       // If the pc update logic is jnz, then we check if the destination
       // is zero. If it is, then we increment the pc by the instruction (default)
       // If it is not, then we add the op1 to the pc.
-      case 'res != 0 ? pc = op1 : pc += instruction_size':
+      case PcUpdate.Jnz:
         if (operands.dst === undefined) {
           throw new InvalidDstOperand();
         }

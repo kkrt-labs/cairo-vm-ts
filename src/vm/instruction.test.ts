@@ -1,6 +1,12 @@
 import { test, expect, describe } from 'bun:test';
 
-import { Instruction, Op1Source, Register, ResLogic } from './instruction';
+import {
+  Instruction,
+  Op1Source,
+  PcUpdate,
+  Register,
+  ResLogic,
+} from './instruction';
 
 import {
   HighBitSetError,
@@ -69,7 +75,7 @@ describe('Instruction', () => {
         Register.Fp,
         Op1Source.Pc,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'assert_eq'
@@ -98,7 +104,7 @@ describe('Instruction', () => {
         Register.Fp,
         Op1Source.Fp,
         ResLogic.Unconstrained,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -127,7 +133,7 @@ describe('Instruction', () => {
         Register.Fp,
         Op1Source.Fp,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap + res',
         'fp = fp',
         'no-op'
@@ -156,7 +162,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Fp,
         ResLogic.Op1,
-        'pc = res',
+        PcUpdate.Jump,
         'ap += 2',
         'fp = ap + 2',
         'call'
@@ -178,7 +184,7 @@ describe('Instruction', () => {
         Register.Fp,
         Op1Source.Pc,
         ResLogic.Add,
-        'pc = res',
+        PcUpdate.Jump,
         'ap = ap + res',
         'fp = ap + 2',
         'call'
@@ -200,7 +206,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Fp,
         ResLogic.Mul,
-        'pc = pc + res',
+        PcUpdate.JumpRel,
         'ap++',
         'fp = relocatable(dst) || fp += felt(dst)',
         'return'
@@ -222,7 +228,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Mul,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap++',
         'fp = fp',
         'assert_eq'
@@ -244,7 +250,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Op0,
         ResLogic.Unconstrained,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap = ap',
         'fp = fp',
         'assert_eq'
@@ -266,7 +272,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Op0,
         ResLogic.Op1,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -288,7 +294,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Op0,
         ResLogic.Op1,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'

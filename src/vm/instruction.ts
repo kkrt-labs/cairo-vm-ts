@@ -61,11 +61,22 @@ export enum ResLogic {
   Unconstrained,
 }
 
-export type PcUpdate =
-  | 'pc = pc'
-  | 'pc = res'
-  | 'pc = pc + res'
-  | 'res != 0 ? pc = op1 : pc += instruction_size';
+/**
+ * - Pc: pc = pc (Common Case)
+ * - Jump: pc = res (Absolute Jump)
+ * - JumpRel: pc = pc + res (Relative Jump)
+ * - Jnz: dst == 0 ? pc = pc + instruction_size : pc = pc + op1 (Conditional Relative Jump - Jump if Not Zero)
+ */
+export enum PcUpdate {
+  /** pc = pc (Common Case) */
+  Pc,
+  /** pc = res (Absolute Jump) */
+  Jump,
+  /** pc = pc + res (Relative Jump) */
+  JumpRel,
+  /** dst == 0 ? pc = pc + instruction_size : pc = pc + op1 (Conditional Relative Jump - Jump if Not Zero) */
+  Jnz,
+}
 
 export type ApUpdate = 'ap = ap' | 'ap = ap + res' | 'ap++' | 'ap += 2';
 
@@ -112,7 +123,7 @@ export class Instruction {
       Register.Ap,
       Op1Source.Op0,
       ResLogic.Op1,
-      'pc = pc',
+      PcUpdate.Pc,
       'ap = ap',
       'fp = fp',
       'no-op'
@@ -251,19 +262,19 @@ export class Instruction {
     switch (targetPcUpdate) {
       case 0n:
         // pc = pc + instruction size
-        pcUpdate = 'pc = pc';
+        pcUpdate = PcUpdate.Pc;
         break;
       case 1n:
         // pc = res
-        pcUpdate = 'pc = res';
+        pcUpdate = PcUpdate.Jump;
         break;
       case 2n:
         // pc = pc + res
-        pcUpdate = 'pc = pc + res';
+        pcUpdate = PcUpdate.JumpRel;
         break;
       case 4n:
         // if dst != 0 then pc = pc + instruction_size else pc + op1
-        pcUpdate = 'res != 0 ? pc = op1 : pc += instruction_size';
+        pcUpdate = PcUpdate.Jnz;
         break;
       default:
         throw new InvalidPcUpdate();
@@ -275,7 +286,7 @@ export class Instruction {
       case 0n:
         // if pc_update == jnz and res_logic == 0 then
         // res is unconstrained else res = op1
-        if (pcUpdate == 'res != 0 ? pc = op1 : pc += instruction_size') {
+        if (pcUpdate == PcUpdate.Jnz) {
           resLogic = ResLogic.Unconstrained;
         } else {
           resLogic = ResLogic.Op1;

@@ -5,6 +5,7 @@ import {
   Opcode,
   ResLogic,
   Register,
+  PcUpdate,
 } from './instruction';
 import { Operands, VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
@@ -366,7 +367,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = ap + 2',
         'assert_eq'
@@ -393,7 +394,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = ap + 2',
         'assert_eq'
@@ -420,7 +421,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = ap + 2',
         'assert_eq'
@@ -447,7 +448,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = ap + 2',
         'call'
@@ -474,7 +475,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = ap + 2',
         'call'
@@ -506,7 +507,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -532,7 +533,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Pc,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -558,7 +559,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = res',
+        PcUpdate.Jump,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -584,7 +585,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = res',
+        PcUpdate.Jump,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -611,7 +612,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = res',
+        PcUpdate.Jump,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -638,7 +639,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc + res',
+        PcUpdate.JumpRel,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -664,7 +665,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc + res',
+        PcUpdate.JumpRel,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -691,7 +692,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc + res',
+        PcUpdate.JumpRel,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -718,7 +719,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -744,7 +745,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Pc,
         ResLogic.Unconstrained,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -770,7 +771,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Pc,
         ResLogic.Unconstrained,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -796,7 +797,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Pc,
         ResLogic.Unconstrained,
-        'res != 0 ? pc = op1 : pc += instruction_size',
+        PcUpdate.Jnz,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -828,7 +829,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -854,7 +855,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = relocatable(dst) || fp += felt(dst)',
         'no-op'
@@ -880,7 +881,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = relocatable(dst) || fp += felt(dst)',
         'no-op'
@@ -906,7 +907,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = ap + 2',
         'no-op'
@@ -938,7 +939,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -964,7 +965,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap += 2',
         'fp = fp',
         'no-op'
@@ -990,7 +991,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap++',
         'fp = fp',
         'no-op'
@@ -1016,7 +1017,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap + res',
         'fp = fp',
         'no-op'
@@ -1042,7 +1043,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap + res',
         'fp = fp',
         'no-op'
@@ -1069,7 +1070,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap + res',
         'fp = fp',
         'no-op'
@@ -1101,7 +1102,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc',
+        PcUpdate.Pc,
         'ap = ap',
         'fp = fp',
         'no-op'
@@ -1129,7 +1130,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        'pc = pc + res',
+        PcUpdate.JumpRel,
         'ap += 2',
         'fp = relocatable(dst) || fp += felt(dst)',
         'no-op'
