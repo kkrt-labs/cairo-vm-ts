@@ -56,6 +56,191 @@ const instructionFromOpcodeAndResLogic = {
   ),
 };
 
+const instructions = {
+  InvalidAssertEq: new Instruction(
+    1,
+    2,
+    3,
+    Register.Fp,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Add,
+    PcUpdate.Regular,
+    ApUpdate.Ap,
+    FpUpdate.Ap2,
+    Opcode.AssertEq
+  ),
+  InvalidCall: new Instruction(
+    1,
+    2,
+    3,
+    Register.Fp,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Add,
+    PcUpdate.Regular,
+    ApUpdate.Ap,
+    FpUpdate.Ap2,
+    Opcode.Call
+  ),
+  Regular: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.Ap,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  RegularImm: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Pc,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.Ap,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  Jump: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Jump,
+    ApUpdate.Ap,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  JumpRel: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.JumpRel,
+    ApUpdate.Ap,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  JumpRelAdd2: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.JumpRel,
+    ApUpdate.Add2,
+    FpUpdate.Dst,
+    Opcode.NoOp
+  ),
+  Jnz: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Jnz,
+    ApUpdate.Ap,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  JnzImm: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Pc,
+    ResLogic.Unused,
+    PcUpdate.Jnz,
+    ApUpdate.Ap,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  Dst: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.Ap,
+    FpUpdate.Dst,
+    Opcode.NoOp
+  ),
+  ApPlus2: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.Ap,
+    FpUpdate.Ap2,
+    Opcode.NoOp
+  ),
+  Add2: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.Add2,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  Add1: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.Add1,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+  AddRes: new Instruction(
+    0,
+    0,
+    0,
+    Register.Ap,
+    Register.Ap,
+    Op1Source.Ap,
+    ResLogic.Unused,
+    PcUpdate.Regular,
+    ApUpdate.AddRes,
+    FpUpdate.Fp,
+    Opcode.NoOp
+  ),
+};
+
 describe('VirtualMachine', () => {
   // Test cases reproduced from:
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L16
@@ -304,19 +489,7 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L572
   describe('opcodeAssertions', () => {
     test('should throw UnconstrainedResError on assert eq opcode and undefined res operand', () => {
-      const instruction: Instruction = new Instruction(
-        1,
-        2,
-        3,
-        Register.Fp,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Ap2,
-        Opcode.AssertEq
-      );
+      const instruction: Instruction = instructions.InvalidAssertEq;
 
       const operands: Operands = {
         dst: new Felt(8n),
@@ -331,19 +504,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst felts', () => {
-      const instruction: Instruction = new Instruction(
-        1,
-        2,
-        3,
-        Register.Fp,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Ap2,
-        Opcode.AssertEq
-      );
+      const instruction: Instruction = instructions.InvalidAssertEq;
 
       const operands: Operands = {
         dst: new Felt(9n),
@@ -358,19 +519,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst relocatables', () => {
-      const instruction: Instruction = new Instruction(
-        1,
-        2,
-        3,
-        Register.Fp,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Ap2,
-        Opcode.AssertEq
-      );
+      const instruction: Instruction = instructions.InvalidAssertEq;
 
       const operands: Operands = {
         dst: new Relocatable(1, 2),
@@ -385,19 +534,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should throw InvalidOp0 on call opcode and pc != op0', () => {
-      const instruction: Instruction = new Instruction(
-        1,
-        2,
-        3,
-        Register.Fp,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Ap2,
-        Opcode.Call
-      );
+      const instruction: Instruction = instructions.InvalidCall;
 
       const operands: Operands = {
         dst: new Relocatable(1, 2),
@@ -412,19 +549,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('should throw InvalidDstError on call opcode and fp != dst', () => {
-      const instruction: Instruction = new Instruction(
-        1,
-        2,
-        3,
-        Register.Fp,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Add,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Ap2,
-        Opcode.Call
-      );
+      const instruction: Instruction = instructions.InvalidCall;
 
       const operands: Operands = {
         dst: new Relocatable(1, 2),
@@ -444,19 +569,7 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L284
   describe('updatePc', () => {
     test('regular', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -470,19 +583,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
     test('regular with imm', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Pc,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.RegularImm;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -496,19 +597,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
     test('jmp res relocatable', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Jump,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
       const operands = {
@@ -522,19 +611,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(operands.res);
     });
     test('jmp res felt', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Jump,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -549,19 +626,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('jmp without res', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Jump,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -576,19 +641,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('jmp rel res felt', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.JumpRel,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -602,19 +655,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(new Relocatable(0, 5));
     });
     test('jmp rel res relocatable', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.JumpRel,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -629,19 +670,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('jmp rel res relocatable', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.JumpRel,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -656,19 +685,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('jnz des is zero no imm', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Jnz,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -682,19 +699,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
     test('jnz des is zero imm', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Pc,
-        ResLogic.Unused,
-        PcUpdate.Jnz,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.JnzImm;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -708,19 +713,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
     test('jnz des not zero op1 felt', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Pc,
-        ResLogic.Unused,
-        PcUpdate.Jnz,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -734,19 +727,7 @@ describe('VirtualMachine', () => {
       expect(vm.pc).toEqual(new Relocatable(0, 3));
     });
     test('jnz des not zero op1 relocatable', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Pc,
-        ResLogic.Unused,
-        PcUpdate.Jnz,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -766,19 +747,7 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L160
   describe('updateFp', () => {
     test('regular', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -792,19 +761,7 @@ describe('VirtualMachine', () => {
       expect(vm.fp).toEqual(new Relocatable(1, 0));
     });
     test('dst felt', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Dst,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Dst;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -818,19 +775,7 @@ describe('VirtualMachine', () => {
       expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
     test('dst relocatable', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Dst,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Dst;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -844,19 +789,7 @@ describe('VirtualMachine', () => {
       expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
     test('ap plus 2', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Ap2,
-        Opcode.NoOp
-      );
+      const instruction = instructions.ApPlus2;
 
       const vm = new VirtualMachine();
       vm.ap = new Relocatable(1, 7);
@@ -876,19 +809,7 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L213
   describe('updateAp', () => {
     test('regular', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -902,19 +823,7 @@ describe('VirtualMachine', () => {
       expect(vm.ap).toEqual(new Relocatable(1, 0));
     });
     test('add 2', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Add2,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Add2;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -928,19 +837,7 @@ describe('VirtualMachine', () => {
       expect(vm.ap).toEqual(new Relocatable(1, 2));
     });
     test('add 1', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Add1,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.Add1;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -954,19 +851,7 @@ describe('VirtualMachine', () => {
       expect(vm.ap).toEqual(new Relocatable(1, 1));
     });
     test('add res felt', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.AddRes,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.AddRes;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -980,19 +865,7 @@ describe('VirtualMachine', () => {
       expect(vm.ap).toEqual(new Relocatable(1, 5));
     });
     test('add res relocatable', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.AddRes,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.AddRes;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -1007,19 +880,7 @@ describe('VirtualMachine', () => {
       );
     });
     test('add no res', () => {
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.AddRes,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
+      const instruction = instructions.AddRes;
 
       const vm = new VirtualMachine();
       const operands: Operands = {
@@ -1038,20 +899,9 @@ describe('VirtualMachine', () => {
   // https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/vm_test.go#L122
   describe('updateRegisters', () => {
     test('should keep ap/fp the same', () => {
+      const instruction = instructions.Regular;
+
       const vm = new VirtualMachine();
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.Regular,
-        ApUpdate.Ap,
-        FpUpdate.Fp,
-        Opcode.NoOp
-      );
       const operands = {
         op0: undefined,
         op1: undefined,
@@ -1067,19 +917,7 @@ describe('VirtualMachine', () => {
     test('should update the register with mixed types', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
-      const instruction = new Instruction(
-        0,
-        0,
-        0,
-        Register.Ap,
-        Register.Ap,
-        Op1Source.Ap,
-        ResLogic.Unused,
-        PcUpdate.JumpRel,
-        ApUpdate.Add2,
-        FpUpdate.Dst,
-        Opcode.NoOp
-      );
+      const instruction = instructions.JumpRelAdd2;
       const operands = {
         op0: undefined,
         op1: undefined,
