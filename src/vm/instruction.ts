@@ -27,20 +27,34 @@ import {
 // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
 // Source: https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction.go
 
-/** Register flags over `dst` and `op0` */
+/**
+ * Flags to compute `dst` and `op0` from a register
+ */
 export enum Register {
+  /**
+   * - dst = [ap + dstOffset]
+   * - op0 = [ap + op0Offset]
+   */
   Ap,
+  /**
+   * - dst = [fp + dstOffset]
+   * - op0 = [fp + op0Offset]
+   */
   Fp,
 }
 
 /**
  * Source from which op1 is computed
- * op1 = [Op1Source + Op1Offset]
+ * op1 = [op1Source + op1Offset]
  */
 export enum Op1Source {
+  /** op1 = [op0 + op1Offset] */
   Op0,
+  /** op1 = [pc + op1Offset] */
   Pc,
+  /** op1 = [fp + op1Offset] */
   Fp,
+  /** op1 = [ap + op1Offset] */
   Ap,
 }
 
