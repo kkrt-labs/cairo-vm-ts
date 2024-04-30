@@ -380,7 +380,7 @@ export class VirtualMachine {
     switch (instruction.pcUpdate) {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
-      case PcUpdate.Pc:
+      case PcUpdate.Regular:
         this.incrementPc(instruction.size());
         break;
       // If the pc update logic is jump, then we set the pc to the

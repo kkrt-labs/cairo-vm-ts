@@ -77,14 +77,14 @@ export enum ResLogic {
 }
 
 /**
- * - Pc: pc = pc + instruction_size (Common Case)
+ * - Regular: pc = pc + instruction_size(Common Case)
  * - Jump: pc = res (Absolute Jump)
  * - JumpRel: pc = pc + res (Relative Jump)
  * - Jnz: dst == 0 ? pc = pc + instruction_size : pc = pc + op1 (Conditional Relative Jump - Jump if Not Zero)
  */
 export enum PcUpdate {
   /** pc = pc + instruction_size (Common Case) */
-  Pc,
+  Regular,
   /** pc = res (Absolute Jump) */
   Jump,
   /** pc = pc + res (Relative Jump) */
@@ -168,7 +168,7 @@ export class Instruction {
       Register.Ap,
       Op1Source.Op0,
       ResLogic.Op1,
-      PcUpdate.Pc,
+      PcUpdate.Regular,
       ApUpdate.Ap,
       FpUpdate.Fp,
       Opcode.NoOp
@@ -307,7 +307,7 @@ export class Instruction {
     switch (targetPcUpdate) {
       case 0n:
         // pc = pc + instruction size
-        pcUpdate = PcUpdate.Pc;
+        pcUpdate = PcUpdate.Regular;
         break;
       case 1n:
         // pc = res

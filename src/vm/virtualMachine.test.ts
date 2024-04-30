@@ -369,7 +369,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
         Opcode.AssertEq
@@ -396,7 +396,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
         Opcode.AssertEq
@@ -423,7 +423,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
         Opcode.AssertEq
@@ -450,7 +450,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
         Opcode.Call
@@ -477,7 +477,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
         Opcode.Call
@@ -509,7 +509,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -535,7 +535,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Pc,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -831,7 +831,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -857,7 +857,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Dst,
         Opcode.NoOp
@@ -883,7 +883,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Dst,
         Opcode.NoOp
@@ -909,7 +909,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
         Opcode.NoOp
@@ -941,7 +941,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -967,7 +967,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Add2,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -993,7 +993,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Add1,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -1019,7 +1019,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -1045,7 +1045,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -1072,7 +1072,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -1104,7 +1104,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Op1Source.Ap,
         ResLogic.Unconstrained,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp

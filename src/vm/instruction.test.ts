@@ -78,7 +78,7 @@ describe('Instruction', () => {
         Register.Fp,
         Op1Source.Pc,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.AssertEq
@@ -136,7 +136,7 @@ describe('Instruction', () => {
         Register.Fp,
         Op1Source.Fp,
         ResLogic.Add,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -275,7 +275,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Op0,
         ResLogic.Op1,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp
@@ -297,7 +297,7 @@ describe('Instruction', () => {
         Register.Ap,
         Op1Source.Op0,
         ResLogic.Op1,
-        PcUpdate.Pc,
+        PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
         Opcode.NoOp
