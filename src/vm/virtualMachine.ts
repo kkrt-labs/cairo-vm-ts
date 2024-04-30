@@ -343,7 +343,7 @@ export class VirtualMachine {
           throw new ExpectedFelt();
         }
         return op0.mul(op1);
-      case ResLogic.Unconstrained:
+      case ResLogic.Unused:
         return undefined;
     }
   }

@@ -73,7 +73,7 @@ export enum ResLogic {
   /** res = op0 * op1 */
   Mul,
   /** res = Unused */
-  Unconstrained,
+  Unused,
 }
 
 /**
@@ -332,7 +332,7 @@ export class Instruction {
         // if pc_update == jnz and res_logic == 0 then
         // res is unconstrained else res = op1
         if (pcUpdate == PcUpdate.Jnz) {
-          resLogic = ResLogic.Unconstrained;
+          resLogic = ResLogic.Unused;
         } else {
           resLogic = ResLogic.Op1;
         }

@@ -140,7 +140,7 @@ describe('VirtualMachine', () => {
     test('should deduce op0 for call', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         Opcode.Call,
-        ResLogic.Unconstrained
+        ResLogic.Unused
       );
       const vm = new VirtualMachine();
 
@@ -301,7 +301,7 @@ describe('VirtualMachine', () => {
     test('should return undefined with res logic unconstrained', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         Opcode.AssertEq,
-        ResLogic.Unconstrained
+        ResLogic.Unused
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -316,7 +316,7 @@ describe('VirtualMachine', () => {
     test('should deduce dst for assert eq with res', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         Opcode.AssertEq,
-        ResLogic.Unconstrained
+        ResLogic.Unused
       );
       const vm = new VirtualMachine();
       const res = new Felt(5n);
@@ -327,7 +327,7 @@ describe('VirtualMachine', () => {
     test('should deduce dst for call', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         Opcode.Call,
-        ResLogic.Unconstrained
+        ResLogic.Unused
       );
       const vm = new VirtualMachine();
       const res = new Felt(5n);
@@ -338,7 +338,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq with res undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         Opcode.AssertEq,
-        ResLogic.Unconstrained
+        ResLogic.Unused
       );
       const vm = new VirtualMachine();
 
@@ -348,7 +348,7 @@ describe('VirtualMachine', () => {
     test('should return undefined dst for ret', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         Opcode.AssertEq,
-        ResLogic.Unconstrained
+        ResLogic.Unused
       );
       const vm = new VirtualMachine();
 
@@ -508,7 +508,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -534,7 +534,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -560,7 +560,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jump,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -586,7 +586,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jump,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -613,7 +613,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jump,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -640,7 +640,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.JumpRel,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -666,7 +666,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.JumpRel,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -693,7 +693,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.JumpRel,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -720,7 +720,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -746,7 +746,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -772,7 +772,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -798,7 +798,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -830,7 +830,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -856,7 +856,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Dst,
@@ -882,7 +882,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Dst,
@@ -908,7 +908,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Ap2,
@@ -940,7 +940,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -966,7 +966,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Add2,
         FpUpdate.Fp,
@@ -992,7 +992,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Add1,
         FpUpdate.Fp,
@@ -1018,7 +1018,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
@@ -1044,7 +1044,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
@@ -1071,7 +1071,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.AddRes,
         FpUpdate.Fp,
@@ -1103,7 +1103,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.Regular,
         ApUpdate.Ap,
         FpUpdate.Fp,
@@ -1131,7 +1131,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        ResLogic.Unconstrained,
+        ResLogic.Unused,
         PcUpdate.JumpRel,
         ApUpdate.Add2,
         FpUpdate.Dst,
