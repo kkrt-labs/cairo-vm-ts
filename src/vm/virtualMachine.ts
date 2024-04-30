@@ -432,7 +432,7 @@ export class VirtualMachine {
   updateFp(instruction: Instruction, operands: Operands): void {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
-      case FpUpdate.Ap2:
+      case FpUpdate.ApPlus2:
         this.fp = this.ap.add(2);
         break;
       // If the fp update logic is dst, then we add the destination

@@ -110,7 +110,7 @@ export enum FpUpdate {
   /** fp = fp (Common Case) */
   Fp,
   /** fp = ap + 2 (Call instruction) */
-  Ap2,
+  ApPlus2,
   /** fp = dst ("ret" instruction) */
   Dst,
 }
@@ -397,7 +397,7 @@ export class Instruction {
     let fpUpdate: FpUpdate;
     switch (opcode) {
       case Opcode.Call:
-        fpUpdate = FpUpdate.Ap2;
+        fpUpdate = FpUpdate.ApPlus2;
         break;
       case Opcode.Ret:
         fpUpdate = FpUpdate.Dst;

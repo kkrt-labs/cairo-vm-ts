@@ -67,7 +67,7 @@ const instructions = {
     ResLogic.Add,
     PcUpdate.Regular,
     ApUpdate.Ap,
-    FpUpdate.Ap2,
+    FpUpdate.ApPlus2,
     Opcode.AssertEq
   ),
   InvalidCall: new Instruction(
@@ -80,7 +80,7 @@ const instructions = {
     ResLogic.Add,
     PcUpdate.Regular,
     ApUpdate.Ap,
-    FpUpdate.Ap2,
+    FpUpdate.ApPlus2,
     Opcode.Call
   ),
   Regular: new Instruction(
@@ -197,7 +197,7 @@ const instructions = {
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Ap,
-    FpUpdate.Ap2,
+    FpUpdate.ApPlus2,
     Opcode.NoOp
   ),
   Add2: new Instruction(

@@ -167,7 +167,7 @@ describe('Instruction', () => {
         ResLogic.Op1,
         PcUpdate.Jump,
         ApUpdate.Add2,
-        FpUpdate.Ap2,
+        FpUpdate.ApPlus2,
         Opcode.Call
       );
 
@@ -189,7 +189,7 @@ describe('Instruction', () => {
         ResLogic.Add,
         PcUpdate.Jump,
         ApUpdate.AddRes,
-        FpUpdate.Ap2,
+        FpUpdate.ApPlus2,
         Opcode.Call
       );
 
