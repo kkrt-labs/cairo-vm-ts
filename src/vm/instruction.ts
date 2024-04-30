@@ -187,7 +187,7 @@ export class Instruction {
   }
 
   static fromBiased(value: bigint): number {
-    return Number(value - this.BIAS);
+    return Number(value - Instruction.BIAS);
   }
 
   static decodeInstruction(encodedInstruction: bigint): Instruction {
