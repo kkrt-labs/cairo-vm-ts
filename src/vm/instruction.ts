@@ -93,11 +93,20 @@ export enum PcUpdate {
   Jnz,
 }
 
-// export type ApUpdate = 'ap = ap' | 'ap = ap + res' | 'ap++' | 'ap += 2';
+/**
+ * - Ap: ap = ap
+ * - AddRes: ap = ap + res
+ * - Add1: ap++
+ * - Add2: ap = ap + 2
+ */
 export enum ApUpdate {
+  /** ap = ap */
   Ap,
+  /** ap = ap + res */
   AddRes,
+  /** ap++ */
   Add1,
+  /** ap = ap + 2 */
   Add2,
 }
 
