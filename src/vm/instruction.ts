@@ -100,7 +100,22 @@ export enum FpUpdate {
   Dst,
 }
 
-export type Opcode = 'no-op' | 'call' | 'return' | 'assert_eq';
+/**
+ * - NoOp: no-op (No Operation)
+ * - Call: call
+ * - Ret: ret (Return)
+ * - AssertEq: assert equal
+ */
+export enum Opcode {
+  /** No Operation */
+  NoOp,
+  /** Call instruction */
+  Call,
+  /** Return instrction */
+  Ret,
+  /** Assert equal instruction */
+  AssertEq,
+}
 
 export class Instruction {
   public dstOffset: number;
@@ -141,7 +156,7 @@ export class Instruction {
       PcUpdate.Pc,
       ApUpdate.Ap,
       FpUpdate.Fp,
-      'no-op'
+      Opcode.NoOp
     );
   }
 
@@ -324,19 +339,19 @@ export class Instruction {
     switch (targetOpcode) {
       case 0n:
         // fp = fp
-        opcode = 'no-op';
+        opcode = Opcode.NoOp;
         break;
       case 1n:
         // fp = ap + 2
-        opcode = 'call';
+        opcode = Opcode.Call;
         break;
       case 2n:
         // Return: fp = dst
-        opcode = 'return';
+        opcode = Opcode.Ret;
         break;
       case 4n:
         // Assert equal: assert dst == op0, fp = fp
-        opcode = 'assert_eq';
+        opcode = Opcode.AssertEq;
         break;
       default:
         throw new InvalidOpcode();
@@ -348,7 +363,7 @@ export class Instruction {
       case 0n:
         // if call with ap_update = 0:  ap = ap + 2
         // else ap = ap
-        if (opcode == 'call') {
+        if (opcode == Opcode.Call) {
           apUpdate = ApUpdate.Add2;
         } else {
           apUpdate = ApUpdate.Ap;
@@ -366,10 +381,10 @@ export class Instruction {
 
     let fpUpdate: FpUpdate;
     switch (opcode) {
-      case 'call':
+      case Opcode.Call:
         fpUpdate = FpUpdate.Ap2;
         break;
-      case 'return':
+      case Opcode.Ret:
         fpUpdate = FpUpdate.Dst;
         break;
       default:

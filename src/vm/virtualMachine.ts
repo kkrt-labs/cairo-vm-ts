@@ -13,6 +13,7 @@ import {
   ApUpdate,
   FpUpdate,
   Instruction,
+  Opcode,
   PcUpdate,
   Register,
   ResLogic,
@@ -252,7 +253,7 @@ export class VirtualMachine {
     switch (instruction.opcode) {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
-      case 'call':
+      case Opcode.Call:
         // op0 = pc + 1 OR op0 = pc + 2
         return this.pc.add(instruction.size());
 
@@ -260,7 +261,7 @@ export class VirtualMachine {
       // based on the result logic.
       // For add, res = op0 + op1 => op0 = res - op1.
       // For mul, res = op0 * op1 => op0 = res / op1.
-      case 'assert_eq':
+      case Opcode.AssertEq:
         switch (instruction.resLogic) {
           case ResLogic.Add:
             // op0 = res - op1
@@ -292,7 +293,7 @@ export class VirtualMachine {
     dst: MaybeRelocatable | undefined,
     op0: MaybeRelocatable | undefined
   ): MaybeRelocatable | undefined {
-    if (instruction.opcode !== 'assert_eq') {
+    if (instruction.opcode !== Opcode.AssertEq) {
       return undefined;
     }
     switch (instruction.resLogic) {
@@ -355,10 +356,10 @@ export class VirtualMachine {
   ): MaybeRelocatable | undefined {
     switch (instruction.opcode) {
       // For an assert equal, we have dst := res
-      case 'assert_eq':
+      case Opcode.AssertEq:
         return res;
       // For a call instruction, we have dst := fp
-      case 'call':
+      case Opcode.Call:
         return this.fp;
       default:
         return undefined;
@@ -485,7 +486,7 @@ export class VirtualMachine {
       // For a assert eq, check that res is defined and equals dst.
       // This is because dst represents the left side of the computation, and
       // res represents the right side of the computation.
-      case 'assert_eq':
+      case Opcode.AssertEq:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -496,7 +497,7 @@ export class VirtualMachine {
       // For a call, check that op0 = pc + instruction size and dst = fp.
       // op0 is used to store the return pc (the address of the instruction
       // following the call instruction). dst is used to store the frame pointer.
-      case 'call':
+      case Opcode.Call:
         const nextPc = this.pc.add(instruction.size());
         if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
           throw new InvalidOp0();

@@ -41,7 +41,7 @@ describe('VirtualMachine', () => {
   describe('deduceOp0', () => {
     test('should return undefined for return opcode', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'return',
+        Opcode.Ret,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -52,7 +52,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op0 for assert eq res logic mul', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -65,7 +65,7 @@ describe('VirtualMachine', () => {
 
     test('should return undefined for assert eq res logic mul with op1 = 0', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -78,7 +78,7 @@ describe('VirtualMachine', () => {
 
     test('should return undefined for assert eq res logic mul with relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -91,7 +91,7 @@ describe('VirtualMachine', () => {
 
     test('should return undefined for assert eq res logic mul with undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -102,7 +102,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op0 and res for assert eq res logic add with felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -115,7 +115,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op0 and res for assert eq res logic add with relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -128,7 +128,7 @@ describe('VirtualMachine', () => {
 
     test('should return undefined for assert eq res logic add with undefined dst and op1', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -139,7 +139,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op0 for call', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'call',
+        Opcode.Call,
         ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
@@ -152,7 +152,7 @@ describe('VirtualMachine', () => {
   describe('deduceOp1', () => {
     test('should return undefined for return opcode', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'return',
+        Opcode.Ret,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -163,7 +163,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op1 for assert eq res logic add', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -176,7 +176,7 @@ describe('VirtualMachine', () => {
 
     test('should return undefined for assert eq res logic add with op0 and dst undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -187,7 +187,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op1 for assert eq res logic mul with felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -200,7 +200,7 @@ describe('VirtualMachine', () => {
 
     test('should return undefined for assert eq res logic mul with op0 = 0', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -213,7 +213,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op1 and res for assert eq res logic op1 with dst undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Op1
       );
       const vm = new VirtualMachine();
@@ -224,7 +224,7 @@ describe('VirtualMachine', () => {
 
     test('should deduce op1 and res for assert eq res logic op1 with dst', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Op1
       );
       const vm = new VirtualMachine();
@@ -238,7 +238,7 @@ describe('VirtualMachine', () => {
   describe('computeRes', () => {
     test('should deduce res with res logic op1', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Op1
       );
       const vm = new VirtualMachine();
@@ -250,7 +250,7 @@ describe('VirtualMachine', () => {
     });
     test('should deduce res with res logic add with op0 and op1 felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -262,7 +262,7 @@ describe('VirtualMachine', () => {
     });
     test('should throw an error with res logic add with op0 and op1 relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Add
       );
       const vm = new VirtualMachine();
@@ -275,7 +275,7 @@ describe('VirtualMachine', () => {
     });
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -287,7 +287,7 @@ describe('VirtualMachine', () => {
     });
     test('should throw an error with res logic mul with op0 and op1 relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Mul
       );
       const vm = new VirtualMachine();
@@ -300,7 +300,7 @@ describe('VirtualMachine', () => {
     });
     test('should return undefined with res logic unconstrained', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
@@ -315,7 +315,7 @@ describe('VirtualMachine', () => {
   describe('deduceDst', () => {
     test('should deduce dst for assert eq with res', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
@@ -326,7 +326,7 @@ describe('VirtualMachine', () => {
     });
     test('should deduce dst for call', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'call',
+        Opcode.Call,
         ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
@@ -337,7 +337,7 @@ describe('VirtualMachine', () => {
     });
     test('should return undefined for assert eq with res undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
@@ -347,7 +347,7 @@ describe('VirtualMachine', () => {
     });
     test('should return undefined dst for ret', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
-        'assert_eq',
+        Opcode.AssertEq,
         ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
@@ -372,7 +372,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Ap2,
-        'assert_eq'
+        Opcode.AssertEq
       );
 
       const operands: Operands = {
@@ -399,7 +399,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Ap2,
-        'assert_eq'
+        Opcode.AssertEq
       );
 
       const operands: Operands = {
@@ -426,7 +426,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Ap2,
-        'assert_eq'
+        Opcode.AssertEq
       );
 
       const operands: Operands = {
@@ -453,7 +453,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Ap2,
-        'call'
+        Opcode.Call
       );
 
       const operands: Operands = {
@@ -480,7 +480,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Ap2,
-        'call'
+        Opcode.Call
       );
 
       const operands: Operands = {
@@ -512,7 +512,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -538,7 +538,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -564,7 +564,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jump,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -590,7 +590,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jump,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -617,7 +617,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jump,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -644,7 +644,7 @@ describe('VirtualMachine', () => {
         PcUpdate.JumpRel,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -670,7 +670,7 @@ describe('VirtualMachine', () => {
         PcUpdate.JumpRel,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -697,7 +697,7 @@ describe('VirtualMachine', () => {
         PcUpdate.JumpRel,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -724,7 +724,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -750,7 +750,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -776,7 +776,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -802,7 +802,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -834,7 +834,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -860,7 +860,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Dst,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -886,7 +886,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Dst,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -912,7 +912,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Ap2,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -944,7 +944,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -970,7 +970,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Add2,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -996,7 +996,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Add1,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -1022,7 +1022,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.AddRes,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -1048,7 +1048,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.AddRes,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -1075,7 +1075,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.AddRes,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       const vm = new VirtualMachine();
@@ -1107,7 +1107,7 @@ describe('VirtualMachine', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
       const operands = {
         op0: undefined,
@@ -1135,7 +1135,7 @@ describe('VirtualMachine', () => {
         PcUpdate.JumpRel,
         ApUpdate.Add2,
         FpUpdate.Dst,
-        'no-op'
+        Opcode.NoOp
       );
       const operands = {
         op0: undefined,

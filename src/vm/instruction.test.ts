@@ -5,6 +5,7 @@ import {
   FpUpdate,
   Instruction,
   Op1Source,
+  Opcode,
   PcUpdate,
   Register,
   ResLogic,
@@ -80,7 +81,7 @@ describe('Instruction', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'assert_eq'
+        Opcode.AssertEq
       );
 
       expect(instruction).toEqual(expected);
@@ -109,7 +110,7 @@ describe('Instruction', () => {
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
@@ -138,7 +139,7 @@ describe('Instruction', () => {
         PcUpdate.Pc,
         ApUpdate.AddRes,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
@@ -167,7 +168,7 @@ describe('Instruction', () => {
         PcUpdate.Jump,
         ApUpdate.Add2,
         FpUpdate.Ap2,
-        'call'
+        Opcode.Call
       );
 
       expect(instruction).toEqual(expected);
@@ -189,7 +190,7 @@ describe('Instruction', () => {
         PcUpdate.Jump,
         ApUpdate.AddRes,
         FpUpdate.Ap2,
-        'call'
+        Opcode.Call
       );
 
       expect(instruction).toEqual(expected);
@@ -211,7 +212,7 @@ describe('Instruction', () => {
         PcUpdate.JumpRel,
         ApUpdate.Add1,
         FpUpdate.Dst,
-        'return'
+        Opcode.Ret
       );
 
       expect(instruction).toEqual(expected);
@@ -233,7 +234,7 @@ describe('Instruction', () => {
         PcUpdate.Jnz,
         ApUpdate.Add1,
         FpUpdate.Fp,
-        'assert_eq'
+        Opcode.AssertEq
       );
 
       expect(instruction).toEqual(expected);
@@ -255,7 +256,7 @@ describe('Instruction', () => {
         PcUpdate.Jnz,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'assert_eq'
+        Opcode.AssertEq
       );
 
       expect(instruction).toEqual(expected);
@@ -277,7 +278,7 @@ describe('Instruction', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
@@ -299,7 +300,7 @@ describe('Instruction', () => {
         PcUpdate.Pc,
         ApUpdate.Ap,
         FpUpdate.Fp,
-        'no-op'
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
