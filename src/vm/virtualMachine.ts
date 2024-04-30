@@ -9,7 +9,7 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction, Register } from './instruction';
+import { Instruction, Register, ResLogic } from './instruction';
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -255,13 +255,13 @@ export class VirtualMachine {
       // For mul, res = op0 * op1 => op0 = res / op1.
       case 'assert_eq':
         switch (instruction.resLogic) {
-          case 'op0 + op1':
+          case ResLogic.Add:
             // op0 = res - op1
             if (dst !== undefined && op1 !== undefined) {
               return dst.sub(op1);
             }
 
-          case 'op0 * op1':
+          case ResLogic.Mul:
             if (dst !== undefined && op1 !== undefined) {
               try {
                 if (!isFelt(dst)) {
@@ -290,17 +290,17 @@ export class VirtualMachine {
     }
     switch (instruction.resLogic) {
       // If the result logic is op1, then dst = op1.
-      case 'op1':
+      case ResLogic.Op1:
         return dst;
 
-      case 'op0 + op1':
+      case ResLogic.Add:
         // dst := res = op0 + op1
         // op1 = op0 - dst
         if (dst !== undefined && op0 !== undefined) {
           return dst.sub(op0);
         }
         break;
-      case 'op0 * op1':
+      case ResLogic.Mul:
         // dst := res = op0 * op1
         // op1 = dst / op0
         if (dst !== undefined && op0 !== undefined) {
@@ -326,16 +326,16 @@ export class VirtualMachine {
     op1: MaybeRelocatable
   ): MaybeRelocatable | undefined {
     switch (instruction.resLogic) {
-      case 'op1':
+      case ResLogic.Op1:
         return op1;
-      case 'op0 + op1':
+      case ResLogic.Add:
         return op0.add(op1);
-      case 'op0 * op1':
+      case ResLogic.Mul:
         if (!isFelt(op0)) {
           throw new ExpectedFelt();
         }
         return op0.mul(op1);
-      case 'unconstrained':
+      case ResLogic.Unconstrained:
         return undefined;
     }
   }

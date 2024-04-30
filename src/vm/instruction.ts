@@ -44,7 +44,22 @@ export enum Op1Source {
   Ap,
 }
 
-export type ResLogic = 'op1' | 'op0 + op1' | 'op0 * op1' | 'unconstrained';
+/**
+ * - Op1: res = op1
+ * - Add: res = op0 + op1
+ * - Mul: res = op0 * op1
+ * - Unconstrained: res = Unused
+ */
+export enum ResLogic {
+  /** res = op1 */
+  Op1,
+  /** res = op0 + op1 */
+  Add,
+  /** res = op0 * op1 */
+  Mul,
+  /** res = Unused */
+  Unconstrained,
+}
 
 export type PcUpdate =
   | 'pc = pc'
@@ -96,7 +111,7 @@ export class Instruction {
       Register.Ap,
       Register.Ap,
       Op1Source.Op0,
-      'op1',
+      ResLogic.Op1,
       'pc = pc',
       'ap = ap',
       'fp = fp',
@@ -261,18 +276,18 @@ export class Instruction {
         // if pc_update == jnz and res_logic == 0 then
         // res is unconstrained else res = op1
         if (pcUpdate == 'res != 0 ? pc = op1 : pc += instruction_size') {
-          resLogic = 'unconstrained';
+          resLogic = ResLogic.Unconstrained;
         } else {
-          resLogic = 'op1';
+          resLogic = ResLogic.Op1;
         }
         break;
       case 1n:
         // res = op0 + op1
-        resLogic = 'op0 + op1';
+        resLogic = ResLogic.Add;
         break;
       case 2n:
         // res = op0 * op1
-        resLogic = 'op0 * op1';
+        resLogic = ResLogic.Mul;
         break;
       default:
         throw new InvalidResLogic();

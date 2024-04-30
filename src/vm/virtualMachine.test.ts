@@ -39,7 +39,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for return opcode', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'return',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
 
@@ -50,7 +50,7 @@ describe('VirtualMachine', () => {
     test('should deduce op0 for assert eq res logic mul', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const dst = new Felt(6n);
@@ -63,7 +63,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq res logic mul with op1 = 0', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const dst = new Felt(6n);
@@ -76,7 +76,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq res logic mul with relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const dst = new Relocatable(1, 2);
@@ -89,7 +89,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq res logic mul with undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
 
@@ -100,7 +100,7 @@ describe('VirtualMachine', () => {
     test('should deduce op0 and res for assert eq res logic add with felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
       const dst = new Felt(7n);
@@ -113,7 +113,7 @@ describe('VirtualMachine', () => {
     test('should deduce op0 and res for assert eq res logic add with relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
       const dst = new Relocatable(1, 6);
@@ -126,7 +126,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq res logic add with undefined dst and op1', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
 
@@ -137,7 +137,7 @@ describe('VirtualMachine', () => {
     test('should deduce op0 for call', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'call',
-        'unconstrained'
+        ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
 
@@ -150,7 +150,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for return opcode', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'return',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
 
@@ -161,7 +161,7 @@ describe('VirtualMachine', () => {
     test('should deduce op1 for assert eq res logic add', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
       const dst = new Felt(3n);
@@ -174,7 +174,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq res logic add with op0 and dst undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
 
@@ -185,7 +185,7 @@ describe('VirtualMachine', () => {
     test('should deduce op1 for assert eq res logic mul with felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const dst = new Felt(4n);
@@ -198,7 +198,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq res logic mul with op0 = 0', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const dst = new Felt(4n);
@@ -211,7 +211,7 @@ describe('VirtualMachine', () => {
     test('should deduce op1 and res for assert eq res logic op1 with dst undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op1'
+        ResLogic.Op1
       );
       const vm = new VirtualMachine();
 
@@ -222,7 +222,7 @@ describe('VirtualMachine', () => {
     test('should deduce op1 and res for assert eq res logic op1 with dst', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op1'
+        ResLogic.Op1
       );
       const vm = new VirtualMachine();
       const dst = new Felt(7n);
@@ -236,7 +236,7 @@ describe('VirtualMachine', () => {
     test('should deduce res with res logic op1', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op1'
+        ResLogic.Op1
       );
       const vm = new VirtualMachine();
       const op0 = new Felt(2n);
@@ -248,7 +248,7 @@ describe('VirtualMachine', () => {
     test('should deduce res with res logic add with op0 and op1 felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
       const op0 = new Felt(5n);
@@ -260,7 +260,7 @@ describe('VirtualMachine', () => {
     test('should throw an error with res logic add with op0 and op1 relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 + op1'
+        ResLogic.Add
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -273,7 +273,7 @@ describe('VirtualMachine', () => {
     test('should deduce res with res logic mul with op0 and op1 felts', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const op0 = new Felt(5n);
@@ -285,7 +285,7 @@ describe('VirtualMachine', () => {
     test('should throw an error with res logic mul with op0 and op1 relocatables', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'op0 * op1'
+        ResLogic.Mul
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -298,7 +298,7 @@ describe('VirtualMachine', () => {
     test('should return undefined with res logic unconstrained', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'unconstrained'
+        ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
       const op0 = new Relocatable(1, 5);
@@ -313,7 +313,7 @@ describe('VirtualMachine', () => {
     test('should deduce dst for assert eq with res', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'unconstrained'
+        ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
       const res = new Felt(5n);
@@ -324,7 +324,7 @@ describe('VirtualMachine', () => {
     test('should deduce dst for call', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'call',
-        'unconstrained'
+        ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
       const res = new Felt(5n);
@@ -335,7 +335,7 @@ describe('VirtualMachine', () => {
     test('should return undefined for assert eq with res undefined', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'unconstrained'
+        ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
 
@@ -345,7 +345,7 @@ describe('VirtualMachine', () => {
     test('should return undefined dst for ret', () => {
       const instruction = getInstructionWithOpcodeAndResLogic(
         'assert_eq',
-        'unconstrained'
+        ResLogic.Unconstrained
       );
       const vm = new VirtualMachine();
 
@@ -365,7 +365,7 @@ describe('VirtualMachine', () => {
         Register.Fp,
         Register.Ap,
         Op1Source.Ap,
-        'op0 + op1',
+        ResLogic.Add,
         'pc = pc',
         'ap = ap',
         'fp = ap + 2',
@@ -392,7 +392,7 @@ describe('VirtualMachine', () => {
         Register.Fp,
         Register.Ap,
         Op1Source.Ap,
-        'op0 + op1',
+        ResLogic.Add,
         'pc = pc',
         'ap = ap',
         'fp = ap + 2',
@@ -419,7 +419,7 @@ describe('VirtualMachine', () => {
         Register.Fp,
         Register.Ap,
         Op1Source.Ap,
-        'op0 + op1',
+        ResLogic.Add,
         'pc = pc',
         'ap = ap',
         'fp = ap + 2',
@@ -446,7 +446,7 @@ describe('VirtualMachine', () => {
         Register.Fp,
         Register.Ap,
         Op1Source.Ap,
-        'op0 + op1',
+        ResLogic.Add,
         'pc = pc',
         'ap = ap',
         'fp = ap + 2',
@@ -473,7 +473,7 @@ describe('VirtualMachine', () => {
         Register.Fp,
         Register.Ap,
         Op1Source.Ap,
-        'op0 + op1',
+        ResLogic.Add,
         'pc = pc',
         'ap = ap',
         'fp = ap + 2',
@@ -505,7 +505,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = fp',
@@ -531,7 +531,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = fp',
@@ -557,7 +557,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = res',
         'ap = ap',
         'fp = fp',
@@ -583,7 +583,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = res',
         'ap = ap',
         'fp = fp',
@@ -610,7 +610,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = res',
         'ap = ap',
         'fp = fp',
@@ -637,7 +637,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc + res',
         'ap = ap',
         'fp = fp',
@@ -663,7 +663,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc + res',
         'ap = ap',
         'fp = fp',
@@ -690,7 +690,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc + res',
         'ap = ap',
         'fp = fp',
@@ -717,7 +717,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
         'fp = fp',
@@ -743,7 +743,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
         'fp = fp',
@@ -769,7 +769,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
         'fp = fp',
@@ -795,7 +795,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Pc,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'res != 0 ? pc = op1 : pc += instruction_size',
         'ap = ap',
         'fp = fp',
@@ -827,7 +827,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = fp',
@@ -853,7 +853,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = relocatable(dst) || fp += felt(dst)',
@@ -879,7 +879,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = relocatable(dst) || fp += felt(dst)',
@@ -905,7 +905,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = ap + 2',
@@ -937,7 +937,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = fp',
@@ -963,7 +963,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap += 2',
         'fp = fp',
@@ -989,7 +989,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap++',
         'fp = fp',
@@ -1015,7 +1015,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap + res',
         'fp = fp',
@@ -1041,7 +1041,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap + res',
         'fp = fp',
@@ -1068,7 +1068,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap + res',
         'fp = fp',
@@ -1100,7 +1100,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc',
         'ap = ap',
         'fp = fp',
@@ -1128,7 +1128,7 @@ describe('VirtualMachine', () => {
         Register.Ap,
         Register.Ap,
         Op1Source.Ap,
-        'unconstrained',
+        ResLogic.Unconstrained,
         'pc = pc + res',
         'ap += 2',
         'fp = relocatable(dst) || fp += felt(dst)',
