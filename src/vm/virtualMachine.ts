@@ -9,7 +9,13 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction, PcUpdate, Register, ResLogic } from './instruction';
+import {
+  ApUpdate,
+  Instruction,
+  PcUpdate,
+  Register,
+  ResLogic,
+} from './instruction';
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -448,7 +454,7 @@ export class VirtualMachine {
   updateAp(instruction: Instruction, operands: Operands): void {
     switch (instruction.apUpdate) {
       // If the ap update logic is add, then we add the result to the ap.
-      case 'ap = ap + res':
+      case ApUpdate.AddRes:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -459,11 +465,11 @@ export class VirtualMachine {
         this.ap = this.ap.add(operands.res);
         break;
       // If the ap update logic is add 1, then we add 1 to the ap.
-      case 'ap++':
+      case ApUpdate.Add1:
         this.ap = this.ap.add(1);
         break;
       // If the ap update logic is add 2, then we add 2 to the ap.
-      case 'ap += 2':
+      case ApUpdate.Add2:
         this.ap = this.ap.add(2);
         break;
     }

@@ -1,6 +1,7 @@
 import { test, expect, describe } from 'bun:test';
 
 import {
+  ApUpdate,
   Instruction,
   Op1Source,
   PcUpdate,
@@ -76,7 +77,7 @@ describe('Instruction', () => {
         Op1Source.Pc,
         ResLogic.Add,
         PcUpdate.Pc,
-        'ap = ap',
+        ApUpdate.Ap,
         'fp = fp',
         'assert_eq'
       );
@@ -105,7 +106,7 @@ describe('Instruction', () => {
         Op1Source.Fp,
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
-        'ap = ap',
+        ApUpdate.Ap,
         'fp = fp',
         'no-op'
       );
@@ -134,7 +135,7 @@ describe('Instruction', () => {
         Op1Source.Fp,
         ResLogic.Add,
         PcUpdate.Pc,
-        'ap = ap + res',
+        ApUpdate.AddRes,
         'fp = fp',
         'no-op'
       );
@@ -163,7 +164,7 @@ describe('Instruction', () => {
         Op1Source.Fp,
         ResLogic.Op1,
         PcUpdate.Jump,
-        'ap += 2',
+        ApUpdate.Add2,
         'fp = ap + 2',
         'call'
       );
@@ -185,7 +186,7 @@ describe('Instruction', () => {
         Op1Source.Pc,
         ResLogic.Add,
         PcUpdate.Jump,
-        'ap = ap + res',
+        ApUpdate.AddRes,
         'fp = ap + 2',
         'call'
       );
@@ -207,7 +208,7 @@ describe('Instruction', () => {
         Op1Source.Fp,
         ResLogic.Mul,
         PcUpdate.JumpRel,
-        'ap++',
+        ApUpdate.Add1,
         'fp = relocatable(dst) || fp += felt(dst)',
         'return'
       );
@@ -229,7 +230,7 @@ describe('Instruction', () => {
         Op1Source.Ap,
         ResLogic.Mul,
         PcUpdate.Jnz,
-        'ap++',
+        ApUpdate.Add1,
         'fp = fp',
         'assert_eq'
       );
@@ -251,7 +252,7 @@ describe('Instruction', () => {
         Op1Source.Op0,
         ResLogic.Unconstrained,
         PcUpdate.Jnz,
-        'ap = ap',
+        ApUpdate.Ap,
         'fp = fp',
         'assert_eq'
       );
@@ -273,7 +274,7 @@ describe('Instruction', () => {
         Op1Source.Op0,
         ResLogic.Op1,
         PcUpdate.Pc,
-        'ap = ap',
+        ApUpdate.Ap,
         'fp = fp',
         'no-op'
       );
@@ -295,7 +296,7 @@ describe('Instruction', () => {
         Op1Source.Op0,
         ResLogic.Op1,
         PcUpdate.Pc,
-        'ap = ap',
+        ApUpdate.Ap,
         'fp = fp',
         'no-op'
       );

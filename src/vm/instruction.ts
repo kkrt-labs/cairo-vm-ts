@@ -78,7 +78,13 @@ export enum PcUpdate {
   Jnz,
 }
 
-export type ApUpdate = 'ap = ap' | 'ap = ap + res' | 'ap++' | 'ap += 2';
+// export type ApUpdate = 'ap = ap' | 'ap = ap + res' | 'ap++' | 'ap += 2';
+export enum ApUpdate {
+  Ap,
+  AddRes,
+  Add1,
+  Add2,
+}
 
 export type FpUpdate =
   | 'fp = fp'
@@ -124,7 +130,7 @@ export class Instruction {
       Op1Source.Op0,
       ResLogic.Op1,
       PcUpdate.Pc,
-      'ap = ap',
+      ApUpdate.Ap,
       'fp = fp',
       'no-op'
     );
@@ -334,16 +340,16 @@ export class Instruction {
         // if call with ap_update = 0:  ap = ap + 2
         // else ap = ap
         if (opcode == 'call') {
-          apUpdate = 'ap += 2';
+          apUpdate = ApUpdate.Add2;
         } else {
-          apUpdate = 'ap = ap';
+          apUpdate = ApUpdate.Ap;
         }
         break;
       case 1n:
-        apUpdate = 'ap = ap + res';
+        apUpdate = ApUpdate.AddRes;
         break;
       case 2n:
-        apUpdate = 'ap++';
+        apUpdate = ApUpdate.Add1;
         break;
       default:
         throw new InvalidApUpdate();
