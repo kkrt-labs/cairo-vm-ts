@@ -27,9 +27,7 @@ import {
 // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
 // Source: https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction.go
 
-/**
- * Flags to compute `dst` and `op0` from a register
- */
+/** Flags to compute `dst` and `op0` from a register */
 export enum Register {
   /**
    * - dst = [ap + dstOffset]
