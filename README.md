@@ -52,8 +52,8 @@ For **client diversity**. As more clients provide more:
 - **Documentation**. The documentation over the Cairo VM is
   still scarce, and the latest version in prod (Rust) is not easy to read for
   the average dev.
-- **Architecture diversity**. Different architectures can
-  implemented to achieve the same goal (e.g. memory model). However, most of the current implementation essentially is a rewrite of the Rust implementation, which is an (enhanced) rewrite of the Python implementation itself.
+- **Architecture diversity**. Different architectures can be
+  implemented to achieve the same goal (e.g. memory model). However, most of the current implementations essentially are a rewrite of the Rust implementation, which is an (enhanced) rewrite of the Python implementation itself.
 - **Usage diversity**. The primary goals of each client can differ. For example, the primary goals of production clients are performance and safety (Rust).
 
 The primary goal of our TypeScript client is **education** through **readability** and **expressiveness**.
