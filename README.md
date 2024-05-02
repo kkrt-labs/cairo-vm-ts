@@ -8,7 +8,8 @@ education</strong>
 
 [Github](https://github.com/kkrt-labs/cairo-vm-ts)
 
-<sub>Built with 🥕 by <a href="https://twitter.com/KakarotZkEvm">KKRT Labs</a></sub>
+<sub>Built with 🥕 by <a href="https://twitter.com/KakarotZkEvm">KKRT
+Labs</a></sub>
 
 </div>
 
@@ -19,9 +20,11 @@ education</strong>
 
 Cairo stands for CPU AIR "o" (like insp"o", conv"o", 🤔).
 
-It is a framework (a machine, an assembly and a language) which allows writing provable programs without having to understand the underneath ZK-technology.
+It is a framework (a machine, an assembly and a language) which allows writing
+provable programs without having to understand the underneath ZK-technology.
 
-A program written in Cairo (or Cairo Zero) is compiled and then executed on a Cairo VM which produces traces to be used for the STARK proof generation.
+A program written in Cairo (or Cairo Zero) is compiled and then executed on a
+Cairo VM which produces traces to be used for the STARK proof generation.
 
 See [resources](#resources) for more information.
 
@@ -33,36 +36,51 @@ There are currently five other Cairo VM implementations:
 
 <!-- Should I add the cairo vm in gs ? and 'oriac', a toy vm in rust -->
 
-- Reference (original) [implementation in Python](https://github.com/starkware-libs/cairo-lang) by Starkware (prod)
-- New [implementation in Rust](https://github.com/lambdaclass/cairo-vm) by Lambda Class (prod)
-- A [Go implementation](https://github.com/lambdaclass/cairo-vm_in_go), by Lambda Class (dev)
-- Another [Go implementation](https://github.com/NethermindEth/cairo-vm-go) by Nethermind (dev)
-- A [Zig implementation](https://github.com/keep-starknet-strange/ziggy-starkdust), by Community (dev)
-- A [C++ implementation](https://github.com/lambdaclass/cairo-vm.c) by Lambda Class (dev)
+- Reference (original)
+  [implementation in Python](https://github.com/starkware-libs/cairo-lang) by
+  Starkware (prod)
+- New [implementation in Rust](https://github.com/lambdaclass/cairo-vm) by
+  Lambda Class (prod)
+- A [Go implementation](https://github.com/lambdaclass/cairo-vm_in_go), by
+  Lambda Class (dev)
+- Another [Go implementation](https://github.com/NethermindEth/cairo-vm-go) by
+  Nethermind (dev)
+- A
+  [Zig implementation](https://github.com/keep-starknet-strange/ziggy-starkdust),
+  by Community (dev)
+- A [C++ implementation](https://github.com/lambdaclass/cairo-vm.c) by Lambda
+  Class (dev)
 
-The Lambda Class alt-implementations comes with a
-detailed guide ([Go](https://github.com/lambdaclass/cairo-vm_in_go/blob/main/README.md#documentation), [C++](https://github.com/lambdaclass/cairo-vm.c?tab=readme-ov-file#documentation)) on how they built their Cairo VM.
-It gives insights into the overall Cairo VM but is incomplete and rather specific to language details.
+The Lambda Class alt-implementations comes with a detailed guide
+([Go](https://github.com/lambdaclass/cairo-vm_in_go/blob/main/README.md#documentation),
+[C++](https://github.com/lambdaclass/cairo-vm.c?tab=readme-ov-file#documentation))
+on how they built their Cairo VM. It gives insights into the overall Cairo VM
+but is incomplete and rather specific to language details.
 
-Why would you have different implementations of the same program in multiple languages?
-For **client diversity**. As more clients provide more:
+Why would you have different implementations of the same program in multiple
+languages? For **client diversity**. As more clients provide more:
 
-- **Resilience**. It helps in finding bugs in the existing
-  implementations.
-- **Documentation**. The documentation over the Cairo VM is
-  still scarce, and the latest version in prod (Rust) is not easy to read for
-  the average dev.
-- **Architecture diversity**. Different architectures can be
-  implemented to achieve the same goal (e.g. memory model). However, most of the current implementations essentially are a rewrite of the Rust implementation, which is an (enhanced) rewrite of the Python implementation itself.
-- **Usage diversity**. The primary goals of each client can differ. For example, the primary goals of production clients are performance and safety (Rust).
+- **Resilience**. It helps in finding bugs in the existing   implementations.
+- **Documentation**. The documentation over the Cairo VM is   still scarce, and
+  the latest version in prod (Rust) is not easy to read for   the average dev.
+- **Architecture diversity**. Different architectures can be   implemented to
+  achieve the same goal (e.g. memory model). However, most of the current
+  implementations essentially are a rewrite of the Rust implementation, which is
+  an (enhanced) rewrite of the Python implementation itself.
+- **Usage diversity**. The primary goals of each client can differ. For example,
+  the primary goals of production clients are performance and safety (Rust).
 
-The primary goal of our TypeScript client is **education** through **readability** and **expressiveness**.
+The primary goal of our TypeScript client is **education** through
+**readability** and **expressiveness**.
+
 ### Demistifying the Cairo VM
 
-The Cairo VM is still obscure to most of us, from a lack of documentation and hard-to-read languages obfuscating the inner workings of the VM. Nobody wants to struggle to reconstruct the missing pieces to understand how something works.
+The Cairo VM is still obscure to most of us, from a lack of documentation and
+hard-to-read languages obfuscating the inner workings of the VM. Nobody wants to
+struggle to reconstruct the missing pieces to understand how something works.
 
-We are implementing a Cairo VM in TypeScript to provide a well
-documented and easy-to-comprehend Cairo VM
+We are implementing a Cairo VM in TypeScript to provide a well documented and
+easy-to-comprehend Cairo VM
 
 - TypeScript is easily readable and known by most devs if not all
 - Deliberate design choices to further improve readability and simplicity
