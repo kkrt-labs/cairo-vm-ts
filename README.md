@@ -30,7 +30,7 @@ See [resources](#resources) for more information.
 
 ## Why this
 
-### Client Diversity
+### Implementation Diversity
 
 There are currently five other Cairo VM implementations:
 
@@ -58,7 +58,8 @@ on how they built their Cairo VM. It gives insights into the overall Cairo VM
 but is incomplete and rather specific to language details.
 
 Why would you have different implementations of the same program in multiple
-languages? For **client diversity**. As more clients provide more:
+languages? For **implementation diversity**. As more implementations provide
+more:
 
 - **Resilience**. It helps in finding bugs in the existing   implementations.
 - **Documentation**. The documentation over the Cairo VM is   still scarce, and
@@ -67,10 +68,11 @@ languages? For **client diversity**. As more clients provide more:
   achieve the same goal (e.g. memory model). However, most of the current
   implementations essentially are a rewrite of the Rust implementation, which is
   an (enhanced) rewrite of the Python implementation itself.
-- **Usage diversity**. The primary goals of each client can differ. For example,
-  the primary goals of production clients are performance and safety (Rust).
+- **Usage diversity**. The primary goals of each implementation can differ. For
+  example, the primary goals of production implementations are performance and
+  safety (Rust).
 
-The primary goal of our TypeScript client is **education** through
+The primary goal of our TypeScript implementation is **education** through
 **readability** and **expressiveness**.
 
 ### Demistifying the Cairo VM
