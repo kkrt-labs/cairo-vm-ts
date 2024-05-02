@@ -58,6 +58,9 @@ export enum Op1Source {
 }
 
 /**
+ * Generic pattern to compute res: `res = logic(op0, op1)`
+ *
+ * Generic instruction pattern `opcode(res, dst)` <=> `opcode(logic(op0, op1), dst)`
  * - Op1: res = op1
  * - Add: res = op0 + op1
  * - Mul: res = op0 * op1
