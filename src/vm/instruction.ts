@@ -78,7 +78,7 @@ export enum ResLogic {
 }
 
 /**
- * - Regular: pc = pc + instruction_size(Common Case)
+ * - Regular: pc = pc + instruction_size (Common Case)
  * - Jump: pc = res (Absolute Jump)
  * - JumpRel: pc = pc + res (Relative Jump)
  * - Jnz: dst == 0 ? pc = pc + instruction_size : pc = pc + op1 (Conditional Relative Jump - Jump if Not Zero)
