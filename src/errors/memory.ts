@@ -1,4 +1,5 @@
-import { MaybeRelocatable, Relocatable } from 'primitives/relocatable';
+import { Relocatable } from 'primitives/relocatable';
+import { MaybeRelocatable } from 'primitives/maybeRelocatable';
 
 export class MemoryError extends Error {}
 

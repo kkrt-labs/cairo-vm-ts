@@ -1,6 +1,15 @@
 import { test, expect, describe } from 'bun:test';
 
-import { Instruction } from './instruction';
+import {
+  ApUpdate,
+  FpUpdate,
+  Instruction,
+  Op1Source,
+  Opcode,
+  PcUpdate,
+  Register,
+  ResLogic,
+} from './instruction';
 
 import {
   HighBitSetError,
@@ -8,7 +17,7 @@ import {
   InvalidOp1Source,
   InvalidOpcode,
   InvalidPcUpdate,
-  InvalidOpLogic,
+  InvalidResLogic,
 } from 'errors/instruction';
 
 describe('Instruction', () => {
@@ -31,9 +40,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidOpLogic', () => {
+    test('should throw an error InvalidResLogic', () => {
       expect(() => Instruction.decodeInstruction(0x2968800080008000n)).toThrow(
-        new InvalidOpLogic()
+        new InvalidResLogic()
       );
     });
 
@@ -65,14 +74,14 @@ describe('Instruction', () => {
         10,
         0,
         1,
-        'ap',
-        'fp',
-        'pc',
-        'op0 + op1',
-        'pc = pc',
-        'ap = ap',
-        'fp = fp',
-        'assert_eq'
+        Register.Ap,
+        Register.Fp,
+        Op1Source.Pc,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.Ap,
+        FpUpdate.Fp,
+        Opcode.AssertEq
       );
 
       expect(instruction).toEqual(expected);
@@ -94,14 +103,14 @@ describe('Instruction', () => {
         -7,
         -1,
         -1,
-        'fp',
-        'fp',
-        'fp',
-        'unconstrained',
-        'res != 0 ? pc = op1 : pc += instruction_size',
-        'ap = ap',
-        'fp = fp',
-        'no-op'
+        Register.Fp,
+        Register.Fp,
+        Op1Source.Fp,
+        ResLogic.Unused,
+        PcUpdate.Jnz,
+        ApUpdate.Ap,
+        FpUpdate.Fp,
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
@@ -123,14 +132,14 @@ describe('Instruction', () => {
         -1,
         4,
         0,
-        'fp',
-        'fp',
-        'fp',
-        'op0 + op1',
-        'pc = pc',
-        'ap = ap + res',
-        'fp = fp',
-        'no-op'
+        Register.Fp,
+        Register.Fp,
+        Op1Source.Fp,
+        ResLogic.Add,
+        PcUpdate.Regular,
+        ApUpdate.AddRes,
+        FpUpdate.Fp,
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
@@ -152,14 +161,14 @@ describe('Instruction', () => {
         0,
         1,
         4,
-        'ap',
-        'ap',
-        'fp',
-        'op1',
-        'pc = res',
-        'ap += 2',
-        'fp = ap + 2',
-        'call'
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Fp,
+        ResLogic.Op1,
+        PcUpdate.Jump,
+        ApUpdate.Add2,
+        FpUpdate.ApPlus2,
+        Opcode.Call
       );
 
       expect(instruction).toEqual(expected);
@@ -174,14 +183,14 @@ describe('Instruction', () => {
         0,
         0,
         0,
-        'fp',
-        'fp',
-        'pc',
-        'op0 + op1',
-        'pc = res',
-        'ap = ap + res',
-        'fp = ap + 2',
-        'call'
+        Register.Fp,
+        Register.Fp,
+        Op1Source.Pc,
+        ResLogic.Add,
+        PcUpdate.Jump,
+        ApUpdate.AddRes,
+        FpUpdate.ApPlus2,
+        Opcode.Call
       );
 
       expect(instruction).toEqual(expected);
@@ -196,14 +205,14 @@ describe('Instruction', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'fp',
-        'op0 * op1',
-        'pc = pc + res',
-        'ap++',
-        'fp = relocatable(dst) || fp += felt(dst)',
-        'return'
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Fp,
+        ResLogic.Mul,
+        PcUpdate.JumpRel,
+        ApUpdate.Add1,
+        FpUpdate.Dst,
+        Opcode.Ret
       );
 
       expect(instruction).toEqual(expected);
@@ -218,14 +227,14 @@ describe('Instruction', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'ap',
-        'op0 * op1',
-        'res != 0 ? pc = op1 : pc += instruction_size',
-        'ap++',
-        'fp = fp',
-        'assert_eq'
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Ap,
+        ResLogic.Mul,
+        PcUpdate.Jnz,
+        ApUpdate.Add1,
+        FpUpdate.Fp,
+        Opcode.AssertEq
       );
 
       expect(instruction).toEqual(expected);
@@ -240,14 +249,14 @@ describe('Instruction', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'op0',
-        'unconstrained',
-        'res != 0 ? pc = op1 : pc += instruction_size',
-        'ap = ap',
-        'fp = fp',
-        'assert_eq'
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Op0,
+        ResLogic.Unused,
+        PcUpdate.Jnz,
+        ApUpdate.Ap,
+        FpUpdate.Fp,
+        Opcode.AssertEq
       );
 
       expect(instruction).toEqual(expected);
@@ -262,14 +271,14 @@ describe('Instruction', () => {
         0,
         0,
         0,
-        'ap',
-        'ap',
-        'op0',
-        'op1',
-        'pc = pc',
-        'ap = ap',
-        'fp = fp',
-        'no-op'
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Op0,
+        ResLogic.Op1,
+        PcUpdate.Regular,
+        ApUpdate.Ap,
+        FpUpdate.Fp,
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);
@@ -284,14 +293,14 @@ describe('Instruction', () => {
         -1,
         0,
         1,
-        'ap',
-        'ap',
-        'op0',
-        'op1',
-        'pc = pc',
-        'ap = ap',
-        'fp = fp',
-        'no-op'
+        Register.Ap,
+        Register.Ap,
+        Op1Source.Op0,
+        ResLogic.Op1,
+        PcUpdate.Regular,
+        ApUpdate.Ap,
+        FpUpdate.Fp,
+        Opcode.NoOp
       );
 
       expect(instruction).toEqual(expected);

@@ -9,7 +9,15 @@ import {
   Op1ImmediateOffsetError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Instruction } from './instruction';
+import {
+  ApUpdate,
+  FpUpdate,
+  Instruction,
+  Opcode,
+  PcUpdate,
+  Register,
+  ResLogic,
+} from './instruction';
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
@@ -77,13 +85,13 @@ export class VirtualMachine {
   ): Relocatable {
     let baseAddr: Relocatable;
     switch (op1Source) {
-      case 'ap':
+      case Op1Source.Ap:
         baseAddr = this.ap;
         break;
-      case 'fp':
+      case Op1Source.Fp:
         baseAddr = this.fp;
         break;
-      case 'pc':
+      case Op1Source.Pc:
         // In case of immediate as the source, the offset
         // has to be 1, otherwise we return an error.
         if (op1Offset == 1) {
@@ -92,7 +100,7 @@ export class VirtualMachine {
           throw new Op1ImmediateOffsetError();
         }
         break;
-      case 'op0':
+      case Op1Source.Op0:
         // In case of operand 0 as the source, we have to check that
         // operand 0 is not undefined.
         if (op0 === undefined) {
@@ -148,24 +156,38 @@ export class VirtualMachine {
   computeOperands(instruction: Instruction): Operands {
     let res: MaybeRelocatable | undefined = undefined;
 
+    const {
+      dstOffset,
+      op0Offset,
+      op1Offset,
+      dstRegister,
+      op0Register,
+      op1Source,
+    } = instruction;
+
     // Compute the destination address based on the dstRegister and
     // the offset
     // Example: const dstAddr = this.fp.add(5) == fp + 5;
-    const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
+    // const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
+    const dstAddr =
+      dstRegister === Register.Fp
+        ? this.fp.add(dstOffset)
+        : this.ap.add(dstOffset);
     let dst = this.memory.get(dstAddr);
 
     // Compute the first operand address based on the op0Register and
     // the offset
-    const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
+    // const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
+    const op0Addr =
+      op0Register === Register.Fp
+        ? this.fp.add(op0Offset)
+        : this.ap.add(op0Offset);
+
     let op0 = this.memory.get(op0Addr);
 
     // Compute the second operand address based on the op1Source and
     // the offset
-    const op1Addr = this.computeOp1Address(
-      instruction.op1Source,
-      instruction.op1Offset,
-      op0
-    );
+    const op1Addr = this.computeOp1Address(op1Source, op1Offset, op0);
     let op1 = this.memory.get(op1Addr);
 
     // If op0 is undefined, then we can deduce it from the instruction, dst and op1
@@ -231,7 +253,7 @@ export class VirtualMachine {
     switch (instruction.opcode) {
       // If the opcode is a call, then the first operand can be found at pc
       // + instruction size.
-      case 'call':
+      case Opcode.Call:
         // op0 = pc + 1 OR op0 = pc + 2
         return this.pc.add(instruction.size());
 
@@ -239,15 +261,15 @@ export class VirtualMachine {
       // based on the result logic.
       // For add, res = op0 + op1 => op0 = res - op1.
       // For mul, res = op0 * op1 => op0 = res / op1.
-      case 'assert_eq':
-        switch (instruction.opLogic) {
-          case 'op0 + op1':
+      case Opcode.AssertEq:
+        switch (instruction.resLogic) {
+          case ResLogic.Add:
             // op0 = res - op1
             if (dst !== undefined && op1 !== undefined) {
               return dst.sub(op1);
             }
 
-          case 'op0 * op1':
+          case ResLogic.Mul:
             if (dst !== undefined && op1 !== undefined) {
               try {
                 if (!isFelt(dst)) {
@@ -271,22 +293,22 @@ export class VirtualMachine {
     dst: MaybeRelocatable | undefined,
     op0: MaybeRelocatable | undefined
   ): MaybeRelocatable | undefined {
-    if (instruction.opcode !== 'assert_eq') {
+    if (instruction.opcode !== Opcode.AssertEq) {
       return undefined;
     }
-    switch (instruction.opLogic) {
+    switch (instruction.resLogic) {
       // If the result logic is op1, then dst = op1.
-      case 'op1':
+      case ResLogic.Op1:
         return dst;
 
-      case 'op0 + op1':
+      case ResLogic.Add:
         // dst := res = op0 + op1
         // op1 = op0 - dst
         if (dst !== undefined && op0 !== undefined) {
           return dst.sub(op0);
         }
         break;
-      case 'op0 * op1':
+      case ResLogic.Mul:
         // dst := res = op0 * op1
         // op1 = dst / op0
         if (dst !== undefined && op0 !== undefined) {
@@ -311,17 +333,17 @@ export class VirtualMachine {
     op0: MaybeRelocatable,
     op1: MaybeRelocatable
   ): MaybeRelocatable | undefined {
-    switch (instruction.opLogic) {
-      case 'op1':
+    switch (instruction.resLogic) {
+      case ResLogic.Op1:
         return op1;
-      case 'op0 + op1':
+      case ResLogic.Add:
         return op0.add(op1);
-      case 'op0 * op1':
+      case ResLogic.Mul:
         if (!isFelt(op0)) {
           throw new ExpectedFelt();
         }
         return op0.mul(op1);
-      case 'unconstrained':
+      case ResLogic.Unused:
         return undefined;
     }
   }
@@ -334,10 +356,10 @@ export class VirtualMachine {
   ): MaybeRelocatable | undefined {
     switch (instruction.opcode) {
       // For an assert equal, we have dst := res
-      case 'assert_eq':
+      case Opcode.AssertEq:
         return res;
       // For a call instruction, we have dst := fp
-      case 'call':
+      case Opcode.Call:
         return this.fp;
       default:
         return undefined;
@@ -358,12 +380,12 @@ export class VirtualMachine {
     switch (instruction.pcUpdate) {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
-      case 'pc = pc':
+      case PcUpdate.Regular:
         this.incrementPc(instruction.size());
         break;
       // If the pc update logic is jump, then we set the pc to the
       // result.
-      case 'pc = res':
+      case PcUpdate.Jump:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -374,7 +396,7 @@ export class VirtualMachine {
         break;
       // If the pc update logic is jump rel, then we add the result
       // to the pc.
-      case 'pc = pc + res':
+      case PcUpdate.JumpRel:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -387,7 +409,7 @@ export class VirtualMachine {
       // If the pc update logic is jnz, then we check if the destination
       // is zero. If it is, then we increment the pc by the instruction (default)
       // If it is not, then we add the op1 to the pc.
-      case 'res != 0 ? pc = op1 : pc += instruction_size':
+      case PcUpdate.Jnz:
         if (operands.dst === undefined) {
           throw new InvalidDstOperand();
         }
@@ -410,13 +432,13 @@ export class VirtualMachine {
   updateFp(instruction: Instruction, operands: Operands): void {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
-      case 'fp = ap + 2':
+      case FpUpdate.ApPlus2:
         this.fp = this.ap.add(2);
         break;
       // If the fp update logic is dst, then we add the destination
       // to fp if dst is a felt, or set the fp to the destination
       // if a relocatable.
-      case 'fp = relocatable(dst) || fp += felt(dst)':
+      case FpUpdate.Dst:
         if (operands.dst === undefined) {
           throw new InvalidDstOperand();
         }
@@ -434,7 +456,7 @@ export class VirtualMachine {
   updateAp(instruction: Instruction, operands: Operands): void {
     switch (instruction.apUpdate) {
       // If the ap update logic is add, then we add the result to the ap.
-      case 'ap = ap + res':
+      case ApUpdate.AddRes:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -445,11 +467,11 @@ export class VirtualMachine {
         this.ap = this.ap.add(operands.res);
         break;
       // If the ap update logic is add 1, then we add 1 to the ap.
-      case 'ap++':
+      case ApUpdate.Add1:
         this.ap = this.ap.add(1);
         break;
       // If the ap update logic is add 2, then we add 2 to the ap.
-      case 'ap += 2':
+      case ApUpdate.Add2:
         this.ap = this.ap.add(2);
         break;
     }
@@ -464,7 +486,7 @@ export class VirtualMachine {
       // For a assert eq, check that res is defined and equals dst.
       // This is because dst represents the left side of the computation, and
       // res represents the right side of the computation.
-      case 'assert_eq':
+      case Opcode.AssertEq:
         if (operands.res === undefined) {
           throw new UnconstrainedResError();
         }
@@ -475,7 +497,7 @@ export class VirtualMachine {
       // For a call, check that op0 = pc + instruction size and dst = fp.
       // op0 is used to store the return pc (the address of the instruction
       // following the call instruction). dst is used to store the frame pointer.
-      case 'call':
+      case Opcode.Call:
         const nextPc = this.pc.add(instruction.size());
         if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
           throw new InvalidOp0();
