@@ -75,7 +75,7 @@ describe('Relocatable', () => {
       expect(result.segment).toEqual(0);
     });
 
-    test('should throw an error ForbiddenOperation when adding an incompatible MaybeRelocatable', () => {
+    test('should throw an error ForbiddenOperation when adding an incompatible SegmentValue', () => {
       const a = new Relocatable(0, 10);
       const b = new Relocatable(0, 5);
       expect(() => a.add(b)).toThrow(new ForbiddenOperation());

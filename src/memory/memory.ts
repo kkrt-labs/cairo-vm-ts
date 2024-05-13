@@ -1,15 +1,15 @@
 import { InconsistentMemory, SegmentOutOfBounds } from 'errors/memory';
 import { Relocatable } from 'primitives/relocatable';
-import { MaybeRelocatable } from 'primitives/maybeRelocatable';
+import { SegmentValue } from 'primitives/segmentValue';
 
 export class Memory {
-  data: Array<Array<MaybeRelocatable>>;
+  data: Array<Array<SegmentValue>>;
 
   constructor() {
     this.data = [[]];
   }
 
-  get(address: Relocatable): MaybeRelocatable | undefined {
+  get(address: Relocatable): SegmentValue | undefined {
     return this.data[address.segment][address.offset];
   }
 
@@ -22,7 +22,7 @@ export class Memory {
     return this.data.length;
   }
 
-  setData(address: Relocatable, data: MaybeRelocatable[]): void {
+  setData(address: Relocatable, data: SegmentValue[]): void {
     data.forEach((value, index) => {
       this.assertEq(address.add(index), value);
     });
@@ -34,7 +34,7 @@ export class Memory {
    *
    * @dev if memory at `address` is undefined, it is set to `value`
    */
-  assertEq(address: Relocatable, value: MaybeRelocatable): void {
+  assertEq(address: Relocatable, value: SegmentValue): void {
     const { segment, offset } = address;
     const segmentNumber = this.getSegmentNumber();
 
@@ -42,8 +42,7 @@ export class Memory {
       throw new SegmentOutOfBounds(segment, segmentNumber);
     }
 
-    const currentValue: MaybeRelocatable | undefined =
-      this.data[segment][offset];
+    const currentValue: SegmentValue | undefined = this.data[segment][offset];
 
     if (currentValue === undefined) {
       this.data[segment][offset] = value;

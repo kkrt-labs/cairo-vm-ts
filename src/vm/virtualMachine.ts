@@ -30,11 +30,7 @@ import { Memory } from 'memory/memory';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
 import { Op1Source } from 'vm/instruction';
-import {
-  MaybeRelocatable,
-  isFelt,
-  isRelocatable,
-} from 'primitives/maybeRelocatable';
+import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -44,10 +40,10 @@ import {
 // assert [fp - 3] = [ap + 7] * [ap + 8]
 // In this case, op0 = [ap + 7], op1 = [ap + 8], res = op0 * op1, dst = [fp - 3]
 export type Operands = {
-  op0: MaybeRelocatable | undefined;
-  op1: MaybeRelocatable | undefined;
-  res: MaybeRelocatable | undefined;
-  dst: MaybeRelocatable | undefined;
+  op0: SegmentValue | undefined;
+  op1: SegmentValue | undefined;
+  res: SegmentValue | undefined;
+  dst: SegmentValue | undefined;
 };
 
 export class VirtualMachine {
@@ -81,7 +77,7 @@ export class VirtualMachine {
   computeOp1Address(
     op1Source: Op1Source,
     op1Offset: number,
-    op0: MaybeRelocatable | undefined
+    op0: SegmentValue | undefined
   ): Relocatable {
     let baseAddr: Relocatable;
     switch (op1Source) {
@@ -154,7 +150,7 @@ export class VirtualMachine {
   // fetch them from memory and if it fails to do so, it can
   // deduce them from the instruction itself.
   computeOperands(instruction: Instruction): Operands {
-    let res: MaybeRelocatable | undefined = undefined;
+    let res: SegmentValue | undefined = undefined;
 
     const {
       dstOffset,
@@ -216,8 +212,8 @@ export class VirtualMachine {
     if (res === undefined) {
       const computedRes = this.computeRes(
         instruction,
-        op0 as MaybeRelocatable,
-        op1 as MaybeRelocatable
+        op0 as SegmentValue,
+        op1 as SegmentValue
       );
 
       res = computedRes;
@@ -245,9 +241,9 @@ export class VirtualMachine {
   // itself. Deduces op0 and result when possible.
   deduceOp0(
     instruction: Instruction,
-    dst: MaybeRelocatable | undefined,
-    op1: MaybeRelocatable | undefined
-  ): MaybeRelocatable | undefined {
+    dst: SegmentValue | undefined,
+    op1: SegmentValue | undefined
+  ): SegmentValue | undefined {
     // We can deduce the first operand from the destination and the second
     // operand, based on which opcode is used.
     switch (instruction.opcode) {
@@ -290,9 +286,9 @@ export class VirtualMachine {
 
   deduceOp1(
     instruction: Instruction,
-    dst: MaybeRelocatable | undefined,
-    op0: MaybeRelocatable | undefined
-  ): MaybeRelocatable | undefined {
+    dst: SegmentValue | undefined,
+    op0: SegmentValue | undefined
+  ): SegmentValue | undefined {
     if (instruction.opcode !== Opcode.AssertEq) {
       return undefined;
     }
@@ -330,9 +326,9 @@ export class VirtualMachine {
   // for the instruction.
   computeRes(
     instruction: Instruction,
-    op0: MaybeRelocatable,
-    op1: MaybeRelocatable
-  ): MaybeRelocatable | undefined {
+    op0: SegmentValue,
+    op1: SegmentValue
+  ): SegmentValue | undefined {
     switch (instruction.resLogic) {
       case ResLogic.Op1:
         return op1;
@@ -352,8 +348,8 @@ export class VirtualMachine {
   // for assert eq and call instructions.
   deduceDst(
     instruction: Instruction,
-    res: MaybeRelocatable | undefined
-  ): MaybeRelocatable | undefined {
+    res: SegmentValue | undefined
+  ): SegmentValue | undefined {
     switch (instruction.opcode) {
       // For an assert equal, we have dst := res
       case Opcode.AssertEq:

@@ -1,18 +1,18 @@
 import { Relocatable } from 'primitives/relocatable';
-import { MaybeRelocatable } from 'primitives/maybeRelocatable';
+import { SegmentValue } from 'primitives/segmentValue';
 
 export class MemoryError extends Error {}
 
 /** Read a different value (`newValue`) than the already constrained value (`oldValue`) at `address` */
 export class InconsistentMemory extends MemoryError {
   public readonly address: Relocatable;
-  public readonly oldValue: MaybeRelocatable;
-  public readonly newValue: MaybeRelocatable;
+  public readonly oldValue: SegmentValue;
+  public readonly newValue: SegmentValue;
 
   constructor(
     address: Relocatable,
-    oldValue: MaybeRelocatable,
-    newValue: MaybeRelocatable
+    oldValue: SegmentValue,
+    newValue: SegmentValue
   ) {
     super();
     this.address = address;
