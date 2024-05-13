@@ -3,7 +3,7 @@ export class VirtualMachineError extends Error {}
 /** End of instructions */
 export class EndOfInstructionsError extends VirtualMachineError {}
 /** Result is unconstrained */
-export class UnconstrainedResError extends VirtualMachineError {}
+export class UnusedResError extends VirtualMachineError {}
 /** Assert values are different */
 export class DiffAssertValuesError extends VirtualMachineError {}
 /** Invalid destination operand */

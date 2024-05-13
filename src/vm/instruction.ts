@@ -66,13 +66,13 @@ export enum Register {
  */
 export enum ResLogic {
   /** res = op1 */
-  Op1,
+  Op1 = 1,
   /** res = op0 + op1 */
-  Add,
+  Add = 2,
   /** res = op0 * op1 */
-  Mul,
+  Mul = 4,
   /** res = Unused */
-  Unused,
+  Unused = 8,
 }
 
 /**
@@ -131,13 +131,13 @@ export enum FpUpdate {
  */
 export enum Opcode {
   /** No Operation */
-  NoOp,
+  NoOp = 16,
   /** Call instruction */
-  Call,
+  Call = 32,
   /** Return instrction */
-  Ret,
+  Ret = 64,
   /** Assert equal instruction */
-  AssertEq,
+  AssertEq = 128,
 }
 
 export class Instruction {

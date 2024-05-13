@@ -3,10 +3,7 @@ import {
   ExpectedRelocatable,
   InvalidDstOperand,
   InvalidOp1,
-  UnconstrainedResError,
-  Op0NotRelocatable,
-  Op0Undefined,
-  Op1ImmediateOffsetError,
+  UnusedResError,
 } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
 import {
@@ -98,8 +95,6 @@ export class VirtualMachine {
   runInstruction(instruction: Instruction): void {
     const operands = this.computeOperands(instruction);
 
-    this.opcodeAssertion(instruction, operands);
-
     // TODO should update the trace here
 
     this.updateRegisters(instruction, operands);
@@ -133,8 +128,8 @@ export class VirtualMachine {
     let op0: SegmentValue | undefined;
     let op1: SegmentValue | undefined;
 
-    // Compute the destination address based on the dstRegister and
-    // the offset
+    // Compute the destination address based
+    // on the dstRegister and the offset
     // Example: const dstAddr = this.fp.add(5) == fp + 5;
     switch (dstRegister) {
       case Register.Ap:
@@ -179,69 +174,113 @@ export class VirtualMachine {
     }
     op1 = this.memory.get(op1Addr);
 
-    // switch (resLogic) {
-    //   case ResLogic.Op1:
-    //     res = op1;
-    //   case ResLogic.Add:
-    //     res = op0.add(op1);
-    //   case ResLogic.Mul:
-    //     if (!isFelt(op0)) {
-    //       throw new ExpectedFelt();
-    //     }
-    //     res = op0.mul(op1);
-    //   case ResLogic.Unused:
-    //     res = undefined;
-    // }
-
     switch (opcode | resLogic) {
+      case Opcode.Call | ResLogic.Op1:
+        if (op0 === undefined) {
+          op0 = this.pc.add(instruction.size());
+        }
+        if (op1 === undefined) throw new InvalidOp1();
+        res = op1;
+        dst = this.fp;
+        break;
+
       case Opcode.Call | ResLogic.Add:
+        if (op0 === undefined) {
+          op0 = this.pc.add(instruction.size());
+        }
+        if (op1 === undefined) throw new InvalidOp1();
+        res = op0.add(op1);
+        dst = this.fp;
+        break;
+
+      case Opcode.Call | ResLogic.Mul:
+        if (op0 === undefined) {
+          op0 = this.pc.add(instruction.size());
+        }
+        if (op1 === undefined) throw new InvalidOp1();
+        if (!isFelt(op0)) throw new ExpectedFelt();
+        res = op0.mul(op1);
+        dst = this.fp;
+        break;
+
+      case Opcode.Call | ResLogic.Unused:
+        if (op0 === undefined) {
+          op0 = this.pc.add(instruction.size());
+        }
+        if (op1 === undefined) throw new InvalidOp1();
+        res = undefined;
+        dst = this.fp;
+        break;
+
+      case Opcode.AssertEq | ResLogic.Op1:
+        if (op1 === undefined) op1 = dst;
+        res = op1;
+        dst = res;
+        break;
+
+      case Opcode.AssertEq | ResLogic.Add:
+        if (op0 === undefined) {
+          if (dst !== undefined && op1 !== undefined) {
+            op0 = dst.sub(op1);
+          } else throw new InvalidOp0();
+        }
+        if (op1 === undefined) {
+          if (dst !== undefined && op0 !== undefined) {
+            op1 = dst.sub(op0);
+          } else throw new InvalidOp1();
+        }
+        res = op0.add(op1);
+        dst = res;
+        break;
+
+      case Opcode.AssertEq | ResLogic.Mul:
+        if (op0 === undefined) {
+          if (dst !== undefined && op1 !== undefined && isFelt(dst)) {
+            op0 = dst.div(op1);
+          } else throw new InvalidOp0();
+        }
+        if (op1 === undefined) {
+          if (dst !== undefined && op0 !== undefined && isFelt(dst)) {
+            op1 = dst.div(op0);
+          } else throw new InvalidOp1();
+        }
+        if (!isFelt(op0)) throw new ExpectedFelt();
+        res = op0.mul(op1);
+        dst = res;
+        break;
+
+      case Opcode.AssertEq | ResLogic.Unused:
+        res = undefined;
+        dst = res;
+        break;
 
       default:
+        switch (resLogic) {
+          case ResLogic.Op1:
+            res = op1;
+            break;
+          case ResLogic.Add:
+            if (op0 !== undefined && op1 !== undefined) {
+              res = op0.add(op1);
+            }
+            break;
+          case ResLogic.Mul:
+            if (op0 !== undefined && op1 !== undefined && isFelt(op0)) {
+              res = op0.mul(op1);
+            }
+            break;
+          case ResLogic.Unused:
+            res = undefined;
+            break;
+          default:
+            throw new Error();
+        }
         break;
     }
 
-    // If op0 is undefined, then we can deduce it from the instruction, dst and op1
-    // We also deduce the result based on the result logic
-    if (op0 === undefined) {
-      const deducedOp0 = this.deduceOp0(instruction, dst, op1);
-
-      if (deducedOp0 !== undefined) {
-        this.memory.assertEq(op0Addr, deducedOp0);
-      }
-      op0 = deducedOp0;
-    }
-
-    // If operand 1 is undefined, then we can deduce it from the instruction,
-    // destination and operand 0.
-    // We also deduce the result based on the result logic
-    if (op1 === undefined) {
-      const deducedOp1 = this.deduceOp1(instruction, dst, op0);
-
-      if (deducedOp1 !== undefined) {
-        this.memory.assertEq(op1Addr, deducedOp1);
-      }
-    }
-
-    // If res is undefined, then we can compute it from op0 and op1
-    if (res === undefined) {
-      const computedRes = this.computeRes(
-        instruction,
-        op0 as SegmentValue,
-        op1 as SegmentValue
-      );
-
-      res = computedRes;
-    }
-
-    // If dst is undefined, then we can deduce it from the instruction and res
-    if (dst === undefined) {
-      const deducedDst = this.deduceDst(instruction, res);
-
-      if (deducedDst !== undefined) {
-        this.memory.assertEq(dstAddr, deducedDst);
-      }
-      dst = deducedDst;
-    }
+    if (op0 !== undefined) this.memory.assertEq(op0Addr, op0);
+    if (op1 !== undefined) this.memory.assertEq(op1Addr, op1);
+    if (dst !== undefined) this.memory.assertEq(dstAddr, dst);
 
     return {
       op0,
@@ -251,137 +290,10 @@ export class VirtualMachine {
     };
   }
 
-  // Deduce the operands of an instruction based on the instruction
-  // itself. Deduces op0 and result when possible.
-  deduceOp0(
-    instruction: Instruction,
-    dst: SegmentValue | undefined,
-    op1: SegmentValue | undefined
-  ): SegmentValue | undefined {
-    // We can deduce the first operand from the destination and the second
-    // operand, based on which opcode is used.
-    switch (instruction.opcode) {
-      // If the opcode is a call, then the first operand can be found at pc
-      // + instruction size.
-      case Opcode.Call:
-        // op0 = pc + 1 OR op0 = pc + 2
-        return this.pc.add(instruction.size());
-
-      // If the opcode is an assert eq, then we can deduce the first operand
-      // based on the result logic.
-      // For add, res = op0 + op1 => op0 = res - op1.
-      // For mul, res = op0 * op1 => op0 = res / op1.
-      case Opcode.AssertEq:
-        switch (instruction.resLogic) {
-          case ResLogic.Add:
-            // op0 = res - op1
-            if (dst !== undefined && op1 !== undefined) {
-              return dst.sub(op1);
-            }
-
-          case ResLogic.Mul:
-            if (dst !== undefined && op1 !== undefined) {
-              try {
-                if (!isFelt(dst)) {
-                  throw new Error();
-                }
-                // op0 = res / op1
-                return dst.div(op1);
-              } catch (err) {
-                return undefined;
-              }
-            }
-            break;
-        }
-      default:
-        return undefined;
-    }
-  }
-
-  deduceOp1(
-    instruction: Instruction,
-    dst: SegmentValue | undefined,
-    op0: SegmentValue | undefined
-  ): SegmentValue | undefined {
-    if (instruction.opcode !== Opcode.AssertEq) {
-      return undefined;
-    }
-    switch (instruction.resLogic) {
-      // If the result logic is op1, then dst = op1.
-      case ResLogic.Op1:
-        return dst;
-
-      case ResLogic.Add:
-        // dst := res = op0 + op1
-        // op1 = op0 - dst
-        if (dst !== undefined && op0 !== undefined) {
-          return dst.sub(op0);
-        }
-        break;
-      case ResLogic.Mul:
-        // dst := res = op0 * op1
-        // op1 = dst / op0
-        if (dst !== undefined && op0 !== undefined) {
-          try {
-            if (!isFelt(dst)) {
-              throw new Error();
-            }
-            return dst.div(op0);
-          } catch (err) {
-            return undefined;
-          }
-        }
-        break;
-    }
-    return undefined;
-  }
-
-  // Compute the result of an instruction based on result logic
-  // for the instruction.
-  computeRes(
-    instruction: Instruction,
-    op0: SegmentValue,
-    op1: SegmentValue
-  ): SegmentValue | undefined {
-    switch (instruction.resLogic) {
-      case ResLogic.Op1:
-        return op1;
-      case ResLogic.Add:
-        return op0.add(op1);
-      case ResLogic.Mul:
-        if (!isFelt(op0)) {
-          throw new ExpectedFelt();
-        }
-        return op0.mul(op1);
-      case ResLogic.Unused:
-        return undefined;
-    }
-  }
-
-  // Deduce the destination of an instruction. We can only deduce
-  // for assert eq and call instructions.
-  deduceDst(
-    instruction: Instruction,
-    res: SegmentValue | undefined
-  ): SegmentValue | undefined {
-    switch (instruction.opcode) {
-      // For an assert equal, we have dst := res
-      case Opcode.AssertEq:
-        return res;
-      // For a call instruction, we have dst := fp
-      case Opcode.Call:
-        return this.fp;
-      default:
-        return undefined;
-    }
-  }
-
   // Update the registers based on the instruction.
   updateRegisters(instruction: Instruction, operands: Operands): void {
     this.updatePc(instruction, operands);
-
     this.updateFp(instruction, operands);
-
     this.updateAp(instruction, operands);
   }
 
@@ -397,7 +309,7 @@ export class VirtualMachine {
       // result.
       case PcUpdate.Jump:
         if (operands.res === undefined) {
-          throw new UnconstrainedResError();
+          throw new UnusedResError();
         }
         if (!isRelocatable(operands.res)) {
           throw new ExpectedRelocatable();
@@ -408,7 +320,7 @@ export class VirtualMachine {
       // to the pc.
       case PcUpdate.JumpRel:
         if (operands.res === undefined) {
-          throw new UnconstrainedResError();
+          throw new UnusedResError();
         }
 
         if (!isFelt(operands.res)) {
@@ -468,7 +380,7 @@ export class VirtualMachine {
       // If the ap update logic is add, then we add the result to the ap.
       case ApUpdate.AddRes:
         if (operands.res === undefined) {
-          throw new UnconstrainedResError();
+          throw new UnusedResError();
         }
         if (!isFelt(operands.res)) {
           throw new ExpectedFelt();
@@ -498,7 +410,7 @@ export class VirtualMachine {
       // res represents the right side of the computation.
       case Opcode.AssertEq:
         if (operands.res === undefined) {
-          throw new UnconstrainedResError();
+          throw new UnusedResError();
         }
         if (operands.dst !== operands.res) {
           throw new DiffAssertValuesError();
