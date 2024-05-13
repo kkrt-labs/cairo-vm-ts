@@ -35,11 +35,11 @@ export class CairoRunner {
 
     // Initialize the program segment.
     // This sets the bytecode of your Cairo program, at segment 0.
-    this.vm.memory.setData(this.programBase, this.program.data);
+    this.vm.memory.setValues(this.programBase, this.program.data);
 
     // Initialize the execution segment.
     // This sets the initial values in Memory, at segment 1.
-    this.vm.memory.setData(this.executionBase, values);
+    this.vm.memory.setValues(this.executionBase, values);
 
     this.vm.ap = this.initialAp;
     this.vm.fp = this.initialFp;
