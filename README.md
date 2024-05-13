@@ -95,12 +95,21 @@ performance and safety. While the ones of our TypeScript implementation is
 | ---------------------------- | ------- |
 | Run basic Cairo Zero program | &#9745; |
 | Run basic Cairo program      | &#9744; |
-| Run any Cairo Zero program   | &#9744; |
-| Run any Cairo program        | &#9744; |
-| Run any StarkNet contract    | &#9744; |
+| Add [builtins](#builtins)    | &#9744; |
+| Add [hints](#hints)          | &#9744; |
+| Run StarkNet contracts       | &#9744; |
 | Benchmark against other VMs  | &#9744; |
 
 <!-- TODO: Add the state of each section of the VM and a small explainer of their purpose (VM core, hints, builtins, runner...) -->
+
+### Builtins
+
+<!-- Add a table with the builtin list and state done/to be done -->
+
+### Hints
+
+<!-- Add a table with the hint list and state done/to be done -->
+<!-- If the list is too long, maybe separate in chunks, put the list in an issue to track it and reference the issue here -->
 
 <!-- TODO: Add a Benchmark section when process is nailed -->
 
@@ -109,7 +118,6 @@ performance and safety. While the ones of our TypeScript implementation is
 - [Cairo whitepaper](https://eprint.iacr.org/2021/1063)
 - [Cairo Book](https://book.cairo-lang.org/)
 - [Cairo website](https://www.cairo-lang.org/)
--
 
 ## Local Development
 
