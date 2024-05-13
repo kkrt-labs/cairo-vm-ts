@@ -60,8 +60,9 @@ on how they built their Cairo VM. It gives insights into the overall Cairo VM
 but is incomplete and rather specific to language details.
 
 Why would you have different implementations of the same program in multiple
-languages? For **implementation diversity**. As more implementations provide
-more:
+languages? For **implementation diversity**.
+
+More implementations provide more:
 
 - **Resilience**. It helps in finding bugs in the existing   implementations.
 - **Documentation**. The documentation over the Cairo VM is   still scarce, and
@@ -70,12 +71,17 @@ more:
   achieve the same goal (e.g. memory model). However, most of the current
   implementations essentially are a rewrite of the Rust implementation, which is
   an (enhanced) rewrite of the Python implementation itself.
-- **Usage diversity**. The primary goals of each implementation can differ. For
-  example, the primary goals of production implementations are performance and
-  safety (Rust).
 
-The primary goal of our TypeScript implementation is **education** through
-**readability** and **expressiveness**.
+Implementation diversity also implies **usage diversity**. The primary goals of
+each implementation can differ. For example, the EVM implementation in clients
+(e.g. geth and reth written in Go and Rust), whose primary goals are
+**performance** and **safety**, and the
+[reference EVM implementation](https://github.com/ethereum/execution-specs/?tab=readme-ov-file#execution-specification-work-in-progress)
+in Python, prioritizing **readability** and **simplicity**.
+
+Analogous to the EVM implementations, the primary goals of the Rust Cairo VM are
+performance and safety. While the ones of our TypeScript implementation is
+**education** through **readability** and **simplicity**.
 
 ### Demistifying the Cairo VM
 
