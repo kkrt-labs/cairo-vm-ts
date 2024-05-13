@@ -3,9 +3,7 @@ import { Relocatable } from './relocatable';
 
 export type SegmentValue = Relocatable | Felt;
 
-export function isFelt(
-  segmentValue: SegmentValue
-): segmentValue is Felt;
+export function isFelt(segmentValue: SegmentValue): segmentValue is Felt;
 export function isFelt(
   segmentValue: SegmentValue | number
 ): segmentValue is Felt;
