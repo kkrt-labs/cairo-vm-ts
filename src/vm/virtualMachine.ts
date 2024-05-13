@@ -29,8 +29,12 @@ import {
 import { Memory } from 'memory/memory';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
-import { Op1Source } from 'vm/instruction';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
+import {
+  InvalidDstRegister,
+  InvalidOp0Register,
+  InvalidOp1Source,
+} from 'errors/instruction';
 
 // operand 0 is the first operand in the right side of the computation
 // operand 1 is the second operand in the right side of the computation
@@ -72,47 +76,6 @@ export class VirtualMachine {
     this.pc = this.pc.add(instructionSize);
   }
 
-  // Operand1 base address can be: ap, fp, pc or op0.
-  // Operand1 can be ap + offset, fp + offset, pc + 1 or op0 + offset.
-  computeOp1Address(
-    op1Source: Op1Source,
-    op1Offset: number,
-    op0: SegmentValue | undefined
-  ): Relocatable {
-    let baseAddr: Relocatable;
-    switch (op1Source) {
-      case Op1Source.Ap:
-        baseAddr = this.ap;
-        break;
-      case Op1Source.Fp:
-        baseAddr = this.fp;
-        break;
-      case Op1Source.Pc:
-        // In case of immediate as the source, the offset
-        // has to be 1, otherwise we return an error.
-        if (op1Offset == 1) {
-          baseAddr = this.pc;
-        } else {
-          throw new Op1ImmediateOffsetError();
-        }
-        break;
-      case Op1Source.Op0:
-        // In case of operand 0 as the source, we have to check that
-        // operand 0 is not undefined.
-        if (op0 === undefined) {
-          throw new Op0Undefined();
-        }
-
-        if (!isRelocatable(op0)) {
-          throw new Op0NotRelocatable();
-        }
-        baseAddr = op0;
-    }
-
-    // We then apply the offset to the base address.
-    return baseAddr.add(op1Offset);
-  }
-
   step(): void {
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
@@ -150,8 +113,6 @@ export class VirtualMachine {
   // fetch them from memory and if it fails to do so, it can
   // deduce them from the instruction itself.
   computeOperands(instruction: Instruction): Operands {
-    let res: SegmentValue | undefined = undefined;
-
     const {
       dstOffset,
       op0Offset,
@@ -159,32 +120,85 @@ export class VirtualMachine {
       dstRegister,
       op0Register,
       op1Source,
+      resLogic,
+      opcode,
     } = instruction;
+
+    let dstAddr: Relocatable;
+    let op0Addr: Relocatable;
+    let op1Addr: Relocatable;
+
+    let res: SegmentValue | undefined;
+    let dst: SegmentValue | undefined;
+    let op0: SegmentValue | undefined;
+    let op1: SegmentValue | undefined;
 
     // Compute the destination address based on the dstRegister and
     // the offset
     // Example: const dstAddr = this.fp.add(5) == fp + 5;
-    // const dstAddr = this[instruction.dstRegister].add(instruction.dstOffset);
-    const dstAddr =
-      dstRegister === Register.Fp
-        ? this.fp.add(dstOffset)
-        : this.ap.add(dstOffset);
-    let dst = this.memory.get(dstAddr);
+    switch (dstRegister) {
+      case Register.Ap:
+        dstAddr = this.ap.add(dstOffset);
+        break;
+      case Register.Fp:
+        dstAddr = this.fp.add(dstOffset);
+        break;
+      default:
+        throw new InvalidDstRegister();
+    }
+    dst = this.memory.get(dstAddr);
 
-    // Compute the first operand address based on the op0Register and
-    // the offset
-    // const op0Addr = this[instruction.op0Register].add(instruction.op0Offset);
-    const op0Addr =
-      op0Register === Register.Fp
-        ? this.fp.add(op0Offset)
-        : this.ap.add(op0Offset);
+    // Compute the first operand address based
+    // on the op0Register and the offset
+    switch (op0Register) {
+      case Register.Ap:
+        op0Addr = this.ap.add(op0Offset);
+        break;
+      case Register.Fp:
+        op0Addr = this.fp.add(op0Offset);
+        break;
+      default:
+        throw new InvalidOp0Register();
+    }
+    op0 = this.memory.get(op0Addr);
 
-    let op0 = this.memory.get(op0Addr);
+    // Compute the second operand address based
+    // on the op1Source and the offset
+    switch (op1Source) {
+      case Register.Ap:
+        op1Addr = this.ap.add(op1Offset);
+        break;
+      case Register.Fp:
+        op1Addr = this.fp.add(op1Offset);
+        break;
+      case Register.Pc:
+        op1Addr = this.pc.add(op1Offset);
+        break;
+      default:
+        throw new InvalidOp1Source();
+    }
+    op1 = this.memory.get(op1Addr);
 
-    // Compute the second operand address based on the op1Source and
-    // the offset
-    const op1Addr = this.computeOp1Address(op1Source, op1Offset, op0);
-    let op1 = this.memory.get(op1Addr);
+    // switch (resLogic) {
+    //   case ResLogic.Op1:
+    //     res = op1;
+    //   case ResLogic.Add:
+    //     res = op0.add(op1);
+    //   case ResLogic.Mul:
+    //     if (!isFelt(op0)) {
+    //       throw new ExpectedFelt();
+    //     }
+    //     res = op0.mul(op1);
+    //   case ResLogic.Unused:
+    //     res = undefined;
+    // }
+
+    switch (opcode | resLogic) {
+      case Opcode.Call | ResLogic.Add:
+
+      default:
+        break;
+    }
 
     // If op0 is undefined, then we can deduce it from the instruction, dst and op1
     // We also deduce the result based on the result logic

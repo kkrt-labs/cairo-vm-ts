@@ -8,6 +8,8 @@ export class UnconstrainedResError extends VirtualMachineError {}
 export class DiffAssertValuesError extends VirtualMachineError {}
 /** Invalid destination operand */
 export class InvalidDstOperand extends VirtualMachineError {}
+/** Invalid operation operand */
+export class InvalidOp0Operand extends VirtualMachineError {}
 /** Invalid operand 0 */
 export class InvalidOp0 extends VirtualMachineError {}
 /** Invalid operand 1 */

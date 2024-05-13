@@ -1,7 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import {
   Instruction,
-  Op1Source,
   Opcode,
   ResLogic,
   Register,
@@ -63,7 +62,7 @@ const instructions = {
     3,
     Register.Fp,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Add,
     PcUpdate.Regular,
     ApUpdate.Ap,
@@ -76,7 +75,7 @@ const instructions = {
     3,
     Register.Fp,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Add,
     PcUpdate.Regular,
     ApUpdate.Ap,
@@ -89,7 +88,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Ap,
@@ -102,7 +101,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Pc,
+    Register.Pc,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Ap,
@@ -115,7 +114,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Jump,
     ApUpdate.Ap,
@@ -128,7 +127,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.JumpRel,
     ApUpdate.Ap,
@@ -141,7 +140,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.JumpRel,
     ApUpdate.Add2,
@@ -154,7 +153,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Jnz,
     ApUpdate.Ap,
@@ -167,7 +166,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Pc,
+    Register.Pc,
     ResLogic.Unused,
     PcUpdate.Jnz,
     ApUpdate.Ap,
@@ -180,7 +179,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Ap,
@@ -193,7 +192,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Ap,
@@ -206,7 +205,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Add2,
@@ -219,7 +218,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.Add1,
@@ -232,7 +231,7 @@ const instructions = {
     0,
     Register.Ap,
     Register.Ap,
-    Op1Source.Ap,
+    Register.Ap,
     ResLogic.Unused,
     PcUpdate.Regular,
     ApUpdate.AddRes,
@@ -940,81 +939,6 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       vm.incrementPc(2);
       expect(vm.pc).toEqual(new Relocatable(0, 2));
-    });
-  });
-
-  // Test cases reproduced from:
-  // https://github.com/lambdaclass/cairo-vm/blob/main/vm/src/vm/context/run_context.rs#L229
-  describe('computeOp1Address', () => {
-    test('should compute op1 addr for fp register', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      const op1Addr = vm.computeOp1Address(Op1Source.Fp, 1, undefined);
-
-      expect(op1Addr.segment).toEqual(1);
-      expect(op1Addr.offset).toEqual(7);
-    });
-
-    test('should compute op1 addr for ap register', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      const op1Addr = vm.computeOp1Address(Op1Source.Ap, 1, undefined);
-
-      expect(op1Addr.segment).toEqual(1);
-      expect(op1Addr.offset).toEqual(6);
-    });
-
-    test('should compute op1 addr for op1 src imm', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      const op1Addr = vm.computeOp1Address(Op1Source.Pc, 1, undefined);
-
-      expect(op1Addr.segment).toEqual(0);
-      expect(op1Addr.offset).toEqual(5);
-    });
-
-    test('should throw an error Op1ImmediateOffsetError for op1 src imm with incorrect offset', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      expect(() => vm.computeOp1Address(Op1Source.Pc, 2, undefined)).toThrow(
-        new Op1ImmediateOffsetError()
-      );
-    });
-
-    test('should compute op1 addr for op1 src op0 with op0 relocatable', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      const op1Addr = vm.computeOp1Address(
-        Op1Source.Op0,
-        1,
-        new Relocatable(1, 7)
-      );
-
-      expect(op1Addr.segment).toEqual(1);
-      expect(op1Addr.offset).toEqual(8);
-    });
-
-    test('should throw an error Op0NotRelocatable for op1 src op0 with op0 felt', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      expect(() =>
-        vm.computeOp1Address(Op1Source.Op0, 1, new Felt(7n))
-      ).toThrow(new Op0NotRelocatable());
-    });
-
-    test('should throw an error Op0Undefined for op1 src op0 with op0 undefined', () => {
-      const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
-
-      expect(() => vm.computeOp1Address(Op1Source.Op0, 1, undefined)).toThrow(
-        new Op0Undefined()
-      );
     });
   });
 });
