@@ -91,14 +91,14 @@ performance and safety. While the ones of our TypeScript implementation is
 
 ## State of the VM
 
-| Goals                        | Done? |
-| ---------------------------- | ----- |
-| Run basic Cairo Zero program | 🗹     |
-| Run basic Cairo program      | ☐     |
-| Run any Cairo Zero program   | ☐     |
-| Run any Cairo program        | ☐     |
-| Run any StarkNet contract    | ☐     |
-| Benchmark against other VMs  | ☐     |
+| Goals                        | Done?   |
+| ---------------------------- | ------- |
+| Run basic Cairo Zero program | &#9745; |
+| Run basic Cairo program      | &#9744; |
+| Run any Cairo Zero program   | &#9744; |
+| Run any Cairo program        | &#9744; |
+| Run any StarkNet contract    | &#9744; |
+| Benchmark against other VMs  | &#9744; |
 
 <!-- TODO: Add the state of each section of the VM and a small explainer of their purpose (VM core, hints, builtins, runner...) -->
 
