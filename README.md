@@ -23,8 +23,9 @@ Cairo stands for CPU AIR "o" (like insp"o", conv"o", 🤔).
 It is a framework (a machine, an assembly and a language) which allows writing
 provable programs without having to understand the underneath ZK-technology.
 
-A program written in Cairo (or Cairo Zero) is compiled and then executed on a
-Cairo VM which produces traces to be used for the STARK proof generation.
+A program written in Cairo (or Cairo Zero) is compiled to Cairo Assembly (CASM)
+and then executed on a Cairo VM which produces traces to be used for the STARK
+proof generation.
 
 See [resources](#resources) for more information.
 
@@ -32,7 +33,7 @@ See [resources](#resources) for more information.
 
 ### Implementation Diversity
 
-There are currently five other Cairo VM implementations:
+There are currently seven other Cairo VM implementations:
 
 <!-- Should I add the cairo vm in gs ? and 'oriac', a toy vm in rust -->
 
@@ -50,6 +51,9 @@ There are currently five other Cairo VM implementations:
   by Community (dev)
 - A [C++ implementation](https://github.com/lambdaclass/cairo-vm.c) by Lambda
   Class (dev)
+- A
+  [GoogleSheets (gs AppScript) implementation](https://github.com/ClementWalter/cairo-vm-gs)
+  by Clément Walter (dev)
 
 The Lambda Class alt-implementations comes with a detailed guide
 ([Go](https://github.com/lambdaclass/cairo-vm_in_go/blob/main/README.md#documentation),
