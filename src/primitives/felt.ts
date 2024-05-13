@@ -1,4 +1,4 @@
-import { MaybeRelocatable, isFelt, isRelocatable } from './maybeRelocatable';
+import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 import { ForbiddenOperation } from 'errors/primitives';
 
 export class Felt {
@@ -13,7 +13,7 @@ export class Felt {
     this.inner = _inner % Felt.PRIME;
   }
 
-  add(other: MaybeRelocatable): Felt {
+  add(other: SegmentValue): Felt {
     if (!isFelt(other)) {
       throw new ForbiddenOperation();
     }
@@ -21,7 +21,7 @@ export class Felt {
     return new Felt(this.inner + other.inner);
   }
 
-  sub(other: MaybeRelocatable): Felt {
+  sub(other: SegmentValue): Felt {
     if (!isFelt(other)) {
       throw new ForbiddenOperation();
     }
@@ -29,7 +29,7 @@ export class Felt {
     return new Felt(this.inner - other.inner);
   }
 
-  mul(other: MaybeRelocatable): Felt {
+  mul(other: SegmentValue): Felt {
     if (!isFelt(other)) {
       throw new ForbiddenOperation();
     }
@@ -37,7 +37,7 @@ export class Felt {
     return new Felt(this.inner * other.inner);
   }
 
-  div(other: MaybeRelocatable): Felt {
+  div(other: SegmentValue): Felt {
     if (!isFelt(other) || other.inner === 0n) {
       throw new ForbiddenOperation();
     }
@@ -45,7 +45,7 @@ export class Felt {
     return this.mul(other.inv());
   }
 
-  eq(other: MaybeRelocatable): boolean {
+  eq(other: SegmentValue): boolean {
     return !isRelocatable(other) && this.inner === other.inner;
   }
 

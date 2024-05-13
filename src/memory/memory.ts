@@ -1,29 +1,29 @@
 import { InconsistentMemory, SegmentOutOfBounds } from 'errors/memory';
 import { Relocatable } from 'primitives/relocatable';
-import { MaybeRelocatable } from 'primitives/maybeRelocatable';
+import { SegmentValue } from 'primitives/segmentValue';
 
 export class Memory {
-  data: Array<Array<MaybeRelocatable>>;
+  values: Array<Array<SegmentValue>>;
 
   constructor() {
-    this.data = [[]];
+    this.values = [[]];
   }
 
-  get(address: Relocatable): MaybeRelocatable | undefined {
-    return this.data[address.segment][address.offset];
+  get(address: Relocatable): SegmentValue | undefined {
+    return this.values[address.segment][address.offset];
   }
 
   addSegment(): Relocatable {
-    this.data.push([]);
-    return new Relocatable(this.data.length - 1, 0);
+    this.values.push([]);
+    return new Relocatable(this.values.length - 1, 0);
   }
 
   getSegmentNumber(): number {
-    return this.data.length;
+    return this.values.length;
   }
 
-  setData(address: Relocatable, data: MaybeRelocatable[]): void {
-    data.forEach((value, index) => {
+  setValues(address: Relocatable, values: SegmentValue[]): void {
+    values.forEach((value, index) => {
       this.assertEq(address.add(index), value);
     });
   }
@@ -34,7 +34,7 @@ export class Memory {
    *
    * @dev if memory at `address` is undefined, it is set to `value`
    */
-  assertEq(address: Relocatable, value: MaybeRelocatable): void {
+  assertEq(address: Relocatable, value: SegmentValue): void {
     const { segment, offset } = address;
     const segmentNumber = this.getSegmentNumber();
 
@@ -42,17 +42,20 @@ export class Memory {
       throw new SegmentOutOfBounds(segment, segmentNumber);
     }
 
-    const currentValue: MaybeRelocatable | undefined =
-      this.data[segment][offset];
+    const currentValue: SegmentValue | undefined = this.values[segment][offset];
 
     if (currentValue === undefined) {
-      this.data[segment][offset] = value;
+      this.values[segment][offset] = value;
     } else if (currentValue !== value) {
-      throw new InconsistentMemory(address, this.data[segment][offset], value);
+      throw new InconsistentMemory(
+        address,
+        this.values[segment][offset],
+        value
+      );
     }
   }
 
   getSegmentSize(segment: number): number {
-    return this.data[segment]?.length ?? 0;
+    return this.values[segment]?.length ?? 0;
   }
 }

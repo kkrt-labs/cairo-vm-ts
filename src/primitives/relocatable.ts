@@ -4,7 +4,7 @@ import {
   OffsetUnderflow,
   SegmentError,
 } from 'errors/primitives';
-import { MaybeRelocatable, isFelt, isRelocatable } from './maybeRelocatable';
+import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 
 export class Relocatable {
   segment: number;
@@ -18,8 +18,8 @@ export class Relocatable {
   add(other: Felt): Relocatable;
   add(other: number): Relocatable;
   add(other: Relocatable): never;
-  add(other: MaybeRelocatable): MaybeRelocatable;
-  add(other: MaybeRelocatable | number): MaybeRelocatable {
+  add(other: SegmentValue): SegmentValue;
+  add(other: SegmentValue | number): SegmentValue {
     if (isFelt(other)) {
       const offset = new Felt(BigInt(this.offset));
       const newOffset = Number(offset.add(other));
@@ -37,8 +37,8 @@ export class Relocatable {
   sub(other: Felt): Relocatable;
   sub(other: number): Relocatable;
   sub(other: Relocatable): Felt;
-  sub(other: MaybeRelocatable): MaybeRelocatable;
-  sub(other: MaybeRelocatable | number): MaybeRelocatable {
+  sub(other: SegmentValue): SegmentValue;
+  sub(other: SegmentValue | number): SegmentValue {
     if (isFelt(other)) {
       const delta = Number(other);
 
@@ -67,7 +67,7 @@ export class Relocatable {
     return new Relocatable(this.segment, this.offset - other);
   }
 
-  eq(other: MaybeRelocatable): boolean {
+  eq(other: SegmentValue): boolean {
     return (
       !isFelt(other) &&
       other.offset === this.offset &&

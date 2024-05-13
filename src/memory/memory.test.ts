@@ -14,7 +14,7 @@ describe('Memory', () => {
     });
   });
 
-  const DATA = [
+  const VALUES = [
     new Relocatable(0, 0),
     new Relocatable(0, 1),
     new Felt(1n),
@@ -36,20 +36,20 @@ describe('Memory', () => {
       expect(memory.getSegmentNumber()).toEqual(2);
     });
   });
-  describe('setData', () => {
-    test('should set the data in memory', () => {
+  describe('setValues', () => {
+    test('should set the values in memory', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 0);
-      memory.setData(address, DATA);
+      memory.setValues(address, VALUES);
 
-      expect([...memory.data[0]]).toEqual(DATA);
+      expect([...memory.values[0]]).toEqual(VALUES);
     });
     test('should update segmentSizes', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 0);
-      memory.setData(address, DATA);
+      memory.setValues(address, VALUES);
 
       expect(memory.getSegmentSize(0)).toEqual(5);
     });
@@ -60,35 +60,35 @@ describe('Memory', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.assertEq(address, DATA[0]);
+      memory.assertEq(address, VALUES[0]);
 
-      expect(memory.get(address)).toEqual(DATA[0]);
+      expect(memory.get(address)).toEqual(VALUES[0]);
     });
 
     test('should not throw when the given value is the one stored', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.assertEq(address, DATA[0]);
+      memory.assertEq(address, VALUES[0]);
 
-      expect(() => memory.assertEq(address, DATA[0])).not.toThrow();
+      expect(() => memory.assertEq(address, VALUES[0])).not.toThrow();
     });
 
     test('should throw when the given value is not the one stored', () => {
       const memory = new Memory();
       memory.addSegment();
       const address = new Relocatable(0, 10);
-      memory.assertEq(address, DATA[0]);
+      memory.assertEq(address, VALUES[0]);
 
-      expect(() => memory.assertEq(address, DATA[1])).toThrow(
-        new InconsistentMemory(address, DATA[0], DATA[1])
+      expect(() => memory.assertEq(address, VALUES[1])).toThrow(
+        new InconsistentMemory(address, VALUES[0], VALUES[1])
       );
     });
 
     test('should throw when the segment is not initialized', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
-      expect(() => memory.assertEq(address, DATA[0])).toThrow(
+      expect(() => memory.assertEq(address, VALUES[0])).toThrow(
         new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
     });
