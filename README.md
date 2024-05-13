@@ -73,9 +73,12 @@ More implementations provide more:
   an (enhanced) rewrite of the Python implementation itself.
 
 Implementation diversity also implies **usage diversity**. The primary goals of
-each implementation can differ. For example, the EVM implementation in clients
-(e.g. geth and reth written in Go and Rust), whose primary goals are
-**performance** and **safety**, and the
+each implementation can differ.
+
+For example, the EVM implementation in clients (e.g.
+[geth](https://geth.ethereum.org/) and
+[reth](https://github.com/paradigmxyz/reth) written in Go and Rust), whose
+primary goals are **performance** and **safety**, and the
 [reference EVM implementation](https://github.com/ethereum/execution-specs/?tab=readme-ov-file#execution-specification-work-in-progress)
 in Python, prioritizing **readability** and **simplicity**.
 
