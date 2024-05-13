@@ -35,8 +35,6 @@ See [resources](#resources) for more information.
 
 There are currently seven other Cairo VM implementations:
 
-<!-- Should I add the cairo vm in gs ? and 'oriac', a toy vm in rust -->
-
 - Reference (original)
   [implementation in Python](https://github.com/starkware-libs/cairo-lang) by
   Starkware (prod)
@@ -80,13 +78,6 @@ The primary goal of our TypeScript implementation is **education** through
 **readability** and **expressiveness**.
 
 ### Demistifying the Cairo VM
-
-The Cairo VM is still obscure to most of us, from a lack of documentation and
-hard-to-read languages obfuscating the inner workings of the VM. Nobody wants to
-struggle to reconstruct the missing pieces to understand how something works.
-
-We are implementing a Cairo VM in TypeScript to provide a well documented and
-easy-to-comprehend Cairo VM
 
 - TypeScript is easily readable and known by most devs if not all
 - Deliberate design choices to further improve readability and simplicity
