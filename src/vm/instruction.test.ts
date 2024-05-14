@@ -13,7 +13,7 @@ import {
 import {
   HighBitSetError,
   InvalidApUpdate,
-  InvalidOp1Source,
+  InvalidOp1Register,
   InvalidOpcode,
   InvalidPcUpdate,
   InvalidResLogic,
@@ -27,9 +27,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidOp1Source', () => {
+    test('should throw an error InvalidOp1Register', () => {
       expect(() => Instruction.decodeInstruction(0x294f800080008000n)).toThrow(
-        new InvalidOp1Source()
+        new InvalidOp1Register()
       );
     });
 

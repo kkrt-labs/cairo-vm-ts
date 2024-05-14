@@ -11,7 +11,7 @@ export class InvalidDstRegister extends InstructionError {}
 export class InvalidOp0Register extends InstructionError {}
 
 /** Invalid op1 Source */
-export class InvalidOp1Source extends InstructionError {}
+export class InvalidOp1Register extends InstructionError {}
 
 /** Invalid PC Update */
 export class InvalidPcUpdate extends InstructionError {}

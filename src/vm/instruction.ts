@@ -7,7 +7,7 @@ import {
   InvalidApUpdate,
   InvalidDstRegister,
   InvalidOp0Register,
-  InvalidOp1Source,
+  InvalidOp1Register,
   InvalidOpcode,
   InvalidPcUpdate,
   InvalidResLogic,
@@ -148,8 +148,8 @@ export class Instruction {
   public dstRegister: Register;
   // The register to use as the Operand 0
   public op0Register: Register;
-  // The source of the Operand 1
-  public op1Source: Register;
+  // The register to use as the Operand 1
+  public op1Register: Register;
   // The result logic
   public resLogic: ResLogic;
   // The logic to use to compute the next pc
@@ -190,7 +190,7 @@ export class Instruction {
    * @param op1Offset
    * @param dstReg
    * @param op0Register
-   * @param op1Source
+   * @param op1Register
    * @param resLogic
    * @param pcUpdate
    * @param apUpdate
@@ -203,7 +203,7 @@ export class Instruction {
     op1Offset: number,
     dstReg: Register,
     op0Register: Register,
-    op1Source: Register,
+    op1Register: Register,
     resLogic: ResLogic,
     pcUpdate: PcUpdate,
     apUpdate: ApUpdate,
@@ -215,7 +215,7 @@ export class Instruction {
     this.op1Offset = op1Offset;
     this.dstRegister = dstReg;
     this.op0Register = op0Register;
-    this.op1Source = op1Source;
+    this.op1Register = op1Register;
     this.resLogic = resLogic;
     this.pcUpdate = pcUpdate;
     this.apUpdate = apUpdate;
@@ -241,7 +241,7 @@ export class Instruction {
 
     const dstRegisterFlag = flags & 0b1n;
     const op0RegisterFlag = (flags >> 1n) & 0b1n;
-    const op1SourceFlag = (flags >> 2n) & 0b111n;
+    const op1RegisterFlag = (flags >> 2n) & 0b111n;
     const resLogicFlag = (flags >> 5n) & 0b11n;
     const pcUpdateFlag = (flags >> 7n) & 0b111n;
     const apUpdateFlag = (flags >> 10n) & 0b11n;
@@ -249,7 +249,7 @@ export class Instruction {
 
     let dstRegister;
     let op0Register;
-    let op1Source: Register;
+    let op1Register: Register;
     let resLogic: ResLogic;
     let pcUpdate: PcUpdate;
     let apUpdate: ApUpdate;
@@ -278,22 +278,22 @@ export class Instruction {
         throw new InvalidOp0Register();
     }
 
-    switch (op1SourceFlag) {
+    switch (op1RegisterFlag) {
       case 0n:
-        op1Source = op0Register;
+        op1Register = op0Register;
         op1Offset += op0Offset;
         break;
       case 1n:
-        op1Source = Register.Pc;
+        op1Register = Register.Pc;
         break;
       case 2n:
-        op1Source = Register.Fp;
+        op1Register = Register.Fp;
         break;
       case 4n:
-        op1Source = Register.Ap;
+        op1Register = Register.Ap;
         break;
       default:
-        throw new InvalidOp1Source();
+        throw new InvalidOp1Register();
     }
 
     switch (pcUpdateFlag) {
@@ -378,7 +378,7 @@ export class Instruction {
       op1Offset,
       dstRegister,
       op0Register,
-      op1Source,
+      op1Register,
       resLogic,
       pcUpdate,
       apUpdate,
@@ -389,6 +389,6 @@ export class Instruction {
 
   /** The instruction size is 2 if an immediate value, located at Pc + 1, is used. */
   size(): number {
-    return this.op1Source == Register.Pc ? 2 : 1;
+    return this.op1Register == Register.Pc ? 2 : 1;
   }
 }

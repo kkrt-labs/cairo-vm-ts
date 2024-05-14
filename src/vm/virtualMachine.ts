@@ -30,7 +30,7 @@ import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import {
   InvalidDstRegister,
   InvalidOp0Register,
-  InvalidOp1Source,
+  InvalidOp1Register,
 } from 'errors/instruction';
 
 // operand 0 is the first operand in the right side of the computation
@@ -85,7 +85,6 @@ export class VirtualMachine {
 
     const encodedInstruction = maybeEncodedInstruction.toBigInt();
 
-    // decode and run instruction
     const instruction = Instruction.decodeInstruction(encodedInstruction);
 
     return this.runInstruction(instruction);
@@ -114,7 +113,7 @@ export class VirtualMachine {
       op1Offset,
       dstRegister,
       op0Register,
-      op1Source,
+      op1Register,
       resLogic,
       opcode,
     } = instruction;
@@ -158,8 +157,8 @@ export class VirtualMachine {
     op0 = this.memory.get(op0Addr);
 
     // Compute the second operand address based
-    // on the op1Source and the offset
-    switch (op1Source) {
+    // on the op1Register and the offset
+    switch (op1Register) {
       case Register.Ap:
         op1Addr = this.ap.add(op1Offset);
         break;
@@ -170,7 +169,7 @@ export class VirtualMachine {
         op1Addr = this.pc.add(op1Offset);
         break;
       default:
-        throw new InvalidOp1Source();
+        throw new InvalidOp1Register();
     }
     op1 = this.memory.get(op1Addr);
 
