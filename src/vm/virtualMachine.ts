@@ -240,8 +240,9 @@ export class VirtualMachine {
   }
 
   /**
-   * Update the three registers PC, AP and FP
-   * based on the current instruction and
+   * Update the three registers PC, AP and FP.
+   *
+   * Based on the current instruction and
    * the previously computed auxiliary values.
    */
   updateRegisters(
@@ -257,6 +258,7 @@ export class VirtualMachine {
 
   /**
    * Update PC to its next value.
+   *
    * Based on the current instruction and
    * the previously computed auxiliary values.
    */
@@ -298,6 +300,7 @@ export class VirtualMachine {
 
   /**
    * Update AP to its next value.
+   *
    * Based on the current instruction and
    * the previously computed auxiliary values.
    */
@@ -322,6 +325,7 @@ export class VirtualMachine {
 
   /**
    * Update FP to its next value.
+   *
    * Based on the current instruction and
    * the previously computed auxiliary values.
    */
