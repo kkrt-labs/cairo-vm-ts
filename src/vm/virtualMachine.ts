@@ -174,38 +174,26 @@ export class VirtualMachine {
 
     switch (opcode | resLogic) {
       case Opcode.Call | ResLogic.Op1:
-        if (op0 === undefined) {
-          op0 = this.pc.add(instruction.size());
-        }
-        if (op1 === undefined) throw new InvalidOp1();
+        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
         res = op1;
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Add:
-        if (op0 === undefined) {
-          op0 = this.pc.add(instruction.size());
-        }
-        if (op1 === undefined) throw new InvalidOp1();
+        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
         res = op0.add(op1);
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Mul:
-        if (op0 === undefined) {
-          op0 = this.pc.add(instruction.size());
-        }
-        if (op1 === undefined) throw new InvalidOp1();
+        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
         if (!isFelt(op0)) throw new ExpectedFelt();
         res = op0.mul(op1);
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Unused:
-        if (op0 === undefined) {
-          op0 = this.pc.add(instruction.size());
-        }
-        if (op1 === undefined) throw new InvalidOp1();
+        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
         res = undefined;
         dst = this.fp;
         break;
@@ -286,6 +274,19 @@ export class VirtualMachine {
       res,
       dst,
     };
+  }
+
+  checkCallOpcode(
+    instruction: Instruction,
+    op0: SegmentValue | undefined,
+    op1: SegmentValue | undefined
+  ): { op0: SegmentValue; op1: SegmentValue } {
+    const nextPc = this.pc.add(instruction.size());
+    if (op0 === undefined) {
+      op0 = nextPc;
+    } else if (!op0.eq(nextPc)) throw new InvalidOp0();
+    if (op1 === undefined) throw new InvalidOp1();
+    return { op0, op1 };
   }
 
   // Update the registers based on the instruction.
