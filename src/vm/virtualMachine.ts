@@ -70,7 +70,7 @@ export class VirtualMachine {
    * for more details
    */
   runInstruction(instruction: Instruction): void {
-    const { op0, op1, res, dst } = this.computeAuxValues(instruction);
+    const { op0, op1, res, dst } = this.computeStepValues(instruction);
 
     // TODO should update the trace here
 
@@ -87,7 +87,7 @@ export class VirtualMachine {
    * "They can be computed from the memory values,
    * the three offsets, and the instruction flags."
    */
-  computeAuxValues(instruction: Instruction): {
+  computeStepValues(instruction: Instruction): {
     op0: SegmentValue | undefined;
     op1: SegmentValue | undefined;
     res: SegmentValue | undefined;
