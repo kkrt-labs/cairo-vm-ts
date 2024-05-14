@@ -285,7 +285,11 @@ export class VirtualMachine {
     return { op0, op1 };
   }
 
-  // Update the registers based on the instruction.
+  /**
+   * Update the three registers PC, AP and FP
+   * based on the current instruction and
+   * the previously computed auxiliary values.
+   */
   updateRegisters(
     instruction: Instruction,
     op1: SegmentValue | undefined,
@@ -297,7 +301,11 @@ export class VirtualMachine {
     this.updateAp(instruction, res);
   }
 
-  // Update the pc update logic based on the instruction.
+  /**
+   * Update PC to its next value.
+   * Based on the current instruction and
+   * the previously computed auxiliary values.
+   */
   updatePc(
     instruction: Instruction,
     op1: SegmentValue | undefined,
@@ -305,50 +313,33 @@ export class VirtualMachine {
     dst: SegmentValue | undefined
   ): void {
     switch (instruction.pcUpdate) {
-      // If the pc update logic is regular, then we increment the pc by
-      // the instruction size.
       case PcUpdate.Regular:
         this.incrementPc(instruction.size());
         break;
-      // If the pc update logic is jump, then we set the pc to the
-      // result.
+
       case PcUpdate.Jump:
-        if (res === undefined) {
-          throw new UnusedResError();
-        }
-        if (!isRelocatable(res)) {
-          throw new ExpectedRelocatable();
-        }
+        if (res === undefined) throw new UnusedResError();
+        if (!isRelocatable(res)) throw new ExpectedRelocatable();
+
         this.pc = res;
         break;
-      // If the pc update logic is jump rel, then we add the result
-      // to the pc.
-      case PcUpdate.JumpRel:
-        if (res === undefined) {
-          throw new UnusedResError();
-        }
 
-        if (!isFelt(res)) {
-          throw new ExpectedFelt();
-        }
+      case PcUpdate.JumpRel:
+        if (res === undefined) throw new UnusedResError();
+        if (!isFelt(res)) throw new ExpectedFelt();
+
         this.pc = this.pc.add(res);
         break;
-      // If the pc update logic is jnz, then we check if the destination
-      // is zero. If it is, then we increment the pc by the instruction (default)
-      // If it is not, then we add the op1 to the pc.
+
       case PcUpdate.Jnz:
-        if (dst === undefined) {
-          throw new InvalidDst();
-        }
+        if (dst === undefined) throw new InvalidDst();
+
         if (isFelt(dst) && dst.eq(Felt.ZERO)) {
           this.incrementPc(instruction.size());
         } else {
-          if (op1 === undefined) {
-            throw new InvalidOp1();
-          }
-          if (!isFelt(op1)) {
-            throw new ExpectedFelt();
-          }
+          if (op1 === undefined) throw new InvalidOp1();
+          if (!isFelt(op1)) throw new ExpectedFelt();
+
           this.pc = this.pc.add(op1);
         }
         break;
