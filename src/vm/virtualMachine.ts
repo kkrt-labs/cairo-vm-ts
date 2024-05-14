@@ -51,8 +51,8 @@ export class VirtualMachine {
     this.fp = new MemoryPointer(fp);
   }
 
-  incrementPc(instructionSize: number): void {
-    this.pc = this.pc.add(instructionSize);
+  incrementPc(size: number): void {
+    this.pc = this.pc.add(size);
   }
 
   step(): void {
