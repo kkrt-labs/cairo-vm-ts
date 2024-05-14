@@ -121,26 +121,26 @@ export class VirtualMachine {
 
     switch (opcode | resLogic) {
       case Opcode.Call | ResLogic.Op1:
-        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
+        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
         res = op1;
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Add:
-        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
+        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
         res = op0.add(op1);
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Mul:
-        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
+        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
         if (!isFelt(op0)) throw new ExpectedFelt();
         res = op0.mul(op1);
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Unused:
-        ({ op0, op1 } = this.checkCallOpcode(instruction, op0, op1));
+        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
         res = undefined;
         dst = this.fp;
         break;
@@ -223,10 +223,11 @@ export class VirtualMachine {
     };
   }
 
-  /** Perform checks for Call opcode cases
+  /** Perform checks for Call opcode cases.
+   *
    * Compute op0 if not retrieved from memory
    */
-  private checkCallOpcode(
+  private validateOperandsCallOpcode(
     instruction: Instruction,
     op0: SegmentValue | undefined,
     op1: SegmentValue | undefined
