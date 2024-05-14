@@ -40,12 +40,6 @@ export class VirtualMachine {
     this.fp = new MemoryPointer(0);
   }
 
-  setRegisters(pc: number, ap: number, fp: number): void {
-    this.pc = new ProgramCounter(pc);
-    this.ap = new MemoryPointer(ap);
-    this.fp = new MemoryPointer(fp);
-  }
-
   /** Increment PC register by the size of the instruction */
   incrementPc(size: number): void {
     this.pc = this.pc.add(size);

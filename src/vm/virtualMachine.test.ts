@@ -9,7 +9,11 @@ import {
   FpUpdate,
 } from './instruction';
 import { VirtualMachine } from './virtualMachine';
-import { Relocatable } from 'primitives/relocatable';
+import {
+  MemoryPointer,
+  ProgramCounter,
+  Relocatable,
+} from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
 import {
   ExpectedFelt,
@@ -482,7 +486,9 @@ describe('VirtualMachine', () => {
 
     test('should update the register with mixed types', () => {
       const vm = new VirtualMachine();
-      vm.setRegisters(4, 5, 6);
+      vm.pc = new ProgramCounter(4);
+      vm.ap = new MemoryPointer(5);
+      vm.fp = new MemoryPointer(6);
       const instruction = instructions.JumpRelAdd2;
 
       const op1 = undefined;
