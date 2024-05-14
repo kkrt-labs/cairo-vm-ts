@@ -108,9 +108,15 @@ export class VirtualMachine {
       opcode,
     } = instruction;
 
-    const op0Addr: Relocatable = this.getRegister(op0Register).add(op0Offset);
-    const op1Addr: Relocatable = this.getRegister(op1Register).add(op1Offset);
-    const dstAddr: Relocatable = this.getRegister(dstRegister).add(dstOffset);
+    const registers = {
+      [Register.Pc]: this.pc,
+      [Register.Ap]: this.ap,
+      [Register.Fp]: this.fp,
+    };
+
+    const op0Addr: Relocatable = registers[op0Register].add(op0Offset);
+    const op1Addr: Relocatable = registers[op1Register].add(op1Offset);
+    const dstAddr: Relocatable = registers[dstRegister].add(dstOffset);
 
     let op0: SegmentValue | undefined = this.memory.get(op0Addr);
     let op1: SegmentValue | undefined = this.memory.get(op1Addr);
@@ -219,17 +225,6 @@ export class VirtualMachine {
       res,
       dst,
     };
-  }
-
-  /** Helper method to get the VM register
-   * from the Register enum
-   */
-  private getRegister(register: Register) {
-    return {
-      [Register.Pc]: this.pc,
-      [Register.Ap]: this.ap,
-      [Register.Fp]: this.fp,
-    }[register];
   }
 
   /** Perform checks for Call opcode cases
