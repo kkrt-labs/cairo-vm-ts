@@ -407,41 +407,4 @@ export class VirtualMachine {
         break;
     }
   }
-
-  // When using the assert or the call opcode, we need to assert that the following
-  // conditions are met:
-  //    - For assert eq, res = dst
-  //    - For call, op0 = pc + instruction size and dst = fp
-  opcodeAssertion(
-    instruction: Instruction,
-    op0: SegmentValue | undefined,
-    res: SegmentValue | undefined,
-    dst: SegmentValue | undefined
-  ): void {
-    switch (instruction.opcode) {
-      // For a assert eq, check that res is defined and equals dst.
-      // This is because dst represents the left side of the computation, and
-      // res represents the right side of the computation.
-      case Opcode.AssertEq:
-        if (res === undefined) {
-          throw new UnusedResError();
-        }
-        if (dst !== res) {
-          throw new DiffAssertValuesError();
-        }
-        break;
-      // For a call, check that op0 = pc + instruction size and dst = fp.
-      // op0 is used to store the return pc (the address of the instruction
-      // following the call instruction). dst is used to store the frame pointer.
-      case Opcode.Call:
-        const nextPc = this.pc.add(instruction.size());
-        if (op0 === undefined || !nextPc.eq(op0)) {
-          throw new InvalidOp0();
-        }
-        if (this.fp !== dst) {
-          throw new InvalidDst();
-        }
-        break;
-    }
-  }
 }
