@@ -23,11 +23,6 @@ import { Memory } from 'memory/memory';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
-import {
-  InvalidDstRegister,
-  InvalidOp0Register,
-  InvalidOp1Register,
-} from 'errors/instruction';
 
 export class VirtualMachine {
   private currentStep: bigint;
@@ -113,60 +108,14 @@ export class VirtualMachine {
       opcode,
     } = instruction;
 
-    let dstAddr: Relocatable;
-    let op0Addr: Relocatable;
-    let op1Addr: Relocatable;
+    const op0Addr: Relocatable = this.getRegister(op0Register).add(op0Offset);
+    const op1Addr: Relocatable = this.getRegister(op1Register).add(op1Offset);
+    const dstAddr: Relocatable = this.getRegister(dstRegister).add(dstOffset);
 
-    let res: SegmentValue | undefined;
-    let dst: SegmentValue | undefined;
-    let op0: SegmentValue | undefined;
-    let op1: SegmentValue | undefined;
-
-    // Compute the destination address based
-    // on the dstRegister and the offset
-    // Example: const dstAddr = this.fp.add(5) == fp + 5;
-    switch (dstRegister) {
-      case Register.Ap:
-        dstAddr = this.ap.add(dstOffset);
-        break;
-      case Register.Fp:
-        dstAddr = this.fp.add(dstOffset);
-        break;
-      default:
-        throw new InvalidDstRegister();
-    }
-    dst = this.memory.get(dstAddr);
-
-    // Compute the first operand address based
-    // on the op0Register and the offset
-    switch (op0Register) {
-      case Register.Ap:
-        op0Addr = this.ap.add(op0Offset);
-        break;
-      case Register.Fp:
-        op0Addr = this.fp.add(op0Offset);
-        break;
-      default:
-        throw new InvalidOp0Register();
-    }
-    op0 = this.memory.get(op0Addr);
-
-    // Compute the second operand address based
-    // on the op1Register and the offset
-    switch (op1Register) {
-      case Register.Ap:
-        op1Addr = this.ap.add(op1Offset);
-        break;
-      case Register.Fp:
-        op1Addr = this.fp.add(op1Offset);
-        break;
-      case Register.Pc:
-        op1Addr = this.pc.add(op1Offset);
-        break;
-      default:
-        throw new InvalidOp1Register();
-    }
-    op1 = this.memory.get(op1Addr);
+    let op0: SegmentValue | undefined = this.memory.get(op0Addr);
+    let op1: SegmentValue | undefined = this.memory.get(op1Addr);
+    let res: SegmentValue | undefined = undefined;
+    let dst: SegmentValue | undefined = this.memory.get(dstAddr);
 
     switch (opcode | resLogic) {
       case Opcode.Call | ResLogic.Op1:
@@ -272,7 +221,21 @@ export class VirtualMachine {
     };
   }
 
-  checkCallOpcode(
+  /** Helper method to get the VM register
+   * from the Register enum
+   */
+  private getRegister(register: Register) {
+    return {
+      [Register.Pc]: this.pc,
+      [Register.Ap]: this.ap,
+      [Register.Fp]: this.fp,
+    }[register];
+  }
+
+  /** Perform checks for Call opcode cases
+   * Compute op0 if not retrieved from memory
+   */
+  private checkCallOpcode(
     instruction: Instruction,
     op0: SegmentValue | undefined,
     op1: SegmentValue | undefined
