@@ -346,20 +346,19 @@ export class VirtualMachine {
     }
   }
 
-  // Update the fp based on the fp update logic of the instruction.
+  /**
+   * Update FP to its next value.
+   * Based on the current instruction and
+   * the previously computed auxiliary values.
+   */
   updateFp(instruction: Instruction, dst: SegmentValue | undefined): void {
     switch (instruction.fpUpdate) {
-      // If the fp update logic is ap plus 2, then we add 2 to the ap
       case FpUpdate.ApPlus2:
         this.fp = this.ap.add(2);
         break;
-      // If the fp update logic is dst, then we add the destination
-      // to fp if dst is a felt, or set the fp to the destination
-      // if a relocatable.
+
       case FpUpdate.Dst:
-        if (dst === undefined) {
-          throw new InvalidDst();
-        }
+        if (dst === undefined) throw new InvalidDst();
         if (isFelt(dst)) {
           this.fp = this.fp.add(dst);
         }
@@ -370,25 +369,24 @@ export class VirtualMachine {
     }
   }
 
-  // Update the ap based on the ap update logic of the instruction.
+  /**
+   * Update AP to its next value.
+   * Based on the current instruction and
+   * the previously computed auxiliary values.
+   */
   updateAp(instruction: Instruction, res: SegmentValue | undefined): void {
     switch (instruction.apUpdate) {
-      // If the ap update logic is add, then we add the result to the ap.
       case ApUpdate.AddRes:
-        if (res === undefined) {
-          throw new UnusedResError();
-        }
-        if (!isFelt(res)) {
-          throw new ExpectedFelt();
-        }
+        if (res === undefined) throw new UnusedResError();
+        if (!isFelt(res)) throw new ExpectedFelt();
 
         this.ap = this.ap.add(res);
         break;
-      // If the ap update logic is add 1, then we add 1 to the ap.
+
       case ApUpdate.Add1:
         this.ap = this.ap.add(1);
         break;
-      // If the ap update logic is add 2, then we add 2 to the ap.
+
       case ApUpdate.Add2:
         this.ap = this.ap.add(2);
         break;
