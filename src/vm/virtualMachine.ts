@@ -251,8 +251,8 @@ export class VirtualMachine {
     dst: SegmentValue | undefined
   ): void {
     this.updatePc(instruction, op1, res, dst);
-    this.updateFp(instruction, dst);
     this.updateAp(instruction, res);
+    this.updateFp(instruction, dst);
   }
 
   /**
@@ -297,29 +297,6 @@ export class VirtualMachine {
   }
 
   /**
-   * Update FP to its next value.
-   * Based on the current instruction and
-   * the previously computed auxiliary values.
-   */
-  updateFp(instruction: Instruction, dst: SegmentValue | undefined): void {
-    switch (instruction.fpUpdate) {
-      case FpUpdate.ApPlus2:
-        this.fp = this.ap.add(2);
-        break;
-
-      case FpUpdate.Dst:
-        if (dst === undefined) throw new InvalidDst();
-        if (isFelt(dst)) {
-          this.fp = this.fp.add(dst);
-        }
-        if (isRelocatable(dst)) {
-          this.fp = dst;
-        }
-        break;
-    }
-  }
-
-  /**
    * Update AP to its next value.
    * Based on the current instruction and
    * the previously computed auxiliary values.
@@ -339,6 +316,29 @@ export class VirtualMachine {
 
       case ApUpdate.Add2:
         this.ap = this.ap.add(2);
+        break;
+    }
+  }
+
+  /**
+   * Update FP to its next value.
+   * Based on the current instruction and
+   * the previously computed auxiliary values.
+   */
+  updateFp(instruction: Instruction, dst: SegmentValue | undefined): void {
+    switch (instruction.fpUpdate) {
+      case FpUpdate.ApPlus2:
+        this.fp = this.ap.add(2);
+        break;
+
+      case FpUpdate.Dst:
+        if (dst === undefined) throw new InvalidDst();
+        if (isFelt(dst)) {
+          this.fp = this.fp.add(dst);
+        }
+        if (isRelocatable(dst)) {
+          this.fp = dst;
+        }
         break;
     }
   }
