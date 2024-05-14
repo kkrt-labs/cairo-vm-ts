@@ -1,7 +1,3 @@
-// Instruction is the representation of the first word of each Cairo instruction.
-// Some instructions spread over two words when they use an immediate value, so
-// representing the first one with this struct is enough.
-
 import {
   HighBitSetError,
   InvalidApUpdate,
@@ -148,25 +144,34 @@ export enum Opcode {
   AssertEq = 1 << 8,
 }
 
+/**
+ * Cairo instructions are spread over one or two words.
+ *
+ * If existing, the second word is an immediate value (i.e. a Felt).
+ *
+ * This class only needs to represent the first word of an instruction.
+ */
 export class Instruction {
+  /** Offset applied to the register used for reading dst */
   public dstOffset: number;
+  /** Offset applied to the register used for reading op0 */
   public op0Offset: number;
+  /** Offset applied to the register used for reading op1 */
   public op1Offset: number;
-  // The register to use as the Destination Operand
+  /** The register (AP or FP) to be used for reading dst */
   public dstRegister: Register;
-  // The register to use as the Operand 0
+  /** The register (AP or FP) to be used for reading op0 */
   public op0Register: Register;
-  // The register to use as the Operand 1
+  /** The register (PC, AP or FP) to be used for reading op1 */
   public op1Register: Register;
-  // The result logic
+  /** How res will be computed from op0 and op1 */
   public resLogic: ResLogic;
-  // The logic to use to compute the next pc
+  /** How PC will be updated */
   public pcUpdate: PcUpdate;
-  // The logic to use to compute the next ap
+  /** How AP will be updated */
   public apUpdate: ApUpdate;
-  // The logic to use to compute the next fp
+  /** How FP will be updated */
   public fpUpdate: FpUpdate;
-  // The opcode
   public opcode: Opcode;
 
   /** Value added to the offsets on encoded instructions
@@ -191,20 +196,6 @@ export class Instruction {
     );
   }
 
-  /**
-   *
-   * @param dstOffset
-   * @param op0Offset
-   * @param op1Offset
-   * @param dstReg
-   * @param op0Register
-   * @param op1Register
-   * @param resLogic
-   * @param pcUpdate
-   * @param apUpdate
-   * @param fpUpdate
-   * @param opcode
-   */
   constructor(
     dstOffset: number,
     op0Offset: number,
