@@ -1,7 +1,7 @@
 import {
   ExpectedFelt,
   ExpectedRelocatable,
-  InvalidDstOperand,
+  InvalidDst,
   InvalidOp1,
   UnusedResError,
 } from 'errors/virtualMachine';
@@ -32,20 +32,6 @@ import {
   InvalidOp0Register,
   InvalidOp1Register,
 } from 'errors/instruction';
-
-// operand 0 is the first operand in the right side of the computation
-// operand 1 is the second operand in the right side of the computation
-// res is the result of the computation
-// dst is the destination of the computation i.e. the left side of the computation
-// Example:
-// assert [fp - 3] = [ap + 7] * [ap + 8]
-// In this case, op0 = [ap + 7], op1 = [ap + 8], res = op0 * op1, dst = [fp - 3]
-export type Operands = {
-  op0: SegmentValue | undefined;
-  op1: SegmentValue | undefined;
-  res: SegmentValue | undefined;
-  dst: SegmentValue | undefined;
-};
 
 export class VirtualMachine {
   private currentStep: bigint;
@@ -92,21 +78,34 @@ export class VirtualMachine {
 
   // Run the current instruction
   runInstruction(instruction: Instruction): void {
-    const operands = this.computeOperands(instruction);
+    const { op0, op1, res, dst } = this.computeAuxValues(instruction);
 
     // TODO should update the trace here
 
-    this.updateRegisters(instruction, operands);
+    this.updateRegisters(instruction, op1, res, dst);
 
     this.currentStep += 1n;
 
     return;
   }
 
-  // Compute the operands of an instruction. The VM can either
-  // fetch them from memory and if it fails to do so, it can
-  // deduce them from the instruction itself.
-  computeOperands(instruction: Instruction): Operands {
+  /**
+   * @param instruction
+   * @returns Auxiliary values (op0, op1, res, dst)
+   * needed to run the given instruction.
+   *
+   * They can be computed from the memory values,
+   * the three offsets, and the instruction flags.
+   *
+   * NOTE: See Cairo whitepaper 4.5 State Transition
+   * for formal definition
+   */
+  computeAuxValues(instruction: Instruction): {
+    op0: SegmentValue | undefined;
+    op1: SegmentValue | undefined;
+    res: SegmentValue | undefined;
+    dst: SegmentValue | undefined;
+  } {
     const {
       dstOffset,
       op0Offset,
@@ -290,14 +289,24 @@ export class VirtualMachine {
   }
 
   // Update the registers based on the instruction.
-  updateRegisters(instruction: Instruction, operands: Operands): void {
-    this.updatePc(instruction, operands);
-    this.updateFp(instruction, operands);
-    this.updateAp(instruction, operands);
+  updateRegisters(
+    instruction: Instruction,
+    op1: SegmentValue | undefined,
+    res: SegmentValue | undefined,
+    dst: SegmentValue | undefined
+  ): void {
+    this.updatePc(instruction, op1, res, dst);
+    this.updateFp(instruction, dst);
+    this.updateAp(instruction, res);
   }
 
   // Update the pc update logic based on the instruction.
-  updatePc(instruction: Instruction, operands: Operands): void {
+  updatePc(
+    instruction: Instruction,
+    op1: SegmentValue | undefined,
+    res: SegmentValue | undefined,
+    dst: SegmentValue | undefined
+  ): void {
     switch (instruction.pcUpdate) {
       // If the pc update logic is regular, then we increment the pc by
       // the instruction size.
@@ -307,50 +316,50 @@ export class VirtualMachine {
       // If the pc update logic is jump, then we set the pc to the
       // result.
       case PcUpdate.Jump:
-        if (operands.res === undefined) {
+        if (res === undefined) {
           throw new UnusedResError();
         }
-        if (!isRelocatable(operands.res)) {
+        if (!isRelocatable(res)) {
           throw new ExpectedRelocatable();
         }
-        this.pc = operands.res;
+        this.pc = res;
         break;
       // If the pc update logic is jump rel, then we add the result
       // to the pc.
       case PcUpdate.JumpRel:
-        if (operands.res === undefined) {
+        if (res === undefined) {
           throw new UnusedResError();
         }
 
-        if (!isFelt(operands.res)) {
+        if (!isFelt(res)) {
           throw new ExpectedFelt();
         }
-        this.pc = this.pc.add(operands.res);
+        this.pc = this.pc.add(res);
         break;
       // If the pc update logic is jnz, then we check if the destination
       // is zero. If it is, then we increment the pc by the instruction (default)
       // If it is not, then we add the op1 to the pc.
       case PcUpdate.Jnz:
-        if (operands.dst === undefined) {
-          throw new InvalidDstOperand();
+        if (dst === undefined) {
+          throw new InvalidDst();
         }
-        if (isFelt(operands.dst) && operands.dst.eq(Felt.ZERO)) {
+        if (isFelt(dst) && dst.eq(Felt.ZERO)) {
           this.incrementPc(instruction.size());
         } else {
-          if (operands.op1 === undefined) {
+          if (op1 === undefined) {
             throw new InvalidOp1();
           }
-          if (!isFelt(operands.op1)) {
+          if (!isFelt(op1)) {
             throw new ExpectedFelt();
           }
-          this.pc = this.pc.add(operands.op1);
+          this.pc = this.pc.add(op1);
         }
         break;
     }
   }
 
   // Update the fp based on the fp update logic of the instruction.
-  updateFp(instruction: Instruction, operands: Operands): void {
+  updateFp(instruction: Instruction, dst: SegmentValue | undefined): void {
     switch (instruction.fpUpdate) {
       // If the fp update logic is ap plus 2, then we add 2 to the ap
       case FpUpdate.ApPlus2:
@@ -360,32 +369,32 @@ export class VirtualMachine {
       // to fp if dst is a felt, or set the fp to the destination
       // if a relocatable.
       case FpUpdate.Dst:
-        if (operands.dst === undefined) {
-          throw new InvalidDstOperand();
+        if (dst === undefined) {
+          throw new InvalidDst();
         }
-        if (isFelt(operands.dst)) {
-          this.fp = this.fp.add(operands.dst);
+        if (isFelt(dst)) {
+          this.fp = this.fp.add(dst);
         }
-        if (isRelocatable(operands.dst)) {
-          this.fp = operands.dst;
+        if (isRelocatable(dst)) {
+          this.fp = dst;
         }
         break;
     }
   }
 
   // Update the ap based on the ap update logic of the instruction.
-  updateAp(instruction: Instruction, operands: Operands): void {
+  updateAp(instruction: Instruction, res: SegmentValue | undefined): void {
     switch (instruction.apUpdate) {
       // If the ap update logic is add, then we add the result to the ap.
       case ApUpdate.AddRes:
-        if (operands.res === undefined) {
+        if (res === undefined) {
           throw new UnusedResError();
         }
-        if (!isFelt(operands.res)) {
+        if (!isFelt(res)) {
           throw new ExpectedFelt();
         }
 
-        this.ap = this.ap.add(operands.res);
+        this.ap = this.ap.add(res);
         break;
       // If the ap update logic is add 1, then we add 1 to the ap.
       case ApUpdate.Add1:
@@ -402,16 +411,21 @@ export class VirtualMachine {
   // conditions are met:
   //    - For assert eq, res = dst
   //    - For call, op0 = pc + instruction size and dst = fp
-  opcodeAssertion(instruction: Instruction, operands: Operands): void {
+  opcodeAssertion(
+    instruction: Instruction,
+    op0: SegmentValue | undefined,
+    res: SegmentValue | undefined,
+    dst: SegmentValue | undefined
+  ): void {
     switch (instruction.opcode) {
       // For a assert eq, check that res is defined and equals dst.
       // This is because dst represents the left side of the computation, and
       // res represents the right side of the computation.
       case Opcode.AssertEq:
-        if (operands.res === undefined) {
+        if (res === undefined) {
           throw new UnusedResError();
         }
-        if (operands.dst !== operands.res) {
+        if (dst !== res) {
           throw new DiffAssertValuesError();
         }
         break;
@@ -420,11 +434,11 @@ export class VirtualMachine {
       // following the call instruction). dst is used to store the frame pointer.
       case Opcode.Call:
         const nextPc = this.pc.add(instruction.size());
-        if (operands.op0 === undefined || !nextPc.eq(operands.op0)) {
+        if (op0 === undefined || !nextPc.eq(op0)) {
           throw new InvalidOp0();
         }
-        if (this.fp !== operands.dst) {
-          throw new InvalidDstOperand();
+        if (this.fp !== dst) {
+          throw new InvalidDst();
         }
         break;
     }

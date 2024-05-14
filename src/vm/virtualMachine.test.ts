@@ -8,14 +8,14 @@ import {
   ApUpdate,
   FpUpdate,
 } from './instruction';
-import { Operands, VirtualMachine } from './virtualMachine';
+import { VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
 import {
   DiffAssertValuesError,
   ExpectedFelt,
   ExpectedRelocatable,
-  InvalidDstOperand,
+  InvalidDst,
   InvalidOp0,
   UnusedResError,
 } from 'errors/virtualMachine';
@@ -212,76 +212,61 @@ describe('VirtualMachine', () => {
     test('should throw UnusedResError on assert eq opcode and undefined res operand', () => {
       const instruction: Instruction = instructions.InvalidAssertEq;
 
-      const operands: Operands = {
-        dst: new Felt(8n),
-        res: undefined,
-        op0: new Felt(9n),
-        op1: new Felt(10n),
-      };
       const vm = new VirtualMachine();
+      const op0 = new Felt(9n);
+      const res = undefined;
+      const dst = new Felt(8n);
 
-      expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
+      expect(() => vm.opcodeAssertion(instruction, op0, res, dst)).toThrow(
         new UnusedResError()
       );
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst felts', () => {
       const instruction: Instruction = instructions.InvalidAssertEq;
 
-      const operands: Operands = {
-        dst: new Felt(9n),
-        res: new Felt(8n),
-        op0: new Felt(9n),
-        op1: new Felt(10n),
-      };
       const vm = new VirtualMachine();
+      const op0 = new Felt(9n);
+      const res = new Felt(8n);
+      const dst = new Felt(9n);
 
-      expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
+      expect(() => vm.opcodeAssertion(instruction, op0, res, dst)).toThrow(
         new DiffAssertValuesError()
       );
     });
     test('should throw DiffAssertError on assert eq opcode and res != dst relocatables', () => {
       const instruction: Instruction = instructions.InvalidAssertEq;
 
-      const operands: Operands = {
-        dst: new Relocatable(1, 2),
-        res: new Relocatable(1, 3),
-        op0: new Felt(9n),
-        op1: new Felt(10n),
-      };
       const vm = new VirtualMachine();
+      const op0 = new Felt(9n);
+      const res = new Relocatable(1, 3);
+      const dst = new Relocatable(1, 2);
 
-      expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
+      expect(() => vm.opcodeAssertion(instruction, op0, res, dst)).toThrow(
         new DiffAssertValuesError()
       );
     });
     test('should throw InvalidOp0 on call opcode and pc != op0', () => {
       const instruction: Instruction = instructions.InvalidCall;
 
-      const operands: Operands = {
-        dst: new Relocatable(1, 2),
-        res: new Relocatable(1, 3),
-        op0: new Felt(9n),
-        op1: new Felt(10n),
-      };
       const vm = new VirtualMachine();
+      const op0 = new Felt(9n);
+      const res = new Relocatable(1, 3);
+      const dst = new Relocatable(1, 2);
 
-      expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
+      expect(() => vm.opcodeAssertion(instruction, op0, res, dst)).toThrow(
         new InvalidOp0()
       );
     });
     test('should throw InvalidDstError on call opcode and fp != dst', () => {
       const instruction: Instruction = instructions.InvalidCall;
 
-      const operands: Operands = {
-        dst: new Relocatable(1, 2),
-        res: new Relocatable(1, 3),
-        op0: new Relocatable(0, 1),
-        op1: new Felt(10n),
-      };
       const vm = new VirtualMachine();
+      const op0 = new Relocatable(0, 1);
+      const res = new Relocatable(1, 3);
+      const dst = new Relocatable(1, 2);
 
-      expect(() => vm.opcodeAssertion(instruction, operands)).toThrow(
-        new InvalidDstOperand()
+      expect(() => vm.opcodeAssertion(instruction, op0, res, dst)).toThrow(
+        new InvalidDst()
       );
     });
   });
@@ -293,172 +278,148 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = undefined;
 
-      vm.updatePc(instruction, operands);
+      vm.updatePc(instruction, op1, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
+
     test('regular with imm', () => {
       const instruction = instructions.RegularImm;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = undefined;
 
-      vm.updatePc(instruction, operands);
+      vm.updatePc(instruction, op1, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
+
     test('jmp res relocatable', () => {
       const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
-      const operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Relocatable(0, 5),
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = new Relocatable(0, 5);
+      const dst = undefined;
 
-      vm.updatePc(instruction, operands);
-      expect(vm.pc).toEqual(operands.res);
+      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, op1, res, dst);
+      expect(vm.pc).toEqual(res);
     });
+
     test('jmp res felt', () => {
       const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Felt(0n),
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = new Felt(0n);
+      const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, operands)).toThrow(
+      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
         new ExpectedRelocatable()
       );
     });
+
     test('jmp without res', () => {
       const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, operands)).toThrow(
+      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
         new UnusedResError()
       );
     });
+
     test('jmp rel res felt', () => {
       const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Felt(5n),
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = new Felt(5n);
+      const dst = undefined;
 
-      vm.updatePc(instruction, operands);
+      vm.updatePc(instruction, op1, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 5));
     });
+
     test('jmp rel res relocatable', () => {
       const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Relocatable(0, 5),
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = new Relocatable(0, 5);
+      const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, operands)).toThrow(
+      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
         new ExpectedFelt()
       );
     });
+
     test('jmp rel res relocatable', () => {
       const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, operands)).toThrow(
+      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
         new UnusedResError()
       );
     });
+
     test('jnz des is zero no imm', () => {
       const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: new Felt(0n),
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = new Felt(0n);
 
-      vm.updatePc(instruction, operands);
+      vm.updatePc(instruction, op1, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
+
     test('jnz des is zero imm', () => {
       const instruction = instructions.JnzImm;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: new Felt(0n),
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = new Felt(0n);
 
-      vm.updatePc(instruction, operands);
+      vm.updatePc(instruction, op1, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
+
     test('jnz des not zero op1 felt', () => {
       const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: new Felt(3n),
-        res: undefined,
-        dst: new Felt(1n),
-      };
+      const op1 = new Felt(3n);
+      const res = undefined;
+      const dst = new Felt(1n);
 
-      vm.updatePc(instruction, operands);
+      vm.updatePc(instruction, op1, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 3));
     });
+
     test('jnz des not zero op1 relocatable', () => {
       const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: new Relocatable(0, 0),
-        res: undefined,
-        dst: new Felt(1n),
-      };
+      const op1 = new Relocatable(0, 0);
+      const res = undefined;
+      const dst = new Felt(1n);
 
-      expect(() => vm.updatePc(instruction, operands)).toThrow(
+      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
         new ExpectedFelt()
       );
     });
@@ -471,57 +432,40 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const dst = undefined;
 
-      vm.updateFp(instruction, operands);
+      vm.updateFp(instruction, dst);
       expect(vm.fp).toEqual(new Relocatable(1, 0));
     });
+
     test('dst felt', () => {
       const instruction = instructions.Dst;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: new Felt(9n),
-      };
+      const dst = new Felt(9n);
 
-      vm.updateFp(instruction, operands);
+      vm.updateFp(instruction, dst);
       expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
+
     test('dst relocatable', () => {
       const instruction = instructions.Dst;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: new Relocatable(1, 9),
-      };
+      const dst = new Relocatable(1, 9);
 
-      vm.updateFp(instruction, operands);
+      vm.updateFp(instruction, dst);
       expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
+
     test('ap plus 2', () => {
       const instruction = instructions.ApPlus2;
 
       const vm = new VirtualMachine();
       vm.ap = new Relocatable(1, 7);
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const dst = undefined;
 
-      vm.updateFp(instruction, operands);
+      vm.updateFp(instruction, dst);
       expect(vm.fp).toEqual(new Relocatable(1, 9));
     });
   });
@@ -533,87 +477,58 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const res = undefined;
 
-      vm.updateAp(instruction, operands);
+      vm.updateAp(instruction, res);
       expect(vm.ap).toEqual(new Relocatable(1, 0));
     });
+
     test('add 2', () => {
       const instruction = instructions.Add2;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const res = undefined;
 
-      vm.updateAp(instruction, operands);
+      vm.updateAp(instruction, res);
       expect(vm.ap).toEqual(new Relocatable(1, 2));
     });
+
     test('add 1', () => {
       const instruction = instructions.Add1;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const res = undefined;
 
-      vm.updateAp(instruction, operands);
+      vm.updateAp(instruction, res);
       expect(vm.ap).toEqual(new Relocatable(1, 1));
     });
+
     test('add res felt', () => {
       const instruction = instructions.AddRes;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Felt(5n),
-        dst: undefined,
-      };
+      const res = new Felt(5n);
 
-      vm.updateAp(instruction, operands);
+      vm.updateAp(instruction, res);
       expect(vm.ap).toEqual(new Relocatable(1, 5));
     });
+
     test('add res relocatable', () => {
       const instruction = instructions.AddRes;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Relocatable(0, 0),
-        dst: undefined,
-      };
+      const res = new Relocatable(0, 0);
 
-      expect(() => vm.updateAp(instruction, operands)).toThrow(
-        new ExpectedFelt()
-      );
+      expect(() => vm.updateAp(instruction, res)).toThrow(new ExpectedFelt());
     });
+
     test('add no res', () => {
       const instruction = instructions.AddRes;
 
       const vm = new VirtualMachine();
-      const operands: Operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const res = undefined;
 
-      expect(() => vm.updateAp(instruction, operands)).toThrow(
-        new UnusedResError()
-      );
+      expect(() => vm.updateAp(instruction, res)).toThrow(new UnusedResError());
     });
   });
 
@@ -623,30 +538,26 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
-      const operands = {
-        op0: undefined,
-        op1: undefined,
-        res: undefined,
-        dst: undefined,
-      };
+      const op1 = undefined;
+      const res = undefined;
+      const dst = undefined;
 
-      vm.updateRegisters(instruction, operands);
+      vm.updateRegisters(instruction, op1, res, dst);
       expect(vm.ap).toEqual(new Relocatable(1, 0));
       expect(vm.fp).toEqual(new Relocatable(1, 0));
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
+
     test('should update the register with mixed types', () => {
       const vm = new VirtualMachine();
       vm.setRegisters(4, 5, 6);
       const instruction = instructions.JumpRelAdd2;
-      const operands = {
-        op0: undefined,
-        op1: undefined,
-        res: new Felt(8n),
-        dst: new Relocatable(1, 11),
-      };
 
-      vm.updateRegisters(instruction, operands);
+      const op1 = undefined;
+      const res = new Felt(8n);
+      const dst = new Relocatable(1, 11);
+
+      vm.updateRegisters(instruction, op1, res, dst);
       const registers = {
         pc: new Relocatable(0, 12),
         ap: new Relocatable(1, 7),
