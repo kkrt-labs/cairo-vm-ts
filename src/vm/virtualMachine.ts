@@ -40,11 +40,6 @@ export class VirtualMachine {
     this.fp = new MemoryPointer(0);
   }
 
-  /** Increment PC register by the size of the instruction */
-  incrementPc(size: number): void {
-    this.pc = this.pc.add(size);
-  }
-
   /**
    * Execute one step:
    * - Decode the instruction at PC
@@ -273,32 +268,28 @@ export class VirtualMachine {
   ): void {
     switch (instruction.pcUpdate) {
       case PcUpdate.Regular:
-        this.incrementPc(instruction.size());
+        this.pc = this.pc.add(instruction.size());
         break;
 
       case PcUpdate.Jump:
         if (res === undefined) throw new UnusedResError();
         if (!isRelocatable(res)) throw new ExpectedRelocatable();
-
         this.pc = res;
         break;
 
       case PcUpdate.JumpRel:
         if (res === undefined) throw new UnusedResError();
         if (!isFelt(res)) throw new ExpectedFelt();
-
         this.pc = this.pc.add(res);
         break;
 
       case PcUpdate.Jnz:
         if (dst === undefined) throw new InvalidDst();
-
         if (isFelt(dst) && dst.eq(Felt.ZERO)) {
-          this.incrementPc(instruction.size());
+          this.pc = this.pc.add(instruction.size());
         } else {
           if (op1 === undefined) throw new InvalidOp1();
           if (!isFelt(op1)) throw new ExpectedFelt();
-
           this.pc = this.pc.add(op1);
         }
         break;

@@ -504,12 +504,4 @@ describe('VirtualMachine', () => {
       expect({ ap: vm.ap, fp: vm.fp, pc: vm.pc }).toEqual(registers);
     });
   });
-
-  describe('incrementPc', () => {
-    test('should successfully increment pc', () => {
-      const vm = new VirtualMachine();
-      vm.incrementPc(2);
-      expect(vm.pc).toEqual(new Relocatable(0, 2));
-    });
-  });
 });
