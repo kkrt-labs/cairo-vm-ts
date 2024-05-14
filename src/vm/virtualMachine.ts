@@ -18,11 +18,7 @@ import {
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
-import {
-  DiffAssertValuesError,
-  EndOfInstructionsError,
-  InvalidOp0,
-} from 'errors/virtualMachine';
+import { EndOfInstructionsError, InvalidOp0 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
 import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 

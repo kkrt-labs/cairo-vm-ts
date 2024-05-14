@@ -12,11 +12,8 @@ import { VirtualMachine } from './virtualMachine';
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
 import {
-  DiffAssertValuesError,
   ExpectedFelt,
   ExpectedRelocatable,
-  InvalidDst,
-  InvalidOp0,
   UnusedResError,
 } from 'errors/virtualMachine';
 
