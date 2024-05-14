@@ -46,10 +46,16 @@ export class VirtualMachine {
     this.fp = new MemoryPointer(fp);
   }
 
+  /** Increment PC register by the size of the instruction */
   incrementPc(size: number): void {
     this.pc = this.pc.add(size);
   }
 
+  /**
+   * Execute one step:
+   * - Decode the instruction at PC
+   * - Run the instruction
+   */
   step(): void {
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
@@ -64,10 +70,16 @@ export class VirtualMachine {
 
     const instruction = Instruction.decodeInstruction(encodedInstruction);
 
-    return this.runInstruction(instruction);
+    this.runInstruction(instruction);
   }
 
-  // Run the current instruction
+  /**
+   * Perform the state transition based on the given instruction
+   * @param {Instruction} instruction Current instruction
+   *
+   * NOTE: See Cairo whitepaper 4.5 State Transition
+   * for more details
+   */
   runInstruction(instruction: Instruction): void {
     const { op0, op1, res, dst } = this.computeAuxValues(instruction);
 
@@ -76,20 +88,15 @@ export class VirtualMachine {
     this.updateRegisters(instruction, op1, res, dst);
 
     this.currentStep += 1n;
-
-    return;
   }
 
   /**
-   * @param instruction
-   * @returns Auxiliary values (op0, op1, res, dst)
+   * @param {Instruction} instruction Current instruction
+   * @returns {Object} Auxiliary values (op0, op1, res, dst)
    * needed to run the given instruction.
    *
-   * They can be computed from the memory values,
-   * the three offsets, and the instruction flags.
-   *
-   * NOTE: See Cairo whitepaper 4.5 State Transition
-   * for formal definition
+   * "They can be computed from the memory values,
+   * the three offsets, and the instruction flags."
    */
   computeAuxValues(instruction: Instruction): {
     op0: SegmentValue | undefined;
