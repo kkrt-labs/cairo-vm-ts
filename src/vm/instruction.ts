@@ -63,16 +63,21 @@ export enum Register {
  * - Add: res = op0 + op1
  * - Mul: res = op0 * op1
  * - Unused: res = Unused
+ *
+ * ResLogic is used with Opcode
+ * in a switch with two variables.
+ * Each field must be a different bit
+ * (bitwise operator `|`)
  */
 export enum ResLogic {
   /** res = op1 */
-  Op1 = 1,
+  Op1 = 1 << 1,
   /** res = op0 + op1 */
-  Add = 2,
+  Add = 1 << 2,
   /** res = op0 * op1 */
-  Mul = 4,
+  Mul = 1 << 3,
   /** res = Unused */
-  Unused = 8,
+  Unused = 1 << 4,
 }
 
 /**
@@ -128,16 +133,22 @@ export enum FpUpdate {
  * - Call: call
  * - Ret: ret (Return)
  * - AssertEq: assert equal
+ *
+ * Opcode is used with ResLogic
+ * in a switch with two variables.
+ * Each field must be a different bit
+ * (bitwise operator `|`)
+ *
  */
 export enum Opcode {
   /** No Operation */
-  NoOp = 16,
+  NoOp = 1 << 5,
   /** Call instruction */
-  Call = 32,
+  Call = 1 << 6,
   /** Return instrction */
-  Ret = 64,
+  Ret = 1 << 7,
   /** Assert equal instruction */
-  AssertEq = 128,
+  AssertEq = 1 << 8,
 }
 
 export class Instruction {
