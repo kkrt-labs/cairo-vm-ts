@@ -31,20 +31,8 @@ import {
  * - Fp: Frame Pointer - Points to the beginning of the stack frame of the current function
  */
 export enum Register {
-  /** Program Counter
-   *
-   * Contains the memory address of the current instruction to be executed
-   */
   Pc,
-  /** Allocation Pointer
-   *
-   * Points to the first memory cell that has not been used by the program so far (Convention)
-   */
   Ap,
-  /** Frame Pointer
-   *
-   * Points to the beginning of the stack frame of the current function
-   */
   Fp,
 }
 
