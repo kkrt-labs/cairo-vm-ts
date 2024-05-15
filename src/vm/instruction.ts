@@ -231,8 +231,8 @@ export class Instruction {
     const apUpdateFlag = (flags >> 10n) & 0b11n;
     const opcodeFlag = (flags >> 12n) & 0b111n;
 
-    let dstRegister;
-    let op0Register;
+    let dstRegister: Register;
+    let op0Register: Register;
     let op1Register: Register;
     let resLogic: ResLogic;
     let pcUpdate: PcUpdate;
