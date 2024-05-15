@@ -1,7 +1,7 @@
 export class VirtualMachineError extends Error {}
 
 /** End of instructions */
-export class EndOfInstructionsError extends VirtualMachineError {}
+export class UndefinedInstruction extends VirtualMachineError {}
 
 /** Result is unconstrained */
 export class UnusedResError extends VirtualMachineError {}

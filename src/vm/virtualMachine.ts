@@ -18,7 +18,7 @@ import {
 import { Relocatable } from 'primitives/relocatable';
 import { InstructionError } from 'errors/memory';
 
-import { EndOfInstructionsError, InvalidOp0 } from 'errors/virtualMachine';
+import { UndefinedInstruction, InvalidOp0 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
 
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
@@ -47,7 +47,7 @@ export class VirtualMachine {
   step(): void {
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
-      throw new EndOfInstructionsError();
+      throw new UndefinedInstruction();
     }
 
     if (!isFelt(maybeEncodedInstruction)) {
