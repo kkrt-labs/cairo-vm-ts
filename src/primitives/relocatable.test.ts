@@ -1,11 +1,13 @@
 import { test, expect, describe } from 'bun:test';
-import { Felt } from './felt';
-import { Relocatable } from './relocatable';
+
 import {
   ForbiddenOperation,
   OffsetUnderflow,
   SegmentError,
 } from 'errors/primitives';
+
+import { Felt } from './felt';
+import { Relocatable } from './relocatable';
 
 describe('Relocatable', () => {
   describe('constructor', () => {

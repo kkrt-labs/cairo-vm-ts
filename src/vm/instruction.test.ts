@@ -1,6 +1,15 @@
 import { test, expect, describe } from 'bun:test';
 
 import {
+  HighBitSetError,
+  InvalidApUpdate,
+  InvalidOp1Register,
+  InvalidOpcode,
+  InvalidPcUpdate,
+  InvalidResLogic,
+} from 'errors/instruction';
+
+import {
   ApUpdate,
   FpUpdate,
   Instruction,
@@ -9,15 +18,6 @@ import {
   Register,
   ResLogic,
 } from './instruction';
-
-import {
-  HighBitSetError,
-  InvalidApUpdate,
-  InvalidOp1Register,
-  InvalidOpcode,
-  InvalidPcUpdate,
-  InvalidResLogic,
-} from 'errors/instruction';
 
 describe('Instruction', () => {
   describe('decodeInstruction', () => {

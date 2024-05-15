@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'bun:test';
-import { parseProgram } from 'vm/program';
 import * as fs from 'fs';
-import { CairoRunner } from './cairoRunner';
-import { Relocatable } from 'primitives/relocatable';
+
 import { Felt } from 'primitives/felt';
+import { Relocatable } from 'primitives/relocatable';
+import { parseProgram } from 'vm/program';
+import { CairoRunner } from './cairoRunner';
 
 const FIBONACCI_PROGRAM_STRING = fs.readFileSync(
   'cairo_programs/cairo_0/fibonacci.json',

@@ -1,9 +1,10 @@
-import { Felt } from './felt';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
   SegmentError,
 } from 'errors/primitives';
+
+import { Felt } from './felt';
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 
 export class Relocatable {

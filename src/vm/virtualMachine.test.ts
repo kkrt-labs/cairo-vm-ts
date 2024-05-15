@@ -1,4 +1,13 @@
 import { test, expect, describe } from 'bun:test';
+
+import {
+  ExpectedFelt,
+  ExpectedRelocatable,
+  UnusedResError,
+} from 'errors/virtualMachine';
+
+import { Felt } from 'primitives/felt';
+import { Relocatable } from 'primitives/relocatable';
 import {
   Instruction,
   Opcode,
@@ -9,13 +18,6 @@ import {
   FpUpdate,
 } from './instruction';
 import { VirtualMachine } from './virtualMachine';
-import { Relocatable } from 'primitives/relocatable';
-import { Felt } from 'primitives/felt';
-import {
-  ExpectedFelt,
-  ExpectedRelocatable,
-  UnusedResError,
-} from 'errors/virtualMachine';
 
 const instructions = {
   InvalidAssertEq: new Instruction(

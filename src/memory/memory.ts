@@ -1,4 +1,5 @@
 import { InconsistentMemory, SegmentOutOfBounds } from 'errors/memory';
+
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
 

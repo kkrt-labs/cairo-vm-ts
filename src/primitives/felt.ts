@@ -1,5 +1,6 @@
-import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 import { ForbiddenOperation } from 'errors/primitives';
+
+import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 
 export class Felt {
   private inner: bigint;

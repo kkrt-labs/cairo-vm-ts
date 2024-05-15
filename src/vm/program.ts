@@ -1,5 +1,6 @@
-import { Felt } from 'primitives/felt';
 import { z } from 'zod';
+
+import { Felt } from 'primitives/felt';
 
 const ApTrackingData = z.object({
   group: z.number(),

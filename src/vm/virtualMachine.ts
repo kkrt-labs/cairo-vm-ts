@@ -4,8 +4,15 @@ import {
   InvalidDst,
   InvalidOp1,
   UnusedResError,
+  UndefinedInstruction,
+  InvalidOp0,
 } from 'errors/virtualMachine';
+import { InstructionError } from 'errors/memory';
+
+import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
+import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
+import { Memory } from 'memory/memory';
 import {
   ApUpdate,
   FpUpdate,
@@ -15,13 +22,6 @@ import {
   Register,
   ResLogic,
 } from './instruction';
-import { Relocatable } from 'primitives/relocatable';
-import { InstructionError } from 'errors/memory';
-
-import { UndefinedInstruction, InvalidOp0 } from 'errors/virtualMachine';
-import { Memory } from 'memory/memory';
-
-import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 
 export class VirtualMachine {
   private currentStep: bigint;

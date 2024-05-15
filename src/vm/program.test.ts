@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import * as fs from 'fs';
-import { parseProgram } from './program';
+
 import { Felt } from 'primitives/felt';
+import { parseProgram } from './program';
 
 describe('program', () => {
   describe('parseProgram', () => {
