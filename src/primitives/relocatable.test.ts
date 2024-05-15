@@ -1,6 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 import { Felt } from './felt';
-import { Relocatable, MemoryPointer, ProgramCounter } from './relocatable';
+import { Relocatable } from './relocatable';
 import {
   ForbiddenOperation,
   OffsetUnderflow,
@@ -119,26 +119,6 @@ describe('Relocatable', () => {
       const b = new Relocatable(0, 1);
       const eq = a.eq(b);
       expect(eq).toBeTrue();
-    });
-  });
-});
-
-describe('MemoryPointer', () => {
-  describe('constructor', () => {
-    test('should always set segment to 1', () => {
-      const pointer = new MemoryPointer(42);
-      expect(pointer.segment).toEqual(1);
-      expect(pointer.offset).toEqual(42);
-    });
-  });
-});
-
-describe('ProgramCounter', () => {
-  describe('constructor', () => {
-    test('should always set segment to 0', () => {
-      const pc = new ProgramCounter(24);
-      expect(pc.segment).toEqual(0);
-      expect(pc.offset).toEqual(24);
     });
   });
 });

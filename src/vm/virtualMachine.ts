@@ -20,24 +20,23 @@ import { InstructionError } from 'errors/memory';
 
 import { EndOfInstructionsError, InvalidOp0 } from 'errors/virtualMachine';
 import { Memory } from 'memory/memory';
-import { ProgramCounter, MemoryPointer } from 'primitives/relocatable';
 
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
-  pc: ProgramCounter;
-  ap: MemoryPointer;
-  fp: MemoryPointer;
+  pc: Relocatable;
+  ap: Relocatable;
+  fp: Relocatable;
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
 
-    this.pc = new ProgramCounter(0);
-    this.ap = new MemoryPointer(0);
-    this.fp = new MemoryPointer(0);
+    this.pc = new Relocatable(0, 0);
+    this.ap = new Relocatable(1, 0);
+    this.fp = new Relocatable(1, 0);
   }
 
   /**
