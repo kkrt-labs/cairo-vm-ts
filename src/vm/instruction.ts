@@ -39,7 +39,7 @@ export enum Register {
 /**
  * Generic pattern to compute res: `res = logic(op0, op1)`
  *
- * Generic instruction pattern `opcode(res, dst)` <=> `opcode(logic(op0, op1), dst)`
+ * Generic instruction pattern `opcode(dst, res)` <=> `opcode(dst, logic(op0, op1))`
  * - Op1: res = op1
  * - Add: res = op0 + op1
  * - Mul: res = op0 * op1
