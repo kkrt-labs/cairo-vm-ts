@@ -140,27 +140,24 @@ export enum Opcode {
  * This class only needs to represent the first word of an instruction.
  */
 export class Instruction {
-  /** Offset applied to the register used for reading dst */
-  public dstOffset: number;
-  /** Offset applied to the register used for reading op0 */
-  public op0Offset: number;
-  /** Offset applied to the register used for reading op1 */
-  public op1Offset: number;
   /** The register (AP or FP) to be used for reading dst */
   public dstRegister: Register;
   /** The register (AP or FP) to be used for reading op0 */
   public op0Register: Register;
   /** The register (PC, AP or FP) to be used for reading op1 */
   public op1Register: Register;
+  /** Offset applied to the register used for reading dst */
+  public dstOffset: number;
+  /** Offset applied to the register used for reading op0 */
+  public op0Offset: number;
+  /** Offset applied to the register used for reading op1 */
+  public op1Offset: number;
   /** How res will be computed from op0 and op1 */
   public resLogic: ResLogic;
-  /** How PC will be updated */
-  public pcUpdate: PcUpdate;
-  /** How AP will be updated */
-  public apUpdate: ApUpdate;
-  /** How FP will be updated */
-  public fpUpdate: FpUpdate;
   public opcode: Opcode;
+  public pcUpdate: PcUpdate;
+  public apUpdate: ApUpdate;
+  public fpUpdate: FpUpdate;
 
   /** Value added to the offsets on encoded instructions
    *
