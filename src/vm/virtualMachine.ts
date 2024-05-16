@@ -152,14 +152,16 @@ export class VirtualMachine {
 
       case Opcode.AssertEq | ResLogic.Add:
         if (op0 === undefined) {
-          if (dst !== undefined && op1 !== undefined) {
-            op0 = dst.sub(op1);
-          } else throw new InvalidOp0();
+          if (dst === undefined || op1 === undefined) {
+            throw new InvalidOp0();
+          }
+          op0 = dst.sub(op1);
         }
         if (op1 === undefined) {
-          if (dst !== undefined && op0 !== undefined) {
-            op1 = dst.sub(op0);
-          } else throw new InvalidOp1();
+          if (dst === undefined || op0 === undefined) {
+            throw new InvalidOp1();
+          }
+          op1 = dst.sub(op0);
         }
         res = op0.add(op1);
         dst = res;
@@ -167,16 +169,18 @@ export class VirtualMachine {
 
       case Opcode.AssertEq | ResLogic.Mul:
         if (op0 === undefined) {
-          if (dst !== undefined && op1 !== undefined && isFelt(dst)) {
-            op0 = dst.div(op1);
-          } else throw new InvalidOp0();
-        }
-        if (op1 === undefined) {
-          if (dst !== undefined && op0 !== undefined && isFelt(dst)) {
-            op1 = dst.div(op0);
-          } else throw new InvalidOp1();
+          if (dst === undefined || op1 === undefined || !isFelt(dst)) {
+            throw new InvalidOp0();
+          }
+          op0 = dst.div(op1);
         }
         if (!isFelt(op0)) throw new ExpectedFelt();
+        if (op1 === undefined) {
+          if (dst === undefined || op0 === undefined || !isFelt(dst)) {
+            throw new InvalidOp1();
+          }
+          op1 = dst.div(op0);
+        }
         res = op0.mul(op1);
         dst = res;
         break;
