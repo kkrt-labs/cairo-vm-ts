@@ -47,7 +47,7 @@ export class VirtualMachine {
   step(): void {
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
-      throw new UndefinedInstruction();
+      throw new UndefinedInstruction(this.pc);
     }
 
     if (!isFelt(maybeEncodedInstruction)) {
