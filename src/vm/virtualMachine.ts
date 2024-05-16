@@ -206,7 +206,6 @@ export class VirtualMachine {
         break;
 
       case Opcode.AssertEq | ResLogic.Unused:
-        res = undefined;
         dst = res;
         break;
 
@@ -226,7 +225,6 @@ export class VirtualMachine {
             }
             break;
           case ResLogic.Unused:
-            res = undefined;
             break;
           default:
             throw new Error();
