@@ -165,7 +165,7 @@ export class VirtualMachine {
         break;
 
       case Opcode.AssertEq | ResLogic.Op1:
-        if (op1 === undefined) op1 = dst;
+        op1 = op1 ?? dst;
         res = op1;
         dst = res;
         break;
