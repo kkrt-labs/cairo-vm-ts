@@ -120,26 +120,46 @@ export class VirtualMachine {
 
     switch (opcode | resLogic) {
       case Opcode.Call | ResLogic.Op1:
-        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
+        {
+          const nextPc = this.pc.add(instruction.size());
+          op0 = op0 ?? nextPc;
+          if (!op0.eq(nextPc)) throw new InvalidOp0();
+        }
+        if (op1 === undefined) throw new InvalidOp1();
         res = op1;
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Add:
-        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
+        {
+          const nextPc = this.pc.add(instruction.size());
+          op0 = op0 ?? nextPc;
+          if (!op0.eq(nextPc)) throw new InvalidOp0();
+        }
+        if (op1 === undefined) throw new InvalidOp1();
         res = op0.add(op1);
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Mul:
-        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
+        {
+          const nextPc = this.pc.add(instruction.size());
+          op0 = op0 ?? nextPc;
+          if (!op0.eq(nextPc)) throw new InvalidOp0();
+        }
+        if (op1 === undefined) throw new InvalidOp1();
         if (!isFelt(op0)) throw new ExpectedFelt();
         res = op0.mul(op1);
         dst = this.fp;
         break;
 
       case Opcode.Call | ResLogic.Unused:
-        ({ op0, op1 } = this.validateOperandsCallOpcode(instruction, op0, op1));
+        {
+          const nextPc = this.pc.add(instruction.size());
+          op0 = op0 ?? nextPc;
+          if (!op0.eq(nextPc)) throw new InvalidOp0();
+        }
+        if (op1 === undefined) throw new InvalidOp1();
         res = undefined;
         dst = this.fp;
         break;
@@ -224,23 +244,6 @@ export class VirtualMachine {
       res,
       dst,
     };
-  }
-
-  /** Perform checks for Call opcode cases.
-   *
-   * Compute op0 if not retrieved from memory
-   */
-  private validateOperandsCallOpcode(
-    instruction: Instruction,
-    op0: SegmentValue | undefined,
-    op1: SegmentValue | undefined
-  ): { op0: SegmentValue; op1: SegmentValue } {
-    const nextPc = this.pc.add(instruction.size());
-    if (op0 === undefined) {
-      op0 = nextPc;
-    } else if (!op0.eq(nextPc)) throw new InvalidOp0();
-    if (op1 === undefined) throw new InvalidOp1();
-    return { op0, op1 };
   }
 
   /**
