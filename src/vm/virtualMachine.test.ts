@@ -3,7 +3,7 @@ import { test, expect, describe } from 'bun:test';
 import {
   ExpectedFelt,
   ExpectedRelocatable,
-  UnusedResError,
+  UnusedRes,
 } from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
@@ -267,7 +267,7 @@ describe('VirtualMachine', () => {
       const dst = undefined;
 
       expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new UnusedResError()
+        new UnusedRes()
       );
     });
 
@@ -305,7 +305,7 @@ describe('VirtualMachine', () => {
       const dst = undefined;
 
       expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new UnusedResError()
+        new UnusedRes()
       );
     });
 
@@ -462,7 +462,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       const res = undefined;
 
-      expect(() => vm.updateAp(instruction, res)).toThrow(new UnusedResError());
+      expect(() => vm.updateAp(instruction, res)).toThrow(new UnusedRes());
     });
   });
 

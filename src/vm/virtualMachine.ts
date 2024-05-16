@@ -3,7 +3,7 @@ import {
   ExpectedRelocatable,
   InvalidDst,
   InvalidOp1,
-  UnusedResError,
+  UnusedRes,
   UndefinedInstruction,
   InvalidOp0,
 } from 'errors/virtualMachine';
@@ -279,13 +279,13 @@ export class VirtualMachine {
         break;
 
       case PcUpdate.Jump:
-        if (res === undefined) throw new UnusedResError();
+        if (res === undefined) throw new UnusedRes();
         if (!isRelocatable(res)) throw new ExpectedRelocatable();
         this.pc = res;
         break;
 
       case PcUpdate.JumpRel:
-        if (res === undefined) throw new UnusedResError();
+        if (res === undefined) throw new UnusedRes();
         if (!isFelt(res)) throw new ExpectedFelt();
         this.pc = this.pc.add(res);
         break;
@@ -312,7 +312,7 @@ export class VirtualMachine {
   updateAp(instruction: Instruction, res: SegmentValue | undefined): void {
     switch (instruction.apUpdate) {
       case ApUpdate.AddRes:
-        if (res === undefined) throw new UnusedResError();
+        if (res === undefined) throw new UnusedRes();
         if (!isFelt(res)) throw new ExpectedFelt();
 
         this.ap = this.ap.add(res);

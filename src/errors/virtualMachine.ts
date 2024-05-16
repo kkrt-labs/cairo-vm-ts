@@ -3,8 +3,8 @@ export class VirtualMachineError extends Error {}
 /** End of instructions */
 export class UndefinedInstruction extends VirtualMachineError {}
 
-/** Result is unconstrained */
-export class UnusedResError extends VirtualMachineError {}
+/** Auxiliary value res is undefined */
+export class UnusedRes extends VirtualMachineError {}
 
 /** Invalid dst */
 export class InvalidDst extends VirtualMachineError {}
