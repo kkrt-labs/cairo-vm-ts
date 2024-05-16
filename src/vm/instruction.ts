@@ -1,11 +1,9 @@
-// Instruction is the representation of the first word of each Cairo instruction.
-// Some instructions spread over two words when they use an immediate value, so
-// representing the first one with this struct is enough.
-
 import {
   HighBitSetError,
   InvalidApUpdate,
-  InvalidOp1Source,
+  InvalidDstRegister,
+  InvalidOp0Register,
+  InvalidOp1Register,
   InvalidOpcode,
   InvalidPcUpdate,
   InvalidResLogic,
@@ -27,54 +25,40 @@ import {
 // └─────┴─────┴───┴───┴───┴───┴───┴───┴───┴───┴────┴────┴────┴────┴────┴────┘
 // Source: https://github.com/lambdaclass/cairo-vm_in_go/blob/main/pkg/vm/instruction.go
 
-/** Flags to compute `dst` and `op0` from a register */
-export enum Register {
-  /**
-   * - dst = [ap + dstOffset]
-   * - op0 = [ap + op0Offset]
-   */
-  Ap,
-  /**
-   * - dst = [fp + dstOffset]
-   * - op0 = [fp + op0Offset]
-   */
-  Fp,
-}
-
-/**
- * Source from which op1 is computed
- *
- * op1 = [op1Source + op1Offset]
+/** The three registers of the Cairo machine
+ * - Pc: Program Counter - Contains the memory address of the current instruction to be executed
+ * - Ap: Allocation Pointer - Points to the first memory cell that has not been used by the program so far (Convention)
+ * - Fp: Frame Pointer - Points to the beginning of the stack frame of the current function
  */
-export enum Op1Source {
-  /** op1 = [op0 + op1Offset] */
-  Op0,
-  /** op1 = [pc + op1Offset] */
+export enum Register {
   Pc,
-  /** op1 = [fp + op1Offset] */
-  Fp,
-  /** op1 = [ap + op1Offset] */
   Ap,
+  Fp,
 }
 
 /**
  * Generic pattern to compute res: `res = logic(op0, op1)`
  *
- * Generic instruction pattern `opcode(res, dst)` <=> `opcode(logic(op0, op1), dst)`
+ * Generic instruction pattern `opcode(dst, res)` <=> `opcode(dst, logic(op0, op1))`
  * - Op1: res = op1
  * - Add: res = op0 + op1
  * - Mul: res = op0 * op1
- * - Unconstrained: res = Unused
+ * - Unused: res = Unused
+ *
+ * ResLogic is used with Opcode
+ * in a switch with two variables.
+ * Each field must be a different bit
+ * (bitwise operator `|`)
  */
 export enum ResLogic {
   /** res = op1 */
-  Op1,
+  Op1 = 1 << 1,
   /** res = op0 + op1 */
-  Add,
+  Add = 1 << 2,
   /** res = op0 * op1 */
-  Mul,
+  Mul = 1 << 3,
   /** res = Unused */
-  Unused,
+  Unused = 1 << 4,
 }
 
 /**
@@ -130,38 +114,50 @@ export enum FpUpdate {
  * - Call: call
  * - Ret: ret (Return)
  * - AssertEq: assert equal
+ *
+ * Opcode is used with ResLogic
+ * in a switch with two variables.
+ * Each field must be a different bit
+ * (bitwise operator `|`)
+ *
  */
 export enum Opcode {
   /** No Operation */
-  NoOp,
+  NoOp = 1 << 5,
   /** Call instruction */
-  Call,
+  Call = 1 << 6,
   /** Return instrction */
-  Ret,
+  Ret = 1 << 7,
   /** Assert equal instruction */
-  AssertEq,
+  AssertEq = 1 << 8,
 }
 
+/**
+ * Cairo instructions are spread over one or two words.
+ *
+ * If existing, the second word is an immediate value (i.e. a Felt).
+ *
+ * This class only needs to represent the first word of an instruction.
+ */
 export class Instruction {
-  public dstOffset: number;
-  public op0Offset: number;
-  public op1Offset: number;
-  // The register to use as the Destination Operand
+  /** The register (AP or FP) to be used for reading dst */
   public dstRegister: Register;
-  // The register to use as the Operand 0
+  /** The register (AP or FP) to be used for reading op0 */
   public op0Register: Register;
-  // The source of the Operand 1
-  public op1Source: Op1Source;
-  // The result logic
+  /** The register (PC, AP or FP) to be used for reading op1 */
+  public op1Register: Register;
+  /** Offset applied to the register used for reading dst */
+  public dstOffset: number;
+  /** Offset applied to the register used for reading op0 */
+  public op0Offset: number;
+  /** Offset applied to the register used for reading op1 */
+  public op1Offset: number;
+  /** How res will be computed from op0 and op1 */
   public resLogic: ResLogic;
-  // The logic to use to compute the next pc
-  public pcUpdate: PcUpdate;
-  // The logic to use to compute the next ap
-  public apUpdate: ApUpdate;
-  // The logic to use to compute the next fp
-  public fpUpdate: FpUpdate;
-  // The opcode
   public opcode: Opcode;
+  public pcUpdate: PcUpdate;
+  public apUpdate: ApUpdate;
+  public fpUpdate: FpUpdate;
 
   /** Value added to the offsets on encoded instructions
    *
@@ -176,7 +172,7 @@ export class Instruction {
       0,
       Register.Ap,
       Register.Ap,
-      Op1Source.Op0,
+      Register.Ap,
       ResLogic.Op1,
       PcUpdate.Regular,
       ApUpdate.Ap,
@@ -191,7 +187,7 @@ export class Instruction {
     op1Offset: number,
     dstReg: Register,
     op0Register: Register,
-    op1Source: Op1Source,
+    op1Register: Register,
     resLogic: ResLogic,
     pcUpdate: PcUpdate,
     apUpdate: ApUpdate,
@@ -203,7 +199,7 @@ export class Instruction {
     this.op1Offset = op1Offset;
     this.dstRegister = dstReg;
     this.op0Register = op0Register;
-    this.op1Source = op1Source;
+    this.op1Register = op1Register;
     this.resLogic = resLogic;
     this.pcUpdate = pcUpdate;
     this.apUpdate = apUpdate;
@@ -217,182 +213,127 @@ export class Instruction {
 
   static decodeInstruction(encodedInstruction: bigint): Instruction {
     // INVARIANT: The high bit of the encoded instruction must be 0
-    const highBit = 1n << 63n;
-    if ((highBit & encodedInstruction) !== 0n) {
+    if (encodedInstruction >> 63n) {
       throw new HighBitSetError();
     }
 
-    // Structure of the 48 first bits of an encoded instruction:
-    // The 3 offsets (Dst, Op0, Op1) are 16-bit signed integers
+    const dstOffset = this.fromBiased(encodedInstruction & 0xffffn);
+    const op0Offset = this.fromBiased((encodedInstruction >> 16n) & 0xffffn);
+    let op1Offset = this.fromBiased((encodedInstruction >> 32n) & 0xffffn);
 
-    // mask for the 16 least significant bits of the instruction
-    const mask = 0xffffn;
-    const shift = 16n;
+    const flags = encodedInstruction >> 48n;
 
-    // Get the offset by masking and shifting the encoded instruction
-    const dstOffset = this.fromBiased(encodedInstruction & mask);
+    const dstRegisterFlag = flags & 0b1n;
+    const op0RegisterFlag = (flags >> 1n) & 0b1n;
+    const op1RegisterFlag = (flags >> 2n) & 0b111n;
+    const resLogicFlag = (flags >> 5n) & 0b11n;
+    const pcUpdateFlag = (flags >> 7n) & 0b111n;
+    const apUpdateFlag = (flags >> 10n) & 0b11n;
+    const opcodeFlag = (flags >> 12n) & 0b111n;
 
-    let shiftedEncodedInstruction = encodedInstruction >> shift;
-    const op0Offset = this.fromBiased(shiftedEncodedInstruction & mask);
-
-    shiftedEncodedInstruction = shiftedEncodedInstruction >> shift;
-    const op1Offset = this.fromBiased(shiftedEncodedInstruction & mask);
-
-    // Get the flags by shifting the encoded instruction
-    const flags = shiftedEncodedInstruction >> shift;
-
-    // Decoding the flags and the logic of the instruction in the last 16 bits of the instruction
-    // dstRegister is located at bits 0-0. We apply a mask of 0x01 (0b1)
-    // and shift 0 bits right
-    const dstRegisterMask = 0x01n;
-    const dstRegisterOff = 0n;
-    // op0Register is located at bits 1-1. We apply a mask of 0x02 (0b10)
-    // and shift 1 bit right
-    const op0RegisterMask = 0x02n;
-    const op0RegisterOff = 1n;
-    // Op1Source is located at bits 2-4. We apply a mask of 0x1c (0b11100)
-    // and shift 2 bits right
-    const OperandOneSourceMask = 0x1cn;
-    const OperandOneSourceOff = 2n;
-    // resLogic is located at bits 5-6. We apply a mask of 0x60 (0b1100000)
-    // and shift 5 bits right
-    const resLogicMask = 0x60n;
-    const resLogicOff = 5n;
-    // pcUpdate is located at bits 7-9. We apply a mask of 0x380 (0b1110000000)
-    // and shift 7 bits right
-    const pcUpdateMask = 0x0380n;
-    const pcUpdateOff = 7n;
-    // apUpdate is located at bits 10-11. We apply a mask of 0xc00 (0b110000000000)
-    // and shift 10 bits right
-    const apUpdateMask = 0x0c00n;
-    const apUpdateOff = 10n;
-    // opcode is located at bits 12-14. We apply a mask of 0x7000 (0b111000000000000)
-    // and shift 12 bits right
-    const opcodeMask = 0x7000n;
-    const opcodeOff = 12n;
-
-    // Destination register is either Ap or Fp
-    const targetdstRegister = (flags & dstRegisterMask) >> dstRegisterOff;
     let dstRegister: Register;
-    if (targetdstRegister == 0n) {
-      dstRegister = Register.Ap;
-    } else {
-      dstRegister = Register.Fp;
-    }
-    // Operand 0 register is either Ap or Fp
-    const targetRegister = (flags & op0RegisterMask) >> op0RegisterOff;
     let op0Register: Register;
-    if (targetRegister == 0n) {
-      op0Register = Register.Ap;
-    } else {
-      op0Register = Register.Fp;
-    }
+    let op1Register: Register;
+    let resLogic: ResLogic;
+    let pcUpdate: PcUpdate;
+    let apUpdate: ApUpdate;
+    let opcode: Opcode;
+    let fpUpdate: FpUpdate;
 
-    const targetOperandOneSource =
-      (flags & OperandOneSourceMask) >> OperandOneSourceOff;
-    let op1Source: Op1Source;
-    switch (targetOperandOneSource) {
+    switch (dstRegisterFlag) {
       case 0n:
-        // op1 = m(op0 + offop1)
-        op1Source = Op1Source.Op0;
+        dstRegister = Register.Ap;
         break;
       case 1n:
-        // op1 = m(pc + offop1)
-        op1Source = Op1Source.Pc;
-        break;
-      case 2n:
-        // op1 = m(fp + offop1)
-        op1Source = Op1Source.Fp;
-        break;
-      case 4n:
-        // op1 = m(ap + offop1)
-        op1Source = Op1Source.Ap;
+        dstRegister = Register.Fp;
         break;
       default:
-        throw new InvalidOp1Source();
+        throw new InvalidDstRegister();
     }
 
-    const targetPcUpdate = (flags & pcUpdateMask) >> pcUpdateOff;
-    let pcUpdate: PcUpdate;
-    switch (targetPcUpdate) {
+    switch (op0RegisterFlag) {
       case 0n:
-        // pc = pc + instruction size
+        op0Register = Register.Ap;
+        break;
+      case 1n:
+        op0Register = Register.Fp;
+        break;
+      default:
+        throw new InvalidOp0Register();
+    }
+
+    switch (op1RegisterFlag) {
+      case 0n:
+        op1Register = op0Register;
+        op1Offset += op0Offset;
+        break;
+      case 1n:
+        op1Register = Register.Pc;
+        break;
+      case 2n:
+        op1Register = Register.Fp;
+        break;
+      case 4n:
+        op1Register = Register.Ap;
+        break;
+      default:
+        throw new InvalidOp1Register();
+    }
+
+    switch (pcUpdateFlag) {
+      case 0n:
         pcUpdate = PcUpdate.Regular;
         break;
       case 1n:
-        // pc = res
         pcUpdate = PcUpdate.Jump;
         break;
       case 2n:
-        // pc = pc + res
         pcUpdate = PcUpdate.JumpRel;
         break;
       case 4n:
-        // if dst != 0 then pc = pc + instruction_size else pc + op1
         pcUpdate = PcUpdate.Jnz;
         break;
       default:
         throw new InvalidPcUpdate();
     }
 
-    const targetResLogic = (flags & resLogicMask) >> resLogicOff;
-    let resLogic: ResLogic;
-    switch (targetResLogic) {
+    switch (resLogicFlag) {
       case 0n:
-        // if pc_update == jnz and res_logic == 0 then
-        // res is unconstrained else res = op1
-        if (pcUpdate == PcUpdate.Jnz) {
-          resLogic = ResLogic.Unused;
-        } else {
-          resLogic = ResLogic.Op1;
-        }
+        resLogic = pcUpdate === PcUpdate.Jnz ? ResLogic.Unused : ResLogic.Op1;
         break;
       case 1n:
-        // res = op0 + op1
         resLogic = ResLogic.Add;
         break;
       case 2n:
-        // res = op0 * op1
         resLogic = ResLogic.Mul;
         break;
       default:
         throw new InvalidResLogic();
     }
 
-    const targetOpcode = (flags & opcodeMask) >> opcodeOff;
-    let opcode: Opcode;
-    switch (targetOpcode) {
+    switch (opcodeFlag) {
       case 0n:
-        // fp = fp
         opcode = Opcode.NoOp;
         break;
       case 1n:
-        // fp = ap + 2
         opcode = Opcode.Call;
         break;
       case 2n:
-        // Return: fp = dst
         opcode = Opcode.Ret;
         break;
       case 4n:
-        // Assert equal: assert dst == op0, fp = fp
         opcode = Opcode.AssertEq;
         break;
       default:
         throw new InvalidOpcode();
     }
 
-    const targetApUpdate = (flags & apUpdateMask) >> apUpdateOff;
-    let apUpdate: ApUpdate;
-    switch (targetApUpdate) {
+    switch (apUpdateFlag) {
       case 0n:
-        // if call with ap_update = 0:  ap = ap + 2
-        // else ap = ap
-        if (opcode == Opcode.Call) {
-          apUpdate = ApUpdate.Add2;
-        } else {
-          apUpdate = ApUpdate.Ap;
-        }
+        apUpdate =
+          opcode == Opcode.Call
+            ? (apUpdate = ApUpdate.Add2)
+            : (apUpdate = ApUpdate.Ap);
         break;
       case 1n:
         apUpdate = ApUpdate.AddRes;
@@ -404,7 +345,6 @@ export class Instruction {
         throw new InvalidApUpdate();
     }
 
-    let fpUpdate: FpUpdate;
     switch (opcode) {
       case Opcode.Call:
         fpUpdate = FpUpdate.ApPlus2;
@@ -422,7 +362,7 @@ export class Instruction {
       op1Offset,
       dstRegister,
       op0Register,
-      op1Source,
+      op1Register,
       resLogic,
       pcUpdate,
       apUpdate,
@@ -433,6 +373,6 @@ export class Instruction {
 
   /** The instruction size is 2 if an immediate value, located at Pc + 1, is used. */
   size(): number {
-    return this.op1Source == Op1Source.Pc ? 2 : 1;
+    return this.op1Register == Register.Pc ? 2 : 1;
   }
 }

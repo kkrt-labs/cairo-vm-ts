@@ -1,6 +1,6 @@
 import { Relocatable } from 'primitives/relocatable';
-import { Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
+import { Program } from 'vm/program';
 
 export class CairoRunner {
   program: Program;

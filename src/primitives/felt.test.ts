@@ -1,4 +1,5 @@
 import { test, expect, describe } from 'bun:test';
+
 import { Felt } from './felt';
 
 describe('Felt', () => {

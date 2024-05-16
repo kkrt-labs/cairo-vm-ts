@@ -1,8 +1,10 @@
 import { test, expect, describe } from 'bun:test';
-import { Memory } from './memory';
-import { Relocatable } from 'primitives/relocatable';
-import { Felt } from 'primitives/felt';
+
 import { SegmentOutOfBounds, InconsistentMemory } from 'errors/memory';
+
+import { Felt } from 'primitives/felt';
+import { Relocatable } from 'primitives/relocatable';
+import { Memory } from './memory';
 
 describe('Memory', () => {
   describe('get', () => {

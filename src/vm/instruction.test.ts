@@ -1,24 +1,23 @@
 import { test, expect, describe } from 'bun:test';
 
 import {
+  HighBitSetError,
+  InvalidApUpdate,
+  InvalidOp1Register,
+  InvalidOpcode,
+  InvalidPcUpdate,
+  InvalidResLogic,
+} from 'errors/instruction';
+
+import {
   ApUpdate,
   FpUpdate,
   Instruction,
-  Op1Source,
   Opcode,
   PcUpdate,
   Register,
   ResLogic,
 } from './instruction';
-
-import {
-  HighBitSetError,
-  InvalidApUpdate,
-  InvalidOp1Source,
-  InvalidOpcode,
-  InvalidPcUpdate,
-  InvalidResLogic,
-} from 'errors/instruction';
 
 describe('Instruction', () => {
   describe('decodeInstruction', () => {
@@ -28,9 +27,9 @@ describe('Instruction', () => {
       );
     });
 
-    test('should throw an error InvalidOp1Source', () => {
+    test('should throw an error InvalidOp1Register', () => {
       expect(() => Instruction.decodeInstruction(0x294f800080008000n)).toThrow(
-        new InvalidOp1Source()
+        new InvalidOp1Register()
       );
     });
 
@@ -53,9 +52,9 @@ describe('Instruction', () => {
     });
 
     test('should throw an error with InvalidApUpdate', () => {
-      expect(() => Instruction.decodeInstruction(0x2d48800080008000n)).toThrow(
-        new InvalidApUpdate()
-      );
+      expect(() =>
+        Instruction.decodeInstruction(0x2d48_8000_8000_8000n)
+      ).toThrow(new InvalidApUpdate());
     });
 
     test('should correctly decode the cairo instruction [ap + 10] = [fp] + 42', () => {
@@ -76,7 +75,7 @@ describe('Instruction', () => {
         1,
         Register.Ap,
         Register.Fp,
-        Op1Source.Pc,
+        Register.Pc,
         ResLogic.Add,
         PcUpdate.Regular,
         ApUpdate.Ap,
@@ -105,7 +104,7 @@ describe('Instruction', () => {
         -1,
         Register.Fp,
         Register.Fp,
-        Op1Source.Fp,
+        Register.Fp,
         ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
@@ -134,7 +133,7 @@ describe('Instruction', () => {
         0,
         Register.Fp,
         Register.Fp,
-        Op1Source.Fp,
+        Register.Fp,
         ResLogic.Add,
         PcUpdate.Regular,
         ApUpdate.AddRes,
@@ -163,7 +162,7 @@ describe('Instruction', () => {
         4,
         Register.Ap,
         Register.Ap,
-        Op1Source.Fp,
+        Register.Fp,
         ResLogic.Op1,
         PcUpdate.Jump,
         ApUpdate.Add2,
@@ -185,7 +184,7 @@ describe('Instruction', () => {
         0,
         Register.Fp,
         Register.Fp,
-        Op1Source.Pc,
+        Register.Pc,
         ResLogic.Add,
         PcUpdate.Jump,
         ApUpdate.AddRes,
@@ -207,7 +206,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Op1Source.Fp,
+        Register.Fp,
         ResLogic.Mul,
         PcUpdate.JumpRel,
         ApUpdate.Add1,
@@ -229,7 +228,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Op1Source.Ap,
+        Register.Ap,
         ResLogic.Mul,
         PcUpdate.Jnz,
         ApUpdate.Add1,
@@ -251,7 +250,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Op1Source.Op0,
+        Register.Ap,
         ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
@@ -273,7 +272,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Op1Source.Op0,
+        Register.Ap,
         ResLogic.Op1,
         PcUpdate.Regular,
         ApUpdate.Ap,
@@ -295,7 +294,7 @@ describe('Instruction', () => {
         1,
         Register.Ap,
         Register.Ap,
-        Op1Source.Op0,
+        Register.Ap,
         ResLogic.Op1,
         PcUpdate.Regular,
         ApUpdate.Ap,

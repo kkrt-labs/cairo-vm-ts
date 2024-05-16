@@ -1,25 +1,31 @@
+import { Relocatable } from 'primitives/relocatable';
+
 export class VirtualMachineError extends Error {}
 
-/** End of instructions */
-export class EndOfInstructionsError extends VirtualMachineError {}
-/** Result is unconstrained */
-export class UnconstrainedResError extends VirtualMachineError {}
-/** Assert values are different */
-export class DiffAssertValuesError extends VirtualMachineError {}
-/** Invalid destination operand */
-export class InvalidDstOperand extends VirtualMachineError {}
-/** Invalid operand 0 */
+/** Instruction read from memory at `address` is undefined */
+export class UndefinedInstruction extends VirtualMachineError {
+  public readonly address: Relocatable;
+
+  constructor(address: Relocatable) {
+    super();
+    this.address = address;
+  }
+}
+
+/** Auxiliary value res is undefined */
+export class UnusedRes extends VirtualMachineError {}
+
+/** Invalid dst */
+export class InvalidDst extends VirtualMachineError {}
+
+/** Invalid op0 */
 export class InvalidOp0 extends VirtualMachineError {}
-/** Invalid operand 1 */
+
+/** Invalid op1 */
 export class InvalidOp1 extends VirtualMachineError {}
+
 /** Expected relocatable */
 export class ExpectedRelocatable extends VirtualMachineError {}
+
 /** Expected felt */
 export class ExpectedFelt extends VirtualMachineError {}
-
-/** Op1 immediate offset should be 1 */
-export class Op1ImmediateOffsetError extends VirtualMachineError {}
-/** Op0 is not relocatable. Cannot compute Op1 address */
-export class Op0NotRelocatable extends VirtualMachineError {}
-/** Op0 is undefined */
-export class Op0Undefined extends VirtualMachineError {}
