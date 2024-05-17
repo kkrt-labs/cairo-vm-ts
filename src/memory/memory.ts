@@ -59,4 +59,15 @@ export class Memory {
   getSegmentSize(segment: number): number {
     return this.values[segment]?.length ?? 0;
   }
+
+  printMemory() {
+    console.log('MEMORY');
+    console.log('Address  |  Value');
+    console.log('-----------------');
+    for (const [index, segment] of Object.entries(this.values)) {
+      for (const [offset, value] of segment.entries()) {
+        console.log(`${index}:${offset} -> ${value.toString()}`);
+      }
+    }
+  }
 }

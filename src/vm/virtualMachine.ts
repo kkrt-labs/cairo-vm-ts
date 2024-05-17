@@ -26,6 +26,7 @@ import {
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
+  relocatedMemory: Map<number, Felt>;
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
@@ -33,6 +34,7 @@ export class VirtualMachine {
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
+    this.relocatedMemory = new Map<number, Felt>();
 
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
@@ -349,6 +351,44 @@ export class VirtualMachine {
           this.fp = dst;
         }
         break;
+    }
+  }
+
+  /** Relocate memory and trace */
+  relocate() {
+    let relocationTable = [1];
+    let memorySize = 1;
+
+    for (const segment of this.memory.values) {
+      memorySize += segment.length;
+      relocationTable.push(memorySize);
+    }
+
+    for (const [index, segment] of Object.entries(this.memory.values)) {
+      for (const [offset, value] of segment.entries()) {
+        let relocatedValue: Felt;
+        const relocatedAddr = relocationTable[Number(index)] + Number(offset);
+        if (isFelt(value)) {
+          relocatedValue = value;
+        } else if (isRelocatable(value)) {
+          relocatedValue = new Felt(
+            BigInt(relocationTable[value.segment] + value.offset)
+          );
+        } else {
+          throw new Error();
+        }
+
+        this.relocatedMemory.set(relocatedAddr, relocatedValue);
+      }
+    }
+  }
+
+  printRelocatedMemory() {
+    console.log('RELOCATED MEMORY');
+    console.log('Address  |  Value');
+    console.log('-----------------');
+    for (const [index, value] of this.relocatedMemory.entries()) {
+      console.log(`${index} -> ${value.toString()}`);
     }
   }
 }

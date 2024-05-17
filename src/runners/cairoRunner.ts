@@ -47,7 +47,12 @@ export class CairoRunner {
   }
 
   // Run until the given PC is reached.
-  runUntilPc(finalPc: Relocatable, verbose: boolean = false): void {
+  runUntilPc(
+    finalPc: Relocatable,
+    verbose?: boolean,
+    printMemory?: boolean,
+    printRelocatedMemory?: boolean
+  ): void {
     while (this.vm.pc.offset < finalPc.offset) {
       this.vm.step();
       if (verbose) {
@@ -58,6 +63,14 @@ export class CairoRunner {
         console.log(`[ap - 1]: ${this.vm.memory.get(this.vm.ap.sub(1))}`);
         console.log(`[fp]: ${this.vm.memory.get(this.vm.fp)}`);
       }
+    }
+    this.vm.relocate();
+
+    if (printMemory) {
+      this.vm.memory.printMemory();
+    }
+    if (printRelocatedMemory) {
+      this.vm.printRelocatedMemory();
     }
   }
 }
