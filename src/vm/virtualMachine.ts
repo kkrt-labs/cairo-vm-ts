@@ -23,6 +23,12 @@ import {
   ResLogic,
 } from './instruction';
 
+type TraceEntry = {
+  pc: Relocatable;
+  ap: Relocatable;
+  fp: Relocatable;
+};
+
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
@@ -30,11 +36,13 @@ export class VirtualMachine {
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
+  trace: TraceEntry[];
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
     this.relocatedMemory = new Map<number, Felt>();
+    this.trace = [];
 
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
@@ -73,7 +81,7 @@ export class VirtualMachine {
   runInstruction(instruction: Instruction): void {
     const { op0, op1, res, dst } = this.computeStepValues(instruction);
 
-    // TODO should update the trace here
+    this.trace.push({ pc: this.pc, ap: this.ap, fp: this.fp });
 
     this.updateRegisters(instruction, op1, res, dst);
 
