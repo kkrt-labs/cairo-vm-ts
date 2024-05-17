@@ -67,10 +67,10 @@ export class CairoRunner {
     this.vm.relocate();
 
     if (printMemory) {
-      this.vm.memory.printMemory();
+      console.log(this.vm.memory.toString());
     }
     if (printRelocatedMemory) {
-      this.vm.printRelocatedMemory();
+      console.log(this.vm.relocatedMemoryToString());
     }
   }
 }

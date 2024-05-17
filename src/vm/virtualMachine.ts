@@ -391,12 +391,15 @@ export class VirtualMachine {
     }
   }
 
-  printRelocatedMemory() {
-    console.log('RELOCATED MEMORY');
-    console.log('Address  |  Value');
-    console.log('-----------------');
+  relocatedMemoryToString(): string {
+    const relocatedMemoryToPrint = [
+      '\nRELOCATED MEMORY',
+      'Address  ->  Value',
+      '-----------------',
+    ];
     for (const [index, value] of this.relocatedMemory.entries()) {
-      console.log(`${index} -> ${value.toString()}`);
+      relocatedMemoryToPrint.push(`${index} -> ${value.toString()}`);
     }
+    return relocatedMemoryToPrint.join('\n');
   }
 }

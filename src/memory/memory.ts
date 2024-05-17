@@ -57,14 +57,17 @@ export class Memory {
     return this.values[segment]?.length ?? 0;
   }
 
-  printMemory() {
-    console.log('MEMORY');
-    console.log('Address  |  Value');
-    console.log('-----------------');
+  toString(): string {
+    const memoryToPrint = [
+      '\nMEMORY',
+      'Address  ->  Value',
+      '-----------------',
+    ];
     for (const [index, segment] of Object.entries(this.values)) {
       for (const [offset, value] of segment.entries()) {
-        console.log(`${index}:${offset} -> ${value.toString()}`);
+        memoryToPrint.push(`${index}:${offset} -> ${value.toString()}`);
       }
     }
+    return memoryToPrint.join('\n');
   }
 }
