@@ -31,7 +31,7 @@ describe('cairoRunner', () => {
     test('should return the value of the 10th fibonacci number', () => {
       const runner = new CairoRunner(PROGRAM);
       const finalPc = new Relocatable(0, 12);
-      runner.runUntilPc(finalPc, false, true, true);
+      runner.runUntilPc(finalPc, true, true);
       const executionSize = runner.vm.memory.getSegmentSize(1);
       const executionEnd = runner.executionBase.add(executionSize);
 
@@ -41,7 +41,7 @@ describe('cairoRunner', () => {
     test('should export encoded trace and memory', () => {
       const runner = new CairoRunner(PROGRAM);
       const finalPc = new Relocatable(0, 12);
-      runner.runUntilPc(finalPc, false, true, true);
+      runner.runUntilPc(finalPc, true, true);
       const executionSize = runner.vm.memory.getSegmentSize(1);
       const executionEnd = runner.executionBase.add(executionSize);
       expect(runner.vm.memory.get(executionEnd.sub(1))).toEqual(new Felt(144n));
