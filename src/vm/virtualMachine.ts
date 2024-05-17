@@ -29,6 +29,12 @@ type TraceEntry = {
   fp: Relocatable;
 };
 
+type RelocatedTraceEntry = {
+  pc: Felt;
+  ap: Felt;
+  fp: Felt;
+};
+
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
@@ -37,12 +43,14 @@ export class VirtualMachine {
   ap: Relocatable;
   fp: Relocatable;
   trace: TraceEntry[];
+  relocatedTrace: RelocatedTraceEntry[];
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
     this.relocatedMemory = new Map<number, Felt>();
     this.trace = [];
+    this.relocatedTrace = [];
 
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
@@ -388,6 +396,19 @@ export class VirtualMachine {
 
         this.relocatedMemory.set(relocatedAddr, relocatedValue);
       }
+    }
+    for (const entry of this.trace) {
+      this.relocatedTrace.push({
+        pc: new Felt(
+          BigInt(relocationTable[entry.pc.segment] + entry.pc.offset)
+        ),
+        ap: new Felt(
+          BigInt(relocationTable[entry.ap.segment] + entry.ap.offset)
+        ),
+        fp: new Felt(
+          BigInt(relocationTable[entry.fp.segment] + entry.fp.offset)
+        ),
+      });
     }
   }
 
