@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 import * as fs from 'fs';
+import * as path from 'path';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
@@ -35,6 +36,21 @@ describe('cairoRunner', () => {
       const executionEnd = runner.executionBase.add(executionSize);
 
       expect(runner.vm.memory.get(executionEnd.sub(1))).toEqual(new Felt(144n));
+    });
+
+    test('should export encoded trace and memory', () => {
+      const runner = new CairoRunner(PROGRAM);
+      const finalPc = new Relocatable(0, 12);
+      runner.runUntilPc(finalPc, false, true, true);
+      const executionSize = runner.vm.memory.getSegmentSize(1);
+      const executionEnd = runner.executionBase.add(executionSize);
+      expect(runner.vm.memory.get(executionEnd.sub(1))).toEqual(new Felt(144n));
+
+      const dir = './cairo_programs/cairo_0';
+      const trace_filename = 'fibonacci_trace_ts.bin';
+      const memory_filename = 'fibonacci_memory_ts.bin';
+      runner.exportTrace(path.join(dir, trace_filename));
+      runner.exportMemory(path.join(dir, memory_filename));
     });
   });
 });
