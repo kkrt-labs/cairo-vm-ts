@@ -58,17 +58,17 @@ export class Memory {
   }
 
   toString(): string {
-    const buffer = ['\nMEMORY', 'Address  ->  Value', '-----------------'];
-    buffer.push(
-      this.values
-        .map((segment, index) =>
-          segment.map(
-            (value, offset) => `${index}:${offset} -> ${value.toString()}`
-          )
+    return [
+      '\nMEMORY',
+      'Address  ->  Value',
+      '-----------------',
+      ...this.values.map((segment, index) =>
+        segment.map(
+          (value, offset) => `${index}:${offset} -> ${value.toString()}`
         )
-        .flat()
-        .join('\n')
-    );
-    return buffer.join('\n');
+      ),
+    ]
+      .flat()
+      .join('\n');
   }
 }
