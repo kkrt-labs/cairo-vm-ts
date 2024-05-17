@@ -63,7 +63,7 @@ export class Memory {
       'Address  ->  Value',
       '-----------------',
     ];
-    for (const [index, segment] of Object.entries(this.values)) {
+    for (const [index, segment] of this.values.entries()) {
       for (const [offset, value] of segment.entries()) {
         memoryToPrint.push(`${index}:${offset} -> ${value.toString()}`);
       }

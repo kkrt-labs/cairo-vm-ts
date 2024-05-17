@@ -372,10 +372,10 @@ export class VirtualMachine {
       relocationTable.push(memorySize);
     }
 
-    for (const [index, segment] of Object.entries(this.memory.values)) {
+    for (const [index, segment] of this.memory.values.entries()) {
       for (const [offset, value] of segment.entries()) {
         let relocatedValue: Felt;
-        const relocatedAddr = relocationTable[Number(index)] + Number(offset);
+        const relocatedAddr = relocationTable[index] + offset;
         if (isFelt(value)) {
           relocatedValue = value;
         } else if (isRelocatable(value)) {
