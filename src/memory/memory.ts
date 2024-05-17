@@ -58,16 +58,12 @@ export class Memory {
   }
 
   toString(): string {
-    const memoryToPrint = [
-      '\nMEMORY',
-      'Address  ->  Value',
-      '-----------------',
-    ];
+    const buffer = ['\nMEMORY', 'Address  ->  Value', '-----------------'];
     for (const [index, segment] of this.values.entries()) {
       for (const [offset, value] of segment.entries()) {
-        memoryToPrint.push(`${index}:${offset} -> ${value.toString()}`);
+        buffer.push(`${index}:${offset} -> ${value.toString()}`);
       }
     }
-    return memoryToPrint.join('\n');
+    return buffer.join('\n');
   }
 }
