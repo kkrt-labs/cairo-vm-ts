@@ -55,7 +55,7 @@ export class CairoRunner {
     printMemory?: boolean,
     printRelocatedMemory?: boolean
   ): void {
-    while (this.vm.pc.offset < finalPc.offset) {
+    while (!this.vm.pc.eq(finalPc)) {
       this.vm.step();
       if (verbose) {
         console.log(`AP: ${this.vm.ap.toString}`);
