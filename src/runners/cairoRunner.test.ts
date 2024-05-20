@@ -30,7 +30,7 @@ describe('cairoRunner', () => {
   describe('runUntilPc', () => {
     test('should return the value of the 10th fibonacci number', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, true, true);
+      runner.runUntilPc(runner.finalPc, false, false);
       const executionSize = runner.vm.memory.getSegmentSize(1);
       const executionEnd = runner.executionBase.add(executionSize);
 
