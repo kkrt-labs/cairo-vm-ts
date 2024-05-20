@@ -392,19 +392,13 @@ export class VirtualMachine {
       )
       .forEach(({ addr, value }) => this.relocatedMemory.set(addr, value));
 
-    for (const entry of this.trace) {
-      this.relocatedTrace.push({
-        pc: new Felt(
-          BigInt(relocationTable[entry.pc.segment] + entry.pc.offset)
-        ),
-        ap: new Felt(
-          BigInt(relocationTable[entry.ap.segment] + entry.ap.offset)
-        ),
-        fp: new Felt(
-          BigInt(relocationTable[entry.fp.segment] + entry.fp.offset)
-        ),
-      });
-    }
+    this.trace
+      .map(({ pc, ap, fp }) => ({
+        pc: new Felt(BigInt(relocationTable[pc.segment] + pc.offset)),
+        ap: new Felt(BigInt(relocationTable[ap.segment] + ap.offset)),
+        fp: new Felt(BigInt(relocationTable[fp.segment] + fp.offset)),
+      }))
+      .forEach((registers) => this.relocatedTrace.push(registers));
   }
 
   relocatedMemoryToString(): string {
