@@ -402,14 +402,15 @@ export class VirtualMachine {
   }
 
   relocatedMemoryToString(): string {
-    const buffer = [
+    return [
       '\nRELOCATED MEMORY',
       'Address  ->  Value',
       '-----------------',
-    ];
-    for (const [index, value] of this.relocatedMemory.entries()) {
-      buffer.push(`${index} -> ${value.toString()}`);
-    }
-    return buffer.join('\n');
+      ...Array.from(this.relocatedMemory).map(
+        ([address, value]) => `${address} -> ${value.toString()}`
+      ),
+    ]
+      .flat()
+      .join('\n');
   }
 }
