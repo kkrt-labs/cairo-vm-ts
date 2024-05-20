@@ -381,23 +381,17 @@ export class VirtualMachine {
         )(1)
       );
 
-    for (const [index, segment] of this.memory.values.entries()) {
-      for (const [offset, value] of segment.entries()) {
-        let relocatedValue: Felt;
-        const relocatedAddr = relocationTable[index] + offset;
-        if (isFelt(value)) {
-          relocatedValue = value;
-        } else if (isRelocatable(value)) {
-          relocatedValue = new Felt(
-            BigInt(relocationTable[value.segment] + value.offset)
-          );
-        } else {
-          throw new Error();
-        }
+    this.memory.values
+      .flatMap((segment, index) =>
+        segment.map((value, offset) => ({
+          addr: relocationTable[index] + offset,
+          value: isFelt(value)
+            ? value
+            : new Felt(BigInt(relocationTable[value.segment] + value.offset)),
+        }))
+      )
+      .forEach(({ addr, value }) => this.relocatedMemory.set(addr, value));
 
-        this.relocatedMemory.set(relocatedAddr, relocatedValue);
-      }
-    }
     for (const entry of this.trace) {
       this.relocatedTrace.push({
         pc: new Felt(
