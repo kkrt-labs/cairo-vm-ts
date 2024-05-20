@@ -372,13 +372,14 @@ export class VirtualMachine {
 
   /** Relocate memory and trace */
   relocate() {
-    let relocationTable = [1];
-    let memorySize = 1;
-
-    for (const segment of this.memory.values) {
-      memorySize += segment.length;
-      relocationTable.push(memorySize);
-    }
+    const relocationTable = this.memory.values
+      .map((segment) => segment.length)
+      .map(
+        (
+          (sum) => (value) =>
+            (sum += value) - value
+        )(1)
+      );
 
     for (const [index, segment] of this.memory.values.entries()) {
       for (const [offset, value] of segment.entries()) {
