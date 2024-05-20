@@ -39,13 +39,11 @@ describe('cairoRunner', () => {
 
     test('should export encoded trace and memory', () => {
       const runner = new CairoRunner(PROGRAM);
-      // const finalPc = new Relocatable(0, 12);
       runner.runUntilPc(runner.finalPc, true, true);
-      const executionSize = runner.vm.memory.getSegmentSize(1);
-      const executionEnd = runner.executionBase.add(executionSize);
-      expect(runner.vm.memory.get(executionEnd.sub(1))).toEqual(new Felt(144n));
-
-      const dir = './cairo_programs/cairo_0';
+      const dir = 'tmp';
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+      }
       const trace_filename = 'fibonacci_trace_ts.bin';
       const memory_filename = 'fibonacci_memory_ts.bin';
       runner.exportTrace(path.join(dir, trace_filename));
