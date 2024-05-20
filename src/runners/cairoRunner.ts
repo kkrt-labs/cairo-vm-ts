@@ -56,8 +56,8 @@ export class CairoRunner {
   ): void {
     while (!this.vm.pc.eq(finalPc)) {
       this.vm.step();
-      this.vm.relocate();
     }
+    this.vm.relocate();
     if (printMemory) console.log(this.vm.memory.toString());
     if (printRelocatedMemory) console.log(this.vm.relocatedMemoryToString());
   }
