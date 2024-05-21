@@ -64,15 +64,13 @@ export class CairoRunner {
 
   /** Export the trace little-endian encoded to a file */
   exportTrace(filename: string = 'encoded_trace') {
-    const buffer = new ArrayBuffer((this.vm.relocatedTrace.length + 1) * 3 * 8);
-    const view = new DataView(buffer);
-
-    this.vm.relocatedTrace.forEach((entry, step) => {
-      const byteOffset = step * 3 * 8;
-      view.setBigUint64(byteOffset, entry.ap.toBigInt(), true);
-      view.setBigUint64(byteOffset + 8, entry.fp.toBigInt(), true);
-      view.setBigUint64(byteOffset + 2 * 8, entry.pc.toBigInt(), true);
-    });
+    const buffer = BigUint64Array.from(
+      this.vm.relocatedTrace.flatMap(({ pc, ap, fp }) => [
+        ap.toBigInt(),
+        fp.toBigInt(),
+        pc.toBigInt(),
+      ])
+    );
 
     fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
       if (err) throw err;
