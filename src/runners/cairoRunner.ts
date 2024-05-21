@@ -79,14 +79,13 @@ export class CairoRunner {
 
   /** Export the relocated memory little-endian encoded to a file */
   exportMemory(filename: string = 'encoded_memory') {
-    const buffer = new ArrayBuffer(this.vm.relocatedMemory.size * 5 * 8);
-    const view = new DataView(buffer);
-
-    this.vm.relocatedMemory.forEach((value, address) => {
-      const byteOffset = (address - 1) * 5 * 8;
-      view.setBigUint64(byteOffset, BigInt(address), true);
-      view.setBigUint64(byteOffset + 8, value.toBigInt(), true);
-    });
+    const buffer = BigUint64Array.from(
+      this.vm.relocatedMemory
+        .map(({ address, value }) => {
+          return [BigInt(address), value.to64BitsWords()];
+        })
+        .flat(2)
+    );
 
     fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
       if (err) throw err;

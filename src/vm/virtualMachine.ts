@@ -35,20 +35,25 @@ type RelocatedTraceEntry = {
   fp: Felt;
 };
 
+type RelocatedMemory = {
+  address: number;
+  value: Felt;
+};
+
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
-  relocatedMemory: Map<number, Felt>;
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
   trace: TraceEntry[];
   relocatedTrace: RelocatedTraceEntry[];
+  relocatedMemory: RelocatedMemory[];
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
-    this.relocatedMemory = new Map<number, Felt>();
+    this.relocatedMemory = [];
     this.trace = [];
     this.relocatedTrace = [];
 
@@ -381,24 +386,20 @@ export class VirtualMachine {
         )(1)
       );
 
-    this.memory.values
-      .flatMap((segment, index) =>
-        segment.map((value, offset) => ({
-          addr: relocationTable[index] + offset,
-          value: isFelt(value)
-            ? value
-            : new Felt(BigInt(relocationTable[value.segment] + value.offset)),
-        }))
-      )
-      .forEach(({ addr, value }) => this.relocatedMemory.set(addr, value));
-
-    this.trace
-      .map(({ pc, ap, fp }) => ({
-        pc: new Felt(BigInt(relocationTable[pc.segment] + pc.offset)),
-        ap: new Felt(BigInt(relocationTable[ap.segment] + ap.offset)),
-        fp: new Felt(BigInt(relocationTable[fp.segment] + fp.offset)),
+    this.relocatedMemory = this.memory.values.flatMap((segment, index) =>
+      segment.map((value, offset) => ({
+        address: relocationTable[index] + offset,
+        value: isFelt(value)
+          ? value
+          : new Felt(BigInt(relocationTable[value.segment] + value.offset)),
       }))
-      .forEach((registers) => this.relocatedTrace.push(registers));
+    );
+
+    this.relocatedTrace = this.trace.map(({ pc, ap, fp }) => ({
+      pc: new Felt(BigInt(relocationTable[pc.segment] + pc.offset)),
+      ap: new Felt(BigInt(relocationTable[ap.segment] + ap.offset)),
+      fp: new Felt(BigInt(relocationTable[fp.segment] + fp.offset)),
+    }));
   }
 
   relocatedMemoryToString(): string {
@@ -406,8 +407,8 @@ export class VirtualMachine {
       '\nRELOCATED MEMORY',
       'Address  ->  Value',
       '-----------------',
-      ...Array.from(this.relocatedMemory).map(
-        ([address, value]) => `${address} -> ${value.toString()}`
+      ...this.relocatedMemory.map(
+        ({ address, value }) => `${address} -> ${value.toString()}`
       ),
     ]
       .flat()
