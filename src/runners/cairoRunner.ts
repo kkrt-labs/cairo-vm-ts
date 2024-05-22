@@ -62,30 +62,45 @@ export class CairoRunner {
     if (printRelocatedMemory) console.log(this.vm.relocatedMemoryToString());
   }
 
-  /** Export the trace little-endian encoded to a file */
+  /**
+   * Export the trace little-endian encoded to a file
+   *
+   * @dev DataView must be used to enforce little-endianness
+   */
   exportTrace(filename: string = 'encoded_trace') {
-    const buffer = BigUint64Array.from(
-      this.vm.relocatedTrace.flatMap(({ pc, ap, fp }) => [
-        ap.toBigInt(),
-        fp.toBigInt(),
-        pc.toBigInt(),
-      ])
-    );
+    const buffer = new ArrayBuffer(this.vm.relocatedTrace.length * 3 * 8);
+    const view = new DataView(buffer);
+
+    this.vm.relocatedTrace.forEach(({ pc, ap, fp }, step) => {
+      const byteOffset = step * 3 * 8;
+      view.setBigUint64(byteOffset, ap.toBigInt(), true);
+      view.setBigUint64(byteOffset + 8, fp.toBigInt(), true);
+      view.setBigUint64(byteOffset + 2 * 8, pc.toBigInt(), true);
+    });
 
     fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
       if (err) throw err;
     });
   }
 
-  /** Export the relocated memory little-endian encoded to a file */
+  /**
+   * Export the relocated memory little-endian encoded to a file
+   *
+   * @dev DataView must be used to enforce little-endianness
+   */
   exportMemory(filename: string = 'encoded_memory') {
-    const buffer = BigUint64Array.from(
-      this.vm.relocatedMemory
-        .map(({ address, value }) => {
-          return [BigInt(address), value.to64BitsWords()];
-        })
-        .flat(2)
-    );
+    const buffer = new ArrayBuffer(this.vm.relocatedMemory.length * 5 * 8);
+    const view = new DataView(buffer);
+
+    this.vm.relocatedMemory.forEach(({ address, value }) => {
+      const byteOffset = (address - 1) * 5 * 8;
+      const valueAs64BitsWords = value.to64BitsWords();
+      view.setBigUint64(byteOffset, BigInt(address), true);
+      view.setBigUint64(byteOffset + 8, valueAs64BitsWords[0], true);
+      view.setBigUint64(byteOffset + 2 * 8, valueAs64BitsWords[1], true);
+      view.setBigUint64(byteOffset + 3 * 8, valueAs64BitsWords[2], true);
+      view.setBigUint64(byteOffset + 4 * 8, valueAs64BitsWords[3], true);
+    });
 
     fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
       if (err) throw err;
