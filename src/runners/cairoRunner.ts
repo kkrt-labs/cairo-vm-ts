@@ -51,13 +51,14 @@ export class CairoRunner {
   // Run until the given PC is reached.
   runUntilPc(
     finalPc: Relocatable,
+    relocate: boolean,
     printMemory?: boolean,
     printRelocatedMemory?: boolean
   ): void {
     while (!this.vm.pc.eq(finalPc)) {
       this.vm.step();
     }
-    this.vm.relocate();
+    if (relocate) this.vm.relocate();
     if (printMemory) console.log(this.vm.memory.toString());
     if (printRelocatedMemory) console.log(this.vm.relocatedMemoryToString());
   }
