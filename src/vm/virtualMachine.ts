@@ -377,6 +377,14 @@ export class VirtualMachine {
 
   /** Relocate memory and trace */
   relocate() {
+    /*
+     * Each element of the relocationTable is the start address
+     * of a segment in the relocated memory.
+     * This address is the sum of the length of all previous segments,
+     * plus one, as the relocated memory is 1-based.
+     * We still don't know why it is 1-based, must investigate.
+     * See [issue #60](https://github.com/kkrt-labs/cairo-vm-ts/issues/60)
+     */
     const relocationTable = this.memory.values
       .map((segment) => segment.length)
       .map(
