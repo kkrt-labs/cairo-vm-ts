@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'bun:test';
+
 import * as fs from 'fs';
 import * as path from 'path';
+import * as os from 'os';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
 import { CairoRunner } from './cairoRunner';
+
+const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
 const FIBONACCI_PROGRAM_STRING = fs.readFileSync(
   'cairo_programs/cairo_0/fibonacci.json',
@@ -40,14 +44,10 @@ describe('cairoRunner', () => {
     test('should export encoded trace and memory', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.runUntilPc(runner.finalPc, true, true);
-      const dir = 'tmp';
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-      }
       const trace_filename = 'fibonacci_trace_ts.bin';
       const memory_filename = 'fibonacci_memory_ts.bin';
-      runner.exportTrace(path.join(dir, trace_filename));
-      runner.exportMemory(path.join(dir, memory_filename));
+      runner.exportTrace(path.join(tmpDir, trace_filename));
+      runner.exportMemory(path.join(tmpDir, memory_filename));
     });
   });
 });
