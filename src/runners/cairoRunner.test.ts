@@ -41,13 +41,37 @@ describe('cairoRunner', () => {
       expect(runner.vm.memory.get(executionEnd.sub(1))).toEqual(new Felt(144n));
     });
 
-    test('should export encoded trace and memory', () => {
+    /*
+     * TODO: Add differential testing of the content
+     * See this [issue](https://github.com/kkrt-labs/cairo-vm-ts/issues/59) for more details
+
+     * NOTE: `fs.access` is only used when checking if a file exists
+     * It should be removed if reading the file, to avoid race conditions
+    */
+    test('should export encoded trace', () => {
       const runner = new CairoRunner(PROGRAM);
       runner.runUntilPc(runner.finalPc, true, true);
       const trace_filename = 'fibonacci_trace_ts.bin';
+      const trace_path = path.join(tmpDir, trace_filename);
+      runner.exportTrace(trace_path);
+      expect(() =>
+        fs.access(trace_path, (err) => {
+          if (err) throw err;
+        })
+      ).not.toThrow();
+    });
+
+    test('should export encoded memory', () => {
+      const runner = new CairoRunner(PROGRAM);
+      runner.runUntilPc(runner.finalPc, true, true);
       const memory_filename = 'fibonacci_memory_ts.bin';
-      runner.exportTrace(path.join(tmpDir, trace_filename));
-      runner.exportMemory(path.join(tmpDir, memory_filename));
+      const memory_path = path.join(tmpDir, memory_filename);
+      runner.exportMemory(memory_path);
+      expect(() =>
+        fs.access(memory_path, (err) => {
+          if (err) throw err;
+        })
+      ).not.toThrow();
     });
   });
 });
