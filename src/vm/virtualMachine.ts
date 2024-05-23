@@ -23,16 +23,39 @@ import {
   ResLogic,
 } from './instruction';
 
+type TraceEntry = {
+  pc: Relocatable;
+  ap: Relocatable;
+  fp: Relocatable;
+};
+
+type RelocatedTraceEntry = {
+  pc: Felt;
+  ap: Felt;
+  fp: Felt;
+};
+
+type RelocatedMemory = {
+  address: number;
+  value: Felt;
+};
+
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
+  trace: TraceEntry[];
+  relocatedMemory: RelocatedMemory[];
+  relocatedTrace: RelocatedTraceEntry[];
 
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
+    this.trace = [];
+    this.relocatedMemory = [];
+    this.relocatedTrace = [];
 
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
@@ -71,7 +94,7 @@ export class VirtualMachine {
   runInstruction(instruction: Instruction): void {
     const { op0, op1, res, dst } = this.computeStepValues(instruction);
 
-    // TODO should update the trace here
+    this.trace.push({ pc: this.pc, ap: this.ap, fp: this.fp });
 
     this.updateRegisters(instruction, op1, res, dst);
 
@@ -350,5 +373,67 @@ export class VirtualMachine {
         }
         break;
     }
+  }
+
+  /**
+   * Relocate memory and trace
+   *
+   * @param offset Sets the relocated memory start address to offset.
+   *
+   * NOTE: The current Solidity contract CpuVerifier.sol by StarkWare
+   * expects the relocated memory to start at 1.
+   *
+   * See [issue #60](https://github.com/kkrt-labs/cairo-vm-ts/issues/60) for more details
+   */
+  relocate(offset: number = 0) {
+    /*
+     * Each element of the relocationTable is the start address
+     * of a segment in the relocated memory.
+     * This address is the sum of the length of all previous segments,
+     * plus one if complying with StarkWare current verifier
+     */
+    const relocationTable = this.memory.values
+      .map((segment) => segment.length)
+      .map(
+        (
+          (sum) => (value) =>
+            (sum += value) - value
+        )(offset)
+      );
+
+    this.relocatedMemory = this.memory.values.flatMap((segment, index) =>
+      segment.map((value, offset) => ({
+        address: relocationTable[index] + offset,
+        value: isFelt(value)
+          ? value
+          : new Felt(BigInt(relocationTable[value.segment] + value.offset)),
+      }))
+    );
+
+    this.relocatedTrace = this.trace.map(({ pc, ap, fp }) => ({
+      pc: new Felt(BigInt(relocationTable[pc.segment] + pc.offset)),
+      ap: new Felt(BigInt(relocationTable[ap.segment] + ap.offset)),
+      fp: new Felt(BigInt(relocationTable[fp.segment] + fp.offset)),
+    }));
+
+    this.trace
+      .flatMap(Object.values)
+      .map(
+        (register: Relocatable) =>
+          new Felt(BigInt(relocationTable[register.segment] + register.offset))
+      );
+  }
+
+  relocatedMemoryToString(): string {
+    return [
+      '\nRELOCATED MEMORY',
+      'Address  ->  Value',
+      '-----------------',
+      ...this.relocatedMemory.map(
+        ({ address, value }) => `${address} -> ${value.toString()}`
+      ),
+    ]
+      .flat()
+      .join('\n');
   }
 }

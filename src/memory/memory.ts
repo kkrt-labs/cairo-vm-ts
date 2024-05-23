@@ -43,11 +43,8 @@ export class Memory {
       throw new SegmentOutOfBounds(segment, segmentNumber);
     }
 
-    const currentValue: SegmentValue | undefined = this.values[segment][offset];
-
-    if (currentValue === undefined) {
-      this.values[segment][offset] = value;
-    } else if (currentValue !== value) {
+    this.values[segment][offset] = this.values[segment][offset] ?? value;
+    if (this.values[segment][offset] !== value) {
       throw new InconsistentMemory(
         address,
         this.values[segment][offset],
@@ -58,5 +55,20 @@ export class Memory {
 
   getSegmentSize(segment: number): number {
     return this.values[segment]?.length ?? 0;
+  }
+
+  toString(): string {
+    return [
+      '\nMEMORY',
+      'Address  ->  Value',
+      '-----------------',
+      ...this.values.map((segment, index) =>
+        segment.map(
+          (value, offset) => `${index}:${offset} -> ${value.toString()}`
+        )
+      ),
+    ]
+      .flat()
+      .join('\n');
   }
 }

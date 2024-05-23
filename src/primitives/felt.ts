@@ -58,6 +58,16 @@ export class Felt {
     return this.inner;
   }
 
+  to64BitsWords(): bigint[] {
+    const mask = 0xffffffffffffffffn;
+    return [
+      this.inner & mask,
+      (this.inner >> 64n) & mask,
+      (this.inner >> 128n) & mask,
+      (this.inner >> 192n) & mask,
+    ];
+  }
+
   toHexString(): string {
     return this.inner.toString(16);
   }
