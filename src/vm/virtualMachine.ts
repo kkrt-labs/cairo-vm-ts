@@ -375,15 +375,22 @@ export class VirtualMachine {
     }
   }
 
-  /** Relocate memory and trace */
-  relocate() {
+  /**
+   * Relocate memory and trace
+   *
+   * @param offset Sets the relocated memory start address to offset.
+   *
+   * NOTE: The current Solidity contract CpuVerifier.sol by StarkWare
+   * expects the relocated memory to start at 1.
+   *
+   * See [issue #60](https://github.com/kkrt-labs/cairo-vm-ts/issues/60) for more details
+   */
+  relocate(offset: number = 0) {
     /*
      * Each element of the relocationTable is the start address
      * of a segment in the relocated memory.
      * This address is the sum of the length of all previous segments,
-     * plus one, as the relocated memory is 1-based.
-     * We still don't know why it is 1-based, must investigate.
-     * See [issue #60](https://github.com/kkrt-labs/cairo-vm-ts/issues/60)
+     * plus one if complying with StarkWare current verifier
      */
     const relocationTable = this.memory.values
       .map((segment) => segment.length)
@@ -391,7 +398,7 @@ export class VirtualMachine {
         (
           (sum) => (value) =>
             (sum += value) - value
-        )(1)
+        )(offset)
       );
 
     this.relocatedMemory = this.memory.values.flatMap((segment, index) =>

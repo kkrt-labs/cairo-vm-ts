@@ -34,7 +34,7 @@ describe('cairoRunner', () => {
   describe('runUntilPc', () => {
     test('should return the value of the 10th fibonacci number', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, false, true, true);
+      runner.runUntilPc(runner.finalPc, true, 0);
       const executionSize = runner.vm.memory.getSegmentSize(1);
       const executionEnd = runner.executionBase.add(executionSize);
 
@@ -50,7 +50,7 @@ describe('cairoRunner', () => {
     */
     test('should export encoded trace', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, true);
+      runner.runUntilPc(runner.finalPc, true, 1);
       const trace_filename = 'fibonacci_trace_ts.bin';
       const trace_path = path.join(tmpDir, trace_filename);
       runner.exportTrace(trace_path);
@@ -63,7 +63,7 @@ describe('cairoRunner', () => {
 
     test('should export encoded memory', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, true);
+      runner.runUntilPc(runner.finalPc, true, 1);
       const memory_filename = 'fibonacci_memory_ts.bin';
       const memory_path = path.join(tmpDir, memory_filename);
       runner.exportMemory(memory_path);
