@@ -10,12 +10,12 @@ export class CairoRunner {
   programBase: Relocatable;
   executionBase: Relocatable;
   finalPc: Relocatable;
-  mainOffset: number;
 
   constructor(program: Program) {
     this.program = program;
     const mainIdentifier = program.identifiers.get('__main__.main');
-    this.mainOffset = mainIdentifier !== undefined ? mainIdentifier.pc ?? 0 : 0;
+    const mainOffset =
+      mainIdentifier !== undefined ? mainIdentifier.pc ?? 0 : 0;
 
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
@@ -25,7 +25,7 @@ export class CairoRunner {
     this.finalPc = this.vm.memory.addSegment();
     const values = [returnFp, this.finalPc];
 
-    this.vm.pc = this.programBase.add(this.mainOffset);
+    this.vm.pc = this.programBase.add(mainOffset);
     this.vm.ap = this.executionBase.add(values.length);
     this.vm.fp = this.vm.ap;
 

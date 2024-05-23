@@ -21,7 +21,6 @@ describe('cairoRunner', () => {
   describe('constructor', () => {
     test('should construct', () => {
       const runner = new CairoRunner(PROGRAM);
-      expect(runner.mainOffset).toEqual(0);
       expect(runner.programBase).toEqual(new Relocatable(0, 0));
       expect(runner.executionBase).toEqual(new Relocatable(1, 0));
       expect(runner.vm.pc).toEqual(new Relocatable(0, 0));
