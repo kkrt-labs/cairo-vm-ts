@@ -24,10 +24,10 @@ describe('cairoRunner', () => {
       expect(runner.mainOffset).toEqual(0);
       expect(runner.programBase).toEqual(new Relocatable(0, 0));
       expect(runner.executionBase).toEqual(new Relocatable(1, 0));
-      expect(runner.initialFp).toEqual(new Relocatable(1, 2));
-      expect(runner.initialAp).toEqual(new Relocatable(1, 2));
+      expect(runner.vm.pc).toEqual(new Relocatable(0, 0));
+      expect(runner.vm.ap).toEqual(new Relocatable(1, 2));
+      expect(runner.vm.fp).toEqual(new Relocatable(1, 2));
       expect(runner.finalPc).toEqual(new Relocatable(3, 0));
-      expect(runner.initialPc).toEqual(new Relocatable(0, 0));
     });
   });
 
