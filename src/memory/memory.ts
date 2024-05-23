@@ -7,10 +7,14 @@ export class Memory {
   values: Array<Array<SegmentValue>>;
 
   constructor() {
-    this.values = [[]];
+    this.values = [];
   }
 
   get(address: Relocatable): SegmentValue | undefined {
+    const segmentNumber = this.getSegmentNumber();
+    if (address.segment >= segmentNumber) {
+      throw new SegmentOutOfBounds(address.segment, segmentNumber);
+    }
     return this.values[address.segment][address.offset];
   }
 
@@ -37,13 +41,7 @@ export class Memory {
    */
   assertEq(address: Relocatable, value: SegmentValue): void {
     const { segment, offset } = address;
-    const segmentNumber = this.getSegmentNumber();
-
-    if (segment >= segmentNumber) {
-      throw new SegmentOutOfBounds(segment, segmentNumber);
-    }
-
-    this.values[segment][offset] = this.values[segment][offset] ?? value;
+    this.values[segment][offset] = this.get(address) ?? value;
     if (this.values[segment][offset] !== value) {
       throw new InconsistentMemory(
         address,

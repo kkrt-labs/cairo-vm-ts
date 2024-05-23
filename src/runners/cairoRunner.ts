@@ -22,7 +22,7 @@ export class CairoRunner {
       mainIdentifier !== undefined ? mainIdentifier.pc ?? 0 : 0;
 
     this.vm = new VirtualMachine();
-    this.programBase = new Relocatable(0, 0);
+    this.programBase = this.vm.memory.addSegment();
     this.mainOffset = mainOffset;
     this.executionBase = this.vm.memory.addSegment();
 
