@@ -1,4 +1,4 @@
-import { test, expect, describe } from 'bun:test';
+import { test, expect, describe, spyOn } from 'bun:test';
 
 import { SegmentOutOfBounds, InconsistentMemory } from 'errors/memory';
 import { Felt } from 'primitives/felt';
@@ -101,6 +101,37 @@ describe('Memory', () => {
       expect(() => memory.assertEq(address, VALUES[0])).toThrow(
         new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
       );
+    });
+  });
+
+  describe('toString', () => {
+    test('Memory should be correctly printed to stdout', () => {
+      const memory = new Memory();
+      memory.addSegment();
+      memory.addSegment();
+      const addresses = [
+        new Relocatable(0, 0),
+        new Relocatable(0, 2),
+        new Relocatable(1, 0),
+      ];
+      memory.assertEq(addresses[0], VALUES[2]);
+      memory.assertEq(addresses[1], VALUES[3]);
+      memory.assertEq(addresses[2], VALUES[1]);
+
+      const expectedStr = [
+        '\nMEMORY',
+        'Address  ->  Value',
+        '-----------------',
+        '0:0 -> 1',
+        '0:2 -> 2',
+        '1:0 -> 0:1',
+      ].join('\n');
+
+      const logSpy = spyOn(memory, 'toString');
+
+      console.log(memory.toString());
+
+      expect(logSpy.mock.results[0].value).toEqual(expectedStr);
     });
   });
 });
