@@ -22,7 +22,7 @@ describe('Memory', () => {
   });
 
   describe('addSegment', () => {
-    test('should expand the memory size', () => {
+    test('should add a new segment', () => {
       const memory = new Memory();
       memory.addSegment();
       expect(memory.getSegmentNumber()).toEqual(1);
