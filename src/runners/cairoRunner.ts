@@ -4,6 +4,16 @@ import { Relocatable } from 'primitives/relocatable';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { Program } from 'vm/program';
 
+/**
+ * Configuration of the run
+ * - relocate: Flag to relocate the memory and the trace
+ * - relocateOffset: Start address of the relocated memory
+ */
+export type RunOptions = {
+  relocate: boolean;
+  relocateOffset: number;
+};
+
 export class CairoRunner {
   program: Program;
   vm: VirtualMachine;
@@ -11,11 +21,15 @@ export class CairoRunner {
   executionBase: Relocatable;
   finalPc: Relocatable;
 
+  static readonly defaultRunOptions: RunOptions = {
+    relocate: false,
+    relocateOffset: 0,
+  };
+
   constructor(program: Program) {
     this.program = program;
-    const mainIdentifier = program.identifiers.get('__main__.main');
-    const mainOffset =
-      mainIdentifier !== undefined ? mainIdentifier.pc ?? 0 : 0;
+    const mainId = program.identifiers.get('__main__.main');
+    const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
@@ -23,29 +37,25 @@ export class CairoRunner {
 
     const returnFp = this.vm.memory.addSegment();
     this.finalPc = this.vm.memory.addSegment();
-    const values = [returnFp, this.finalPc];
+    const stack = [returnFp, this.finalPc];
 
     this.vm.pc = this.programBase.add(mainOffset);
-    this.vm.ap = this.executionBase.add(values.length);
+    this.vm.ap = this.executionBase.add(stack.length);
     this.vm.fp = this.vm.ap;
 
     this.vm.memory.setValues(this.programBase, this.program.data);
-    this.vm.memory.setValues(this.executionBase, values);
+    this.vm.memory.setValues(this.executionBase, stack);
   }
-  // Run until the given PC is reached.
-  runUntilPc(
-    finalPc: Relocatable,
-    relocate?: boolean,
-    relocateOffset: number = 0,
-    printMemory?: boolean,
-    printRelocatedMemory?: boolean
-  ): void {
-    while (!this.vm.pc.eq(finalPc)) {
+
+  /**
+   * Run the loaded program with the given config
+   */
+  run(config: RunOptions = CairoRunner.defaultRunOptions): void {
+    while (!this.vm.pc.eq(this.finalPc)) {
       this.vm.step();
     }
+    const { relocate, relocateOffset } = config;
     if (relocate) this.vm.relocate(relocateOffset);
-    if (printMemory) console.log(this.vm.memory.toString());
-    if (printRelocatedMemory) console.log(this.vm.relocatedMemoryToString());
   }
 
   /**
