@@ -7,7 +7,7 @@ import * as os from 'os';
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
-import { CairoRunner } from './cairoRunner';
+import { CairoRunner, RunOptions } from './cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
@@ -21,20 +21,23 @@ describe('cairoRunner', () => {
   describe('constructor', () => {
     test('should construct', () => {
       const runner = new CairoRunner(PROGRAM);
-      expect(runner.mainOffset).toEqual(0);
       expect(runner.programBase).toEqual(new Relocatable(0, 0));
       expect(runner.executionBase).toEqual(new Relocatable(1, 0));
-      expect(runner.initialFp).toEqual(new Relocatable(1, 2));
-      expect(runner.initialAp).toEqual(new Relocatable(1, 2));
+      expect(runner.vm.pc).toEqual(new Relocatable(0, 0));
+      expect(runner.vm.ap).toEqual(new Relocatable(1, 2));
+      expect(runner.vm.fp).toEqual(new Relocatable(1, 2));
       expect(runner.finalPc).toEqual(new Relocatable(3, 0));
-      expect(runner.initialPc).toEqual(new Relocatable(0, 0));
     });
   });
 
-  describe('runUntilPc', () => {
+  describe('run', () => {
     test('should return the value of the 10th fibonacci number', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, true, 0);
+      const config: RunOptions = {
+        relocate: true,
+        relocateOffset: 0,
+      };
+      runner.run(config);
       const executionSize = runner.vm.memory.getSegmentSize(1);
       const executionEnd = runner.executionBase.add(executionSize);
 
@@ -50,7 +53,11 @@ describe('cairoRunner', () => {
     */
     test('should export encoded trace', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, true, 1);
+      const config: RunOptions = {
+        relocate: false,
+        relocateOffset: 1,
+      };
+      runner.run(config);
       const trace_filename = 'fibonacci_trace_ts.bin';
       const trace_path = path.join(tmpDir, trace_filename);
       runner.exportTrace(trace_path);
@@ -63,7 +70,11 @@ describe('cairoRunner', () => {
 
     test('should export encoded memory', () => {
       const runner = new CairoRunner(PROGRAM);
-      runner.runUntilPc(runner.finalPc, true, 1);
+      const config: RunOptions = {
+        relocate: false,
+        relocateOffset: 1,
+      };
+      runner.run(config);
       const memory_filename = 'fibonacci_memory_ts.bin';
       const memory_path = path.join(tmpDir, memory_filename);
       runner.exportMemory(memory_path);

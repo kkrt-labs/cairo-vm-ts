@@ -1,4 +1,4 @@
-import { test, expect, describe } from 'bun:test';
+import { test, expect, describe, spyOn } from 'bun:test';
 
 import {
   ExpectedFelt,
@@ -500,6 +500,41 @@ describe('VirtualMachine', () => {
         fp: new Relocatable(1, 11),
       };
       expect({ ap: vm.ap, fp: vm.fp, pc: vm.pc }).toEqual(registers);
+    });
+  });
+
+  describe('relocatedMemoryToString', () => {
+    test('should properly print relocated memory', () => {
+      const vm = new VirtualMachine();
+      vm.memory.addSegment();
+      vm.memory.addSegment();
+
+      const addresses = [
+        new Relocatable(0, 0),
+        new Relocatable(0, 2),
+        new Relocatable(1, 0),
+      ];
+      const values = [new Felt(1n), new Felt(2n), new Relocatable(0, 2)];
+      vm.memory.assertEq(addresses[0], values[0]);
+      vm.memory.assertEq(addresses[1], values[1]);
+      vm.memory.assertEq(addresses[2], values[2]);
+
+      vm.relocate();
+
+      const expectedStr = [
+        '\nRELOCATED MEMORY',
+        'Address  ->  Value',
+        '-----------------',
+        `0 -> 1`,
+        `2 -> 2`,
+        `3 -> 2`,
+      ].join('\n');
+
+      const logSpy = spyOn(vm, 'relocatedMemoryToString');
+
+      vm.relocatedMemoryToString();
+
+      expect(logSpy.mock.results[0].value).toEqual(expectedStr);
     });
   });
 });

@@ -26,10 +26,10 @@ export class SegmentOutOfBounds extends MemoryError {
   public readonly segmentIndex: number;
   public readonly segmentNumber: number;
 
-  constructor(segment_index: number, segment_number: number) {
+  constructor(segmentIndex: number, segmentNumber: number) {
     super();
-    this.segmentIndex = segment_index;
-    this.segmentNumber = segment_number;
+    this.segmentIndex = segmentIndex;
+    this.segmentNumber = segmentNumber;
   }
 }
 
