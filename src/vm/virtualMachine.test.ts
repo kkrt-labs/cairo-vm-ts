@@ -532,7 +532,7 @@ describe('VirtualMachine', () => {
 
       const logSpy = spyOn(vm, 'relocatedMemoryToString');
 
-      console.log(vm.relocatedMemoryToString());
+      vm.relocatedMemoryToString();
 
       expect(logSpy.mock.results[0].value).toEqual(expectedStr);
     });

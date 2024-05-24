@@ -129,7 +129,7 @@ describe('Memory', () => {
 
       const logSpy = spyOn(memory, 'toString');
 
-      console.log(memory.toString());
+      memory.toString();
 
       expect(logSpy.mock.results[0].value).toEqual(expectedStr);
     });
