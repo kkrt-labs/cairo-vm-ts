@@ -37,7 +37,7 @@ describe('Felt', () => {
     });
     test('should convert correctly a felt to its hexstring representation', () => {
       const felt = new Felt(10n);
-      expect(felt.toHexString()).toEqual('a');
+      expect(felt.toString(16)).toEqual('a');
     });
   });
 

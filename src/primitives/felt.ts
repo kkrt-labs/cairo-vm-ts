@@ -50,8 +50,8 @@ export class Felt {
     return !isRelocatable(other) && this.inner === other.inner;
   }
 
-  toString(): string {
-    return this.inner.toString();
+  toString(radix?: number): string {
+    return this.inner.toString(radix);
   }
 
   toBigInt(): bigint {
@@ -66,10 +66,6 @@ export class Felt {
       (this.inner >> 128n) & mask,
       (this.inner >> 192n) & mask,
     ];
-  }
-
-  toHexString(): string {
-    return this.inner.toString(16);
   }
 
   /**
