@@ -165,22 +165,6 @@ export class Instruction {
    */
   static readonly BIAS = BigInt(2 ** 15);
 
-  static default(): Instruction {
-    return new Instruction(
-      0,
-      0,
-      0,
-      Register.Ap,
-      Register.Ap,
-      Register.Ap,
-      ResLogic.Op1,
-      PcUpdate.Regular,
-      ApUpdate.Ap,
-      FpUpdate.Fp,
-      Opcode.NoOp
-    );
-  }
-
   constructor(
     dstOffset: number,
     op0Offset: number,
