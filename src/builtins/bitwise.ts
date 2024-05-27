@@ -30,14 +30,20 @@ export class Bitwise extends BuiltinRunnerBase {
     if (!isFelt(yValue)) throw new ExpectedFelt();
     const y = yValue.toBigInt();
 
-    const addressAND = new Relocatable(segmentId, xOffset + 2);
-    const addressXOR = new Relocatable(segmentId, xOffset + 3);
-    const addressOR = new Relocatable(segmentId, xOffset + 4);
-
-    segment.assertEq(addressAND, new Felt(x & y));
-    segment.assertEq(addressXOR, new Felt(x ^ y));
-    segment.assertEq(addressOR, new Felt(x | y));
-
+    switch (bitwiseIndex) {
+      case 2:
+        const addressAND = new Relocatable(segmentId, xOffset + 2);
+        segment.assertEq(addressAND, new Felt(x & y));
+        break;
+      case 3:
+        const addressXOR = new Relocatable(segmentId, xOffset + 3);
+        segment.assertEq(addressXOR, new Felt(x ^ y));
+        break;
+      case 4:
+        const addressOR = new Relocatable(segmentId, xOffset + 4);
+        segment.assertEq(addressOR, new Felt(x | y));
+        break;
+    }
     return segment.values[offset];
   }
 
