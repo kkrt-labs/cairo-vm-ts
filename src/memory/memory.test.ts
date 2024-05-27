@@ -34,7 +34,7 @@ describe('Memory', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
       expect(() => memory.get(address)).toThrow(
-        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
+        new SegmentOutOfBounds(address.segmentId, memory.getSegmentNumber())
       );
     });
 
@@ -100,7 +100,7 @@ describe('Memory', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
       expect(() => memory.assertEq(address, VALUES[0])).toThrow(
-        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
+        new SegmentOutOfBounds(address.segmentId, memory.getSegmentNumber())
       );
     });
   });

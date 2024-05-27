@@ -8,11 +8,11 @@ import { Felt } from './felt';
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 
 export class Relocatable {
-  segment: number;
+  segmentId: number;
   offset: number;
 
-  constructor(segment: number, offset: number) {
-    this.segment = segment;
+  constructor(segmentId: number, offset: number) {
+    this.segmentId = segmentId;
     this.offset = offset;
   }
 
@@ -25,14 +25,14 @@ export class Relocatable {
       const offset = new Felt(BigInt(this.offset));
       const newOffset = Number(offset.add(other));
 
-      return new Relocatable(this.segment, newOffset);
+      return new Relocatable(this.segmentId, newOffset);
     }
 
     if (isRelocatable(other)) {
       throw new ForbiddenOperation();
     }
 
-    return new Relocatable(this.segment, this.offset + other);
+    return new Relocatable(this.segmentId, this.offset + other);
   }
 
   sub(other: Felt): Relocatable;
@@ -46,7 +46,7 @@ export class Relocatable {
       if (this.offset < delta) {
         throw new OffsetUnderflow();
       }
-      return new Relocatable(this.segment, this.offset - delta);
+      return new Relocatable(this.segmentId, this.offset - delta);
     }
 
     if (isRelocatable(other)) {
@@ -54,7 +54,7 @@ export class Relocatable {
         throw new OffsetUnderflow();
       }
 
-      if (this.segment !== other.segment) {
+      if (this.segmentId !== other.segmentId) {
         throw new SegmentError();
       }
 
@@ -65,18 +65,18 @@ export class Relocatable {
       throw new OffsetUnderflow();
     }
 
-    return new Relocatable(this.segment, this.offset - other);
+    return new Relocatable(this.segmentId, this.offset - other);
   }
 
   eq(other: SegmentValue): boolean {
     return (
       !isFelt(other) &&
       other.offset === this.offset &&
-      other.segment === this.segment
+      other.segmentId === this.segmentId
     );
   }
 
   toString(): string {
-    return `${this.segment}:${this.offset}`;
+    return `${this.segmentId}:${this.offset}`;
   }
 }

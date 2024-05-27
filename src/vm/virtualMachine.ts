@@ -406,21 +406,25 @@ export class VirtualMachine {
         address: relocationTable[index] + offset,
         value: isFelt(value)
           ? value
-          : new Felt(BigInt(relocationTable[value.segment] + value.offset)),
+          : new Felt(
+              BigInt(relocationTable[value.segmentId] + value.offset)
+            ),
       }))
     );
 
     this.relocatedTrace = this.trace.map(({ pc, ap, fp }) => ({
-      pc: new Felt(BigInt(relocationTable[pc.segment] + pc.offset)),
-      ap: new Felt(BigInt(relocationTable[ap.segment] + ap.offset)),
-      fp: new Felt(BigInt(relocationTable[fp.segment] + fp.offset)),
+      pc: new Felt(BigInt(relocationTable[pc.segmentId] + pc.offset)),
+      ap: new Felt(BigInt(relocationTable[ap.segmentId] + ap.offset)),
+      fp: new Felt(BigInt(relocationTable[fp.segmentId] + fp.offset)),
     }));
 
     this.trace
       .flatMap(Object.values)
       .map(
         (register: Relocatable) =>
-          new Felt(BigInt(relocationTable[register.segment] + register.offset))
+          new Felt(
+            BigInt(relocationTable[register.segmentId] + register.offset)
+          )
       );
   }
 

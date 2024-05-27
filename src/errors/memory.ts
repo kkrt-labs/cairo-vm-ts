@@ -21,14 +21,14 @@ export class InconsistentMemory extends MemoryError {
   }
 }
 
-/** Trying to read on a segment that is not accessible (`segmentIndex >= segmentNumber`) */
+/** Trying to read on a segment that is not accessible (`segmentId >= segmentNumber`) */
 export class SegmentOutOfBounds extends MemoryError {
-  public readonly segmentIndex: number;
+  public readonly segmentId: number;
   public readonly segmentNumber: number;
 
-  constructor(segmentIndex: number, segmentNumber: number) {
+  constructor(segmentId: number, segmentNumber: number) {
     super();
-    this.segmentIndex = segmentIndex;
+    this.segmentId = segmentId;
     this.segmentNumber = segmentNumber;
   }
 }

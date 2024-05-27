@@ -37,10 +37,10 @@ export class Memory {
 
   get(address: Relocatable): SegmentValue | undefined {
     const segmentNumber = this.getSegmentNumber();
-    if (address.segment >= segmentNumber) {
-      throw new SegmentOutOfBounds(address.segment, segmentNumber);
+    if (address.segmentId >= segmentNumber) {
+      throw new SegmentOutOfBounds(address.segmentId, segmentNumber);
     }
-    return this.segments[address.segment].get(address);
+    return this.segments[address.segmentId].get(address);
   }
 
   addSegment(builtin?: BuiltinRunner): Relocatable {
@@ -66,10 +66,10 @@ export class Memory {
    */
   assertEq(address: Relocatable, value: SegmentValue): void {
     const segmentNumber = this.getSegmentNumber();
-    if (address.segment >= segmentNumber) {
-      throw new SegmentOutOfBounds(address.segment, segmentNumber);
+    if (address.segmentId >= segmentNumber) {
+      throw new SegmentOutOfBounds(address.segmentId, segmentNumber);
     }
-    this.segments[address.segment].assertEq(address, value);
+    this.segments[address.segmentId].assertEq(address, value);
   }
 
   getSegmentSize(segment: number): number {
