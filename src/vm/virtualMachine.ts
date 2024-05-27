@@ -406,9 +406,7 @@ export class VirtualMachine {
         address: relocationTable[index] + offset,
         value: isFelt(value)
           ? value
-          : new Felt(
-              BigInt(relocationTable[value.segmentId] + value.offset)
-            ),
+          : new Felt(BigInt(relocationTable[value.segmentId] + value.offset)),
       }))
     );
 
