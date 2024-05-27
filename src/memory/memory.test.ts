@@ -134,5 +134,11 @@ describe('Memory', () => {
 
       expect(logSpy.mock.results[0].value).toEqual(expectedStr);
     });
+
+    test('Default segment name should be no builtin', () => {
+      const memory = new Memory();
+      memory.addSegment();
+      expect(memory.segments[0].builtin.toString()).toEqual('No builtin');
+    });
   });
 });

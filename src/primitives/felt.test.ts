@@ -39,6 +39,9 @@ describe('Felt', () => {
       const felt = new Felt(10n);
       expect(felt.toString(16)).toEqual('a');
     });
+    test('should convert correctly a felt to its 64-bits word representation', () => {
+      expect(new Felt(2n ** 64n).to64BitsWords()).toEqual([0n, 1n, 0n, 0n]);
+    });
   });
 
   describe('eq', () => {

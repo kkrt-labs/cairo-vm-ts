@@ -99,4 +99,10 @@ describe('Bitwise', () => {
       );
     }
   );
+
+  test('should correctly print builtin name', () => {
+    const memory = new Memory();
+    memory.addSegment(new Bitwise());
+    expect(memory.segments[0].builtin.toString()).toEqual('Bitwise builtin');
+  });
 });
