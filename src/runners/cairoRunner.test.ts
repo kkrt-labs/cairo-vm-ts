@@ -15,12 +15,18 @@ const FIBONACCI_PROGRAM_STRING = fs.readFileSync(
   'cairo_programs/cairo_0/fibonacci.json',
   'utf8'
 );
-const PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
+const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
+
+const BITWISE_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/bitwise_test.json',
+  'utf8'
+);
+const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
     test('should construct', () => {
-      const runner = new CairoRunner(PROGRAM);
+      const runner = new CairoRunner(FIBONACCI_PROGRAM);
       expect(runner.programBase).toEqual(new Relocatable(0, 0));
       expect(runner.executionBase).toEqual(new Relocatable(1, 0));
       expect(runner.vm.pc).toEqual(new Relocatable(0, 0));
@@ -32,7 +38,7 @@ describe('cairoRunner', () => {
 
   describe('run', () => {
     test('should return the value of the 10th fibonacci number', () => {
-      const runner = new CairoRunner(PROGRAM);
+      const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
         relocate: true,
         relocateOffset: 0,
@@ -52,7 +58,7 @@ describe('cairoRunner', () => {
      * It should be removed if reading the file, to avoid race conditions
     */
     test('should export encoded trace', () => {
-      const runner = new CairoRunner(PROGRAM);
+      const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
         relocate: false,
         relocateOffset: 1,
@@ -69,7 +75,7 @@ describe('cairoRunner', () => {
     });
 
     test('should export encoded memory', () => {
-      const runner = new CairoRunner(PROGRAM);
+      const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
         relocate: false,
         relocateOffset: 1,
@@ -83,6 +89,17 @@ describe('cairoRunner', () => {
           if (err) throw err;
         })
       ).not.toThrow();
+    });
+  });
+
+  describe('builtins', () => {
+    describe('bitwise', () => {
+      // Test returns an error: InconsistentMemory during bitwise run, must investigate
+      test('should compute bitwise 12 & 10', () => {
+        const runner = new CairoRunner(BITWISE_PROGRAM);
+        runner.run();
+        runner.vm.memory.toString();
+      });
     });
   });
 });
