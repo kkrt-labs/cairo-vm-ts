@@ -53,7 +53,8 @@ describe('Memory', () => {
       memory.addSegment();
       const address = new Relocatable(0, 0);
       memory.setValues(address, VALUES);
-      expect([...memory.values[0]]).toEqual(VALUES);
+
+      expect([...memory.segments[0].values]).toEqual(VALUES);
     });
 
     test('should update segmentSizes', () => {
