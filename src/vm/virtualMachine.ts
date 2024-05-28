@@ -237,18 +237,22 @@ export class VirtualMachine {
           case ResLogic.Op1:
             res = op1;
             break;
+
           case ResLogic.Add:
             if (op0 !== undefined && op1 !== undefined) {
               res = op0.add(op1);
             }
             break;
+
           case ResLogic.Mul:
             if (op0 !== undefined && op1 !== undefined && isFelt(op0)) {
               res = op0.mul(op1);
             }
             break;
+
           case ResLogic.Unused:
             break;
+
           default:
             throw new Error();
         }

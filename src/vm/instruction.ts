@@ -228,9 +228,11 @@ export class Instruction {
       case 0n:
         dstRegister = Register.Ap;
         break;
+
       case 1n:
         dstRegister = Register.Fp;
         break;
+
       default:
         throw new InvalidDstRegister();
     }
@@ -239,9 +241,11 @@ export class Instruction {
       case 0n:
         op0Register = Register.Ap;
         break;
+
       case 1n:
         op0Register = Register.Fp;
         break;
+
       default:
         throw new InvalidOp0Register();
     }
@@ -251,15 +255,19 @@ export class Instruction {
         op1Register = op0Register;
         op1Offset += op0Offset;
         break;
+
       case 1n:
         op1Register = Register.Pc;
         break;
+
       case 2n:
         op1Register = Register.Fp;
         break;
+
       case 4n:
         op1Register = Register.Ap;
         break;
+
       default:
         throw new InvalidOp1Register();
     }
@@ -268,15 +276,19 @@ export class Instruction {
       case 0n:
         pcUpdate = PcUpdate.Regular;
         break;
+
       case 1n:
         pcUpdate = PcUpdate.Jump;
         break;
+
       case 2n:
         pcUpdate = PcUpdate.JumpRel;
         break;
+
       case 4n:
         pcUpdate = PcUpdate.Jnz;
         break;
+
       default:
         throw new InvalidPcUpdate();
     }
@@ -285,12 +297,15 @@ export class Instruction {
       case 0n:
         resLogic = pcUpdate === PcUpdate.Jnz ? ResLogic.Unused : ResLogic.Op1;
         break;
+
       case 1n:
         resLogic = ResLogic.Add;
         break;
+
       case 2n:
         resLogic = ResLogic.Mul;
         break;
+
       default:
         throw new InvalidResLogic();
     }
@@ -299,15 +314,19 @@ export class Instruction {
       case 0n:
         opcode = Opcode.NoOp;
         break;
+
       case 1n:
         opcode = Opcode.Call;
         break;
+
       case 2n:
         opcode = Opcode.Ret;
         break;
+
       case 4n:
         opcode = Opcode.AssertEq;
         break;
+
       default:
         throw new InvalidOpcode();
     }
@@ -319,12 +338,15 @@ export class Instruction {
             ? (apUpdate = ApUpdate.Add2)
             : (apUpdate = ApUpdate.Ap);
         break;
+
       case 1n:
         apUpdate = ApUpdate.AddRes;
         break;
+
       case 2n:
         apUpdate = ApUpdate.Add1;
         break;
+
       default:
         throw new InvalidApUpdate();
     }
@@ -333,11 +355,14 @@ export class Instruction {
       case Opcode.Call:
         fpUpdate = FpUpdate.ApPlus2;
         break;
+
       case Opcode.Ret:
         fpUpdate = FpUpdate.Dst;
         break;
+
       default:
         fpUpdate = FpUpdate.Fp;
+        break;
     }
 
     return new Instruction(
