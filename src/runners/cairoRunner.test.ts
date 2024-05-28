@@ -97,8 +97,11 @@ describe('cairoRunner', () => {
       // Test returns an error: InconsistentMemory during bitwise run, must investigate
       test('should compute bitwise 12 & 10', () => {
         const runner = new CairoRunner(BITWISE_PROGRAM);
-        runner.run();
-        runner.vm.memory.toString();
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
       });
     });
   });
