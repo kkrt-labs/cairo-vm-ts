@@ -284,8 +284,8 @@ export class VirtualMachine {
     dst: SegmentValue | undefined
   ): void {
     this.updatePc(instruction, op1, res, dst);
-    this.updateAp(instruction, res);
     this.updateFp(instruction, dst);
+    this.updateAp(instruction, res);
   }
 
   /**
