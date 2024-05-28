@@ -33,13 +33,13 @@ export const bitwiseHandler: BuiltinHandler = {
 
     switch (bitwiseIndex) {
       case 2:
-        target[xOffset + 2] = new Felt(x & y);
+        target[offset] = new Felt(x & y);
         break;
       case 3:
-        target[xOffset + 3] = new Felt(x ^ y);
+        target[offset] = new Felt(x ^ y);
         break;
       case 4:
-        target[xOffset + 4] = new Felt(x | y);
+        target[offset] = new Felt(x | y);
         break;
     }
     return target[offset];
