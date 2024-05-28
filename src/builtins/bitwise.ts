@@ -6,6 +6,10 @@ import { BuiltinHandler } from './builtin';
 
 export const bitwiseHandler: BuiltinHandler = {
   get(target, prop) {
+    if (isNaN(Number(prop))) {
+      return Reflect.get(target, prop);
+    }
+
     const cellsPerBitwise = 5;
     const inputCellsPerBitwise = 2;
 

@@ -13,6 +13,7 @@ import {
   ApUpdate,
   FpUpdate,
   Instruction,
+  Op1Src,
   Opcode,
   PcUpdate,
   Register,
@@ -75,10 +76,39 @@ describe('Instruction', () => {
         1,
         Register.Ap,
         Register.Fp,
-        Register.Pc,
+        Op1Src.Pc,
         ResLogic.Add,
         PcUpdate.Regular,
         ApUpdate.Ap,
+        FpUpdate.Fp,
+        Opcode.AssertEq
+      );
+
+      expect(instruction).toEqual(expected);
+    });
+
+    test('should correctly decode the cairo instruction [fp + 1] = [[ap + 2] + 3]; ap++', () => {
+      const BIAS = 2n ** 15n;
+      const shift = 16n;
+      const dstOffset = 1n + BIAS;
+      const op0Offset = (2n + BIAS) << shift;
+      const op1Offset = (3n + BIAS) << (2n * shift);
+      const flag = 0b0100100000000001n << (3n * shift);
+
+      const encodedInstruction = dstOffset | op0Offset | op1Offset | flag;
+
+      const instruction = Instruction.decodeInstruction(encodedInstruction);
+
+      const expected = new Instruction(
+        1,
+        2,
+        3,
+        Register.Fp,
+        Register.Ap,
+        Op1Src.Op0,
+        ResLogic.Op1,
+        PcUpdate.Regular,
+        ApUpdate.Add1,
         FpUpdate.Fp,
         Opcode.AssertEq
       );
@@ -104,7 +134,7 @@ describe('Instruction', () => {
         -1,
         Register.Fp,
         Register.Fp,
-        Register.Fp,
+        Op1Src.Fp,
         ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
@@ -133,7 +163,7 @@ describe('Instruction', () => {
         0,
         Register.Fp,
         Register.Fp,
-        Register.Fp,
+        Op1Src.Fp,
         ResLogic.Add,
         PcUpdate.Regular,
         ApUpdate.AddRes,
@@ -162,7 +192,7 @@ describe('Instruction', () => {
         4,
         Register.Ap,
         Register.Ap,
-        Register.Fp,
+        Op1Src.Fp,
         ResLogic.Op1,
         PcUpdate.Jump,
         ApUpdate.Add2,
@@ -184,7 +214,7 @@ describe('Instruction', () => {
         0,
         Register.Fp,
         Register.Fp,
-        Register.Pc,
+        Op1Src.Pc,
         ResLogic.Add,
         PcUpdate.Jump,
         ApUpdate.AddRes,
@@ -206,7 +236,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Register.Fp,
+        Op1Src.Fp,
         ResLogic.Mul,
         PcUpdate.JumpRel,
         ApUpdate.Add1,
@@ -228,7 +258,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Register.Ap,
+        Op1Src.Ap,
         ResLogic.Mul,
         PcUpdate.Jnz,
         ApUpdate.Add1,
@@ -250,7 +280,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Register.Ap,
+        Op1Src.Op0,
         ResLogic.Unused,
         PcUpdate.Jnz,
         ApUpdate.Ap,
@@ -272,7 +302,7 @@ describe('Instruction', () => {
         0,
         Register.Ap,
         Register.Ap,
-        Register.Ap,
+        Op1Src.Op0,
         ResLogic.Op1,
         PcUpdate.Regular,
         ApUpdate.Ap,
@@ -294,7 +324,7 @@ describe('Instruction', () => {
         1,
         Register.Ap,
         Register.Ap,
-        Register.Ap,
+        Op1Src.Op0,
         ResLogic.Op1,
         PcUpdate.Regular,
         ApUpdate.Ap,

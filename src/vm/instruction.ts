@@ -36,6 +36,16 @@ export enum Register {
   Fp,
 }
 
+/** The values from which op1 can be computed from:
+ * - One of the three registers (`pc`, `ap` or `fp`)
+ * - Op0: [[op0Reg + op0Offset] + op1Offset]
+ */
+export enum Op1Src {
+  Pc,
+  Ap,
+  Fp,
+  Op0,
+}
 /**
  * Generic pattern to compute res: `res = logic(op0, op1)`
  *
@@ -145,7 +155,7 @@ export class Instruction {
   /** The register (AP or FP) to be used for reading op0 */
   public op0Register: Register;
   /** The register (PC, AP or FP) to be used for reading op1 */
-  public op1Register: Register;
+  public op1Register: Op1Src;
   /** Offset applied to the register used for reading dst */
   public dstOffset: number;
   /** Offset applied to the register used for reading op0 */
@@ -171,7 +181,7 @@ export class Instruction {
     op1Offset: number,
     dstReg: Register,
     op0Register: Register,
-    op1Register: Register,
+    op1Register: Op1Src,
     resLogic: ResLogic,
     pcUpdate: PcUpdate,
     apUpdate: ApUpdate,
@@ -217,7 +227,7 @@ export class Instruction {
 
     let dstRegister: Register;
     let op0Register: Register;
-    let op1Register: Register;
+    let op1Register: Op1Src;
     let resLogic: ResLogic;
     let pcUpdate: PcUpdate;
     let apUpdate: ApUpdate;
@@ -252,20 +262,19 @@ export class Instruction {
 
     switch (op1RegisterFlag) {
       case 0n:
-        op1Register = op0Register;
-        op1Offset += op0Offset;
+        op1Register = Op1Src.Op0;
         break;
 
       case 1n:
-        op1Register = Register.Pc;
+        op1Register = Op1Src.Pc;
         break;
 
       case 2n:
-        op1Register = Register.Fp;
+        op1Register = Op1Src.Fp;
         break;
 
       case 4n:
-        op1Register = Register.Ap;
+        op1Register = Op1Src.Ap;
         break;
 
       default:
@@ -382,6 +391,6 @@ export class Instruction {
 
   /** The instruction size is 2 if an immediate value, located at Pc + 1, is used. */
   size(): number {
-    return this.op1Register == Register.Pc ? 2 : 1;
+    return this.op1Register == Op1Src.Pc ? 2 : 1;
   }
 }

@@ -17,6 +17,7 @@ import {
   ApUpdate,
   FpUpdate,
   Instruction,
+  Op1Src,
   Opcode,
   PcUpdate,
   Register,
@@ -133,10 +134,19 @@ export class VirtualMachine {
     };
 
     const op0Addr: Relocatable = registers[op0Register].add(op0Offset);
-    const op1Addr: Relocatable = registers[op1Register].add(op1Offset);
     const dstAddr: Relocatable = registers[dstRegister].add(dstOffset);
+    let op1Addr: Relocatable;
 
     let op0: SegmentValue | undefined = this.memory.get(op0Addr);
+    switch (op1Register) {
+      case Op1Src.Op0:
+        if (!op0 || !isRelocatable(op0)) throw new InvalidOp0();
+        op1Addr = new Relocatable(op0.segmentId, op0.offset + op1Offset);
+        break;
+      default:
+        op1Addr = registers[op1Register].add(op1Offset);
+        break;
+    }
     let op1: SegmentValue | undefined = this.memory.get(op1Addr);
     let res: SegmentValue | undefined = undefined;
     let dst: SegmentValue | undefined = this.memory.get(dstAddr);
