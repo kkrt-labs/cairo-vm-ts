@@ -1,53 +1,43 @@
-import { Memory, Segment } from 'memory/memory';
-import { BuiltinRunnerBase } from './builtin';
-import { SegmentValue, isFelt } from 'primitives/segmentValue';
-import { CannotInferValue, UndefinedValue } from 'errors/builtins';
+import { isFelt } from 'primitives/segmentValue';
+import { UndefinedValue } from 'errors/builtins';
 import { ExpectedFelt } from 'errors/virtualMachine';
 import { Felt } from 'primitives/felt';
-import { Relocatable } from 'primitives/relocatable';
+import { BuiltinHandler } from './builtin';
 
-export class Bitwise extends BuiltinRunnerBase {
-  static readonly cellsPerBitwise = 5;
-  static readonly inputCellsPerBitwise = 2;
+export const bitwiseHandler: BuiltinHandler = {
+  get(target, prop) {
+    const cellsPerBitwise = 5;
+    const inputCellsPerBitwise = 2;
 
-  /* Perform bitwise operations and, or & xor */
-  infer(segment: Segment, address: Relocatable): SegmentValue | undefined {
-    const { segmentId, offset } = address;
-    const bitwiseIndex = offset % Bitwise.cellsPerBitwise;
-    if (bitwiseIndex < Bitwise.inputCellsPerBitwise) {
-      throw new CannotInferValue(address);
+    const offset = Number(prop);
+    const bitwiseIndex = offset % cellsPerBitwise;
+    if (bitwiseIndex < inputCellsPerBitwise) {
+      return target[offset];
     }
 
     const xOffset = offset - bitwiseIndex;
-    const xValue = segment.values[xOffset];
+    const xValue = target[xOffset];
     if (!xValue) throw new UndefinedValue(xOffset);
     if (!isFelt(xValue)) throw new ExpectedFelt();
     const x = xValue.toBigInt();
 
     const yOffset = xOffset + 1;
-    const yValue = segment.values[yOffset];
+    const yValue = target[yOffset];
     if (!yValue) throw new UndefinedValue(yOffset);
     if (!isFelt(yValue)) throw new ExpectedFelt();
     const y = yValue.toBigInt();
 
     switch (bitwiseIndex) {
       case 2:
-        const addressAND = new Relocatable(segmentId, xOffset + 2);
-        segment.assertEq(addressAND, new Felt(x & y));
+        target[xOffset + 2] = new Felt(x & y);
         break;
       case 3:
-        const addressXOR = new Relocatable(segmentId, xOffset + 3);
-        segment.assertEq(addressXOR, new Felt(x ^ y));
+        target[xOffset + 3] = new Felt(x ^ y);
         break;
       case 4:
-        const addressOR = new Relocatable(segmentId, xOffset + 4);
-        segment.assertEq(addressOR, new Felt(x | y));
+        target[xOffset + 4] = new Felt(x | y);
         break;
     }
-    return segment.values[offset];
-  }
-
-  toString(): string {
-    return 'Bitwise builtin';
-  }
-}
+    return target[offset];
+  },
+};

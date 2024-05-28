@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Relocatable } from 'primitives/relocatable';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { Program } from 'vm/program';
-import { Bitwise } from 'builtins/bitwise';
+import { BUILTIN_HANDLER } from 'builtins/builtin';
 
 /**
  * Configuration of the run
@@ -31,20 +31,14 @@ export class CairoRunner {
     this.program = program;
     const mainId = program.identifiers.get('__main__.main');
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
-    const builtins = program.builtins;
 
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
-    const builtin_stack = builtins.map((builtin) => {
-      switch (builtin) {
-        case 'bitwise':
-          return this.vm.memory.addSegment(new Bitwise());
-        default:
-          throw new Error();
-      }
-    });
+    const builtin_stack = program.builtins
+      .map((builtinName) => BUILTIN_HANDLER[builtinName])
+      .map((builtinHandler) => this.vm.memory.addSegment(builtinHandler));
     const returnFp = this.vm.memory.addSegment();
     this.finalPc = this.vm.memory.addSegment();
     const stack = [...builtin_stack, returnFp, this.finalPc];

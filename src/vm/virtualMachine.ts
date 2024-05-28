@@ -397,7 +397,7 @@ export class VirtualMachine {
      * plus one if complying with StarkWare current verifier
      */
     const relocationTable = this.memory.segments
-      .map((segment) => segment.values.length)
+      .map((segment) => segment.length)
       .map(
         (
           (sum) => (value) =>
@@ -406,7 +406,7 @@ export class VirtualMachine {
       );
 
     this.relocatedMemory = this.memory.segments.flatMap((segment, index) =>
-      segment.values.map((value, offset) => ({
+      segment.map((value, offset) => ({
         address: relocationTable[index] + offset,
         value: isFelt(value)
           ? value

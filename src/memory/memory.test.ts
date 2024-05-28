@@ -54,7 +54,7 @@ describe('Memory', () => {
       const address = new Relocatable(0, 0);
       memory.setValues(address, VALUES);
 
-      expect([...memory.segments[0].values]).toEqual(VALUES);
+      expect([...memory.segments[0]]).toEqual(VALUES);
     });
 
     test('should update segmentSizes', () => {
@@ -92,7 +92,7 @@ describe('Memory', () => {
       memory.assertEq(address, VALUES[0]);
 
       expect(() => memory.assertEq(address, VALUES[1])).toThrow(
-        new InconsistentMemory(address, VALUES[0], VALUES[1])
+        new InconsistentMemory(address.offset, VALUES[0], VALUES[1])
       );
     });
 
@@ -133,12 +133,6 @@ describe('Memory', () => {
       memory.toString();
 
       expect(logSpy.mock.results[0].value).toEqual(expectedStr);
-    });
-
-    test('Default segment name should be no builtin', () => {
-      const memory = new Memory();
-      memory.addSegment();
-      expect(memory.segments[0].builtin.toString()).toEqual('No builtin');
     });
   });
 });

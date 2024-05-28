@@ -1,15 +1,13 @@
-import { Relocatable } from 'primitives/relocatable';
-
 /** Errors related to builtins */
 export class BuiltinError extends Error {}
 
 /** Value cannot be infered from the given cell of the builtin segment */
 export class CannotInferValue extends BuiltinError {
-  public readonly address: Relocatable;
+  public readonly offset: number;
 
-  constructor(address: Relocatable) {
+  constructor(offset: number) {
     super();
-    this.address = address;
+    this.offset = offset;
   }
 }
 

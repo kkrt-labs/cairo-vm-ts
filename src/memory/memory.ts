@@ -2,34 +2,10 @@ import { InconsistentMemory, SegmentOutOfBounds } from 'errors/memory';
 
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
-import { BuiltinRunner, NoBuiltin } from 'builtins/builtin';
-
-export class Segment {
-  builtin: BuiltinRunner;
-  values: Array<SegmentValue>;
-
-  constructor(builtin: BuiltinRunner = new NoBuiltin()) {
-    this.builtin = builtin;
-    this.values = [];
-  }
-
-  get(address: Relocatable): SegmentValue | undefined {
-    return this.values[address.offset] ?? this.builtin.infer(this, address);
-  }
-
-  assertEq(address: Relocatable, value: SegmentValue): void {
-    const { offset } = address;
-    this.values[offset] = this.values[offset] ?? value;
-
-    if (this.values[offset] !== value) {
-      throw new InconsistentMemory(address, this.values[offset], value);
-    }
-    this.builtin.validate(this);
-  }
-}
+import { BuiltinHandler } from 'builtins/builtin';
 
 export class Memory {
-  segments: Array<Segment>;
+  segments: Array<Array<SegmentValue>>;
 
   constructor() {
     this.segments = [];
@@ -40,11 +16,12 @@ export class Memory {
     if (address.segmentId >= segmentNumber) {
       throw new SegmentOutOfBounds(address.segmentId, segmentNumber);
     }
-    return this.segments[address.segmentId].get(address);
+    return this.segments[address.segmentId][address.offset];
   }
 
-  addSegment(builtin?: BuiltinRunner): Relocatable {
-    this.segments.push(new Segment(builtin));
+  addSegment(builtin: BuiltinHandler = {}): Relocatable {
+    const segment = new Proxy(new Array<SegmentValue>(), builtin);
+    this.segments.push(segment);
     return new Relocatable(this.segments.length - 1, 0);
   }
 
@@ -66,14 +43,22 @@ export class Memory {
    */
   assertEq(address: Relocatable, value: SegmentValue): void {
     const segmentNumber = this.getSegmentNumber();
-    if (address.segmentId >= segmentNumber) {
-      throw new SegmentOutOfBounds(address.segmentId, segmentNumber);
+    const { segmentId, offset } = address;
+    if (segmentId >= segmentNumber) {
+      throw new SegmentOutOfBounds(segmentId, segmentNumber);
     }
-    this.segments[address.segmentId].assertEq(address, value);
+
+    const segment = this.segments[segmentId];
+    this.segments[segmentId][offset] = segment[offset] ?? value;
+
+    if (segment[offset] !== value) {
+      throw new InconsistentMemory(offset, segment[offset], value);
+    }
+    this.segments[address.segmentId][address.offset] = value;
   }
 
   getSegmentSize(segment: number): number {
-    return this.segments[segment].values.length ?? 0;
+    return this.segments[segment].length ?? 0;
   }
 
   toString(): string {
@@ -82,7 +67,7 @@ export class Memory {
       'Address  ->  Value',
       '-----------------',
       ...this.segments.map((segment, index) =>
-        segment.values.map(
+        segment.map(
           (value, offset) => `${index}:${offset} -> ${value.toString()}`
         )
       ),

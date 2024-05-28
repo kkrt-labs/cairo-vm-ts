@@ -1,9 +1,11 @@
-import { beforeAll, describe, expect, test } from 'bun:test';
-import { Memory } from 'memory/memory';
-import { Bitwise } from './bitwise';
+import { describe, expect, test } from 'bun:test';
+
+import { UndefinedValue } from 'errors/builtins';
+
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
-import { CannotInferValue, UndefinedValue } from 'errors/builtins';
+import { Memory } from 'memory/memory';
+import { bitwiseHandler } from './bitwise';
 
 type BitwiseInput = {
   x: Felt;
@@ -42,7 +44,7 @@ describe('Bitwise', () => {
     'should properly perform bitwise operations',
     ({ x, y, expected }: BitwiseInput) => {
       const memory = new Memory();
-      memory.addSegment(new Bitwise());
+      memory.addSegment(bitwiseHandler);
       memory.assertEq(new Relocatable(0, 0), x);
       memory.assertEq(new Relocatable(0, 1), y);
       expect(memory.get(addressAND)).toEqual(expected.and);
@@ -53,7 +55,7 @@ describe('Bitwise', () => {
 
   test('should properly perform multiple bitwise operations ', () => {
     const memory = new Memory();
-    memory.addSegment(new Bitwise());
+    memory.addSegment(bitwiseHandler);
     const x = new Felt(1n);
     const y = new Felt(2n);
     memory.assertEq(new Relocatable(0, 0), x);
@@ -75,34 +77,11 @@ describe('Bitwise', () => {
     'should throw UndefinedValue error when one of the two input is not constrained',
     (address: Relocatable) => {
       const memory = new Memory();
-      memory.addSegment(new Bitwise());
+      memory.addSegment(bitwiseHandler);
       memory.assertEq(address, new Felt(0n));
       expect(() => memory.get(addressAND)).toThrow(
         new UndefinedValue(address.offset)
       );
     }
   );
-
-  test.each([
-    new Relocatable(0, 0),
-    new Relocatable(0, 1),
-    new Relocatable(0, 5),
-    new Relocatable(0, 6),
-  ])(
-    'should throw CannotInferValue if trying to infer input values of the segment',
-    (address: Relocatable) => {
-      const memory = new Memory();
-      memory.addSegment(new Bitwise());
-      memory.assertEq(address, new Felt(0n));
-      expect(() => memory.get(addressAND)).toThrow(
-        new CannotInferValue(address)
-      );
-    }
-  );
-
-  test('should correctly print builtin name', () => {
-    const memory = new Memory();
-    memory.addSegment(new Bitwise());
-    expect(memory.segments[0].builtin.toString()).toEqual('Bitwise builtin');
-  });
 });
