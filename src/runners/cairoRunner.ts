@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { Relocatable } from 'primitives/relocatable';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { Program } from 'vm/program';
-import { BUILTIN_HANDLER } from 'builtins/builtin';
+import { getBuiltin } from 'builtins/builtin';
 
 /**
  * Configuration of the run
@@ -37,8 +37,8 @@ export class CairoRunner {
     this.executionBase = this.vm.memory.addSegment();
 
     const builtin_stack = program.builtins
-      .map((builtinName) => BUILTIN_HANDLER[builtinName])
-      .map((builtinHandler) => this.vm.memory.addSegment(builtinHandler));
+      .map(getBuiltin)
+      .map((builtin) => this.vm.memory.addSegment(builtin));
     const returnFp = this.vm.memory.addSegment();
     this.finalPc = this.vm.memory.addSegment();
     const stack = [...builtin_stack, returnFp, this.finalPc];

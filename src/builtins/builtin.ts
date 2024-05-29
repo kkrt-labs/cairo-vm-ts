@@ -16,8 +16,11 @@ export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
  * - Segment Arena: Unknown usage, must investigate
  * - Output: Output builtin
  */
-export const BUILTIN_HANDLER: {
+const BUILTIN_HANDLER: {
   [key: string]: BuiltinHandler;
 } = {
   bitwise: bitwiseHandler,
 };
+
+/** Getter of the object `BUILTIN_HANDLER` */
+export const getBuiltin = (name: string) => BUILTIN_HANDLER[name];
