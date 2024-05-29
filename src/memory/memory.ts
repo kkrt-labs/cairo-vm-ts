@@ -50,7 +50,7 @@ export class Memory {
 
     const segmentValue = this.segments[segmentId][offset] ?? value;
     if (!segmentValue.eq(value)) {
-      throw new InconsistentMemory(offset, segmentValue, value);
+      throw new InconsistentMemory(address, segmentValue, value);
     }
     this.segments[segmentId][offset] = value;
   }
