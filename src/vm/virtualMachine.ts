@@ -17,6 +17,7 @@ import {
   ApUpdate,
   FpUpdate,
   Instruction,
+  Op1Src,
   Opcode,
   PcUpdate,
   Register,
@@ -133,10 +134,19 @@ export class VirtualMachine {
     };
 
     const op0Addr: Relocatable = registers[op0Register].add(op0Offset);
-    const op1Addr: Relocatable = registers[op1Register].add(op1Offset);
     const dstAddr: Relocatable = registers[dstRegister].add(dstOffset);
+    let op1Addr: Relocatable;
 
     let op0: SegmentValue | undefined = this.memory.get(op0Addr);
+    switch (op1Register) {
+      case Op1Src.Op0:
+        if (!op0 || !isRelocatable(op0)) throw new InvalidOp0();
+        op1Addr = new Relocatable(op0.segmentId, op0.offset + op1Offset);
+        break;
+      default:
+        op1Addr = registers[op1Register].add(op1Offset);
+        break;
+    }
     let op1: SegmentValue | undefined = this.memory.get(op1Addr);
     let res: SegmentValue | undefined = undefined;
     let dst: SegmentValue | undefined = this.memory.get(dstAddr);
@@ -237,18 +247,22 @@ export class VirtualMachine {
           case ResLogic.Op1:
             res = op1;
             break;
+
           case ResLogic.Add:
             if (op0 !== undefined && op1 !== undefined) {
               res = op0.add(op1);
             }
             break;
+
           case ResLogic.Mul:
             if (op0 !== undefined && op1 !== undefined && isFelt(op0)) {
               res = op0.mul(op1);
             }
             break;
+
           case ResLogic.Unused:
             break;
+
           default:
             throw new Error();
         }
@@ -280,8 +294,8 @@ export class VirtualMachine {
     dst: SegmentValue | undefined
   ): void {
     this.updatePc(instruction, op1, res, dst);
-    this.updateAp(instruction, res);
     this.updateFp(instruction, dst);
+    this.updateAp(instruction, res);
   }
 
   /**
@@ -392,7 +406,7 @@ export class VirtualMachine {
      * This address is the sum of the length of all previous segments,
      * plus one if complying with StarkWare current verifier
      */
-    const relocationTable = this.memory.values
+    const relocationTable = this.memory.segments
       .map((segment) => segment.length)
       .map(
         (
@@ -401,26 +415,28 @@ export class VirtualMachine {
         )(offset)
       );
 
-    this.relocatedMemory = this.memory.values.flatMap((segment, index) =>
+    this.relocatedMemory = this.memory.segments.flatMap((segment, index) =>
       segment.map((value, offset) => ({
         address: relocationTable[index] + offset,
         value: isFelt(value)
           ? value
-          : new Felt(BigInt(relocationTable[value.segment] + value.offset)),
+          : new Felt(BigInt(relocationTable[value.segmentId] + value.offset)),
       }))
     );
 
     this.relocatedTrace = this.trace.map(({ pc, ap, fp }) => ({
-      pc: new Felt(BigInt(relocationTable[pc.segment] + pc.offset)),
-      ap: new Felt(BigInt(relocationTable[ap.segment] + ap.offset)),
-      fp: new Felt(BigInt(relocationTable[fp.segment] + fp.offset)),
+      pc: new Felt(BigInt(relocationTable[pc.segmentId] + pc.offset)),
+      ap: new Felt(BigInt(relocationTable[ap.segmentId] + ap.offset)),
+      fp: new Felt(BigInt(relocationTable[fp.segmentId] + fp.offset)),
     }));
 
     this.trace
       .flatMap(Object.values)
       .map(
         (register: Relocatable) =>
-          new Felt(BigInt(relocationTable[register.segment] + register.offset))
+          new Felt(
+            BigInt(relocationTable[register.segmentId] + register.offset)
+          )
       );
   }
 

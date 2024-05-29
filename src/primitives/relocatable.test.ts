@@ -13,7 +13,7 @@ describe('Relocatable', () => {
   describe('constructor', () => {
     test('should initialize a relocatable correctly', () => {
       const relocatable = new Relocatable(0, 5);
-      expect(relocatable.segment).toEqual(0);
+      expect(relocatable.segmentId).toEqual(0);
       expect(relocatable.offset).toEqual(5);
     });
   });
@@ -43,7 +43,7 @@ describe('Relocatable', () => {
       const felt = new Felt(5n);
       const result = relocatable.sub(felt);
       expect(result.offset).toEqual(5);
-      expect(result.segment).toEqual(0);
+      expect(result.segmentId).toEqual(0);
     });
 
     test('should throw an error OffsetUnderflow when subtracting a larger Felt', () => {
@@ -64,7 +64,7 @@ describe('Relocatable', () => {
       const b = new Felt(5n);
       const result = a.sub(b);
       expect(result.offset).toEqual(5);
-      expect(result.segment).toEqual(0);
+      expect(result.segmentId).toEqual(0);
     });
   });
 
@@ -74,7 +74,7 @@ describe('Relocatable', () => {
       const felt = new Felt(5n);
       const result = relocatable.add(felt);
       expect(result.offset).toEqual(10);
-      expect(result.segment).toEqual(0);
+      expect(result.segmentId).toEqual(0);
     });
 
     test('should throw an error ForbiddenOperation when adding an incompatible SegmentValue', () => {
@@ -87,13 +87,13 @@ describe('Relocatable', () => {
       const felt = new Felt(5n);
       const result = relocatable.add(felt);
       expect(result.offset).toEqual(10);
-      expect(result.segment).toEqual(0);
+      expect(result.segmentId).toEqual(0);
     });
     test('should add a positive number correctly to a relocatable', () => {
       const relocatable = new Relocatable(0, 5);
       const result = relocatable.add(5);
       expect(result.offset).toEqual(10);
-      expect(result.segment).toEqual(0);
+      expect(result.segmentId).toEqual(0);
     });
   });
 

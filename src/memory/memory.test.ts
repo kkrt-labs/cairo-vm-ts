@@ -34,7 +34,7 @@ describe('Memory', () => {
       const memory = new Memory();
       const address = new Relocatable(0, 0);
       expect(() => memory.get(address)).toThrow(
-        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
+        new SegmentOutOfBounds(address.segmentId, memory.getSegmentNumber())
       );
     });
 
@@ -53,7 +53,8 @@ describe('Memory', () => {
       memory.addSegment();
       const address = new Relocatable(0, 0);
       memory.setValues(address, VALUES);
-      expect([...memory.values[0]]).toEqual(VALUES);
+
+      expect([...memory.segments[0]]).toEqual(VALUES);
     });
 
     test('should update segmentSizes', () => {
@@ -91,7 +92,7 @@ describe('Memory', () => {
       memory.assertEq(address, VALUES[0]);
 
       expect(() => memory.assertEq(address, VALUES[1])).toThrow(
-        new InconsistentMemory(address, VALUES[0], VALUES[1])
+        new InconsistentMemory(address.offset, VALUES[0], VALUES[1])
       );
     });
 
@@ -99,7 +100,7 @@ describe('Memory', () => {
       const memory = new Memory();
       const address = new Relocatable(1, 10);
       expect(() => memory.assertEq(address, VALUES[0])).toThrow(
-        new SegmentOutOfBounds(address.segment, memory.getSegmentNumber())
+        new SegmentOutOfBounds(address.segmentId, memory.getSegmentNumber())
       );
     });
   });
