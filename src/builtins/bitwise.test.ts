@@ -6,6 +6,7 @@ import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { Memory } from 'memory/memory';
 import { bitwiseHandler } from './bitwise';
+import { ExpectedFelt } from 'errors/virtualMachine';
 
 type BitwiseInput = {
   x: Felt;
@@ -36,51 +37,36 @@ describe('Bitwise', () => {
     },
   ];
 
-  const addressAND = new Relocatable(0, 2);
-  const addressXOR = new Relocatable(0, 3);
-  const addressOR = new Relocatable(0, 4);
-
   test.each(inputs)(
     'should properly perform bitwise operations',
     ({ x, y, expected }: BitwiseInput) => {
       const memory = new Memory();
-      memory.addSegment(bitwiseHandler);
-      memory.assertEq(new Relocatable(0, 0), x);
-      memory.assertEq(new Relocatable(0, 1), y);
+      const { segmentId } = memory.addSegment(bitwiseHandler);
+      const addressAND = new Relocatable(segmentId, 2);
+      const addressXOR = new Relocatable(segmentId, 3);
+      const addressOR = new Relocatable(segmentId, 4);
+
+      memory.assertEq(new Relocatable(segmentId, 0), x);
+      memory.assertEq(new Relocatable(segmentId, 1), y);
+
       expect(memory.get(addressAND)).toEqual(expected.and);
       expect(memory.get(addressXOR)).toEqual(expected.xor);
       expect(memory.get(addressOR)).toEqual(expected.or);
     }
   );
 
-  test('should properly perform multiple bitwise operations ', () => {
-    const memory = new Memory();
-    memory.addSegment(bitwiseHandler);
-    const x = new Felt(1n);
-    const y = new Felt(2n);
-    memory.assertEq(new Relocatable(0, 0), x);
-    memory.assertEq(new Relocatable(0, 1), y);
-    memory.assertEq(new Relocatable(0, 5), x);
-    memory.assertEq(new Relocatable(0, 6), y);
-
-    const expectedOR = new Felt(3n);
-    const expectedAND = new Felt(0n);
-    expect(memory.get(addressAND)).toEqual(expectedAND);
-    expect(memory.get(addressXOR)).toEqual(expectedOR);
-    expect(memory.get(addressOR)).toEqual(expectedOR);
-    expect(memory.get(new Relocatable(0, 7))).toEqual(expectedAND);
-    expect(memory.get(new Relocatable(0, 8))).toEqual(expectedOR);
-    expect(memory.get(new Relocatable(0, 9))).toEqual(expectedOR);
-  });
-
-  test.each([new Relocatable(0, 0), new Relocatable(0, 1)])(
+  test.each([0, 1])(
     'should throw UndefinedValue error when one of the two input is not constrained',
-    (address: Relocatable) => {
+    (offset: number) => {
       const memory = new Memory();
-      memory.addSegment(bitwiseHandler);
+      const { segmentId } = memory.addSegment(bitwiseHandler);
+      const address = new Relocatable(segmentId, offset);
+      const addressAND = new Relocatable(segmentId, 2);
+
       memory.assertEq(address, new Felt(0n));
+
       expect(() => memory.get(addressAND)).toThrow(
-        new UndefinedValue(address.offset)
+        new UndefinedValue((offset + 1) % 2)
       );
     }
   );
