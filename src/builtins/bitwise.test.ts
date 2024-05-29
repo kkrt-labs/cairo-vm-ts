@@ -70,4 +70,19 @@ describe('Bitwise', () => {
       );
     }
   );
+
+  test('should throw ExpectedFelt error when trying to constrain an input cell to a Relocatable', () => {
+    const memory = new Memory();
+    const { segmentId } = memory.addSegment(bitwiseHandler);
+    const addressAND = new Relocatable(segmentId, 2);
+
+    const xAddr = new Relocatable(segmentId, 0);
+    const yAddr = new Relocatable(segmentId, 1);
+    const y = new Felt(1n);
+
+    memory.assertEq(xAddr, xAddr);
+    memory.assertEq(yAddr, y);
+
+    expect(() => memory.get(addressAND)).toThrow(new ExpectedFelt());
+  });
 });
