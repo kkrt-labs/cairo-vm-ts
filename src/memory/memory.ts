@@ -48,17 +48,11 @@ export class Memory {
       throw new SegmentOutOfBounds(segmentId, segmentNumber);
     }
 
-    this.segments[segmentId][offset] =
-      this.segments[segmentId][offset] ?? value;
-
-    if (!this.segments[segmentId][offset].eq(value)) {
-      throw new InconsistentMemory(
-        offset,
-        this.segments[segmentId][offset],
-        value
-      );
+    const segmentValue = this.segments[segmentId][offset] ?? value;
+    if (!segmentValue.eq(value)) {
+      throw new InconsistentMemory(offset, segmentValue, value);
     }
-    this.segments[address.segmentId][address.offset] = value;
+    this.segments[segmentId][offset] = value;
   }
 
   getSegmentSize(segment: number): number {
