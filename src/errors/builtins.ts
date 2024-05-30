@@ -10,3 +10,6 @@ export class UndefinedValue extends BuiltinError {
     this.offset = offset;
   }
 }
+
+/** Ladder formula R = P + mQ failed in EcOp builtin */
+export class LadderFailed extends BuiltinError {}
