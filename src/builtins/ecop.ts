@@ -28,7 +28,9 @@ export const ecOpHandler: BuiltinHandler = {
     }
 
     const inputOffset = offset - ecOpIndex;
-    const inputs = target.slice(inputOffset, inputOffset + 5).map((value) => {
+    const outputOffset = inputOffset + inputCellsPerEcOp;
+
+    const inputs = target.slice(inputOffset, outputOffset).map((value) => {
       if (!isFelt(value)) throw new ExpectedFelt();
       return value.toBigInt();
     });
@@ -38,8 +40,6 @@ export const ecOpHandler: BuiltinHandler = {
 
     const r = p.multiplyAndAddUnsafe(q, _1n, inputs[4]);
     if (r === undefined) throw new LadderFailed();
-
-    const outputOffset = inputOffset + inputCellsPerEcOp;
 
     switch (ecOpIndex - inputCellsPerEcOp) {
       case 0:
