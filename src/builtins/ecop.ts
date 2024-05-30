@@ -35,8 +35,6 @@ export const ecOpHandler: BuiltinHandler = {
 
     const p = ProjectivePoint.fromAffine({ x: inputs[0], y: inputs[1] });
     const q = ProjectivePoint.fromAffine({ x: inputs[2], y: inputs[3] });
-    // const p = new ProjectivePoint(inputs[0], inputs[1], _1n);
-    // const q = new ProjectivePoint(inputs[2], inputs[3], _1n);
 
     const r = p.multiplyAndAddUnsafe(q, _1n, inputs[4]);
     if (r === undefined) throw new LadderFailed();
