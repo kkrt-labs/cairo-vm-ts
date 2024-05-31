@@ -15,13 +15,18 @@ const FIBONACCI_PROGRAM_STRING = fs.readFileSync(
   'cairo_programs/cairo_0/fibonacci.json',
   'utf8'
 );
-const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
-
 const BITWISE_PROGRAM_STRING = fs.readFileSync(
   'cairo_programs/cairo_0/bitwise_test.json',
   'utf8'
 );
+const EC_OP_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/ecop_builtin.json',
+  'utf8'
+);
+
+const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
 const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
+const EC_OP_PROGRAM = parseProgram(EC_OP_PROGRAM_STRING);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
@@ -94,7 +99,6 @@ describe('cairoRunner', () => {
 
   describe('builtins', () => {
     describe('bitwise', () => {
-      // Test returns an error: InconsistentMemory during bitwise run, must investigate
       test('should compute bitwise 12 & 10', () => {
         const runner = new CairoRunner(BITWISE_PROGRAM);
         const config: RunOptions = {
@@ -105,6 +109,29 @@ describe('cairoRunner', () => {
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
         expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(new Felt(8n));
+      });
+    });
+
+    describe('ec_op', () => {
+      test('should properly compute  R = P + 34Q', () => {
+        const runner = new CairoRunner(EC_OP_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+
+        const expectedRx = new Felt(
+          108925483682366235368969256555281508851459278989259552980345066351008608800n
+        );
+        const expectedRy = new Felt(
+          1592365885972480102953613056006596671718206128324372995731808913669237079419n
+        );
+
+        const executionSize = runner.vm.memory.getSegmentSize(1);
+        const executionEnd = runner.executionBase.add(executionSize);
+        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(expectedRx);
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(expectedRy);
       });
     });
   });

@@ -23,6 +23,7 @@
     "printWidth": 80
   },
   "dependencies": {
+    "@scure/starknet": "^1.0.0",
     "zod": "canary"
   }
 }
