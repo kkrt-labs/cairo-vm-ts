@@ -1,12 +1,11 @@
 import { describe, expect, test } from 'bun:test';
 
 import { UndefinedValue } from 'errors/builtins';
+import { ExpectedFelt } from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { Memory } from 'memory/memory';
-import { bitwiseHandler } from './bitwise';
-import { ExpectedFelt } from 'errors/virtualMachine';
 import { pedersenHandler } from './pedersen';
 
 type PedersenInput = {
@@ -65,7 +64,7 @@ describe('Pedersen', () => {
     'should throw UndefinedValue error when one of the two input is not constrained',
     (offset: number) => {
       const memory = new Memory();
-      const { segmentId } = memory.addSegment(bitwiseHandler);
+      const { segmentId } = memory.addSegment(pedersenHandler);
       const address = new Relocatable(segmentId, offset);
       const addressHash = new Relocatable(segmentId, 2);
 
@@ -79,7 +78,7 @@ describe('Pedersen', () => {
 
   test('should throw ExpectedFelt error when trying to constrain an input cell to a Relocatable', () => {
     const memory = new Memory();
-    const { segmentId } = memory.addSegment(bitwiseHandler);
+    const { segmentId } = memory.addSegment(pedersenHandler);
     const addressHash = new Relocatable(segmentId, 2);
 
     const xAddr = new Relocatable(segmentId, 0);
