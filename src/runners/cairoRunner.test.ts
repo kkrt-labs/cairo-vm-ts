@@ -29,10 +29,16 @@ const PEDERSEN_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 
+const POSEIDON_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/poseidon_builtin.json',
+  'utf8'
+);
+
 const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
 const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
 const EC_OP_PROGRAM = parseProgram(EC_OP_PROGRAM_STRING);
 const PEDERSEN_PROGRAM = parseProgram(PEDERSEN_PROGRAM_STRING);
+const POSEIDON_PROGRAM = parseProgram(POSEIDON_PROGRAM_STRING);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
@@ -170,6 +176,53 @@ describe('cairoRunner', () => {
             )
           ).toEqual(hash)
         );
+      });
+    });
+
+    describe('poseidon', () => {
+      test('should properly compute Poseidon states from initial states (1, 2, 3) and (13, 40, 36)', () => {
+        const runner = new CairoRunner(POSEIDON_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+
+        const expectedStates = [
+          [
+            0xfa8c9b6742b6176139365833d001e30e932a9bf7456d009b1b174f36d558c5n,
+            0x4f04deca4cb7f9f2bd16b1d25b817ca2d16fba2151e4252a2e2111cde08bfe6n,
+            0x58dde0a2a785b395ee2dc7b60b79e9472ab826e9bb5383a8018b59772964892n,
+          ].map((value) => new Felt(value)),
+          [
+            0x3314844f551d723c07039394d16ceabebb5178983820576d393ed4725465b2en,
+            0x368530a53a48b47a14e8e4e5cc1e531ec1c7fd92a0480ac5143ad6dc5794627n,
+            0x5885c5b4d797dbae20b78bbfbb6e5ba02cc0a21ae05a9cac3606a21805be2c9n,
+          ].map((value) => new Felt(value)),
+        ];
+
+        const executionSize = runner.vm.memory.getSegmentSize(1);
+        const executionEnd = runner.executionBase.add(executionSize);
+
+        const cellsPerPoseidon = 6;
+        const start = expectedStates.length * cellsPerPoseidon - 2;
+
+        const getPoseidonState = (index: number) => {
+          return [
+            runner.vm.memory.get(
+              executionEnd.sub(start - index * cellsPerPoseidon)
+            ),
+            runner.vm.memory.get(
+              executionEnd.sub(start - index * cellsPerPoseidon - 1)
+            ),
+            runner.vm.memory.get(
+              executionEnd.sub(start - index * cellsPerPoseidon - 2)
+            ),
+          ];
+        };
+
+        const poseidonStates = [getPoseidonState(0), getPoseidonState(1)];
+        expect(poseidonStates).toEqual(expectedStates);
       });
     });
   });
