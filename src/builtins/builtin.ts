@@ -1,6 +1,7 @@
 import { SegmentValue } from 'primitives/segmentValue';
 import { bitwiseHandler } from './bitwise';
 import { ecOpHandler } from './ecop';
+import { ecdsaHandler } from './ecdsa';
 
 /** Proxy handler to abstract validation & deduction rules off the VM */
 export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
@@ -22,6 +23,7 @@ const BUILTIN_HANDLER: {
 } = {
   bitwise: bitwiseHandler,
   ec_op: ecOpHandler,
+  ecdsa: ecdsaHandler,
 };
 
 /** Getter of the object `BUILTIN_HANDLER` */
