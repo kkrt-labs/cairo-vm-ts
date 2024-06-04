@@ -1,6 +1,7 @@
 import { ForbiddenOperation } from 'errors/primitives';
 
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
+import { CURVE } from '@scure/starknet';
 
 export class Felt {
   private inner: bigint;
@@ -38,6 +39,10 @@ export class Felt {
     return new Felt(this.inner * other.inner);
   }
 
+  neg(): Felt {
+    return new Felt(-this.inner);
+  }
+
   div(other: SegmentValue): Felt {
     if (!isFelt(other) || other.inner === 0n) {
       throw new ForbiddenOperation();
@@ -48,6 +53,10 @@ export class Felt {
 
   eq(other: SegmentValue): boolean {
     return !isRelocatable(other) && this.inner === other.inner;
+  }
+
+  sqrt(): Felt {
+    return new Felt(CURVE.Fp.sqrt(this.inner));
   }
 
   toString(radix?: number): string {
