@@ -53,32 +53,8 @@ export const keccakHandler: BuiltinHandler = {
       return finalState.slice(size, size + KECCAK_BYTES);
     }).map(bytesToNumberLE);
 
-    switch (keccakIndex - inputCellsPerKeccak) {
-      case 0:
-        target[offset] = new Felt(outputs[0]);
-        break;
-      case 1:
-        target[offset] = new Felt(outputs[1]);
-        break;
-      case 2:
-        target[offset] = new Felt(outputs[2]);
-        break;
-      case 3:
-        target[offset] = new Felt(outputs[3]);
-        break;
-      case 4:
-        target[offset] = new Felt(outputs[4]);
-        break;
-      case 5:
-        target[offset] = new Felt(outputs[5]);
-        break;
-      case 6:
-        target[offset] = new Felt(outputs[6]);
-        break;
-      default:
-        target[offset] = new Felt(outputs[7]);
-        break;
-    }
-    return target[offset];
+    return (target[offset] = new Felt(
+      outputs[keccakIndex - inputCellsPerKeccak]
+    ));
   },
 };
