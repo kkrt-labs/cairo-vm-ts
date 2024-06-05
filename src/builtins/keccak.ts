@@ -48,10 +48,9 @@ export const keccakHandler: BuiltinHandler = {
     keccakP(state);
     const finalState = u8(state);
 
-    const outputs = Array.from({ length: 8 }, (_, i) => {
-      const size = i * KECCAK_BYTES;
-      return finalState.slice(size, size + KECCAK_BYTES);
-    }).map(bytesToNumberLE);
+    const outputs = Array.from({ length: 8 }, (_, i) =>
+      finalState.slice(i * KECCAK_BYTES, (i + 1) * KECCAK_BYTES)
+    ).map(bytesToNumberLE);
 
     return (target[offset] = new Felt(
       outputs[keccakIndex - inputCellsPerKeccak]
