@@ -46,17 +46,8 @@ export const poseidonHandler: BuiltinHandler = {
 
     const state = poseidon(x, y, z);
 
-    switch (poseidonIndex - inputCellsPerPoseidon) {
-      case 0:
-        target[offset] = new Felt(state[0]);
-        break;
-      case 1:
-        target[offset] = new Felt(state[1]);
-        break;
-      default:
-        target[offset] = new Felt(state[2]);
-        break;
-    }
-    return target[offset];
+    return (target[offset] = new Felt(
+      state[poseidonIndex - inputCellsPerPoseidon]
+    ));
   },
 };
