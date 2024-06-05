@@ -106,4 +106,10 @@ export class CairoRunner {
       if (err) throw err;
     });
   }
+
+  getOutput() {
+    const builtins = this.program.builtins;
+    const outputIdx = builtins.findIndex((name) => name === 'output');
+    return outputIdx >= 0 ? this.vm.memory.segments[outputIdx + 2] : [];
+  }
 }

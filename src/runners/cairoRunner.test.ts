@@ -44,6 +44,16 @@ const KECCAK_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 
+const JMP_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/jmp.json',
+  'utf8'
+);
+
+const BITWISE_OUTPUT_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/bitwise_output.json',
+  'utf8'
+);
+
 const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
 const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
 const EC_OP_PROGRAM = parseProgram(EC_OP_PROGRAM_STRING);
@@ -51,6 +61,8 @@ const PEDERSEN_PROGRAM = parseProgram(PEDERSEN_PROGRAM_STRING);
 const POSEIDON_PROGRAM = parseProgram(POSEIDON_PROGRAM_STRING);
 const KECCAK_SEED_PROGRAM = parseProgram(KECCAK_SEED_PROGRAM_STRING);
 const KECCAK_PROGRAM = parseProgram(KECCAK_PROGRAM_STRING);
+const JMP_PROGRAM = parseProgram(JMP_PROGRAM_STRING);
+const BITWISE_OUTPUT_PROGRAM = parseProgram(BITWISE_OUTPUT_PROGRAM_STRING);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
@@ -295,6 +307,32 @@ describe('cairoRunner', () => {
             value
           )
         );
+      });
+    });
+
+    describe('output', () => {
+      test('Should properly store the jmp dest value in the output segment', () => {
+        const runner = new CairoRunner(JMP_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+        const output = runner.getOutput();
+        expect(output.length).toEqual(1);
+        expect(output[0]).toEqual(new Felt(2n));
+      });
+
+      test('Should properly write the result of bitwise 1 & 2 to output segment', () => {
+        const runner = new CairoRunner(BITWISE_OUTPUT_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+        const output = runner.getOutput();
+        expect(output.length).toEqual(1);
+        expect(output[0]).toEqual(new Felt(0n));
       });
     });
   });
