@@ -24,9 +24,15 @@ const EC_OP_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 
+const PEDERSEN_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/pedersen_builtin.json',
+  'utf8'
+);
+
 const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
 const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
 const EC_OP_PROGRAM = parseProgram(EC_OP_PROGRAM_STRING);
+const PEDERSEN_PROGRAM = parseProgram(PEDERSEN_PROGRAM_STRING);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
@@ -132,6 +138,38 @@ describe('cairoRunner', () => {
         const executionEnd = runner.executionBase.add(executionSize);
         expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(expectedRx);
         expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(expectedRy);
+      });
+    });
+
+    describe('pedersen', () => {
+      test('should properly compute Pedersen hashes of (0, 0), (0, 1), (1, 0) and (54, 1249832432) tuples', () => {
+        const runner = new CairoRunner(PEDERSEN_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+
+        const expectedHashes = [
+          0x49ee3eba8c1600700ee1b87eb599f16716b0b1022947733551fde4050ca6804n,
+          0x46c9aeb066cc2f41c7124af30514f9e607137fbac950524f5fdace5788f9d43n,
+          0x268a9d47dde48af4b6e2c33932ed1c13adec25555abaa837c376af4ea2f8a94n,
+          0x20120a7d08fd21654c72a9281841406543b16d00faaca1069332053c41c07b8n,
+        ].map((value) => new Felt(value));
+
+        const executionSize = runner.vm.memory.getSegmentSize(1);
+        const executionEnd = runner.executionBase.add(executionSize);
+
+        const cellsPerPedersen = 3;
+        const start = expectedHashes.length * cellsPerPedersen - 1;
+
+        expectedHashes.forEach((hash, index) =>
+          expect(
+            runner.vm.memory.get(
+              executionEnd.sub(start - cellsPerPedersen * index)
+            )
+          ).toEqual(hash)
+        );
       });
     });
   });
