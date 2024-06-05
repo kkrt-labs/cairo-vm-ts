@@ -1,7 +1,5 @@
 %builtins output
 
-from starkware.cairo.common.serialize import serialize_word
-
 func main{output_ptr: felt*}() {
     jmp test;
 
@@ -11,6 +9,7 @@ func main{output_ptr: felt*}() {
     test:
     [ap] = 2, ap++;
 
-    serialize_word([ap - 1]);
+    assert [output_ptr] = [ap - 1];
+    let output_ptr = output_ptr + 1;
     return ();
 }
