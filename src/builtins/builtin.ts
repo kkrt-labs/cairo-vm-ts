@@ -5,6 +5,7 @@ import { ecdsaHandler } from './ecdsa';
 import { pedersenHandler } from './pedersen';
 import { poseidonHandler } from './poseidon';
 import { keccakHandler } from './keccak';
+import { outputHandler } from './output';
 
 /** Proxy handler to abstract validation & deduction rules off the VM */
 export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
@@ -24,6 +25,7 @@ export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
 const BUILTIN_HANDLER: {
   [key: string]: BuiltinHandler;
 } = {
+  output: outputHandler,
   bitwise: bitwiseHandler,
   ec_op: ecOpHandler,
   ecdsa: ecdsaHandler,

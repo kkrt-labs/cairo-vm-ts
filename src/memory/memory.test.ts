@@ -92,7 +92,7 @@ describe('Memory', () => {
       memory.assertEq(address, VALUES[0]);
 
       expect(() => memory.assertEq(address, VALUES[1])).toThrow(
-        new InconsistentMemory(address.offset, VALUES[0], VALUES[1])
+        new InconsistentMemory(address, VALUES[0], VALUES[1])
       );
     });
 
