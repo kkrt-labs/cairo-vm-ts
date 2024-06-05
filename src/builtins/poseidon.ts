@@ -21,12 +21,12 @@ export const poseidonHandler: BuiltinHandler = {
     const inputCellsPerPoseidon = 3;
 
     const offset = Number(prop);
-    const PoseidonIndex = offset % cellsPerPoseidon;
-    if (PoseidonIndex < inputCellsPerPoseidon) {
+    const poseidonIndex = offset % cellsPerPoseidon;
+    if (poseidonIndex < inputCellsPerPoseidon) {
       return target[offset];
     }
 
-    const xOffset = offset - PoseidonIndex;
+    const xOffset = offset - poseidonIndex;
     const xValue = target[xOffset];
     if (!xValue) throw new UndefinedValue(xOffset);
     if (!isFelt(xValue)) throw new ExpectedFelt();
@@ -46,7 +46,7 @@ export const poseidonHandler: BuiltinHandler = {
 
     const state = poseidon(x, y, z);
 
-    switch (PoseidonIndex - inputCellsPerPoseidon) {
+    switch (poseidonIndex - inputCellsPerPoseidon) {
       case 0:
         target[offset] = new Felt(state[0]);
         break;
