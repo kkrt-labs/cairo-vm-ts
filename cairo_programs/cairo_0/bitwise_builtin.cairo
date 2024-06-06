@@ -1,6 +1,5 @@
-// Taken from lambda-class/cairo-vm repo
-
 %builtins bitwise
+
 from starkware.cairo.common.bitwise import bitwise_and, bitwise_xor, bitwise_or, bitwise_operations
 from starkware.cairo.common.cairo_builtins import BitwiseBuiltin
 
