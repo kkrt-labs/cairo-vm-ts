@@ -99,7 +99,7 @@ describe('cairoRunner', () => {
 
   describe('builtins', () => {
     describe('bitwise', () => {
-      test('should compute bitwise_ptr 12 & 10', () => {
+      test('should compute bitwise operations 12 & 10, 12 ^10 and 12 | 10', () => {
         const runner = new CairoRunner(BITWISE_PROGRAM);
         const config: RunOptions = {
           relocate: true,
