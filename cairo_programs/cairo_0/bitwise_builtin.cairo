@@ -12,7 +12,7 @@ func main{bitwise_ptr: BitwiseBuiltin*}() {
     assert bitwise_ptr.x_xor_y = 14; // Binary 1110
     assert bitwise_ptr.x_or_y = 6; // Binary 0110
 
-    bitwise_ptr = bitwise_ptr + BitwiseBuiltin.SIZE;
+    let bitwise_ptr = bitwise_ptr + BitwiseBuiltin.SIZE;
 
     return ();
 }

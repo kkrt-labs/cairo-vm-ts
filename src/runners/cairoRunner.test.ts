@@ -16,7 +16,7 @@ const FIBONACCI_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 const BITWISE_PROGRAM_STRING = fs.readFileSync(
-  'cairo_programs/cairo_0/bitwise_test.json',
+  'cairo_programs/cairo_0/bitwise_builtin.json',
   'utf8'
 );
 const EC_OP_PROGRAM_STRING = fs.readFileSync(
@@ -99,7 +99,7 @@ describe('cairoRunner', () => {
 
   describe('builtins', () => {
     describe('bitwise', () => {
-      test('should compute bitwise 12 & 10', () => {
+      test('should compute bitwise_ptr 12 & 10', () => {
         const runner = new CairoRunner(BITWISE_PROGRAM);
         const config: RunOptions = {
           relocate: true,
@@ -108,6 +108,8 @@ describe('cairoRunner', () => {
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
+        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(new Felt(6n));
+        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(new Felt(14n));
         expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(new Felt(8n));
       });
     });
