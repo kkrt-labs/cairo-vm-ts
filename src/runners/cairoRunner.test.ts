@@ -108,9 +108,9 @@ describe('cairoRunner', () => {
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
-        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(new Felt(6n));
-        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(new Felt(14n));
-        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(new Felt(8n));
+        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(new Felt(8n));
+        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(new Felt(6n));
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(new Felt(14n));
       });
     });
 
