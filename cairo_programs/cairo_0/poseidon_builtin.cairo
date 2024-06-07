@@ -1,4 +1,5 @@
 %builtins poseidon
+
 from starkware.cairo.common.cairo_builtins import PoseidonBuiltin
 from starkware.cairo.common.poseidon_state import PoseidonBuiltinState
 

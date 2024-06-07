@@ -11,6 +11,9 @@ export class UndefinedValue extends BuiltinError {
   }
 }
 
+/** Value is above Range Check upper bound */
+export class RangeCheckOutOfBounds extends BuiltinError {}
+
 /** ECDSA signature cannot be retrived from dictionnary at `offset` */
 export class UndefinedECDSASignature extends BuiltinError {
   constructor(readonly offset: number) {

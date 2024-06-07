@@ -1,4 +1,5 @@
 %builtins keccak
+
 from starkware.cairo.common.cairo_builtins import KeccakBuiltin
 from starkware.cairo.common.keccak_state import KeccakBuiltinState
 
