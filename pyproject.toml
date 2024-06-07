@@ -6,7 +6,7 @@ authors = ["Gregory Edison <gregory.edison1993@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.9"
 cairo-lang = "^0.13.1"
 
 
