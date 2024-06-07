@@ -6,7 +6,7 @@ import { pedersenHandler } from './pedersen';
 import { poseidonHandler } from './poseidon';
 import { keccakHandler } from './keccak';
 import { outputHandler } from './output';
-import { rangeCheckHandler } from './rangeCheck';
+import { rangeCheck96Handler, rangeCheckHandler } from './rangeCheck';
 
 /** Proxy handler to abstract validation & deduction rules off the VM */
 export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
@@ -34,6 +34,7 @@ const BUILTIN_HANDLER: {
   poseidon: poseidonHandler,
   keccak: keccakHandler,
   range_check: rangeCheckHandler,
+  range_check96: rangeCheck96Handler,
 };
 
 /** Getter of the object `BUILTIN_HANDLER` */
