@@ -7,7 +7,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-cairo-lang = "^0.12.2"
+cairo-lang = "^0.13.1"
 
 
 [build-system]
