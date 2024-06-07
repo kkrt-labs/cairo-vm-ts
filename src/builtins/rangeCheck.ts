@@ -3,7 +3,7 @@ import { BuiltinHandler } from './builtin';
 import { isFelt } from 'primitives/segmentValue';
 import { ExpectedFelt } from 'errors/virtualMachine';
 
-const rangeCheckHandlerFactory = (boundExponent: bigint): BuiltinHandler => {
+export const rangeCheckHandler = (boundExponent: bigint): BuiltinHandler => {
   return {
     set(target, prop, newValue): boolean {
       if (isNaN(Number(prop))) throw new ExpectedOffset();
@@ -18,6 +18,3 @@ const rangeCheckHandlerFactory = (boundExponent: bigint): BuiltinHandler => {
     },
   };
 };
-
-export const rangeCheckHandler = rangeCheckHandlerFactory(128n);
-export const rangeCheck96Handler = rangeCheckHandlerFactory(96n);

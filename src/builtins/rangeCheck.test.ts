@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import { Relocatable } from 'primitives/relocatable';
 import { Memory } from 'memory/memory';
-import { rangeCheck96Handler, rangeCheckHandler } from './rangeCheck';
+import { rangeCheckHandler } from './rangeCheck';
 import { Felt } from 'primitives/felt';
 
 describe('range check', () => {
@@ -10,7 +10,7 @@ describe('range check', () => {
     'should properly assert values inferior to 2 ** 128 in range check segment',
     (value) => {
       const memory = new Memory();
-      const { segmentId } = memory.addSegment(rangeCheckHandler);
+      const { segmentId } = memory.addSegment(rangeCheckHandler(128n));
 
       const offset = 0;
       const address = new Relocatable(segmentId, offset);
@@ -24,7 +24,7 @@ describe('range check', () => {
     'should properly assert values inferior to 2 ** 96 in range check96 segment',
     (value) => {
       const memory = new Memory();
-      const { segmentId } = memory.addSegment(rangeCheck96Handler);
+      const { segmentId } = memory.addSegment(rangeCheckHandler(96n));
 
       const offset = 0;
       const address = new Relocatable(segmentId, offset);
@@ -38,7 +38,7 @@ describe('range check', () => {
     'should throw when trying to assert values equal or superior to 2 ** 128 in range check segment',
     (value) => {
       const memory = new Memory();
-      const { segmentId } = memory.addSegment(rangeCheckHandler);
+      const { segmentId } = memory.addSegment(rangeCheckHandler(128n));
 
       const offset = 0;
       const address = new Relocatable(segmentId, offset);
@@ -52,7 +52,7 @@ describe('range check', () => {
     'should throw when trying to assert values equal or superior to 2 ** 96 in range check96 segment',
     (value) => {
       const memory = new Memory();
-      const { segmentId } = memory.addSegment(rangeCheck96Handler);
+      const { segmentId } = memory.addSegment(rangeCheckHandler(96n));
 
       const offset = 0;
       const address = new Relocatable(segmentId, offset);
