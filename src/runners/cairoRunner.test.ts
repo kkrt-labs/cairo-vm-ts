@@ -97,7 +97,8 @@ describe('cairoRunner', () => {
       const pyMemoryPath = path.join(tmpDir, 'memory_python.bin');
       await $`poetry run cairo-run --layout=starknet --program=${programPath} --memory_file ${pyMemoryPath}`;
 
-      const runner = new CairoRunner(FIBONACCI_PROGRAM);
+      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const runner = new CairoRunner(program);
       const config: RunOptions = {
         relocate: false,
         relocateOffset: 1,
@@ -116,7 +117,8 @@ describe('cairoRunner', () => {
       const pyTracePath = path.join(tmpDir, 'trace_python.bin');
       await $`poetry run cairo-run --layout=starknet --program=${programPath} --trace_file ${pyTracePath}`;
 
-      const runner = new CairoRunner(FIBONACCI_PROGRAM);
+      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const runner = new CairoRunner(program);
       const config: RunOptions = {
         relocate: false,
         relocateOffset: 1,
