@@ -131,12 +131,9 @@ describe('cairoRunner', () => {
     });
 
     /*
-     * TODO: Add differential testing of the content
-     * See this [issue](https://github.com/kkrt-labs/cairo-vm-ts/issues/59) for more details
-
      * NOTE: `fs.access` is only used when checking if a file exists
      * It should be removed if reading the file, to avoid race conditions
-    */
+     */
     test('should export encoded trace', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
