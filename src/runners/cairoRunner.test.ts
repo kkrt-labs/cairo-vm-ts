@@ -92,46 +92,6 @@ describe('cairoRunner', () => {
       expect(runner.vm.memory.get(executionEnd.sub(1))).toEqual(new Felt(144n));
     });
 
-    test('should compare memory from TS & Python VMs execution of fibonacci', async () => {
-      const programPath = 'cairo_programs/cairo_0/fibonacci.json';
-      const pyMemoryPath = path.join(tmpDir, 'memory_python.bin');
-      await $`poetry run cairo-run --layout=starknet --program=${programPath} --memory_file ${pyMemoryPath}`;
-
-      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
-      const runner = new CairoRunner(program);
-      const config: RunOptions = {
-        relocate: false,
-        relocateOffset: 1,
-      };
-      runner.run(config);
-      const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
-      runner.exportMemory(tsMemoryPath);
-
-      const tsMemory = fs.readFileSync(tsMemoryPath);
-      const pyMemory = fs.readFileSync(pyMemoryPath);
-      expect(tsMemory.equals(pyMemory)).toBeTrue;
-    });
-
-    test('should compare trace from TS & Python VMs execution of fibonacci', async () => {
-      const programPath = 'cairo_programs/cairo_0/fibonacci.json';
-      const pyTracePath = path.join(tmpDir, 'trace_python.bin');
-      await $`poetry run cairo-run --layout=starknet --program=${programPath} --trace_file ${pyTracePath}`;
-
-      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
-      const runner = new CairoRunner(program);
-      const config: RunOptions = {
-        relocate: false,
-        relocateOffset: 1,
-      };
-      runner.run(config);
-      const tsTracePath = path.join(tmpDir, 'trace_ts.bin');
-      runner.exportTrace(tsTracePath);
-
-      const tsTrace = fs.readFileSync(tsTracePath);
-      const pyTrace = fs.readFileSync(pyTracePath);
-      expect(tsTrace.equals(pyTrace)).toBeTrue;
-    });
-
     /*
      * NOTE: `fs.access` is only used when checking if a file exists
      * It should be removed if reading the file, to avoid race conditions
@@ -372,6 +332,48 @@ describe('cairoRunner', () => {
         expect(output.length).toEqual(1);
         expect(output[0]).toEqual(new Felt(0n));
       });
+    });
+  });
+
+  describe('diff testing', () => {
+    test('should compare memory from TS & Python VMs execution of fibonacci', async () => {
+      const programPath = 'cairo_programs/cairo_0/fibonacci.json';
+      const pyMemoryPath = path.join(tmpDir, 'memory_python.bin');
+      await $`poetry run cairo-run --layout=starknet --program=${programPath} --memory_file ${pyMemoryPath}`;
+
+      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const runner = new CairoRunner(program);
+      const config: RunOptions = {
+        relocate: false,
+        relocateOffset: 1,
+      };
+      runner.run(config);
+      const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
+      runner.exportMemory(tsMemoryPath);
+
+      const tsMemory = fs.readFileSync(tsMemoryPath);
+      const pyMemory = fs.readFileSync(pyMemoryPath);
+      expect(tsMemory.equals(pyMemory)).toBeTrue;
+    });
+
+    test('should compare trace from TS & Python VMs execution of fibonacci', async () => {
+      const programPath = 'cairo_programs/cairo_0/fibonacci.json';
+      const pyTracePath = path.join(tmpDir, 'trace_python.bin');
+      await $`poetry run cairo-run --layout=starknet --program=${programPath} --trace_file ${pyTracePath}`;
+
+      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const runner = new CairoRunner(program);
+      const config: RunOptions = {
+        relocate: false,
+        relocateOffset: 1,
+      };
+      runner.run(config);
+      const tsTracePath = path.join(tmpDir, 'trace_ts.bin');
+      runner.exportTrace(tsTracePath);
+
+      const tsTrace = fs.readFileSync(tsTracePath);
+      const pyTrace = fs.readFileSync(pyTracePath);
+      expect(tsTrace.equals(pyTrace)).toBeTrue;
     });
   });
 });
