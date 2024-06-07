@@ -78,9 +78,7 @@ export class CairoRunner {
       view.setBigUint64(byteOffset + 2 * 8, pc.toBigInt(), true);
     });
 
-    fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(filename, view, { flag: 'w+' });
   }
 
   /**
@@ -102,9 +100,7 @@ export class CairoRunner {
       view.setBigUint64(byteOffset + 4 * 8, valueAs64BitsWords[3], true);
     });
 
-    fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(filename, view, { flag: 'w+' });
   }
 
   getOutput() {
