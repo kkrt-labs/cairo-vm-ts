@@ -33,7 +33,8 @@ const BUILTIN_HANDLER: {
   pedersen: pedersenHandler,
   poseidon: poseidonHandler,
   keccak: keccakHandler,
-  range_check: rangeCheckHandler,
+  range_check: rangeCheckHandler(128n),
+  range_check96: rangeCheckHandler(96n),
 };
 
 /** Getter of the object `BUILTIN_HANDLER` */

@@ -60,8 +60,18 @@ const RANGE_CHECK_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 
+const RANGE_CHECK96_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/range_check96_builtin.json',
+  'utf8'
+);
+
 const BAD_RANGE_CHECK_PROGRAM_STRING = fs.readFileSync(
   'cairo_programs/cairo_0/bad_programs/bad_range_check_builtin.json',
+  'utf8'
+);
+
+const BAD_RANGE_CHECK96_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/bad_programs/bad_range_check96_builtin.json',
   'utf8'
 );
 
@@ -75,8 +85,12 @@ const KECCAK_PROGRAM = parseProgram(KECCAK_PROGRAM_STRING);
 const JMP_PROGRAM = parseProgram(JMP_PROGRAM_STRING);
 const BITWISE_OUTPUT_PROGRAM = parseProgram(BITWISE_OUTPUT_PROGRAM_STRING);
 const RANGE_CHECK_PROGRAM = parseProgram(RANGE_CHECK_PROGRAM_STRING);
+const RANGE_CHECK96_PROGRAM = parseProgram(RANGE_CHECK96_PROGRAM_STRING);
 
 const BAD_RANGE_CHECK_PROGRAM = parseProgram(BAD_RANGE_CHECK_PROGRAM_STRING);
+const BAD_RANGE_CHECK96_PROGRAM = parseProgram(
+  BAD_RANGE_CHECK96_PROGRAM_STRING
+);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
@@ -367,6 +381,31 @@ describe('cairoRunner', () => {
 
       test('should crash the VM when trying to assert -1 to the range check segment', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
+      });
+    });
+
+    describe('range_check96', () => {
+      test('should properly write 2 ** 96 - 1 to the range check segment', () => {
+        const runner = new CairoRunner(RANGE_CHECK96_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+        const executionSize = runner.vm.memory.getSegmentSize(1);
+        const executionEnd = runner.executionBase.add(executionSize);
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(
+          new Felt((1n << 96n) - 1n)
+        );
+      });
+
+      test('should crash the VM when trying to assert 2 ** 96 to the range check segment', () => {
+        const runner = new CairoRunner(BAD_RANGE_CHECK96_PROGRAM);
         const config: RunOptions = {
           relocate: true,
           relocateOffset: 1,
