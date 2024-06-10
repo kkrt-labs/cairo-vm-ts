@@ -116,15 +116,15 @@ describe('cairoRunner', () => {
     test('should export encoded memory', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
-        relocate: false,
+        relocate: true,
         relocateOffset: 1,
       };
       runner.run(config);
-      const memory_filename = 'fibonacci_memory_ts.bin';
-      const memory_path = path.join(tmpDir, memory_filename);
-      runner.exportMemory(memory_path, config.relocateOffset);
+      const memoryFilename = 'fibonacci_memory_ts.bin';
+      const memoryPath = path.join(tmpDir, memoryFilename);
+      runner.exportMemory(memoryPath, config.relocateOffset);
       expect(() =>
-        fs.access(memory_path, (err) => {
+        fs.access(memoryPath, (err) => {
           if (err) throw err;
         })
       ).not.toThrow();
