@@ -344,7 +344,7 @@ describe('cairoRunner', () => {
       const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
       const runner = new CairoRunner(program);
       const config: RunOptions = {
-        relocate: false,
+        relocate: true,
         relocateOffset: 1,
       };
       runner.run(config);
@@ -364,7 +364,7 @@ describe('cairoRunner', () => {
       const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
       const runner = new CairoRunner(program);
       const config: RunOptions = {
-        relocate: false,
+        relocate: true,
         relocateOffset: 1,
       };
       runner.run(config);
