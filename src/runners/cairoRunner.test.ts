@@ -9,6 +9,7 @@ import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from './cairoRunner';
+import { RangeCheckOutOfBounds } from 'errors/builtins';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
@@ -55,6 +56,26 @@ const BITWISE_OUTPUT_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 
+const RANGE_CHECK_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/range_check_builtin.json',
+  'utf8'
+);
+
+const RANGE_CHECK96_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/range_check96_builtin.json',
+  'utf8'
+);
+
+const BAD_RANGE_CHECK_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/bad_programs/bad_range_check_builtin.json',
+  'utf8'
+);
+
+const BAD_RANGE_CHECK96_PROGRAM_STRING = fs.readFileSync(
+  'cairo_programs/cairo_0/bad_programs/bad_range_check96_builtin.json',
+  'utf8'
+);
+
 const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
 const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
 const EC_OP_PROGRAM = parseProgram(EC_OP_PROGRAM_STRING);
@@ -64,6 +85,13 @@ const KECCAK_SEED_PROGRAM = parseProgram(KECCAK_SEED_PROGRAM_STRING);
 const KECCAK_PROGRAM = parseProgram(KECCAK_PROGRAM_STRING);
 const JMP_PROGRAM = parseProgram(JMP_PROGRAM_STRING);
 const BITWISE_OUTPUT_PROGRAM = parseProgram(BITWISE_OUTPUT_PROGRAM_STRING);
+const RANGE_CHECK_PROGRAM = parseProgram(RANGE_CHECK_PROGRAM_STRING);
+const RANGE_CHECK96_PROGRAM = parseProgram(RANGE_CHECK96_PROGRAM_STRING);
+
+const BAD_RANGE_CHECK_PROGRAM = parseProgram(BAD_RANGE_CHECK_PROGRAM_STRING);
+const BAD_RANGE_CHECK96_PROGRAM = parseProgram(
+  BAD_RANGE_CHECK96_PROGRAM_STRING
+);
 
 describe('cairoRunner', () => {
   describe('constructor', () => {
@@ -331,6 +359,56 @@ describe('cairoRunner', () => {
         const output = runner.getOutput();
         expect(output.length).toEqual(1);
         expect(output[0]).toEqual(new Felt(0n));
+      });
+    });
+
+    describe('range_check', () => {
+      test('should properly write 2 ** 128 - 1 to the range check segment', () => {
+        const runner = new CairoRunner(RANGE_CHECK_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+        const executionSize = runner.vm.memory.getSegmentSize(1);
+        const executionEnd = runner.executionBase.add(executionSize);
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(
+          new Felt((1n << 128n) - 1n)
+        );
+      });
+
+      test('should crash the VM when trying to assert -1 to the range check segment', () => {
+        const runner = new CairoRunner(BAD_RANGE_CHECK_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
+      });
+    });
+
+    describe('range_check96', () => {
+      test('should properly write 2 ** 96 - 1 to the range check segment', () => {
+        const runner = new CairoRunner(RANGE_CHECK96_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        runner.run(config);
+        const executionSize = runner.vm.memory.getSegmentSize(1);
+        const executionEnd = runner.executionBase.add(executionSize);
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(
+          new Felt((1n << 96n) - 1n)
+        );
+      });
+
+      test('should crash the VM when trying to assert 2 ** 96 to the range check segment', () => {
+        const runner = new CairoRunner(BAD_RANGE_CHECK96_PROGRAM);
+        const config: RunOptions = {
+          relocate: true,
+          relocateOffset: 1,
+        };
+        expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
       });
     });
   });
