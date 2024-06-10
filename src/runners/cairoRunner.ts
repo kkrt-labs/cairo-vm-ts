@@ -78,7 +78,7 @@ export class CairoRunner {
       view.setBigUint64(byteOffset + 2 * 8, pc.toBigInt(), true);
     });
 
-    fs.writeFileSync(filename, buffer, { flag: 'w+' });
+    fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
   }
 
   /**
@@ -100,7 +100,7 @@ export class CairoRunner {
       view.setBigUint64(byteOffset + 4 * 8, valueAs64BitsWords[3], true);
     });
 
-    fs.writeFileSync(filename, buffer, { flag: 'w+' });
+    fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
   }
 
   getOutput() {
