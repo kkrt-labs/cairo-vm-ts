@@ -84,14 +84,18 @@ export class CairoRunner {
   /**
    * Export the relocated memory little-endian encoded to a file
    *
+   * @param offset - Start address of the relocated memory.  Defaults to 0.
+   *
+   *
+   * NOTE: StarkWare verifier expects offset to be 1.
    * @dev DataView must be used to enforce little-endianness
    */
-  exportMemory(filename: string = 'encoded_memory') {
+  exportMemory(filename: string = 'encoded_memory', offset: number = 0) {
     const buffer = new ArrayBuffer(this.vm.relocatedMemory.length * 5 * 8);
     const view = new DataView(buffer);
 
     this.vm.relocatedMemory.forEach(({ address, value }) => {
-      const byteOffset = (address - 1) * 5 * 8;
+      const byteOffset = (address - offset) * 5 * 8;
       const valueAs64BitsWords = value.to64BitsWords();
       view.setBigUint64(byteOffset, BigInt(address), true);
       view.setBigUint64(byteOffset + 8, valueAs64BitsWords[0], true);

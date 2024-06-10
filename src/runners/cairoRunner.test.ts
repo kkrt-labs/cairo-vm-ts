@@ -122,7 +122,7 @@ describe('cairoRunner', () => {
       runner.run(config);
       const memory_filename = 'fibonacci_memory_ts.bin';
       const memory_path = path.join(tmpDir, memory_filename);
-      runner.exportMemory(memory_path);
+      runner.exportMemory(memory_path, config.relocateOffset);
       expect(() =>
         fs.access(memory_path, (err) => {
           if (err) throw err;
@@ -349,11 +349,12 @@ describe('cairoRunner', () => {
       };
       runner.run(config);
       const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
-      runner.exportMemory(tsMemoryPath);
+      runner.exportMemory(tsMemoryPath, config.relocateOffset);
 
       const tsMemory = fs.readFileSync(tsMemoryPath);
+
       const pyMemory = fs.readFileSync(pyMemoryPath);
-      expect(tsMemory.equals(pyMemory)).toBeTrue;
+      expect(pyMemory.equals(tsMemory)).toBeTrue();
     });
 
     test('should compare trace from TS & Python VMs execution of fibonacci', async () => {
@@ -373,7 +374,7 @@ describe('cairoRunner', () => {
 
       const tsTrace = fs.readFileSync(tsTracePath);
       const pyTrace = fs.readFileSync(pyTracePath);
-      expect(tsTrace.equals(pyTrace)).toBeTrue;
+      expect(tsTrace.equals(pyTrace)).toBeTrue();
     });
   });
 });
