@@ -1,8 +1,10 @@
 import * as fs from 'fs';
 
+import { EmptyRelocatedMemory } from 'errors/cairoRunner';
+
 import { Relocatable } from 'primitives/relocatable';
-import { VirtualMachine } from 'vm/virtualMachine';
 import { Program } from 'vm/program';
+import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 
 /**
@@ -91,6 +93,8 @@ export class CairoRunner {
    * @dev DataView must be used to enforce little-endianness
    */
   exportMemory(filename: string = 'encoded_memory', offset: number = 0) {
+    if (!this.vm.relocatedMemory.length) throw new EmptyRelocatedMemory();
+
     const buffer = new ArrayBuffer(this.vm.relocatedMemory.length * 5 * 8);
     const view = new DataView(buffer);
 
