@@ -15,17 +15,20 @@ jobs:
     name: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+      - uses: actions/checkout@v4
+      - name: Set up Python 3.10
+        id: setup-python
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11
+          python-version: '3.10'
+
       - name: Load cached Poetry installation
         id: cached-poetry
         uses: actions/cache@v3
         with:
           path: ~/.local
-          key: poetry-${{ runner.os }}
+          key: poetry-${{ steps.setup-python.outputs.python-version }}
+
       - name: Install Poetry
         if: steps.cached-poetry.outputs.cache-hit != 'true'
         uses: snok/install-poetry@v1
@@ -33,20 +36,25 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
-      - run: poetry config installer.modern-installation false
+
       - name: Load cached venv
         id: cached-poetry-dependencies
         uses: actions/cache@v3
         with:
           path: .venv
-          key: venv-${{ runner.os }}-${{ hashFiles('**/poetry.lock') }}
+          key:
+            venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('**/poetry.lock') }}
+
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install
+        run: poetry install --no-interaction --no-root
+
       - name: Compile cairo files
         run: make compile
 
       - name: Install bun
         uses: oven-sh/setup-bun@v1
+
       - name: Run tests
         run: bun install && bun test

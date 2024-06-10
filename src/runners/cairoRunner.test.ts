@@ -1,3 +1,4 @@
+import { $ } from 'bun';
 import { describe, expect, test } from 'bun:test';
 
 import * as fs from 'fs';
@@ -120,12 +121,9 @@ describe('cairoRunner', () => {
     });
 
     /*
-     * TODO: Add differential testing of the content
-     * See this [issue](https://github.com/kkrt-labs/cairo-vm-ts/issues/59) for more details
-
      * NOTE: `fs.access` is only used when checking if a file exists
      * It should be removed if reading the file, to avoid race conditions
-    */
+     */
     test('should export encoded trace', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
@@ -146,15 +144,15 @@ describe('cairoRunner', () => {
     test('should export encoded memory', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
-        relocate: false,
+        relocate: true,
         relocateOffset: 1,
       };
       runner.run(config);
-      const memory_filename = 'fibonacci_memory_ts.bin';
-      const memory_path = path.join(tmpDir, memory_filename);
-      runner.exportMemory(memory_path);
+      const memoryFilename = 'fibonacci_memory_ts.bin';
+      const memoryPath = path.join(tmpDir, memoryFilename);
+      runner.exportMemory(memoryPath, config.relocateOffset);
       expect(() =>
-        fs.access(memory_path, (err) => {
+        fs.access(memoryPath, (err) => {
           if (err) throw err;
         })
       ).not.toThrow();
@@ -412,6 +410,49 @@ describe('cairoRunner', () => {
         };
         expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
       });
+    });
+  });
+
+  describe('diff testing', () => {
+    test('should compare memory from TS & Python VMs execution of fibonacci', async () => {
+      const programPath = 'cairo_programs/cairo_0/fibonacci.json';
+      const pyMemoryPath = path.join(tmpDir, 'memory_python.bin');
+      await $`poetry run cairo-run --layout=starknet --program=${programPath} --memory_file ${pyMemoryPath}`;
+
+      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const runner = new CairoRunner(program);
+      const config: RunOptions = {
+        relocate: true,
+        relocateOffset: 1,
+      };
+      runner.run(config);
+      const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
+      runner.exportMemory(tsMemoryPath, config.relocateOffset);
+
+      const tsMemory = fs.readFileSync(tsMemoryPath);
+
+      const pyMemory = fs.readFileSync(pyMemoryPath);
+      expect(pyMemory.equals(tsMemory)).toBeTrue();
+    });
+
+    test('should compare trace from TS & Python VMs execution of fibonacci', async () => {
+      const programPath = 'cairo_programs/cairo_0/fibonacci.json';
+      const pyTracePath = path.join(tmpDir, 'trace_python.bin');
+      await $`poetry run cairo-run --layout=starknet --program=${programPath} --trace_file ${pyTracePath}`;
+
+      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const runner = new CairoRunner(program);
+      const config: RunOptions = {
+        relocate: true,
+        relocateOffset: 1,
+      };
+      runner.run(config);
+      const tsTracePath = path.join(tmpDir, 'trace_ts.bin');
+      runner.exportTrace(tsTracePath);
+
+      const tsTrace = fs.readFileSync(tsTracePath);
+      const pyTrace = fs.readFileSync(pyTracePath);
+      expect(tsTrace.equals(pyTrace)).toBeTrue();
     });
   });
 });
