@@ -1,12 +1,13 @@
-# TypeScript Cairo VM
+# Cairo VM Typescript
 
 <div align="center">
-  <h1><code>TypeScript Cairo VM</code></h1>
+  <h1><code>Cairo VM TypeScript</code></h1>
 
 <strong>An implementation of the Cairo VM in TypeScript, focusing on
 education</strong>
 
-[Github](https://github.com/kkrt-labs/cairo-vm-ts)
+[Github](https://github.com/kkrt-labs/cairo-vm-ts) ·
+[Telegram](https://t.me/cairovmts)
 
 <sub>Built with 🥕 by <a href="https://twitter.com/KakarotZkEvm">KKRT
 Labs</a></sub>
