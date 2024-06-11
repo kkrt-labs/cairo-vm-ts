@@ -7,6 +7,7 @@ import { consola } from 'consola';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 import { TraceEntry } from 'vm/virtualMachine';
+import { Argument } from 'commander';
 
 consola.options = {
   ...consola.options,
@@ -22,7 +23,16 @@ const program = new Command().name('cairo-vm-ts').version(VERSION_CLI);
 program
   .command('run', { isDefault: true })
   .description('Run a compiled Cairo program')
-  .argument('<program.json>', 'path to Cairo compilation artifacts')
+  .addArgument(
+    new Argument(
+      '<program.json>',
+      'path to Cairo compilation artifacts'
+    ).argParser((path) => {
+      if (!path.match(/\.json$/))
+        throw new Error('Provided file is not a JSON');
+      return path;
+    })
+  )
   .option('--no-relocate', 'do not relocate memory')
   .addOption(
     new Option(
@@ -45,8 +55,6 @@ program
   .option('--print-relocated-memory', 'print the relocated memory')
   .option('--print-output', 'print the output segment')
   .action(async (path, options) => {
-    if (!path.match(/\.json$/)) throw new Error('Provided file is not a JSON');
-
     const {
       relocate,
       offset,
@@ -71,7 +79,7 @@ program
 
     consola.info(`Cairo VM TS ${VERSION_CLI} - Execution Mode`);
 
-    const program = parseProgram(fs.readFileSync(path, 'utf-8'));
+    const program = parseProgram(fs.readFileSync(String(path), 'utf-8'));
     const runner = new CairoRunner(program);
     const config: RunOptions = {
       relocate: relocate,
