@@ -111,7 +111,7 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
         relocate: true,
-        relocateOffset: 0,
+        offset: 0,
       };
       runner.run(config);
       const executionSize = runner.vm.memory.getSegmentSize(1);
@@ -128,7 +128,7 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
         relocate: false,
-        relocateOffset: 1,
+        offset: 1,
       };
       runner.run(config);
       const trace_filename = 'fibonacci_trace_ts.bin';
@@ -145,12 +145,12 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
       const config: RunOptions = {
         relocate: true,
-        relocateOffset: 1,
+        offset: 1,
       };
       runner.run(config);
       const memoryFilename = 'fibonacci_memory_ts.bin';
       const memoryPath = path.join(tmpDir, memoryFilename);
-      runner.exportMemory(memoryPath, config.relocateOffset);
+      runner.exportMemory(memoryPath, config.offset);
       expect(() =>
         fs.access(memoryPath, (err) => {
           if (err) throw err;
@@ -165,7 +165,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(BITWISE_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
@@ -179,7 +179,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(EC_OP_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
 
@@ -202,7 +202,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(PEDERSEN_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
 
@@ -234,7 +234,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(POSEIDON_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
 
@@ -281,7 +281,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(KECCAK_SEED_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
 
@@ -310,7 +310,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(KECCAK_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
 
@@ -341,7 +341,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(JMP_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
         const output = runner.getOutput();
@@ -353,7 +353,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(BITWISE_OUTPUT_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
         const output = runner.getOutput();
@@ -367,7 +367,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(RANGE_CHECK_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
@@ -381,7 +381,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
       });
@@ -392,7 +392,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(RANGE_CHECK96_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
@@ -406,7 +406,7 @@ describe('cairoRunner', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK96_PROGRAM);
         const config: RunOptions = {
           relocate: true,
-          relocateOffset: 1,
+          offset: 1,
         };
         expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
       });
@@ -423,11 +423,11 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(program);
       const config: RunOptions = {
         relocate: true,
-        relocateOffset: 1,
+        offset: 1,
       };
       runner.run(config);
       const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
-      runner.exportMemory(tsMemoryPath, config.relocateOffset);
+      runner.exportMemory(tsMemoryPath, config.offset);
 
       const tsMemory = fs.readFileSync(tsMemoryPath);
 
@@ -444,7 +444,7 @@ describe('cairoRunner', () => {
       const runner = new CairoRunner(program);
       const config: RunOptions = {
         relocate: true,
-        relocateOffset: 1,
+        offset: 1,
       };
       runner.run(config);
       const tsTracePath = path.join(tmpDir, 'trace_ts.bin');

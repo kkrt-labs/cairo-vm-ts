@@ -83,7 +83,7 @@ program
     const runner = new CairoRunner(program);
     const config: RunOptions = {
       relocate: relocate,
-      relocateOffset: offset,
+      offset: offset,
     };
     try {
       runner.run(config);

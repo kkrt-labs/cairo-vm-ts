@@ -10,11 +10,11 @@ import { getBuiltin } from 'builtins/builtin';
 /**
  * Configuration of the run
  * - relocate: Flag to relocate the memory and the trace
- * - relocateOffset: Start address of the relocated memory
+ * - offset: Start address of the relocated memory
  */
 export type RunOptions = {
   relocate: boolean;
-  relocateOffset: number;
+  offset: number;
 };
 
 export class CairoRunner {
@@ -26,7 +26,7 @@ export class CairoRunner {
 
   static readonly defaultRunOptions: RunOptions = {
     relocate: false,
-    relocateOffset: 0,
+    offset: 0,
   };
 
   constructor(program: Program) {
@@ -60,8 +60,8 @@ export class CairoRunner {
     while (!this.vm.pc.eq(this.finalPc)) {
       this.vm.step();
     }
-    const { relocate, relocateOffset } = config;
-    if (relocate) this.vm.relocate(relocateOffset);
+    const { relocate, offset } = config;
+    if (relocate) this.vm.relocate(offset);
   }
 
   /**
