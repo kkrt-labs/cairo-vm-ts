@@ -125,7 +125,7 @@ the flag `--save` to the last command: `bun link --save cairo-vm-ts`
 | ---------------------------- | ------- |
 | Run basic Cairo Zero program | &#9745; |
 | Run basic Cairo program      | &#9744; |
-| Add [builtins](#builtins)    | &#9744; |
+| Add [builtins](#builtins)    | &#9745; |
 | Add [hints](#hints)          | &#9744; |
 | Run StarkNet contracts       | &#9744; |
 | Benchmark against other VMs  | &#9744; |
@@ -134,7 +134,20 @@ the flag `--save` to the last command: `bun link --save cairo-vm-ts`
 
 ### Builtins
 
-<!-- Add a table with the builtin list and state done/to be done -->
+| Builtin                                                              | Done?   |
+| -------------------------------------------------------------------- | ------- |
+| [Output](https://github.com/kkrt-labs/cairo-vm-ts/issues/65)         | &#9745; |
+| [Pedersen](https://github.com/kkrt-labs/cairo-vm-ts/issues/70)       | &#9745; |
+| [Range Check](https://github.com/kkrt-labs/cairo-vm-ts/issues/68)    | &#9745; |
+| [ECDSA](https://github.com/kkrt-labs/cairo-vm-ts/issues/67)          | &#9745; |
+| [Bitwise](https://github.com/kkrt-labs/cairo-vm-ts/issues/62)        | &#9745; |
+| [EcOp](https://github.com/kkrt-labs/cairo-vm-ts/issues/66)           | &#9745; |
+| [Keccak](https://github.com/kkrt-labs/cairo-vm-ts/issues/69)         | &#9745; |
+| [Poseidon](https://github.com/kkrt-labs/cairo-vm-ts/issues/71)       | &#9745; |
+| [Range Check 96](https://github.com/kkrt-labs/cairo-vm-ts/issues/81) | &#9745; |
+| Segment Arena                                                        | &#9744; |
+| AddMod                                                               | &#9744; |
+| MulMod                                                               | &#9744; |
 
 ### Hints
 
