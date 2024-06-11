@@ -49,6 +49,6 @@
     "typescript-transform-paths": "^3.4.7"
   },
   "bin": {
-    "cairo-vm-ts": "./src/cli.ts"
+    "cairo": "./src/cli.ts"
   }
 }

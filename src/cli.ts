@@ -18,7 +18,7 @@ consola.options = {
 
 const VERSION_CLI = '0.1.0';
 
-const program = new Command().name('cairo-vm-ts').version(VERSION_CLI);
+const program = new Command().name('cairo').version(VERSION_CLI);
 
 program
   .command('run', { isDefault: true })
