@@ -105,6 +105,12 @@ You can install the CLI `cairo-vm-ts` by doing the following:
 4. Register the package as a _linkable_ package: `bun link`
 5. Link the package: `bun link cairo-vm-ts`
 
+Example usage:
+
+```bash
+cairo-vm-ts run fibonacci.json --export-memory fib_mem.bin --print-memory --print-output
+```
+
 ### As a dependency
 
 No package release has been done yet.
