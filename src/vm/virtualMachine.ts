@@ -93,7 +93,7 @@ export class VirtualMachine {
    * for more details
    */
   runInstruction(instruction: Instruction): void {
-    const { op0, op1, res, dst } = this.computeStepValues(instruction);
+    const { op1, res, dst } = this.computeStepValues(instruction);
 
     this.trace.push({ pc: this.pc, ap: this.ap, fp: this.fp });
 
