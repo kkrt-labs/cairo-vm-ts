@@ -7,7 +7,7 @@ import {
   UndefinedInstruction,
   InvalidOp0,
 } from 'errors/virtualMachine';
-import { InstructionError } from 'errors/memory';
+import { InvalidInstruction } from 'errors/memory';
 
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
@@ -30,13 +30,13 @@ export type TraceEntry = {
   fp: Relocatable;
 };
 
-type RelocatedTraceEntry = {
+export type RelocatedTraceEntry = {
   pc: Felt;
   ap: Felt;
   fp: Felt;
 };
 
-type RelocatedMemory = {
+export type RelocatedMemory = {
   address: number;
   value: Felt;
 };
@@ -75,7 +75,7 @@ export class VirtualMachine {
     }
 
     if (!isFelt(maybeEncodedInstruction)) {
-      throw new InstructionError();
+      throw new InvalidInstruction();
     }
 
     const encodedInstruction = maybeEncodedInstruction.toBigInt();

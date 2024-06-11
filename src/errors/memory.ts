@@ -34,4 +34,4 @@ export class SegmentOutOfBounds extends MemoryError {
 }
 
 /** Instruction must be a Field Element */
-export class InstructionError extends MemoryError {}
+export class InvalidInstruction extends MemoryError {}
