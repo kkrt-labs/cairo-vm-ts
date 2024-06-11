@@ -17,26 +17,6 @@ Labs</a></sub>
 > ⚠️ This project is in its genesis, undergoing fast-paced development. It is
 > not suitable for production yet. Expect frequent breaking changes.
 
-## Usage
-
-### CLI
-
-You can install the CLI `cairo-vm-ts` by doing the following:
-
-1. Clone this repo: `git clone git@github.com:kkrt-labs/cairo-vm-ts.git`
-2. Go to the cloned directory: `cd cairo-vm-ts`
-3. Install the dependencies: `bun install`
-4. Register the package as a _linkable_ package: `bun link`
-5. Link the package: `bun link cairo-vm-ts`
-
-### As a dependency
-
-No package release has been done yet.
-
-You can still add it as a dependency by cloning the repo and creating a symlink
-of the repo inside your project. Follow the same steps as in [CLI](#cli), adding
-the flag `--save` to the last command: `bun link --save cairo-vm-ts`
-
 ## What is Cairo
 
 Cairo stands for CPU AIR "o" (like insp"o", conv"o", 🤔).
@@ -112,6 +92,26 @@ performance and safety. While the ones of our TypeScript implementation is
 - TypeScript is easily readable and known by most devs if not all
 - Deliberate design choices to further improve readability and simplicity
 - Extensive documentation: JSDoc, diagrams, explainers, etc.
+
+## Usage
+
+### CLI
+
+You can install the CLI `cairo-vm-ts` by doing the following:
+
+1. Clone this repo: `git clone git@github.com:kkrt-labs/cairo-vm-ts.git`
+2. Go to the cloned directory: `cd cairo-vm-ts`
+3. Install the dependencies: `bun install`
+4. Register the package as a _linkable_ package: `bun link`
+5. Link the package: `bun link cairo-vm-ts`
+
+### As a dependency
+
+No package release has been done yet.
+
+You can still add it as a dependency by cloning the repo and creating a symlink
+of the repo inside your project. Follow the same steps as in [CLI](#cli), adding
+the flag `--save` to the last command: `bun link --save cairo-vm-ts`
 
 ## State of the VM
 
