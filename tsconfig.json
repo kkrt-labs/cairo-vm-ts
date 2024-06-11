@@ -1,27 +1,28 @@
 {
   "compilerOptions": {
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "./src",
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "*": ["./src/*"]
     },
     "lib": ["esnext"],
     "module": "esnext",
     "target": "esnext",
-    // if TS 5.x+
     "moduleResolution": "node",
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
     "noEmit": true,
     "strict": true,
+    "allowJs": false,
     "skipLibCheck": true,
-    "noUnusedLocals": true,
     "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noImplicitReturns": true,
+    "noUnusedParameters": true,
     "forceConsistentCasingInFileNames": true,
-    "allowJs": false, // disallow importing `.js` from `.ts`
     "types": ["bun-types"],
     "esModuleInterop": true // allow default imports for CommonJS modules
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
 }

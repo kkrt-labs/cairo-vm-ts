@@ -6,12 +6,14 @@
   "author": "Clément Walter <clement@kakarot.org>",
   "license": "Apache-2.0",
   "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/types/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "echo \"Error: no entrypoint yet\" && exit 1",
+    "clean": "bunx rimraf dist",
+    "prebuild": "bun run clean",
     "build": "bun build --target=node ./src/index.ts --outfile=dist/index.js && bun run build:declaration",
-    "build:declaration": "tsc --emitDeclarationOnly --project tsconfig.types.json",
+    "build:declaration": "tspc --emitDeclarationOnly --project tsconfig.types.json",
     "postbuild": "rimraf tsconfig.types.tsbuildinfo"
   },
   "repository": {
@@ -19,8 +21,9 @@
     "url": "https://github.com/kkrt-labs/cairo-vm-ts"
   },
   "files": [
+    "src/**/*.ts",
     "dist/*.js",
-    "dist/*.d.ts"
+    "dist/types/**/*.d.ts"
   ],
   "prettier": {
     "proseWrap": "always",
@@ -41,9 +44,11 @@
   },
   "devDependencies": {
     "bun-types": "^1.1.12",
-    "typescript": "^5.2.2"
+    "ts-patch": "^3.2.0",
+    "typescript": "^5.2.2",
+    "typescript-transform-paths": "^3.4.7"
   },
   "bin": {
-    "cairo-vm-ts": "./bin/cli.ts"
+    "cairo-vm-ts": "./src/cli.ts"
   }
 }

@@ -4,8 +4,18 @@
     "noEmit": false,
     "emitDeclarationOnly": true,
     "declaration": true,
-    "outDir": "./dist",
-    "rootDir": "./src"
+    "outDir": "./dist/types",
+    "rootDir": "./src",
+    "plugins": [
+      {
+        "transform": "typescript-transform-paths"
+      },
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ]
   },
-  "include": ["src/**/*.ts"]
+  "include": ["./src/**/*.ts"],
+  "exclude": ["node_modules", "./src/**/*.test.ts"]
 }
