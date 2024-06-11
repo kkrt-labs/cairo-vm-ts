@@ -24,7 +24,7 @@ import {
   ResLogic,
 } from './instruction';
 
-type TraceEntry = {
+export type TraceEntry = {
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;

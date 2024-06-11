@@ -6,6 +6,7 @@ import { Command, Option } from '@commander-js/extra-typings';
 import { consola } from 'consola';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
+import { TraceEntry } from 'vm/virtualMachine';
 
 consola.options = {
   ...consola.options,
@@ -114,7 +115,7 @@ program
       consola.log(
         '\nTRACE:',
         runner.vm.trace
-          .map((entry, index) =>
+          .map((entry: TraceEntry, index: number) =>
             [
               `\nSTEP: ${index}`,
               `pc: ${entry.pc.toString()}`,
