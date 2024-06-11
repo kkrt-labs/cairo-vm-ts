@@ -103,7 +103,6 @@ You can install the CLI `cairo-vm-ts` by doing the following:
 2. Go to the cloned directory: `cd cairo-vm-ts`
 3. Install the dependencies: `bun install`
 4. Register the package as a _linkable_ package: `bun link`
-5. Link the package: `bun link cairo-vm-ts`
 
 Example usage:
 
@@ -115,9 +114,15 @@ cairo-vm-ts run fibonacci.json --export-memory fib_mem.bin --print-memory --prin
 
 No package release has been done yet.
 
-You can still add it as a dependency by cloning the repo and creating a symlink
-of the repo inside your project. Follow the same steps as in [CLI](#cli), adding
-the flag `--save` to the last command: `bun link --save cairo-vm-ts`
+You can still add it as a dependency with a local copy:
+
+1. Clone this repo: `git clone git@github.com:kkrt-labs/cairo-vm-ts.git`
+2. Go to the cloned directory: `cd cairo-vm-ts`
+3. Install the dependencies: `bun install`
+4. Build the project: `bun run build`
+5. Go to your project `cd ~/my-project`
+6. Add `cairo-vm-ts` to your project dependency:
+   `<bun | yarn | npm> add ~/path/to/cairo-vm-ts`
 
 ## State of the VM
 
