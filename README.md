@@ -107,7 +107,7 @@ You can install the CLI `cairo-vm-ts` by doing the following:
 Example usage:
 
 ```bash
-cairo-vm-ts run fibonacci.json --export-memory fib_mem.bin --print-memory --print-output
+cairo run fibonacci.json --export-memory fib_mem.bin --print-memory --print-output
 ```
 
 ### As a dependency
