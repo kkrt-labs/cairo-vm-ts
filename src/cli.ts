@@ -3,7 +3,7 @@
 import * as fs from 'fs';
 import { Command, Option } from '@commander-js/extra-typings';
 
-import { consola } from 'consola';
+import { LogLevels, consola } from 'consola';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 import { TraceEntry } from 'vm/virtualMachine';
@@ -33,6 +33,7 @@ program
       return path;
     })
   )
+  .option('-s, --silent', 'silent all logs')
   .option('--no-relocate', 'do not relocate memory')
   .addOption(
     new Option(
@@ -57,6 +58,7 @@ program
   .action(async (path, options) => {
     try {
       const {
+        silent,
         relocate,
         offset,
         exportMemory,
@@ -66,6 +68,8 @@ program
         printRelocatedMemory,
         printTrace,
       } = options;
+
+      if (silent) consola.level = LogLevels.silent;
 
       if (
         (!relocate && !!offset) ||
