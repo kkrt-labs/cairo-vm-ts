@@ -81,10 +81,7 @@ program
 
     const program = parseProgram(fs.readFileSync(String(path), 'utf-8'));
     const runner = new CairoRunner(program);
-    const config: RunOptions = {
-      relocate: relocate,
-      offset: offset,
-    };
+    const config: RunOptions = { relocate: relocate, offset: offset };
     try {
       runner.run(config);
     } catch (err) {
