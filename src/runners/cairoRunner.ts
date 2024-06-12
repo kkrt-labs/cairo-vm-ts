@@ -92,14 +92,14 @@ export class CairoRunner {
    * NOTE: StarkWare verifier expects offset to be 1.
    * @dev DataView must be used to enforce little-endianness
    */
-  exportMemory(filename: string = 'encoded_memory', offset: number = 0) {
+  exportMemory(filename: string = 'encoded_memory') {
     if (!this.vm.relocatedMemory.length) throw new EmptyRelocatedMemory();
 
     const buffer = new ArrayBuffer(this.vm.relocatedMemory.length * 5 * 8);
     const view = new DataView(buffer);
 
-    this.vm.relocatedMemory.forEach(({ address, value }) => {
-      const byteOffset = (address - offset) * 5 * 8;
+    this.vm.relocatedMemory.forEach(({ address, value }, index) => {
+      const byteOffset = index * 5 * 8;
       const valueAs64BitsWords = value.to64BitsWords();
       view.setBigUint64(byteOffset, BigInt(address), true);
       view.setBigUint64(byteOffset + 8, valueAs64BitsWords[0], true);

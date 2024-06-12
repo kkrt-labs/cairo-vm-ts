@@ -92,7 +92,7 @@ program
 
       if (exportMemory) {
         consola.info('Exporting memory...');
-        runner.exportMemory(exportMemory, offset);
+        runner.exportMemory(exportMemory);
         consola.success(`Memory exported to ${exportMemory}`);
       }
       if (exportTrace) {
