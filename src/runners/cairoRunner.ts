@@ -1,18 +1,20 @@
 import * as fs from 'fs';
 
+import { EmptyRelocatedMemory } from 'errors/cairoRunner';
+
 import { Relocatable } from 'primitives/relocatable';
-import { VirtualMachine } from 'vm/virtualMachine';
 import { Program } from 'vm/program';
+import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 
 /**
  * Configuration of the run
  * - relocate: Flag to relocate the memory and the trace
- * - relocateOffset: Start address of the relocated memory
+ * - offset: Start address of the relocated memory
  */
 export type RunOptions = {
   relocate: boolean;
-  relocateOffset: number;
+  offset: number;
 };
 
 export class CairoRunner {
@@ -24,7 +26,7 @@ export class CairoRunner {
 
   static readonly defaultRunOptions: RunOptions = {
     relocate: false,
-    relocateOffset: 0,
+    offset: 0,
   };
 
   constructor(program: Program) {
@@ -58,8 +60,8 @@ export class CairoRunner {
     while (!this.vm.pc.eq(this.finalPc)) {
       this.vm.step();
     }
-    const { relocate, relocateOffset } = config;
-    if (relocate) this.vm.relocate(relocateOffset);
+    const { relocate, offset } = config;
+    if (relocate) this.vm.relocate(offset);
   }
 
   /**
@@ -91,6 +93,8 @@ export class CairoRunner {
    * @dev DataView must be used to enforce little-endianness
    */
   exportMemory(filename: string = 'encoded_memory', offset: number = 0) {
+    if (!this.vm.relocatedMemory.length) throw new EmptyRelocatedMemory();
+
     const buffer = new ArrayBuffer(this.vm.relocatedMemory.length * 5 * 8);
     const view = new DataView(buffer);
 

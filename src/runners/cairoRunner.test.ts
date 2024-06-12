@@ -109,10 +109,7 @@ describe('cairoRunner', () => {
   describe('run', () => {
     test('should return the value of the 10th fibonacci number', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
-      const config: RunOptions = {
-        relocate: true,
-        relocateOffset: 0,
-      };
+      const config: RunOptions = { relocate: true, offset: 0 };
       runner.run(config);
       const executionSize = runner.vm.memory.getSegmentSize(1);
       const executionEnd = runner.executionBase.add(executionSize);
@@ -126,10 +123,7 @@ describe('cairoRunner', () => {
      */
     test('should export encoded trace', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
-      const config: RunOptions = {
-        relocate: false,
-        relocateOffset: 1,
-      };
+      const config: RunOptions = { relocate: false, offset: 1 };
       runner.run(config);
       const trace_filename = 'fibonacci_trace_ts.bin';
       const trace_path = path.join(tmpDir, trace_filename);
@@ -143,14 +137,11 @@ describe('cairoRunner', () => {
 
     test('should export encoded memory', () => {
       const runner = new CairoRunner(FIBONACCI_PROGRAM);
-      const config: RunOptions = {
-        relocate: true,
-        relocateOffset: 1,
-      };
+      const config: RunOptions = { relocate: true, offset: 1 };
       runner.run(config);
       const memoryFilename = 'fibonacci_memory_ts.bin';
       const memoryPath = path.join(tmpDir, memoryFilename);
-      runner.exportMemory(memoryPath, config.relocateOffset);
+      runner.exportMemory(memoryPath, config.offset);
       expect(() =>
         fs.access(memoryPath, (err) => {
           if (err) throw err;
@@ -163,10 +154,7 @@ describe('cairoRunner', () => {
     describe('bitwise', () => {
       test('should compute bitwise 12 & 10', () => {
         const runner = new CairoRunner(BITWISE_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
@@ -177,10 +165,7 @@ describe('cairoRunner', () => {
     describe('ec_op', () => {
       test('should properly compute  R = P + 34Q', () => {
         const runner = new CairoRunner(EC_OP_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
         const expectedRx = new Felt(
@@ -200,10 +185,7 @@ describe('cairoRunner', () => {
     describe('pedersen', () => {
       test('should properly compute Pedersen hashes of (0, 0), (0, 1), (1, 0) and (54, 1249832432) tuples', () => {
         const runner = new CairoRunner(PEDERSEN_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
         const expectedHashes = [
@@ -232,10 +214,7 @@ describe('cairoRunner', () => {
     describe('poseidon', () => {
       test('should properly compute Poseidon states from initial states (1, 2, 3) and (13, 40, 36)', () => {
         const runner = new CairoRunner(POSEIDON_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
         const expectedStates = [
@@ -279,10 +258,7 @@ describe('cairoRunner', () => {
     describe('keccak', () => {
       test('Should properly compute state from input state KeccakBuiltinState(0, 0, 0, 0, 0, 0, 0, 0)', () => {
         const runner = new CairoRunner(KECCAK_SEED_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
         const expectedState = [
@@ -308,10 +284,7 @@ describe('cairoRunner', () => {
 
       test('Should properly compute state from input state KeccakBuiltinState(1, 2, 3, 4, 5, 6, 7, 8)', () => {
         const runner = new CairoRunner(KECCAK_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
         const expectedState = [
@@ -339,10 +312,7 @@ describe('cairoRunner', () => {
     describe('output', () => {
       test('Should properly store the jmp dest value in the output segment', () => {
         const runner = new CairoRunner(JMP_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const output = runner.getOutput();
         expect(output.length).toEqual(1);
@@ -351,10 +321,7 @@ describe('cairoRunner', () => {
 
       test('Should properly write the result of bitwise 1 & 2 to output segment', () => {
         const runner = new CairoRunner(BITWISE_OUTPUT_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const output = runner.getOutput();
         expect(output.length).toEqual(1);
@@ -365,10 +332,7 @@ describe('cairoRunner', () => {
     describe('range_check', () => {
       test('should properly write 2 ** 128 - 1 to the range check segment', () => {
         const runner = new CairoRunner(RANGE_CHECK_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
@@ -379,10 +343,7 @@ describe('cairoRunner', () => {
 
       test('should crash the VM when trying to assert -1 to the range check segment', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
       });
     });
@@ -390,10 +351,7 @@ describe('cairoRunner', () => {
     describe('range_check96', () => {
       test('should properly write 2 ** 96 - 1 to the range check segment', () => {
         const runner = new CairoRunner(RANGE_CHECK96_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
@@ -404,10 +362,7 @@ describe('cairoRunner', () => {
 
       test('should crash the VM when trying to assert 2 ** 96 to the range check segment', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK96_PROGRAM);
-        const config: RunOptions = {
-          relocate: true,
-          relocateOffset: 1,
-        };
+        const config: RunOptions = { relocate: true, offset: 1 };
         expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
       });
     });
@@ -421,13 +376,10 @@ describe('cairoRunner', () => {
 
       const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
       const runner = new CairoRunner(program);
-      const config: RunOptions = {
-        relocate: true,
-        relocateOffset: 1,
-      };
+      const config: RunOptions = { relocate: true, offset: 1 };
       runner.run(config);
       const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
-      runner.exportMemory(tsMemoryPath, config.relocateOffset);
+      runner.exportMemory(tsMemoryPath, config.offset);
 
       const tsMemory = fs.readFileSync(tsMemoryPath);
 
@@ -442,10 +394,7 @@ describe('cairoRunner', () => {
 
       const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
       const runner = new CairoRunner(program);
-      const config: RunOptions = {
-        relocate: true,
-        relocateOffset: 1,
-      };
+      const config: RunOptions = { relocate: true, offset: 1 };
       runner.run(config);
       const tsTracePath = path.join(tmpDir, 'trace_ts.bin');
       runner.exportTrace(tsTracePath);

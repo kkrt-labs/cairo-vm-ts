@@ -1,12 +1,13 @@
-# TypeScript Cairo VM
+# Cairo VM Typescript
 
 <div align="center">
-  <h1><code>TypeScript Cairo VM</code></h1>
+  <h1><code>Cairo VM TypeScript</code></h1>
 
 <strong>An implementation of the Cairo VM in TypeScript, focusing on
 education</strong>
 
-[Github](https://github.com/kkrt-labs/cairo-vm-ts)
+[Github](https://github.com/kkrt-labs/cairo-vm-ts) ·
+[Telegram](https://t.me/cairovmts)
 
 <sub>Built with 🥕 by <a href="https://twitter.com/KakarotZkEvm">KKRT
 Labs</a></sub>
@@ -92,13 +93,44 @@ performance and safety. While the ones of our TypeScript implementation is
 - Deliberate design choices to further improve readability and simplicity
 - Extensive documentation: JSDoc, diagrams, explainers, etc.
 
+## Usage
+
+### CLI
+
+You can install the CLI `cairo-vm-ts` by doing the following:
+
+1. Clone this repo: `git clone git@github.com:kkrt-labs/cairo-vm-ts.git`
+2. Go to the cloned directory: `cd cairo-vm-ts`
+3. Install the dependencies: `bun install`
+4. Register the package as a _linkable_ package: `bun link`
+
+Example usage:
+
+```bash
+cairo run fibonacci.json --export-memory fib_mem.bin --print-memory --print-output
+```
+
+### As a dependency
+
+No package release has been done yet.
+
+You can still add it as a dependency with a local copy:
+
+1. Clone this repo: `git clone git@github.com:kkrt-labs/cairo-vm-ts.git`
+2. Go to the cloned directory: `cd cairo-vm-ts`
+3. Install the dependencies: `bun install`
+4. Build the project: `bun run build`
+5. Go to your project `cd ~/my-project`
+6. Add `cairo-vm-ts` to your project dependency:
+   `<bun | yarn | npm> add ~/path/to/cairo-vm-ts`
+
 ## State of the VM
 
 | Goals                        | Done?   |
 | ---------------------------- | ------- |
 | Run basic Cairo Zero program | &#9745; |
 | Run basic Cairo program      | &#9744; |
-| Add [builtins](#builtins)    | &#9744; |
+| Add [builtins](#builtins)    | &#9745; |
 | Add [hints](#hints)          | &#9744; |
 | Run StarkNet contracts       | &#9744; |
 | Benchmark against other VMs  | &#9744; |
@@ -107,7 +139,20 @@ performance and safety. While the ones of our TypeScript implementation is
 
 ### Builtins
 
-<!-- Add a table with the builtin list and state done/to be done -->
+| Builtin                                                              | Done?   |
+| -------------------------------------------------------------------- | ------- |
+| [Output](https://github.com/kkrt-labs/cairo-vm-ts/issues/65)         | &#9745; |
+| [Pedersen](https://github.com/kkrt-labs/cairo-vm-ts/issues/70)       | &#9745; |
+| [Range Check](https://github.com/kkrt-labs/cairo-vm-ts/issues/68)    | &#9745; |
+| [ECDSA](https://github.com/kkrt-labs/cairo-vm-ts/issues/67)          | &#9745; |
+| [Bitwise](https://github.com/kkrt-labs/cairo-vm-ts/issues/62)        | &#9745; |
+| [EcOp](https://github.com/kkrt-labs/cairo-vm-ts/issues/66)           | &#9745; |
+| [Keccak](https://github.com/kkrt-labs/cairo-vm-ts/issues/69)         | &#9745; |
+| [Poseidon](https://github.com/kkrt-labs/cairo-vm-ts/issues/71)       | &#9745; |
+| [Range Check 96](https://github.com/kkrt-labs/cairo-vm-ts/issues/81) | &#9745; |
+| Segment Arena                                                        | &#9744; |
+| AddMod                                                               | &#9744; |
+| MulMod                                                               | &#9744; |
 
 ### Hints
 
