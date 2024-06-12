@@ -8,9 +8,7 @@
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "echo \"Error: no entrypoint yet\" && exit 1",
-    "clean": "bunx rimraf dist",
+    "clean": "rimraf dist",
     "prebuild": "bun run clean",
     "build": "bun build --target=node ./src/index.ts --outfile=dist/index.js && bun run build:declaration",
     "build:declaration": "tspc --emitDeclarationOnly --project tsconfig.types.json",
