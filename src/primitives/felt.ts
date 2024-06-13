@@ -8,6 +8,19 @@ export class Felt {
   static PRIME: bigint =
     0x800000000000011000000000000000000000000000000000000000000000001n;
   static ZERO: Felt = new Felt(0n);
+
+  static from64BitsWords(valuesLE: bigint[]): Felt {
+    if (valuesLE.length != 4)
+      throw new Error(
+        'Invalid argument - Expects an array of 4 bigint of 64 bits each, little-endian ordered'
+      );
+    const mask = 0xffffffffffffffffn;
+    const values = valuesLE.map((value) => value & mask);
+    return new Felt(
+      values[0] | (values[1] << 64n) | (values[2] << 128n) | (values[3] << 192n)
+    );
+  }
+
   constructor(_inner: bigint) {
     if (_inner < 0n) {
       _inner = (_inner % Felt.PRIME) + Felt.PRIME;
