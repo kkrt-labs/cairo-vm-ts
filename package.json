@@ -47,6 +47,7 @@
     "typescript-transform-paths": "^3.4.7"
   },
   "bin": {
-    "cairo": "./src/cli.ts"
+    "cairo": "./src/cli.ts",
+    "compare-memory": "./src/scripts/compareMemory.ts"
   }
 }

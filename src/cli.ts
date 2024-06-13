@@ -8,6 +8,7 @@ import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 import { TraceEntry } from 'vm/virtualMachine';
 import { Argument } from 'commander';
+import { compareMemory } from 'scripts/compareMemory';
 
 consola.options = {
   ...consola.options,
@@ -131,6 +132,31 @@ program
       consola.fail(`Execution failed`);
       throw err;
     }
+  });
+
+program
+  .command('compare-memory')
+  .description('Compare the memory from encoded binary files')
+  .addArgument(
+    new Argument(
+      '<FILES...>',
+      'List of memory binary files to compare'
+    ).argParser((path, previous) => {
+      if (!path.match(/\.memory$/))
+        throw new Error('Provided file is not a memory binary file');
+      return previous ? [previous, path].flat() : path;
+    })
+  )
+  .option('-s, --silent', 'silent all logs')
+
+  .action(async (paths, options) => {
+    const { silent } = options;
+    if (silent) consola.level = LogLevels.silent;
+
+    if (await compareMemory(paths as string[])) {
+      consola.fail('Encoded memories are different');
+    }
+    consola.success('Encoded memories are similar');
   });
 
 program.addHelpText(
