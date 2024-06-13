@@ -2,10 +2,9 @@
 
 import { Command, Option } from '@commander-js/extra-typings';
 
-import { LogLevels, consola } from 'consola';
+import { consola } from 'consola';
 import { Argument } from 'commander';
-import { compareMemory } from 'scripts/compareMemory';
-import { run } from 'scripts/runCli';
+import { run } from 'scripts/run';
 import { version } from 'bun';
 
 consola.options = {
@@ -27,8 +26,7 @@ program
       '<program.json>',
       'path to Cairo compilation artifacts'
     ).argParser((path) => {
-      if (!path.match(/\.json$/))
-        throw new Error('Provided file is not a JSON');
+      if (!path.match(/\.json$/)) throw new Error(`${path} is not a JSON`);
       return path;
     })
   )
@@ -56,31 +54,6 @@ program
   .option('--print-output', 'print the output segment')
   .action((path, options) => {
     run(String(path), options, consola, version);
-  });
-
-program
-  .command('compare-memory')
-  .description('Compare the memory from encoded binary files')
-  .addArgument(
-    new Argument(
-      '<FILES...>',
-      'List of memory binary files to compare'
-    ).argParser((path, previous) => {
-      if (!path.match(/\.memory$/))
-        throw new Error('Provided file is not a memory binary file');
-      return previous ? [previous, path].flat() : path;
-    })
-  )
-  .option('-s, --silent', 'silent all logs')
-
-  .action(async (paths, options) => {
-    const { silent } = options;
-    if (silent) consola.level = LogLevels.silent;
-
-    if (await compareMemory(paths as string[])) {
-      consola.fail('Encoded memories are different');
-    }
-    consola.success('Encoded memories are similar');
   });
 
 program.addHelpText(
