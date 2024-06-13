@@ -12,7 +12,9 @@
     "prebuild": "bun run clean",
     "build": "bun build --target=node ./src/index.ts --outfile=dist/index.js && bun run build:declaration",
     "build:declaration": "tspc --emitDeclarationOnly --project tsconfig.types.json",
-    "postbuild": "rimraf tsconfig.types.tsbuildinfo"
+    "postbuild": "rimraf tsconfig.types.tsbuildinfo",
+    "compare-memory": "bun ./src/scripts/compareCli.ts memory",
+    "compare-trace": "bun ./src/scripts/compareCli.ts trace"
   },
   "repository": {
     "type": "git",
@@ -48,6 +50,6 @@
   },
   "bin": {
     "cairo": "./src/cli.ts",
-    "compare-memory": "./src/scripts/compareMemory.ts"
+    "compare": "./src/scripts/compareCli.ts"
   }
 }
