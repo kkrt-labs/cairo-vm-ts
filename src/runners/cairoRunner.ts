@@ -1,18 +1,20 @@
 import * as fs from 'fs';
 
+import { EmptyRelocatedMemory } from 'errors/cairoRunner';
+
 import { Relocatable } from 'primitives/relocatable';
-import { VirtualMachine } from 'vm/virtualMachine';
 import { Program } from 'vm/program';
+import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 
 /**
  * Configuration of the run
  * - relocate: Flag to relocate the memory and the trace
- * - relocateOffset: Start address of the relocated memory
+ * - offset: Start address of the relocated memory
  */
 export type RunOptions = {
   relocate: boolean;
-  relocateOffset: number;
+  offset: number;
 };
 
 export class CairoRunner {
@@ -24,7 +26,7 @@ export class CairoRunner {
 
   static readonly defaultRunOptions: RunOptions = {
     relocate: false,
-    relocateOffset: 0,
+    offset: 0,
   };
 
   constructor(program: Program) {
@@ -58,8 +60,8 @@ export class CairoRunner {
     while (!this.vm.pc.eq(this.finalPc)) {
       this.vm.step();
     }
-    const { relocate, relocateOffset } = config;
-    if (relocate) this.vm.relocate(relocateOffset);
+    const { relocate, offset } = config;
+    if (relocate) this.vm.relocate(offset);
   }
 
   /**
@@ -78,22 +80,26 @@ export class CairoRunner {
       view.setBigUint64(byteOffset + 2 * 8, pc.toBigInt(), true);
     });
 
-    fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
   }
 
   /**
    * Export the relocated memory little-endian encoded to a file
    *
+   * @param offset - Start address of the relocated memory.  Defaults to 0.
+   *
+   *
+   * NOTE: StarkWare verifier expects offset to be 1.
    * @dev DataView must be used to enforce little-endianness
    */
-  exportMemory(filename: string = 'encoded_memory') {
+  exportMemory(filename: string = 'encoded_memory', offset: number = 0) {
+    if (!this.vm.relocatedMemory.length) throw new EmptyRelocatedMemory();
+
     const buffer = new ArrayBuffer(this.vm.relocatedMemory.length * 5 * 8);
     const view = new DataView(buffer);
 
     this.vm.relocatedMemory.forEach(({ address, value }) => {
-      const byteOffset = (address - 1) * 5 * 8;
+      const byteOffset = (address - offset) * 5 * 8;
       const valueAs64BitsWords = value.to64BitsWords();
       view.setBigUint64(byteOffset, BigInt(address), true);
       view.setBigUint64(byteOffset + 8, valueAs64BitsWords[0], true);
@@ -102,8 +108,12 @@ export class CairoRunner {
       view.setBigUint64(byteOffset + 4 * 8, valueAs64BitsWords[3], true);
     });
 
-    fs.writeFile(filename, buffer, { flag: 'w+' }, (err) => {
-      if (err) throw err;
-    });
+    fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
+  }
+
+  getOutput() {
+    const builtins = this.program.builtins;
+    const outputIdx = builtins.findIndex((name) => name === 'output');
+    return outputIdx >= 0 ? this.vm.memory.segments[outputIdx + 2] : [];
   }
 }

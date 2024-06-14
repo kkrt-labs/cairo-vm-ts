@@ -7,7 +7,7 @@ import {
   UndefinedInstruction,
   InvalidOp0,
 } from 'errors/virtualMachine';
-import { InstructionError } from 'errors/memory';
+import { InvalidInstruction } from 'errors/memory';
 
 import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
@@ -24,19 +24,19 @@ import {
   ResLogic,
 } from './instruction';
 
-type TraceEntry = {
+export type TraceEntry = {
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
 };
 
-type RelocatedTraceEntry = {
+export type RelocatedTraceEntry = {
   pc: Felt;
   ap: Felt;
   fp: Felt;
 };
 
-type RelocatedMemory = {
+export type RelocatedMemory = {
   address: number;
   value: Felt;
 };
@@ -75,7 +75,7 @@ export class VirtualMachine {
     }
 
     if (!isFelt(maybeEncodedInstruction)) {
-      throw new InstructionError();
+      throw new InvalidInstruction();
     }
 
     const encodedInstruction = maybeEncodedInstruction.toBigInt();
@@ -93,7 +93,7 @@ export class VirtualMachine {
    * for more details
    */
   runInstruction(instruction: Instruction): void {
-    const { op0, op1, res, dst } = this.computeStepValues(instruction);
+    const { op1, res, dst } = this.computeStepValues(instruction);
 
     this.trace.push({ pc: this.pc, ap: this.ap, fp: this.fp });
 
