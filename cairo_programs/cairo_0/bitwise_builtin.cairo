@@ -1,5 +1,7 @@
 %builtins bitwise
 
+from starkware.cairo.common.cairo_builtins import BitwiseBuiltin
+
 func main{bitwise_ptr: BitwiseBuiltin*}() {
     assert bitwise_ptr.x = 12;  // Binary 1100
     assert bitwise_ptr.y = 10;  // Binary 1010
