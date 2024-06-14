@@ -1,4 +1,10 @@
+# Bun build
 node_modules
 dist
 
+# Cairo compilation artifacts
 cairo_programs/**/*.json
+
+# Differential testing (other VMs)
+cairo-vm
+cairo-vm-go
