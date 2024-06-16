@@ -1,13 +1,20 @@
 #! /usr/bin/env bun
 
+import { ConsolaInstance, LogLevels } from 'consola';
 import { Felt } from 'primitives/felt';
 import { RelocatedTraceEntry } from 'vm/virtualMachine';
 
-export const compareTrace = async (paths: string[]) => {
-  return await Promise.all(
+export const compareTrace = async (
+  paths: string[],
+  silent: boolean,
+  consola: ConsolaInstance
+) => {
+  if (silent) consola.level = LogLevels.silent;
+
+  const success = await Promise.all(
     paths.map((path) => Bun.file(path).arrayBuffer())
   ).then((buffers) => {
-    let failed = false;
+    let success = true;
     buffers.reduce((prevBuffer, buffer, index) => {
       if (index && prevBuffer.byteLength !== buffer.byteLength)
         throw new Error(
@@ -31,14 +38,21 @@ export const compareTrace = async (paths: string[]) => {
                   paths[index]
                 } differ at address ${step}: ${entry} != ${trace[Number(step)]}`
               );
-              failed = false;
+              success = false;
             }
           });
         }
         return trace;
       });
-    return failed;
+    return success;
   });
+
+  if (!success) {
+    consola.fail('Encoded traces are different');
+  } else {
+    consola.success('Encoded traces are similar');
+  }
+  return success;
 };
 
 const readTraceBuffer = (buffer: ArrayBuffer) => {
@@ -57,11 +71,17 @@ const readTraceBuffer = (buffer: ArrayBuffer) => {
   return trace;
 };
 
-export const compareMemory = async (paths: string[]) => {
-  return await Promise.all(
+export const compareMemory = async (
+  paths: string[],
+  silent: boolean,
+  consola: ConsolaInstance
+) => {
+  if (silent) consola.level = LogLevels.silent;
+
+  const success = await Promise.all(
     paths.map((path) => Bun.file(path).arrayBuffer())
   ).then((buffers) => {
-    let failed = false;
+    let success = true;
     buffers.reduce((prevBuffer, buffer, index) => {
       if (index && prevBuffer.byteLength !== buffer.byteLength)
         throw new Error(
@@ -81,14 +101,21 @@ export const compareMemory = async (paths: string[]) => {
                   paths[index]
                 } differ at address ${address}: ${value} != ${memory[address]}`
               );
-              failed = false;
+              success = false;
             }
           });
         }
         return memory;
       });
-    return failed;
+    return success;
   });
+
+  if (!success) {
+    consola.fail('Encoded memories are different');
+  } else {
+    consola.success('Encoded memories are similar');
+  }
+  return success;
 };
 
 const readMemoryBuffer = (buffer: ArrayBuffer) => {

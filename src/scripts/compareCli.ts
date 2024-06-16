@@ -1,7 +1,7 @@
 #! /usr/bin/env bun
 
 import { Command, Argument } from '@commander-js/extra-typings';
-import { LogLevels, consola } from 'consola';
+import { consola } from 'consola';
 import { compareMemory, compareTrace } from './compare';
 
 export const compare = async () => {
@@ -25,11 +25,7 @@ export const compare = async () => {
       })
     )
     .action(async (paths, { silent }) => {
-      if (silent) consola.level = LogLevels.silent;
-      if (await compareMemory(paths as string[])) {
-        consola.fail('Encoded memories are different');
-      }
-      consola.success('Encoded memories are similar');
+      await compareMemory(paths as string[], !!silent, consola);
     });
 
   program
@@ -48,11 +44,7 @@ export const compare = async () => {
     )
     .option('-s, --silent', 'silent all logs')
     .action(async (paths, { silent }) => {
-      if (silent) consola.level = LogLevels.silent;
-      if (await compareTrace(paths as string[])) {
-        consola.fail('Encoded traces are different');
-      }
-      consola.success('Encoded traces are similar');
+      await compareTrace(paths as string[], !!silent, consola);
     });
 
   await program.parseAsync();
