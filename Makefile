@@ -93,9 +93,9 @@ bench: $(COMPILED_CAIRO_0_BENCHMARK_FILES)
 	for file in $^; do \
 		md_output=$$TMP_DIR/$$(basename $$file .json)_bench.md; \
 		json_output=$$TMP_DIR/$$(basename $$file .json)_bench.json; \
-		hyperfine \
-		"cairo run $$file" \
+		hyperfine --warmup 2 \
 		"$(CAIRO_VM_RS_CLI) $$file --layout all_cairo" \
+		"cairo run $$file" \
 		"cairo-run --layout starknet_with_keccak --program $$file" \
 		--export-markdown $$md_output \
 		--export-json $$json_output; \
