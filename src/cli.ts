@@ -5,7 +5,6 @@ import { Command, Option } from '@commander-js/extra-typings';
 import { consola } from 'consola';
 import { Argument } from 'commander';
 import { run } from 'scripts/run';
-import { version } from 'bun';
 
 consola.options = {
   ...consola.options,
@@ -53,7 +52,7 @@ program
   .option('--print-relocated-memory', 'print the relocated memory')
   .option('--print-output', 'print the output segment')
   .action((path, options) => {
-    run(String(path), options, consola, version);
+    run(String(path), options, consola, VERSION_CLI);
   });
 
 program.addHelpText(
