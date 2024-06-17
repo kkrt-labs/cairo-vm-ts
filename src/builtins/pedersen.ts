@@ -17,7 +17,7 @@ export const pedersenHandler: BuiltinHandler = {
 
     const offset = Number(prop);
     const pedersenIndex = offset % cellsPerPedersen;
-    if (pedersenIndex < inputCellsPerPedersen) {
+    if (target[offset] || pedersenIndex < inputCellsPerPedersen) {
       return target[offset];
     }
 

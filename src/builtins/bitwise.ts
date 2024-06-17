@@ -15,7 +15,7 @@ export const bitwiseHandler: BuiltinHandler = {
 
     const offset = Number(prop);
     const bitwiseIndex = offset % cellsPerBitwise;
-    if (bitwiseIndex < inputCellsPerBitwise) {
+    if (target[offset] || bitwiseIndex < inputCellsPerBitwise) {
       return target[offset];
     }
 

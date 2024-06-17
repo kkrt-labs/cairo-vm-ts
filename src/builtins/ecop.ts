@@ -23,7 +23,7 @@ export const ecOpHandler: BuiltinHandler = {
 
     const offset = Number(prop);
     const ecOpIndex = offset % cellsPerEcOp;
-    if (ecOpIndex < inputCellsPerEcOp) {
+    if (target[offset] || ecOpIndex < inputCellsPerEcOp) {
       return target[offset];
     }
 
