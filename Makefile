@@ -5,6 +5,8 @@ CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
 CAIRO_VM_GO_CLI:=cairo-vm-go/bin/cairo-vm
 
 $(CAIRO_VM_RS_CLI):
+	@git submodule init; \
+	git submodule update; \
 	cd cairo-vm; cargo build --release --bin cairo-vm-cli
 
 $(CAIRO_VM_GO_CLI):
