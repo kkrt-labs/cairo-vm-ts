@@ -1,4 +1,4 @@
-.PHONY: compile run-all diff-test build-cairo-vm-rs-cli build-cairo-vm-go-cli build-all-cairo-vm-cli clean-tmp
+.PHONY: compile run-all diff-test build-cairo-vm-rs-cli clean-tmp
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
@@ -9,15 +9,7 @@ $(CAIRO_VM_RS_CLI):
 	git submodule update; \
 	cd cairo-vm; cargo build --release --bin cairo-vm-cli
 
-$(CAIRO_VM_GO_CLI):
-	git clone --depth 1 git@github.com:NethermindEth/cairo-vm-go.git
-	cd cairo-vm-go; make build
-
 build-cairo-vm-rs-cli: | $(CAIRO_VM_RS_CLI)
-
-build-cairo-vm-go-cli: | $(CAIRO_VM_GO_CLI)
-
-build-all-cairo-vm-cli: build-cairo-vm-rs-cli build-cairo-vm-go-cli
 
 TMP_PREFIX="cairo-vm-ts"
 
