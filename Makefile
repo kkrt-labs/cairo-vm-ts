@@ -5,7 +5,6 @@ CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
 CAIRO_VM_GO_CLI:=cairo-vm-go/bin/cairo-vm
 
 $(CAIRO_VM_RS_CLI):
-	git clone --depth 1 -b v0.9.3 git@github.com:lambdaclass/cairo-vm.git
 	cd cairo-vm; cargo build --release --bin cairo-vm-cli
 
 $(CAIRO_VM_GO_CLI):
