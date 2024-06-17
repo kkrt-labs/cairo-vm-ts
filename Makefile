@@ -2,7 +2,6 @@
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
-CAIRO_VM_GO_CLI:=cairo-vm-go/bin/cairo-vm
 
 $(CAIRO_VM_RS_CLI):
 	@git submodule init; \
@@ -14,9 +13,12 @@ build-cairo-vm-rs-cli: | $(CAIRO_VM_RS_CLI)
 TMP_PREFIX="cairo-vm-ts"
 
 CAIRO_0_PATH=cairo_programs/cairo_0
+CAIRO_0_BENCHMARK_PATH=cairo_programs/cairo_0/benchmarks
 CAIRO_0_FILES:=$(shell find $(CAIRO_0_PATH) -name '*.cairo')
-VALID_CAIRO_0_FILES=$(shell find $(CAIRO_0_PATH) -name '*.cairo' -not -path "**/bad_programs/*")
+CAIRO_0_BENCHMARK_FILES:=$(shell find $(CAIRO_0_BENCHMARK_PATH) -name '*.cairo')
+VALID_CAIRO_0_FILES=$(shell find $(CAIRO_0_PATH) -maxdepth 1 -name '*.cairo' -not -name 'range_check96_builtin.cairo')
 COMPILED_CAIRO_0_FILES:=$(CAIRO_0_FILES:%.cairo=%.json)
+COMPILED_CAIRO_0_BENCHMARK_FILES:=$(CAIRO_0_BENCHMARK_FILES:%.cairo=%.json)
 VALID_COMPILED_CAIRO_0_FILES:=$(VALID_CAIRO_0_FILES:%.cairo=%.json)
 
 compile: $(COMPILED_CAIRO_0_FILES)
@@ -64,7 +66,7 @@ diff-test: $(VALID_COMPILED_CAIRO_0_FILES)
 		rs_trace=$$TMP_DIR/$$(basename $$file .json).rs.trace; \
 		cairo run $$file --silent --offset 1 --export-memory $$ts_memory --export-trace $$ts_trace; \
 		poetry run cairo-run --program $$file --layout starknet_with_keccak --memory_file $$py_memory --trace_file $$py_trace; \
-		$(CAIRO_VM_RS_CLI) $$file --layout=all_cairo --memory_file $$rs_memory --trace_file $$rs_trace; \
+		$(CAIRO_VM_RS_CLI) $$file --layout all_cairo --memory_file $$rs_memory --trace_file $$rs_trace; \
 		compare memory -s $$ts_memory $$rs_memory $$py_memory; \
 		exit_code_mem=$$?; \
 		compare trace  -s $$ts_trace $$rs_trace $$py_trace; \
@@ -84,6 +86,20 @@ diff-test: $(VALID_COMPILED_CAIRO_0_FILES)
 	else \
 		echo "All $$passed_tests_ctr tests passed."; \
 	fi
+
+bench: $(COMPILED_CAIRO_0_BENCHMARK_FILES)
+	@TMP_DIR=$(shell mktemp -d -t $(TMP_PREFIX)-bench.XXXXXXXX); \
+	echo "TMP_DIR: $$TMP_DIR"; \
+	for file in $^; do \
+		md_output=$$TMP_DIR/$$(basename $$file .json)_bench.md; \
+		json_output=$$TMP_DIR/$$(basename $$file .json)_bench.json; \
+		hyperfine \
+		"cairo run $$file" \
+		"$(CAIRO_VM_RS_CLI) $$file --layout all_cairo" \
+		"cairo-run --layout starknet_with_keccak --program $$file" \
+		--export-markdown $$md_output \
+		--export-json $$json_output; \
+	done
 
 clean-tmp:
 	@rm -rf /tmp/$(TMP_PREFIX)*
