@@ -79,7 +79,7 @@ func main{
 }() {
     let num_a = 123568;
     let num_b = 5673940;
-    builtins_wrapper_iter(num_a, num_b, 10000);
+    builtins_wrapper_iter(num_a, num_b, 100);
 
     return ();
 }
