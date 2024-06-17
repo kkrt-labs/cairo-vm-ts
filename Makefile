@@ -1,4 +1,4 @@
-.PHONY: compile run-all diff-test bench build-cairo-vm-rs-cli clean-tmp
+.PHONY: compile run-all diff-test bench build-cairo-vm-rs-cli clean-diff-test clean--bench clean-tmp
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
@@ -101,5 +101,10 @@ bench: $(COMPILED_CAIRO_0_BENCHMARK_FILES)
 		--export-json $$json_output; \
 	done
 
-clean-tmp:
-	@rm -rf /tmp/$(TMP_PREFIX)*
+clean-diff-test:
+	@rm -rf /tmp/$(TMP_PREFIX)-diff-test*
+
+clean-bench:
+	@rm -rf /tmp/$(TMP_PREFIX)-bench*
+
+clean-tmp: clean-diff-test clean-bench
