@@ -1,0 +1,4 @@
+[submodule "cairo-vm"]
+	path = cairo-vm
+	url = git@github.com:lambdaclass/cairo-vm.git
+	shallow = true
