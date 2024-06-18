@@ -93,6 +93,17 @@ performance and safety. While the ones of our TypeScript implementation is
 - Deliberate design choices to further improve readability and simplicity
 - Extensive documentation: JSDoc, diagrams, explainers, etc.
 
+## Local Development
+
+### Requirements
+
+- Install [Bun](https://bun.sh/)
+- Install [Poetry](https://python-poetry.org/docs/#installation) to compile
+  Cairo Programs
+
+- Run `bun install` to install all dependencies
+- Run `bun test` to run all tests
+
 ## Usage
 
 ### CLI
@@ -159,11 +170,9 @@ You can still add it as a dependency with a local copy:
 <!-- Add a table with the hint list and state done/to be done -->
 <!-- If the list is too long, maybe separate in chunks, put the list in an issue to track it and reference the issue here -->
 
-<!-- TODO: Add a Benchmark section when process is nailed -->
-
 ### Differential Testing & Benchmark
 
-Pre-requisite: make
+Pre-requisite: `make`
 
 ### Differential Testing
 
@@ -230,13 +239,5 @@ A benchmark using each VM implementation API is developped at
 - [Cairo whitepaper](https://eprint.iacr.org/2021/1063)
 - [Cairo Book](https://book.cairo-lang.org/)
 - [Cairo website](https://www.cairo-lang.org/)
-
-## Local Development
-
-### Requirements
-
-- Install [bun](https://bun.sh/)
-- Run `bun install` to install all dependencies
-- Run `bun test` to run all tests
 
 <!-- TODO: Add Project Guidelines -->
