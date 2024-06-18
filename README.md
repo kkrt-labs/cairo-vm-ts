@@ -181,7 +181,7 @@ each VM implementation.
 | [Cairo VM Zig](https://github.com/keep-starknet-strange/ziggy-starkdust)             | &#9745;              |
 | [Cairo VM Go](<(https://github.com/NethermindEth/cairo-vm-go)>) - only ProofMode atm | &#9744;              |
 
-#### Pre-requisites
+#### Differential Testing Dependencies
 
 To build the different projects CLI, you'll need the required dependencies:
 
@@ -195,6 +195,35 @@ To build the different projects CLI, you'll need the required dependencies:
 ```bash
 make diff-test
 ```
+
+### Benchmark
+
+#### Benchmark Dependencies
+
+[`hyperfine`](https://github.com/sharkdp/hyperfine)
+
+#### Benchmark Details
+
+For a quick benchmarking tool, one can run `make bench`
+
+It uses `hyperfine` to benchmark the CLI command of the different Cairo VM
+implementations. These benchmarks might not be accurate, it should be done in a
+proper environment.
+
+The benchmark programs used currently come from the
+`cairo-vm/cairo_programs/benchmarks`. The workload of each program has been
+reduced for slower implementations to finish () Only Cairo programs with no
+hints are used at the moment:
+
+| Cairo Program                | Description                                                                                                                                                                                                                                                                    | Value                                                        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| `big_factorial.cairo`        | Computes $n!$                                                                                                                                                                                                                                                                  | $n = 50000$                                                  |
+| `big_fibonacci.cairo`        | Computes $u_n = u_{n-1} + u_{n-2}, n \geq 2, u_0 = 0, u_1 = 1$                                                                                                                                                                                                                 | $n = 40000$                                                  |
+| `integration_builtins.cairo` | Computes $N$ times $\text{Pedersen}(a, u_{20})$. $\forall n \in \mathbb{N^*}, u_n = D(u_{n-1}, v_{n})$, $v_n = 3v_{n-1}$, $D(x, y) = (x \oplus y) \land (x \lor (y \gg 1))$. Verifies that $\forall n \in \mathbb{N}, v_n < 2^{64}$ and stores the value in the output segment | $N = 100$, $a = 123568$, $u_0 = 5673940$, $v_0 = 6783043740$ |
+| `pedersen.cairo`             | Computes $N$ times $\text{Pedersen}(a, b)$                                                                                                                                                                                                                                     | $N = 5000$, $a = 123568$, $b = 5673940$                      |
+
+A benchmark using each VM implementation API is developped at
+[`cairo-vm-bench`](https://github.com/kkrt-labs/cairo-vm-bench)
 
 ## Resources
 
