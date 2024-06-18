@@ -1,4 +1,4 @@
-.PHONY: compile run-all diff-test bench build-cairo-vm-cli build-cairo-vm-rs-cli build-cairo-vm-zig-cli clean-diff-test clean--bench clean-tmp
+.PHONY: compile run-all diff-test bench build build-cairo-vm-cli build-cairo-vm-rs-cli build-cairo-vm-zig-cli clean-diff-test clean--bench clean-tmp
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
@@ -14,11 +14,14 @@ $(CAIRO_VM_ZIG_CLI):
 	git submodule update; \
 	cd ziggy-starkdust; zig build
 
+build:
+	@bun install; bun link
+
 build-cairo-vm-rs-cli: | $(CAIRO_VM_RS_CLI)
 
 build-cairo-vm-zig-cli: | $(CAIRO_VM_ZIG_CLI)
 
-build-cairo-vm-cli: build-cairo-vm-rs-cli build-cairo-vm-zig-cli
+build-cairo-vm-cli: build build-cairo-vm-rs-cli build-cairo-vm-zig-cli
 
 TMP_PREFIX="cairo-vm-ts"
 
