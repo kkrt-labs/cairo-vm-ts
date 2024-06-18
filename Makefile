@@ -110,7 +110,7 @@ bench: $(COMPILED_CAIRO_0_BENCHMARK_FILES)
 		"$(CAIRO_VM_RS_CLI) $$file --layout all_cairo" \
 		"$(CAIRO_VM_ZIG_CLI) execute --filename $$file --layout all_cairo" \
 		"cairo run $$file" \
-		"cairo-run --layout starknet_with_keccak --program $$file" \
+		"poetry run cairo-run --layout starknet_with_keccak --program $$file" \
 		--export-markdown $$md_output \
 		--export-json $$json_output; \
 	done
