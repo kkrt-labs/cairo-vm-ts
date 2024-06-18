@@ -161,6 +161,41 @@ You can still add it as a dependency with a local copy:
 
 <!-- TODO: Add a Benchmark section when process is nailed -->
 
+### Differential Testing & Benchmark
+
+Pre-requisite: make
+
+### Differential Testing
+
+Compare the encoded memory and trace of executions between different Cairo VM
+implementations on a broad range of Cairo programs (currently with no hints).
+
+It is currently only test in execution mode (non-proof mode). It uses the CLI of
+each VM implementation.
+
+| Cairo VM Implementations                                                             | Added to `diff-test` |
+| ------------------------------------------------------------------------------------ | -------------------- |
+| [Cairo VM TS](https://github.com/kkrt-labs/cairo-vm-ts)                              | &#9745;              |
+| [Cairo VM Rust](https://github.com/lambdaclass/cairo-vm)                             | &#9745;              |
+| [Cairo VM Python](<(https://github.com/starkware-libs/cairo-lang)>)                  | &#9745;              |
+| [Cairo VM Zig](https://github.com/keep-starknet-strange/ziggy-starkdust)             | &#9745;              |
+| [Cairo VM Go](<(https://github.com/NethermindEth/cairo-vm-go)>) - only ProofMode atm | &#9744;              |
+
+#### Pre-requisites
+
+To build the different projects CLI, you'll need the required dependencies:
+
+- [Rust 1.74.1 or newer](https://www.rust-lang.org/tools/install)
+- [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
+- [Zig](https://ziglang.org/)
+- [Poetry](https://python-poetry.org/docs/#installation)
+
+#### How-to diff-test
+
+```bash
+make diff-test
+```
+
 ## Resources
 
 - [Cairo whitepaper](https://eprint.iacr.org/2021/1063)
