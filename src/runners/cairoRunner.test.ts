@@ -141,7 +141,7 @@ describe('cairoRunner', () => {
       runner.run(config);
       const memoryFilename = 'fibonacci_memory_ts.bin';
       const memoryPath = path.join(tmpDir, memoryFilename);
-      runner.exportMemory(memoryPath, config.offset);
+      runner.exportMemory(memoryPath);
       expect(() =>
         fs.access(memoryPath, (err) => {
           if (err) throw err;
@@ -383,7 +383,7 @@ describe('cairoRunner', () => {
       const config: RunOptions = { relocate: true, offset: 1 };
       runner.run(config);
       const tsMemoryPath = path.join(tmpDir, 'memory_ts.bin');
-      runner.exportMemory(tsMemoryPath, config.offset);
+      runner.exportMemory(tsMemoryPath);
 
       const tsMemory = fs.readFileSync(tsMemoryPath);
 

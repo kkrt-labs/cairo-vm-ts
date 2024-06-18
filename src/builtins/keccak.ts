@@ -29,7 +29,7 @@ export const keccakHandler: BuiltinHandler = {
 
     const offset = Number(prop);
     const keccakIndex = offset % cellsPerKeccak;
-    if (keccakIndex < inputCellsPerKeccak) {
+    if (keccakIndex < inputCellsPerKeccak || target[offset]) {
       return target[offset];
     }
 

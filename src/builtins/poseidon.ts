@@ -22,7 +22,7 @@ export const poseidonHandler: BuiltinHandler = {
 
     const offset = Number(prop);
     const poseidonIndex = offset % cellsPerPoseidon;
-    if (poseidonIndex < inputCellsPerPoseidon) {
+    if (poseidonIndex < inputCellsPerPoseidon || target[offset]) {
       return target[offset];
     }
 
