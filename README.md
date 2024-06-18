@@ -101,8 +101,10 @@ performance and safety. While the ones of our TypeScript implementation is
 - Install [Poetry](https://python-poetry.org/docs/#installation) to compile
   Cairo Programs
 
-- Run `bun install` to install all dependencies
-- Run `bun test` to run all tests
+```bash
+bun install # install all dependencies
+bun test # run all tests
+```
 
 ## Usage
 
