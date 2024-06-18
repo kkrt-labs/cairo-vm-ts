@@ -241,3 +241,12 @@ A benchmark using each VM implementation API is developped at
 - [Cairo website](https://www.cairo-lang.org/)
 
 <!-- TODO: Add Project Guidelines -->
+
+## Contributing Guidelines
+
+- All commits must be
+  [signed](https://docs.github.com/en/authentication/managing-commit-signature-verification/signing-commits)
+  (PGP or SSH key, we recommend PGP keys)
+- Issue assignment have a lifespan (e.g. 1d, 2d, 1w...), if no PR has been
+  opened between assignment and expiry date, you'll be unassigned. Issues
+  lifespan is introduced to avoid staling issues as the project moves quickly.
