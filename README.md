@@ -184,13 +184,13 @@ implementations on a broad range of Cairo programs (currently with no hints).
 It is currently only test in execution mode (non-proof mode). It uses the CLI of
 each VM implementation.
 
-| Cairo VM Implementations                                                             | Added to `diff-test` |
-| ------------------------------------------------------------------------------------ | -------------------- |
-| [Cairo VM TS](https://github.com/kkrt-labs/cairo-vm-ts)                              | &#9745;              |
-| [Cairo VM Rust](https://github.com/lambdaclass/cairo-vm)                             | &#9745;              |
-| [Cairo VM Python](<(https://github.com/starkware-libs/cairo-lang)>)                  | &#9745;              |
-| [Cairo VM Zig](https://github.com/keep-starknet-strange/ziggy-starkdust)             | &#9745;              |
-| [Cairo VM Go](<(https://github.com/NethermindEth/cairo-vm-go)>) - only ProofMode atm | &#9744;              |
+| Cairo VM Implementations                                                     | Added to `diff-test` |
+| ---------------------------------------------------------------------------- | -------------------- |
+| [Cairo VM TS](https://github.com/kkrt-labs/cairo-vm-ts)                      | &#9745;              |
+| [Cairo VM Rust](https://github.com/lambdaclass/cairo-vm)                     | &#9745;              |
+| [Cairo VM Python](https://github.com/starkware-libs/cairo-lang)              | &#9745;              |
+| [Cairo VM Zig](https://github.com/keep-starknet-strange/ziggy-starkdust)     | &#9745;              |
+| [Cairo VM Go](https://github.com/NethermindEth/cairo-vm-go) - ProofMode only | &#9744;              |
 
 #### Differential Testing Dependencies
 
