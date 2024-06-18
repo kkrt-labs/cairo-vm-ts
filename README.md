@@ -117,6 +117,8 @@ You can install the CLI `cairo-vm-ts` by doing the following:
 3. Install the dependencies: `bun install`
 4. Register the package as a _linkable_ package: `bun link`
 
+Steps 3. and 4. can be replaced by `make build`
+
 Example usage:
 
 ```bash
@@ -178,11 +180,11 @@ Pre-requisite: `make`
 
 ### Differential Testing
 
-Compare the encoded memory and trace of executions between different Cairo VM
-implementations on a broad range of Cairo programs (currently with no hints).
+Compare the encoded memory and trace of execution between different Cairo VM
+implementations on a broad range of Cairo programs.
 
-It is currently only test in execution mode (non-proof mode). It uses the CLI of
-each VM implementation.
+It is currently only done in execution mode (non-proof mode) on programs with no
+hints. It uses the CLI of each VM implementation.
 
 | Cairo VM Implementations                                                     | Added to `diff-test` |
 | ---------------------------------------------------------------------------- | -------------------- |
@@ -194,17 +196,23 @@ each VM implementation.
 
 #### Differential Testing Dependencies
 
-To build the different projects CLI, you'll need the required dependencies:
+To build the different projects CLI, you'll need the following dependencies:
 
 - [Rust 1.74.1 or newer](https://www.rust-lang.org/tools/install)
 - [Cargo](https://doc.rust-lang.org/cargo/getting-started/installation.html)
 - [Zig](https://ziglang.org/)
 - [Poetry](https://python-poetry.org/docs/#installation)
 
-#### How-to diff-test
+#### How to diff-test
+
+To run the differential tests, simply use `make diff-test`.
+
+If you wanna compare an arbitrary amount of memory or trace files, you can
+directly use the `compare` command
 
 ```bash
-make diff-test
+compare memory fib.memory fib2.memory fib3.memory
+compare trace fib.trace fib2.trace fib3.trace
 ```
 
 ### Benchmark
