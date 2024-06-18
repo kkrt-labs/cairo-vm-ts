@@ -57,15 +57,15 @@ func builtins_wrapper_iter{
     builtins_wrapper(num_a, num_b);
     if (n_iterations != 0) {
         builtins_wrapper_iter(num_a, num_b, n_iterations - 1);
-        tempvar output_ptr = output_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr = bitwise_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
+        let output_ptr = output_ptr;
+        let range_check_ptr = range_check_ptr;
+        let bitwise_ptr = bitwise_ptr;
+        let pedersen_ptr = pedersen_ptr;
     } else {
-        tempvar output_ptr = output_ptr;
-        tempvar range_check_ptr = range_check_ptr;
-        tempvar bitwise_ptr = bitwise_ptr;
-        tempvar pedersen_ptr = pedersen_ptr;
+        let output_ptr = output_ptr;
+        let range_check_ptr = range_check_ptr;
+        let bitwise_ptr = bitwise_ptr;
+        let pedersen_ptr = pedersen_ptr;
     }
 
     return ();
@@ -79,7 +79,7 @@ func main{
 }() {
     let num_a = 123568;
     let num_b = 5673940;
-    builtins_wrapper_iter(num_a, num_b, 100);
+    builtins_wrapper_iter(num_a, num_b, 200);
 
     return ();
 }
