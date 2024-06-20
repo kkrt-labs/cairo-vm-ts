@@ -1,5 +1,5 @@
 /** Errors related to Instruction methods */
-export class InstructionError extends Error {}
+class InstructionError extends Error {}
 
 /** High bit is not zero */
 export class HighBitSetError extends InstructionError {

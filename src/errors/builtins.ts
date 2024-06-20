@@ -1,5 +1,5 @@
 /** Errors related to builtins */
-export class BuiltinError extends Error {}
+class BuiltinError extends Error {}
 
 /** Value cannot be infered from undefined cell value */
 export class UndefinedValue extends BuiltinError {

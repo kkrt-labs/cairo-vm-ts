@@ -1,6 +1,6 @@
 import { Relocatable } from 'primitives/relocatable';
 
-export class VirtualMachineError extends Error {}
+class VirtualMachineError extends Error {}
 
 /** Instruction read from memory at `address` is undefined */
 export class UndefinedInstruction extends VirtualMachineError {

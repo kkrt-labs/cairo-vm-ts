@@ -1,7 +1,7 @@
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
 
-export class MemoryError extends Error {}
+class MemoryError extends Error {}
 
 /** Read a different value (`newValue`) than the already constrained value (`oldValue`) at `address` */
 export class InconsistentMemory extends MemoryError {
