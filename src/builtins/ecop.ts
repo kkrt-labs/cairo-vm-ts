@@ -1,7 +1,7 @@
 import { ProjectivePoint } from '@scure/starknet';
 import { BuiltinHandler } from './builtin';
 import { isFelt } from 'primitives/segmentValue';
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 import { Felt } from 'primitives/felt';
 import { LadderFailed } from 'errors/builtins';
 
@@ -31,7 +31,7 @@ export const ecOpHandler: BuiltinHandler = {
     const outputOffset = inputOffset + inputCellsPerEcOp;
 
     const inputs = target.slice(inputOffset, outputOffset).map((value) => {
-      if (!isFelt(value)) throw new ExpectedFelt();
+      if (!isFelt(value)) throw new ExpectedFelt(value);
       return value.toBigInt();
     });
 

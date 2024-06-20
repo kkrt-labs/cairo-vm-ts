@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
 import { UndefinedValue } from 'errors/builtins';
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
@@ -88,6 +88,6 @@ describe('Pedersen', () => {
     memory.assertEq(xAddr, xAddr);
     memory.assertEq(yAddr, y);
 
-    expect(() => memory.get(addressHash)).toThrow(new ExpectedFelt());
+    expect(() => memory.get(addressHash)).toThrow(new ExpectedFelt(xAddr));
   });
 });

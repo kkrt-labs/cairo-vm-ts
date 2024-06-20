@@ -1,8 +1,4 @@
-import {
-  ForbiddenOperation,
-  OffsetUnderflow,
-  SegmentError,
-} from 'errors/primitives';
+import { ExpectedFelt, OffsetUnderflow, SegmentError } from 'errors/primitives';
 
 import { Felt } from './felt';
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
@@ -29,7 +25,7 @@ export class Relocatable {
     }
 
     if (isRelocatable(other)) {
-      throw new ForbiddenOperation();
+      throw new ExpectedFelt(other);
     }
 
     return new Relocatable(this.segmentId, this.offset + other);
@@ -44,25 +40,25 @@ export class Relocatable {
       const delta = Number(other);
 
       if (this.offset < delta) {
-        throw new OffsetUnderflow();
+        throw new OffsetUnderflow(this, other);
       }
       return new Relocatable(this.segmentId, this.offset - delta);
     }
 
     if (isRelocatable(other)) {
       if (this.offset < other.offset) {
-        throw new OffsetUnderflow();
+        throw new OffsetUnderflow(this, other);
       }
 
       if (this.segmentId !== other.segmentId) {
-        throw new SegmentError();
+        throw new SegmentError(this, other);
       }
 
       return new Felt(BigInt(this.offset - other.offset));
     }
 
     if (this.offset < other) {
-      throw new OffsetUnderflow();
+      throw new OffsetUnderflow(this, other);
     }
 
     return new Relocatable(this.segmentId, this.offset - other);

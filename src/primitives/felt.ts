@@ -1,4 +1,4 @@
-import { ForbiddenOperation } from 'errors/primitives';
+import { CannotDivideByZero, ExpectedFelt } from 'errors/primitives';
 
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
 import { CURVE } from '@scure/starknet';
@@ -30,7 +30,7 @@ export class Felt {
 
   add(other: SegmentValue): Felt {
     if (!isFelt(other)) {
-      throw new ForbiddenOperation();
+      throw new ExpectedFelt(other);
     }
 
     return new Felt(this.inner + other.inner);
@@ -38,7 +38,7 @@ export class Felt {
 
   sub(other: SegmentValue): Felt {
     if (!isFelt(other)) {
-      throw new ForbiddenOperation();
+      throw new ExpectedFelt(other);
     }
 
     return new Felt(this.inner - other.inner);
@@ -46,7 +46,7 @@ export class Felt {
 
   mul(other: SegmentValue): Felt {
     if (!isFelt(other)) {
-      throw new ForbiddenOperation();
+      throw new ExpectedFelt(other);
     }
 
     return new Felt(this.inner * other.inner);
@@ -57,8 +57,10 @@ export class Felt {
   }
 
   div(other: SegmentValue): Felt {
-    if (!isFelt(other) || other.inner === 0n) {
-      throw new ForbiddenOperation();
+    if (!isFelt(other)) {
+      throw new ExpectedFelt(other);
+    } else if (other.inner === 0n) {
+      throw new CannotDivideByZero();
     }
 
     return this.mul(other.inv());

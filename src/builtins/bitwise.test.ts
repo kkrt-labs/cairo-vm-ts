@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 
+import { ExpectedFelt } from 'errors/primitives';
 import { UndefinedValue } from 'errors/builtins';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { Memory } from 'memory/memory';
 import { bitwiseHandler } from './bitwise';
-import { ExpectedFelt } from 'errors/virtualMachine';
 
 type BitwiseInput = {
   x: Felt;
@@ -83,6 +83,6 @@ describe('Bitwise', () => {
     memory.assertEq(xAddr, xAddr);
     memory.assertEq(yAddr, y);
 
-    expect(() => memory.get(addressAND)).toThrow(new ExpectedFelt());
+    expect(() => memory.get(addressAND)).toThrow(new ExpectedFelt(xAddr));
   });
 });

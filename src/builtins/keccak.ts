@@ -2,7 +2,7 @@ import { bytesToNumberLE, numberToBytesLE } from '@noble/curves/abstract/utils';
 import { concatBytes, u32, u8 } from '@noble/hashes/utils';
 import { keccakP } from '@noble/hashes/sha3';
 
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 
 import { Felt } from 'primitives/felt';
 import { isFelt } from 'primitives/segmentValue';
@@ -38,7 +38,7 @@ export const keccakHandler: BuiltinHandler = {
 
     const input = concatBytes(
       ...target.slice(inputOffset, outputOffset).map((value) => {
-        if (!isFelt(value)) throw new ExpectedFelt();
+        if (!isFelt(value)) throw new ExpectedFelt(value);
         if (value.toBigInt() >> KECCAK_BITS !== 0n) throw new Error();
         return numberToBytesLE(value.toBigInt(), 25);
       })

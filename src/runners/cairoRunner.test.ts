@@ -348,7 +348,9 @@ describe('cairoRunner', () => {
       test('should crash the VM when trying to assert -1 to the range check segment', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK_PROGRAM);
         const config: RunOptions = { relocate: true, offset: 1 };
-        expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
+        expect(() => runner.run(config)).toThrow(
+          new RangeCheckOutOfBounds(new Felt(-1n), 128n)
+        );
       });
     });
 
@@ -367,7 +369,9 @@ describe('cairoRunner', () => {
       test('should crash the VM when trying to assert 2 ** 96 to the range check segment', () => {
         const runner = new CairoRunner(BAD_RANGE_CHECK96_PROGRAM);
         const config: RunOptions = { relocate: true, offset: 1 };
-        expect(() => runner.run(config)).toThrow(new RangeCheckOutOfBounds());
+        expect(() => runner.run(config)).toThrow(
+          new RangeCheckOutOfBounds(new Felt(2n ** 96n), 96n)
+        );
       });
     });
   });

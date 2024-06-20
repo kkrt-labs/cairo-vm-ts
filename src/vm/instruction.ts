@@ -208,7 +208,7 @@ export class Instruction {
   static decodeInstruction(encodedInstruction: bigint): Instruction {
     // INVARIANT: The high bit of the encoded instruction must be 0
     if (encodedInstruction >> 63n) {
-      throw new HighBitSetError();
+      throw new HighBitSetError(encodedInstruction);
     }
 
     const dstOffset = this.fromBiased(encodedInstruction & 0xffffn);
@@ -244,7 +244,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidDstRegister();
+        throw new InvalidDstRegister(encodedInstruction, dstRegisterFlag);
     }
 
     switch (op0RegisterFlag) {
@@ -257,7 +257,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidOp0Register();
+        throw new InvalidOp0Register(encodedInstruction, op0RegisterFlag);
     }
 
     switch (op1RegisterFlag) {
@@ -278,7 +278,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidOp1Register();
+        throw new InvalidOp1Register(encodedInstruction, op1RegisterFlag);
     }
 
     switch (pcUpdateFlag) {
@@ -299,7 +299,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidPcUpdate();
+        throw new InvalidPcUpdate(encodedInstruction, pcUpdateFlag);
     }
 
     switch (resLogicFlag) {
@@ -316,7 +316,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidResLogic();
+        throw new InvalidResLogic(encodedInstruction, resLogicFlag);
     }
 
     switch (opcodeFlag) {
@@ -337,7 +337,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidOpcode();
+        throw new InvalidOpcode(encodedInstruction, opcodeFlag);
     }
 
     switch (apUpdateFlag) {
@@ -357,7 +357,7 @@ export class Instruction {
         break;
 
       default:
-        throw new InvalidApUpdate();
+        throw new InvalidApUpdate(encodedInstruction, apUpdateFlag);
     }
 
     switch (opcode) {

@@ -23,39 +23,45 @@ import {
 describe('Instruction', () => {
   describe('decodeInstruction', () => {
     test('should throw an error HighBitSetError', () => {
-      expect(() => Instruction.decodeInstruction(0x94a7800080008000n)).toThrow(
-        new HighBitSetError()
+      const instruction = 0x94a7_8000_8000_8000n;
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
+        new HighBitSetError(instruction)
       );
     });
 
     test('should throw an error InvalidOp1Register', () => {
-      expect(() => Instruction.decodeInstruction(0x294f800080008000n)).toThrow(
-        new InvalidOp1Register()
+      const instruction = 0x294f_8000_8000_8000n;
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
+        new InvalidOp1Register(instruction, 3n)
       );
     });
 
     test('should throw an error InvalidPcUpdate', () => {
-      expect(() => Instruction.decodeInstruction(0x29a8800080008000n)).toThrow(
-        new InvalidPcUpdate()
+      const instruction = 0x29a8_8000_8000_8000n;
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
+        new InvalidPcUpdate(instruction, 3n)
       );
     });
 
     test('should throw an error InvalidResLogic', () => {
-      expect(() => Instruction.decodeInstruction(0x2968800080008000n)).toThrow(
-        new InvalidResLogic()
+      const instruction = 0x2968_8000_8000_8000n;
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
+        new InvalidResLogic(instruction, 3n)
       );
     });
 
     test('should throw an error InvalidOpcode', () => {
-      expect(() => Instruction.decodeInstruction(0x3948800080008000n)).toThrow(
-        new InvalidOpcode()
+      const instruction = 0x3948_8000_8000_8000n;
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
+        new InvalidOpcode(instruction, 3n)
       );
     });
 
     test('should throw an error with InvalidApUpdate', () => {
-      expect(() =>
-        Instruction.decodeInstruction(0x2d48_8000_8000_8000n)
-      ).toThrow(new InvalidApUpdate());
+      const instruction = 0x2d48_8000_8000_8000n;
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
+        new InvalidApUpdate(instruction, 3n)
+      );
     });
 
     test('should correctly decode the cairo instruction [ap + 10] = [fp] + 42', () => {

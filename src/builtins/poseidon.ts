@@ -1,6 +1,6 @@
 import { UndefinedValue } from 'errors/builtins';
 import { BuiltinHandler } from './builtin';
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 import { isFelt } from 'primitives/segmentValue';
 import { poseidonSmall } from '@scure/starknet';
 import { Felt } from 'primitives/felt';
@@ -29,19 +29,19 @@ export const poseidonHandler: BuiltinHandler = {
     const xOffset = offset - poseidonIndex;
     const xValue = target[xOffset];
     if (!xValue) throw new UndefinedValue(xOffset);
-    if (!isFelt(xValue)) throw new ExpectedFelt();
+    if (!isFelt(xValue)) throw new ExpectedFelt(xValue);
     const x = xValue.toBigInt();
 
     const yOffset = xOffset + 1;
     const yValue = target[yOffset];
     if (!yValue) throw new UndefinedValue(yOffset);
-    if (!isFelt(yValue)) throw new ExpectedFelt();
+    if (!isFelt(yValue)) throw new ExpectedFelt(yValue);
     const y = yValue.toBigInt();
 
     const zOffset = xOffset + 2;
     const zValue = target[zOffset];
     if (!zValue) throw new UndefinedValue(zOffset);
-    if (!isFelt(zValue)) throw new ExpectedFelt();
+    if (!isFelt(zValue)) throw new ExpectedFelt(zValue);
     const z = zValue.toBigInt();
 
     const state = poseidon(x, y, z);

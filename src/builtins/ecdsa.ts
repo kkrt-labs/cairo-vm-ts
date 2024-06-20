@@ -6,7 +6,7 @@ import {
   UndefinedECDSASignature,
   UndefinedSignatureDict,
 } from 'errors/builtins';
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 
 import { Felt } from 'primitives/felt';
 import { SegmentValue, isFelt } from 'primitives/segmentValue';
@@ -19,7 +19,8 @@ type EcdsaProxyHandler = ProxyHandler<EcdsaSegment>;
 const signatureHandler: ProxyHandler<EcdsaSignatureDict> = {
   set(target, prop, newValue): boolean {
     if (isNaN(Number(prop))) throw new ExpectedOffset();
-    if (!isFelt(newValue.r) || !isFelt(newValue.s)) throw new ExpectedFelt();
+    if (!isFelt(newValue.r)) throw new ExpectedFelt(newValue.r);
+    if (!isFelt(newValue.s)) throw new ExpectedFelt(newValue.s);
     const key = Number(prop);
     target[key] = newValue;
     return true;
@@ -46,8 +47,8 @@ export const ecdsaHandler: EcdsaProxyHandler = {
     }
 
     if (isNaN(Number(prop))) throw new ExpectedOffset();
-
     if (!target.signatures) throw new UndefinedSignatureDict();
+    if (!isFelt(newValue)) throw new ExpectedFelt(newValue);
 
     const cellsPerEcdsa = 2;
     const offset = Number(prop);
@@ -57,7 +58,6 @@ export const ecdsaHandler: EcdsaProxyHandler = {
     const msgOffset = ecdsaIndex ? offset : offset + 1;
 
     if (!target[pubKeyXOffset] && !target[msgOffset]) {
-      if (!isFelt(newValue)) throw new ExpectedFelt();
       target[offset] = newValue;
       return true;
     }
@@ -68,12 +68,12 @@ export const ecdsaHandler: EcdsaProxyHandler = {
       return true;
     }
 
-    if (!isFelt(newValue)) throw new ExpectedFelt();
     target[offset] = newValue;
 
     const pubKeyX = target[pubKeyXOffset];
     const msg = target[msgOffset];
-    if (!isFelt(pubKeyX) || !isFelt(msg)) throw new ExpectedFelt();
+    if (!isFelt(pubKeyX)) throw new ExpectedFelt(pubKeyX);
+    if (!isFelt(msg)) throw new ExpectedFelt(msg);
 
     const { yPos, yNeg } = recoverY(pubKeyX);
 
@@ -95,7 +95,12 @@ export const ecdsaHandler: EcdsaProxyHandler = {
       });
 
       if (!verify(signature, msg.toString(16), pubKeyNeg.toHex()))
-        throw new InvalidSignature();
+        throw new InvalidSignature(
+          signature,
+          msg,
+          pubKeyPos.toHex(),
+          pubKeyNeg.toHex()
+        );
     }
     return true;
   },
