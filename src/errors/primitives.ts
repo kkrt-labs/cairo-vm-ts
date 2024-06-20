@@ -8,7 +8,14 @@ class PrimitiveError extends Error {}
 /** Expected a Felt */
 export class ExpectedFelt extends PrimitiveError {
   constructor(value: any) {
-    super(`Expected a Felt, received a ${typeof value}: ${value}`);
+    super(`Expected a Felt, received ${value}`);
+  }
+}
+
+/** Expected a Relocatable */
+export class ExpectedRelocatable extends PrimitiveError {
+  constructor(value: any) {
+    super(`Expected a Relocatable, received ${value}`);
   }
 }
 

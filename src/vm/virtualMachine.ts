@@ -1,11 +1,13 @@
-import { ExpectedFelt } from 'errors/primitives';
+import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
 import {
-  ExpectedRelocatable,
   InvalidDst,
   InvalidOp1,
   UnusedRes,
   UndefinedInstruction,
   InvalidOp0,
+  UndefinedOp0,
+  InvalidCallOp0Value,
+  UndefinedOp1,
 } from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
@@ -139,7 +141,8 @@ export class VirtualMachine {
     let op0: SegmentValue | undefined = this.memory.get(op0Addr);
     switch (op1Register) {
       case Op1Src.Op0:
-        if (!op0 || !isRelocatable(op0)) throw new InvalidOp0();
+        if (!op0) throw new UndefinedOp0();
+        if (!isRelocatable(op0)) throw new ExpectedFelt(op0);
         op1Addr = new Relocatable(op0.segmentId, op0.offset + op1Offset);
         break;
       default:
@@ -155,9 +158,9 @@ export class VirtualMachine {
         {
           const nextPc = this.pc.add(instruction.size());
           op0 = op0 ?? nextPc;
-          if (!op0.eq(nextPc)) throw new InvalidOp0();
+          if (!op0.eq(nextPc)) throw new InvalidCallOp0Value(op0, nextPc);
         }
-        if (op1 === undefined) throw new InvalidOp1();
+        if (op1 === undefined) throw new UndefinedOp1();
         res = op1;
         dst = this.fp;
         break;
@@ -166,9 +169,9 @@ export class VirtualMachine {
         {
           const nextPc = this.pc.add(instruction.size());
           op0 = op0 ?? nextPc;
-          if (!op0.eq(nextPc)) throw new InvalidOp0();
+          if (!op0.eq(nextPc)) throw new InvalidCallOp0Value(op0, nextPc);
         }
-        if (op1 === undefined) throw new InvalidOp1();
+        if (op1 === undefined) throw new UndefinedOp1();
         res = op0.add(op1);
         dst = this.fp;
         break;
@@ -177,9 +180,9 @@ export class VirtualMachine {
         {
           const nextPc = this.pc.add(instruction.size());
           op0 = op0 ?? nextPc;
-          if (!op0.eq(nextPc)) throw new InvalidOp0();
+          if (!op0.eq(nextPc)) throw new InvalidCallOp0Value(op0, nextPc);
         }
-        if (op1 === undefined) throw new InvalidOp1();
+        if (op1 === undefined) throw new UndefinedOp1();
         if (!isFelt(op0)) throw new ExpectedFelt(op0);
         res = op0.mul(op1);
         dst = this.fp;
@@ -189,9 +192,9 @@ export class VirtualMachine {
         {
           const nextPc = this.pc.add(instruction.size());
           op0 = op0 ?? nextPc;
-          if (!op0.eq(nextPc)) throw new InvalidOp0();
+          if (!op0.eq(nextPc)) throw new InvalidCallOp0Value(op0, nextPc);
         }
-        if (op1 === undefined) throw new InvalidOp1();
+        if (op1 === undefined) throw new UndefinedOp1();
         res = undefined;
         dst = this.fp;
         break;
@@ -316,7 +319,7 @@ export class VirtualMachine {
 
       case PcUpdate.Jump:
         if (res === undefined) throw new UnusedRes();
-        if (!isRelocatable(res)) throw new ExpectedRelocatable();
+        if (!isRelocatable(res)) throw new ExpectedRelocatable(res);
         this.pc = res;
         break;
 
@@ -331,7 +334,7 @@ export class VirtualMachine {
         if (isFelt(dst) && dst.eq(Felt.ZERO)) {
           this.pc = this.pc.add(instruction.size());
         } else {
-          if (op1 === undefined) throw new InvalidOp1();
+          if (op1 === undefined) throw new UndefinedOp1();
           if (!isFelt(op1)) throw new ExpectedFelt(op1);
           this.pc = this.pc.add(op1);
         }
