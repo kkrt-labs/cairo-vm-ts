@@ -26,6 +26,3 @@ export class InvalidOp1 extends VirtualMachineError {}
 
 /** Expected relocatable */
 export class ExpectedRelocatable extends VirtualMachineError {}
-
-/** Expected felt */
-export class ExpectedFelt extends VirtualMachineError {}

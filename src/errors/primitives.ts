@@ -1,7 +1,7 @@
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
 
-export class PrimitiveError extends Error {}
+class PrimitiveError extends Error {}
 
 // Felt and Relocatable errors
 

@@ -1,7 +1,8 @@
-import { isFelt } from 'primitives/segmentValue';
+import { ExpectedFelt } from 'errors/primitives';
 import { UndefinedValue } from 'errors/builtins';
-import { ExpectedFelt } from 'errors/virtualMachine';
+
 import { Felt } from 'primitives/felt';
+import { isFelt } from 'primitives/segmentValue';
 import { BuiltinHandler } from './builtin';
 
 export const bitwiseHandler: BuiltinHandler = {
@@ -22,13 +23,13 @@ export const bitwiseHandler: BuiltinHandler = {
     const xOffset = offset - bitwiseIndex;
     const xValue = target[xOffset];
     if (!xValue) throw new UndefinedValue(xOffset);
-    if (!isFelt(xValue)) throw new ExpectedFelt();
+    if (!isFelt(xValue)) throw new ExpectedFelt(xValue);
     const x = xValue.toBigInt();
 
     const yOffset = xOffset + 1;
     const yValue = target[yOffset];
     if (!yValue) throw new UndefinedValue(yOffset);
-    if (!isFelt(yValue)) throw new ExpectedFelt();
+    if (!isFelt(yValue)) throw new ExpectedFelt(yValue);
     const y = yValue.toBigInt();
 
     switch (bitwiseIndex) {

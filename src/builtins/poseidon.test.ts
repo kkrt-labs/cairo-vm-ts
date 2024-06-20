@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 import { UndefinedValue } from 'errors/builtins';
 
 import { Felt } from 'primitives/felt';
@@ -89,6 +89,6 @@ describe('Poseidon', () => {
     memory.assertEq(yAddr, y);
     memory.assertEq(zAddr, z);
 
-    expect(() => memory.get(addressHash)).toThrow(new ExpectedFelt());
+    expect(() => memory.get(addressHash)).toThrow(new ExpectedFelt(xAddr));
   });
 });

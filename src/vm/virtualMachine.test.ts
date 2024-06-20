@@ -1,10 +1,6 @@
 import { test, expect, describe, spyOn } from 'bun:test';
 
-import {
-  ExpectedFelt,
-  ExpectedRelocatable,
-  UnusedRes,
-} from 'errors/virtualMachine';
+import { ExpectedRelocatable, UnusedRes } from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
@@ -19,6 +15,7 @@ import {
   Op1Src,
 } from './instruction';
 import { VirtualMachine } from './virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 
 const instructions = {
   InvalidAssertEq: new Instruction(
@@ -293,7 +290,7 @@ describe('VirtualMachine', () => {
       const dst = undefined;
 
       expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new ExpectedFelt()
+        new ExpectedFelt(res)
       );
     });
 
@@ -355,7 +352,7 @@ describe('VirtualMachine', () => {
       const dst = new Felt(1n);
 
       expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new ExpectedFelt()
+        new ExpectedFelt(op1)
       );
     });
   });
@@ -454,7 +451,9 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       const res = new Relocatable(0, 0);
 
-      expect(() => vm.updateAp(instruction, res)).toThrow(new ExpectedFelt());
+      expect(() => vm.updateAp(instruction, res)).toThrow(
+        new ExpectedFelt(res)
+      );
     });
 
     test('add no res', () => {

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { Memory } from 'memory/memory';
 import { outputHandler } from './output';
 import { Relocatable } from 'primitives/relocatable';
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 import { Felt } from 'primitives/felt';
 
 describe('Output', () => {
@@ -28,6 +28,8 @@ describe('Output', () => {
     const { segmentId } = memory.addSegment(outputHandler);
     const address = new Relocatable(segmentId, 10);
     const value = new Relocatable(0, 0);
-    expect(() => memory.assertEq(address, value)).toThrow(new ExpectedFelt());
+    expect(() => memory.assertEq(address, value)).toThrow(
+      new ExpectedFelt(value)
+    );
   });
 });

@@ -1,5 +1,6 @@
+import { ExpectedFelt } from 'errors/primitives';
+import { InvalidInstruction } from 'errors/memory';
 import {
-  ExpectedFelt,
   ExpectedRelocatable,
   InvalidDst,
   InvalidOp1,
@@ -7,10 +8,9 @@ import {
   UndefinedInstruction,
   InvalidOp0,
 } from 'errors/virtualMachine';
-import { InvalidInstruction } from 'errors/memory';
 
-import { Relocatable } from 'primitives/relocatable';
 import { Felt } from 'primitives/felt';
+import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import { Memory } from 'memory/memory';
 import {
@@ -181,7 +181,7 @@ export class VirtualMachine {
           if (!op0.eq(nextPc)) throw new InvalidOp0();
         }
         if (op1 === undefined) throw new InvalidOp1();
-        if (!isFelt(op0)) throw new ExpectedFelt();
+        if (!isFelt(op0)) throw new ExpectedFelt(op0);
         res = op0.mul(op1);
         dst = this.fp;
         break;
@@ -227,7 +227,7 @@ export class VirtualMachine {
           }
           op0 = dst.div(op1);
         }
-        if (!isFelt(op0)) throw new ExpectedFelt();
+        if (!isFelt(op0)) throw new ExpectedFelt(op0);
         if (op1 === undefined) {
           if (dst === undefined || op0 === undefined || !isFelt(dst)) {
             throw new InvalidOp1();
@@ -323,7 +323,7 @@ export class VirtualMachine {
 
       case PcUpdate.JumpRel:
         if (res === undefined) throw new UnusedRes();
-        if (!isFelt(res)) throw new ExpectedFelt();
+        if (!isFelt(res)) throw new ExpectedFelt(res);
         this.pc = this.pc.add(res);
         break;
 
@@ -333,7 +333,7 @@ export class VirtualMachine {
           this.pc = this.pc.add(instruction.size());
         } else {
           if (op1 === undefined) throw new InvalidOp1();
-          if (!isFelt(op1)) throw new ExpectedFelt();
+          if (!isFelt(op1)) throw new ExpectedFelt(op1);
           this.pc = this.pc.add(op1);
         }
         break;
@@ -350,7 +350,7 @@ export class VirtualMachine {
     switch (instruction.apUpdate) {
       case ApUpdate.AddRes:
         if (res === undefined) throw new UnusedRes();
-        if (!isFelt(res)) throw new ExpectedFelt();
+        if (!isFelt(res)) throw new ExpectedFelt(res);
 
         this.ap = this.ap.add(res);
         break;

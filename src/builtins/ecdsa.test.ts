@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';

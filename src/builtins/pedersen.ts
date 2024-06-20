@@ -1,6 +1,6 @@
 import { UndefinedValue } from 'errors/builtins';
 import { BuiltinHandler } from './builtin';
-import { ExpectedFelt } from 'errors/virtualMachine';
+import { ExpectedFelt } from 'errors/primitives';
 import { isFelt } from 'primitives/segmentValue';
 import { pedersen } from '@scure/starknet';
 import { Felt } from 'primitives/felt';
@@ -24,13 +24,13 @@ export const pedersenHandler: BuiltinHandler = {
     const xOffset = offset - pedersenIndex;
     const xValue = target[xOffset];
     if (!xValue) throw new UndefinedValue(xOffset);
-    if (!isFelt(xValue)) throw new ExpectedFelt();
+    if (!isFelt(xValue)) throw new ExpectedFelt(xValue);
     const x = xValue.toBigInt();
 
     const yOffset = xOffset + 1;
     const yValue = target[yOffset];
     if (!yValue) throw new UndefinedValue(yOffset);
-    if (!isFelt(yValue)) throw new ExpectedFelt();
+    if (!isFelt(yValue)) throw new ExpectedFelt(yValue);
     const y = yValue.toBigInt();
 
     return (target[offset] = new Felt(BigInt(pedersen(x, y))));
