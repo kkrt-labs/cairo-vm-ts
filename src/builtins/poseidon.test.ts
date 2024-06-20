@@ -64,12 +64,12 @@ describe('Poseidon', () => {
       const memory = new Memory();
       const { segmentId } = memory.addSegment(poseidonHandler);
       const address = new Relocatable(segmentId, offset);
-      const addressHash = new Relocatable(segmentId, 3);
+      const addressHash = new Relocatable(segmentId, offset + 3);
 
       memory.assertEq(address, new Felt(0n));
 
       expect(() => memory.get(addressHash)).toThrow(
-        new UndefinedValue((offset + 1) % 6)
+        new UndefinedValue(offset + 1)
       );
     }
   );

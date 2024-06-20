@@ -95,7 +95,12 @@ export const ecdsaHandler: EcdsaProxyHandler = {
       });
 
       if (!verify(signature, msg.toString(16), pubKeyNeg.toHex()))
-        throw new InvalidSignature();
+        throw new InvalidSignature(
+          signature,
+          msg,
+          pubKeyPos.toHex(),
+          pubKeyNeg.toHex()
+        );
     }
     return true;
   },

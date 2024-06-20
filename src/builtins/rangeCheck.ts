@@ -11,7 +11,7 @@ export const rangeCheckHandler = (boundExponent: bigint): BuiltinHandler => {
       const offset = Number(prop);
       if (!isFelt(newValue)) throw new ExpectedFelt(newValue);
       if (newValue.toBigInt() >> boundExponent !== 0n)
-        throw new RangeCheckOutOfBounds();
+        throw new RangeCheckOutOfBounds(newValue, boundExponent);
 
       target[offset] = newValue;
       return true;
