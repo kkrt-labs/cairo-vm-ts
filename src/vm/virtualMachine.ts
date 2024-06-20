@@ -1,5 +1,4 @@
 import { ExpectedFelt } from 'errors/primitives';
-import { InvalidInstruction } from 'errors/memory';
 import {
   ExpectedRelocatable,
   InvalidDst,
@@ -75,7 +74,7 @@ export class VirtualMachine {
     }
 
     if (!isFelt(maybeEncodedInstruction)) {
-      throw new InvalidInstruction();
+      throw new ExpectedFelt(maybeEncodedInstruction);
     }
 
     const encodedInstruction = maybeEncodedInstruction.toBigInt();
