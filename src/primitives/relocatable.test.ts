@@ -1,10 +1,6 @@
 import { test, expect, describe } from 'bun:test';
 
-import {
-  ForbiddenOperation,
-  OffsetUnderflow,
-  SegmentError,
-} from 'errors/primitives';
+import { ExpectedFelt, OffsetUnderflow, SegmentError } from 'errors/primitives';
 
 import { Felt } from './felt';
 import { Relocatable } from './relocatable';
@@ -29,13 +25,13 @@ describe('Relocatable', () => {
     test('should throw an error OffsetUnderflow when offset goes below zero', () => {
       const a = new Relocatable(1, 2);
       const b = new Relocatable(1, 3);
-      expect(() => a.sub(b)).toThrow(new OffsetUnderflow());
+      expect(() => a.sub(b)).toThrow(new OffsetUnderflow(a, b));
     });
 
     test('should throw an error SegmentError when segments are different', () => {
       const a = new Relocatable(1, 10);
       const b = new Relocatable(2, 5);
-      expect(() => a.sub(b)).toThrow(new SegmentError());
+      expect(() => a.sub(b)).toThrow(new SegmentError(a, b));
     });
 
     test('should subtract a Felt from a Relocatable', () => {
@@ -49,7 +45,9 @@ describe('Relocatable', () => {
     test('should throw an error OffsetUnderflow when subtracting a larger Felt', () => {
       const relocatable = new Relocatable(0, 5);
       const felt = new Felt(10n);
-      expect(() => relocatable.sub(felt)).toThrow(new OffsetUnderflow());
+      expect(() => relocatable.sub(felt)).toThrow(
+        new OffsetUnderflow(relocatable, felt)
+      );
     });
 
     test('should subtract a Relocatable', () => {
@@ -77,10 +75,10 @@ describe('Relocatable', () => {
       expect(result.segmentId).toEqual(0);
     });
 
-    test('should throw an error ForbiddenOperation when adding an incompatible SegmentValue', () => {
+    test('should throw an error ExpectedFelt when adding an incompatible SegmentValue', () => {
       const a = new Relocatable(0, 10);
       const b = new Relocatable(0, 5);
-      expect(() => a.add(b)).toThrow(new ForbiddenOperation());
+      expect(() => a.add(b)).toThrow(new ExpectedFelt(b));
     });
     test('should add a Felt to a Relocatable', () => {
       const relocatable = new Relocatable(0, 5);
