@@ -59,7 +59,7 @@ describe('Instruction', () => {
 
     test('should throw an error with InvalidApUpdate', () => {
       const instruction = 0x2d48_8000_8000_8000n;
-      expect(Instruction.decodeInstruction(instruction)).toThrow(
+      expect(() => Instruction.decodeInstruction(instruction)).toThrow(
         new InvalidApUpdate(instruction, 3n)
       );
     });
