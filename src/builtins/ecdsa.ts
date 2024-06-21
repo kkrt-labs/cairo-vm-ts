@@ -18,7 +18,7 @@ type EcdsaProxyHandler = ProxyHandler<EcdsaSegment>;
 
 const signatureHandler: ProxyHandler<EcdsaSignatureDict> = {
   set(target, prop, newValue): boolean {
-    if (isNaN(Number(prop))) throw new ExpectedOffset();
+    if (isNaN(Number(prop))) throw new ExpectedOffset(prop);
     if (!isFelt(newValue.r)) throw new ExpectedFelt(newValue.r);
     if (!isFelt(newValue.s)) throw new ExpectedFelt(newValue.s);
     const key = Number(prop);
@@ -46,7 +46,7 @@ export const ecdsaHandler: EcdsaProxyHandler = {
       return true;
     }
 
-    if (isNaN(Number(prop))) throw new ExpectedOffset();
+    if (isNaN(Number(prop))) throw new ExpectedOffset(prop);
     if (!target.signatures) throw new UndefinedSignatureDict();
     if (!isFelt(newValue)) throw new ExpectedFelt(newValue);
 

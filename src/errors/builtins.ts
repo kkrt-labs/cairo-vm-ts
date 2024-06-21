@@ -1,4 +1,5 @@
 import { SignatureType } from '@noble/curves/src/abstract/weierstrass';
+import { ProjectivePoint } from '@scure/starknet';
 import { Felt } from 'primitives/felt';
 
 /** Errors related to builtins */
@@ -49,10 +50,27 @@ public key (negative): ${pubKeyNegHex}
 }
 
 /** The signature dictionnary is undefined */
-export class UndefinedSignatureDict extends BuiltinError {}
+export class UndefinedSignatureDict extends BuiltinError {
+  constructor() {
+    super('The signature dictionnary is undefined');
+  }
+}
 
 /** An offset of type number is expected */
-export class ExpectedOffset extends BuiltinError {}
+export class ExpectedOffset extends BuiltinError {
+  constructor(prop: any) {
+    super(
+      `The key to set a value to the segment is expected to be castable to number, received ${typeof prop}: ${prop}`
+    );
+  }
+}
 
 /** Ladder formula R = P + mQ failed in EcOp builtin */
-export class LadderFailed extends BuiltinError {}
+export class LadderFailed extends BuiltinError {
+  constructor(p: ProjectivePoint, q: ProjectivePoint, m: bigint) {
+    super(`Ladder formula r = P + mQ failed in EcOp builtin
+p: ${p.toHex}
+q: ${q.toHex()}
+m: 0x${m.toString(16)}`);
+  }
+}

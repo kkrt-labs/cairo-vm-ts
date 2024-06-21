@@ -6,7 +6,7 @@ import { ExpectedFelt } from 'errors/primitives';
 export const rangeCheckHandler = (boundExponent: bigint): BuiltinHandler => {
   return {
     set(target, prop, newValue): boolean {
-      if (isNaN(Number(prop))) throw new ExpectedOffset();
+      if (isNaN(Number(prop))) throw new ExpectedOffset(prop);
 
       const offset = Number(prop);
       if (!isFelt(newValue)) throw new ExpectedFelt(newValue);

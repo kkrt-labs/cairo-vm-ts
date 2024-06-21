@@ -37,9 +37,10 @@ export const ecOpHandler: BuiltinHandler = {
 
     const p = ProjectivePoint.fromAffine({ x: inputs[0], y: inputs[1] });
     const q = ProjectivePoint.fromAffine({ x: inputs[2], y: inputs[3] });
+    const m = inputs[4];
 
-    const r = p.multiplyAndAddUnsafe(q, _1n, inputs[4]);
-    if (r === undefined) throw new LadderFailed();
+    const r = p.multiplyAndAddUnsafe(q, _1n, m);
+    if (r === undefined) throw new LadderFailed(p, q, m);
 
     switch (ecOpIndex - inputCellsPerEcOp) {
       case 0:
