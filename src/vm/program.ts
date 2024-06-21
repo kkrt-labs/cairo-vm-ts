@@ -17,8 +17,6 @@ const ReferenceManager = z.object({
   references: z.array(Reference),
 });
 
-type ReferenceManager = z.infer<typeof ReferenceManager>;
-
 const Identifier = z.object({
   full_name: z.string().optional(),
   members: z.record(z.string(), z.any()).optional(),
@@ -34,7 +32,16 @@ const Identifier = z.object({
   destination: z.string().optional(),
 });
 
-export type Identifier = z.infer<typeof Identifier>;
+const FlowTrackingData = z.object({
+  ap_tracking: ApTrackingData,
+  reference_ids: z.record(z.string(), z.number()),
+});
+
+const Hint = z.object({
+  accessible_scopes: z.array(z.string()),
+  code: z.string(),
+  flow_tracking_data: FlowTrackingData,
+});
 
 const Program = z.object({
   attributes: z.any(),
@@ -44,15 +51,20 @@ const Program = z.object({
     .array(z.string())
     .transform((value) => value.map((v) => new Felt(BigInt(v)))),
   debug_info: z.any(), // TODO: DebugInfo
-  hints: z.record(z.string(), z.any()), // TODO: HintParams
+  hints: z.record(z.string(), z.array(Hint)),
   identifiers: z
     .record(z.string(), Identifier)
-    .transform((value) => new Map<string, Identifier>(Object.entries(value))),
+    .transform((record) => new Map<string, Identifier>(Object.entries(record))),
   main_scope: z.string(),
   prime: z.string(),
   reference_manager: ReferenceManager,
 });
 
+type ReferenceManager = z.infer<typeof ReferenceManager>;
+export type ApTrackingData = z.infer<typeof ApTrackingData>;
+export type Identifier = z.infer<typeof Identifier>;
+export type FlowTrackingData = z.infer<typeof FlowTrackingData>;
+export type Hint = z.infer<typeof Hint>;
 export type Program = z.infer<typeof Program>;
 
 export function parseProgram(program: string): Program {

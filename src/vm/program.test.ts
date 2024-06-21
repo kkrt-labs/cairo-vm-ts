@@ -19,5 +19,17 @@ describe('program', () => {
       const program = parseProgram(programContent);
       expect(program.data).toEqual(data);
     });
+
+    test('parse program with hints', () => {
+      const programContent = fs.readFileSync(
+        'cairo_programs/cairo_0/ecdsa_builtin.json',
+        'utf8'
+      );
+      const programJson = JSON.parse(programContent);
+      const hints = programJson.hints;
+
+      const program = parseProgram(programContent);
+      expect(program.hints).toEqual(hints);
+    });
   });
 });
