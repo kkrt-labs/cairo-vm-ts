@@ -67,8 +67,6 @@ export enum ResLogic {
   Add = 1 << 2,
   /** res = op0 * op1 */
   Mul = 1 << 3,
-  /** res = Unused */
-  Unused = 1 << 4,
 }
 
 /**
@@ -304,7 +302,7 @@ export class Instruction {
 
     switch (resLogicFlag) {
       case 0n:
-        resLogic = pcUpdate === PcUpdate.Jnz ? ResLogic.Unused : ResLogic.Op1;
+        resLogic = ResLogic.Op1;
         break;
 
       case 1n:

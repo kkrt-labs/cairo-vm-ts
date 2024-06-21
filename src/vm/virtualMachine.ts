@@ -94,11 +94,11 @@ export class VirtualMachine {
    * for more details
    */
   runInstruction(instruction: Instruction): void {
-    const { op1, res, dst } = this.computeStepValues(instruction);
+    const { res, dst } = this.computeStepValues(instruction);
 
     this.trace.push({ pc: this.pc, ap: this.ap, fp: this.fp });
 
-    this.updateRegisters(instruction, op1, res, dst);
+    this.updateRegisters(instruction, res, dst);
 
     this.currentStep += 1n;
   }
@@ -188,17 +188,6 @@ export class VirtualMachine {
         dst = this.fp;
         break;
 
-      case Opcode.Call | ResLogic.Unused:
-        {
-          const nextPc = this.pc.add(instruction.size());
-          op0 = op0 ?? nextPc;
-          if (!op0.eq(nextPc)) throw new InvalidCallOp0Value(op0, nextPc);
-        }
-        if (op1 === undefined) throw new UndefinedOp1();
-        res = undefined;
-        dst = this.fp;
-        break;
-
       case Opcode.AssertEq | ResLogic.Op1:
         op1 = op1 ?? dst;
         res = op1;
@@ -240,10 +229,6 @@ export class VirtualMachine {
         dst = res;
         break;
 
-      case Opcode.AssertEq | ResLogic.Unused:
-        dst = res;
-        break;
-
       default:
         switch (resLogic) {
           case ResLogic.Op1:
@@ -260,9 +245,6 @@ export class VirtualMachine {
             if (op0 !== undefined && op1 !== undefined && isFelt(op0)) {
               res = op0.mul(op1);
             }
-            break;
-
-          case ResLogic.Unused:
             break;
 
           default:
@@ -291,11 +273,10 @@ export class VirtualMachine {
    */
   updateRegisters(
     instruction: Instruction,
-    op1: SegmentValue | undefined,
     res: SegmentValue | undefined,
     dst: SegmentValue | undefined
   ): void {
-    this.updatePc(instruction, op1, res, dst);
+    this.updatePc(instruction, res, dst);
     this.updateFp(instruction, dst);
     this.updateAp(instruction, res);
   }
@@ -308,7 +289,6 @@ export class VirtualMachine {
    */
   updatePc(
     instruction: Instruction,
-    op1: SegmentValue | undefined,
     res: SegmentValue | undefined,
     dst: SegmentValue | undefined
   ): void {
@@ -334,9 +314,9 @@ export class VirtualMachine {
         if (isFelt(dst) && dst.eq(Felt.ZERO)) {
           this.pc = this.pc.add(instruction.size());
         } else {
-          if (op1 === undefined) throw new UndefinedOp1();
-          if (!isFelt(op1)) throw new ExpectedFelt(op1);
-          this.pc = this.pc.add(op1);
+          if (res === undefined) throw new UndefinedOp1();
+          if (!isFelt(res)) throw new ExpectedFelt(res);
+          this.pc = this.pc.add(res);
         }
         break;
     }

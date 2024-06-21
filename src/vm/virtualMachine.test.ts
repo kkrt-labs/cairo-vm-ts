@@ -51,7 +51,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.Ap,
     FpUpdate.Fp,
@@ -64,7 +64,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Pc,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.Ap,
     FpUpdate.Fp,
@@ -77,7 +77,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Jump,
     ApUpdate.Ap,
     FpUpdate.Fp,
@@ -90,7 +90,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.JumpRel,
     ApUpdate.Ap,
     FpUpdate.Fp,
@@ -103,7 +103,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.JumpRel,
     ApUpdate.Add2,
     FpUpdate.Dst,
@@ -116,7 +116,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Jnz,
     ApUpdate.Ap,
     FpUpdate.Fp,
@@ -129,7 +129,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Pc,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Jnz,
     ApUpdate.Ap,
     FpUpdate.Fp,
@@ -142,7 +142,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.Ap,
     FpUpdate.Dst,
@@ -155,7 +155,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.Ap,
     FpUpdate.ApPlus2,
@@ -168,7 +168,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.Add2,
     FpUpdate.Fp,
@@ -181,7 +181,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.Add1,
     FpUpdate.Fp,
@@ -194,7 +194,7 @@ const instructions = {
     Register.Ap,
     Register.Ap,
     Op1Src.Ap,
-    ResLogic.Unused,
+    ResLogic.Op1,
     PcUpdate.Regular,
     ApUpdate.AddRes,
     FpUpdate.Fp,
@@ -210,11 +210,10 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = undefined;
 
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
 
@@ -222,11 +221,10 @@ describe('VirtualMachine', () => {
       const instruction = instructions.RegularImm;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = undefined;
 
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
 
@@ -234,12 +232,11 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = new Relocatable(0, 5);
       const dst = undefined;
 
-      vm.updatePc(instruction, op1, res, dst);
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(res);
     });
 
@@ -247,11 +244,10 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = new Felt(0n);
       const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
+      expect(() => vm.updatePc(instruction, res, dst)).toThrow(
         new ExpectedRelocatable(res)
       );
     });
@@ -260,24 +256,20 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Jump;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new UnusedRes()
-      );
+      expect(() => vm.updatePc(instruction, res, dst)).toThrow(new UnusedRes());
     });
 
     test('jmp rel res felt', () => {
       const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = new Felt(5n);
       const dst = undefined;
 
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 5));
     });
 
@@ -285,11 +277,10 @@ describe('VirtualMachine', () => {
       const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = new Relocatable(0, 5);
       const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
+      expect(() => vm.updatePc(instruction, res, dst)).toThrow(
         new ExpectedFelt(res)
       );
     });
@@ -298,24 +289,20 @@ describe('VirtualMachine', () => {
       const instruction = instructions.JumpRel;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = undefined;
 
-      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new UnusedRes()
-      );
+      expect(() => vm.updatePc(instruction, res, dst)).toThrow(new UnusedRes());
     });
 
     test('jnz des is zero no imm', () => {
       const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = new Felt(0n);
 
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 1));
     });
 
@@ -323,36 +310,33 @@ describe('VirtualMachine', () => {
       const instruction = instructions.JnzImm;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = new Felt(0n);
 
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 2));
     });
 
-    test('jnz des not zero op1 felt', () => {
+    test('jnz dst not zero op1 felt', () => {
       const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
-      const op1 = new Felt(3n);
-      const res = undefined;
+      const res = new Felt(3n);
       const dst = new Felt(1n);
 
-      vm.updatePc(instruction, op1, res, dst);
+      vm.updatePc(instruction, res, dst);
       expect(vm.pc).toEqual(new Relocatable(0, 3));
     });
 
-    test('jnz des not zero op1 relocatable', () => {
+    test('jnz dst not zero op1 relocatable', () => {
       const instruction = instructions.Jnz;
 
       const vm = new VirtualMachine();
-      const op1 = new Relocatable(0, 0);
-      const res = undefined;
+      const res = new Relocatable(0, 0);
       const dst = new Felt(1n);
 
-      expect(() => vm.updatePc(instruction, op1, res, dst)).toThrow(
-        new ExpectedFelt(op1)
+      expect(() => vm.updatePc(instruction, res, dst)).toThrow(
+        new ExpectedFelt(res)
       );
     });
   });
@@ -472,11 +456,10 @@ describe('VirtualMachine', () => {
       const instruction = instructions.Regular;
 
       const vm = new VirtualMachine();
-      const op1 = undefined;
       const res = undefined;
       const dst = undefined;
 
-      vm.updateRegisters(instruction, op1, res, dst);
+      vm.updateRegisters(instruction, res, dst);
       expect(vm.ap).toEqual(new Relocatable(1, 0));
       expect(vm.fp).toEqual(new Relocatable(1, 0));
       expect(vm.pc).toEqual(new Relocatable(0, 1));
@@ -489,11 +472,10 @@ describe('VirtualMachine', () => {
       vm.fp = new Relocatable(1, 6);
       const instruction = instructions.JumpRelAdd2;
 
-      const op1 = undefined;
       const res = new Felt(8n);
       const dst = new Relocatable(1, 11);
 
-      vm.updateRegisters(instruction, op1, res, dst);
+      vm.updateRegisters(instruction, res, dst);
       const registers = {
         pc: new Relocatable(0, 12),
         ap: new Relocatable(1, 7),
