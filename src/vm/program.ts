@@ -62,7 +62,7 @@ const Program = z.object({
   reference_manager: ReferenceManager,
 });
 
-type ReferenceManager = z.infer<typeof ReferenceManager>;
+export type ReferenceManager = z.infer<typeof ReferenceManager>;
 export type Reference = z.infer<typeof Reference>;
 export type ApTrackingData = z.infer<typeof ApTrackingData>;
 export type Identifier = z.infer<typeof Identifier>;
