@@ -1,7 +1,8 @@
-import { ApTrackingData, Reference } from 'vm/program';
+import { InvalidOffsetExpr, InvalidReference } from 'errors/hintReference';
+
 import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
-import { InvalidOffsetExpr, InvalidReference } from 'errors/hintReference';
+import { ApTrackingData, Reference } from 'vm/program';
 
 export enum ValueType {
   Value,

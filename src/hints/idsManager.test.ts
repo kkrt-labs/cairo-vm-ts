@@ -1,11 +1,14 @@
 import { describe, expect, test } from 'bun:test';
-import { IdsManager } from './idsManager';
-import { HintReference } from './hintReference';
-import { ApTrackingData } from 'vm/program';
-import { VirtualMachine } from 'vm/virtualMachine';
+
+import { UndefinedVariable } from 'errors/idsManager';
+
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
-import { UndefinedVariable } from 'errors/idsManager';
+import { VirtualMachine } from 'vm/virtualMachine';
+import { ApTrackingData } from 'vm/program';
+
+import { HintReference } from './hintReference';
+import { IdsManager } from './idsManager';
 
 const AP_TRACKING_DATA_DEFAULT: ApTrackingData = { group: 0, offset: 0 };
 

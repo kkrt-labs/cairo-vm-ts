@@ -7,6 +7,7 @@ import {
   UndefinedValue,
 } from 'errors/idsManager';
 import { ExpectedRelocatable } from 'errors/primitives';
+
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { isRelocatable } from 'primitives/segmentValue';
