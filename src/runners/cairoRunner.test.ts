@@ -10,6 +10,7 @@ import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from './cairoRunner';
 import { RangeCheckOutOfBounds } from 'errors/builtins';
+import { EmptyRelocatedMemory } from 'errors/cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
@@ -133,6 +134,16 @@ describe('cairoRunner', () => {
           if (err) throw err;
         })
       ).not.toThrow();
+    });
+
+    test('should throw EmptyRelocatedMemory when exporting a non-relocated memory', () => {
+      const runner = new CairoRunner(FIBONACCI_PROGRAM);
+      runner.run();
+      const memoryFilename = 'fibonacci_memory_ts.bin';
+      const memoryPath = path.join(tmpDir, memoryFilename);
+      expect(() => runner.exportMemory(memoryPath)).toThrow(
+        new EmptyRelocatedMemory()
+      );
     });
 
     test('should export encoded memory', () => {
