@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+import { ExpectedFelt } from 'errors/primitives';
+import { InvalidIdentifierDest, UnknownIdentifier } from 'errors/program';
+
 import { Felt } from 'primitives/felt';
 
 const ApTrackingData = z.object({
@@ -32,6 +35,8 @@ const Identifier = z.object({
   destination: z.string().optional(),
 });
 
+const Identifiers = z.record(z.string(), Identifier);
+
 const FlowTrackingData = z.object({
   ap_tracking: ApTrackingData,
   reference_ids: z.record(z.string(), z.number()),
@@ -54,9 +59,7 @@ const Program = z.object({
     .transform((values) => values.map((v) => new Felt(BigInt(v)))),
   debug_info: z.any(), // TODO: DebugInfo
   hints: Hints,
-  identifiers: z
-    .record(z.string(), Identifier)
-    .transform((record) => new Map<string, Identifier>(Object.entries(record))),
+  identifiers: Identifiers,
   main_scope: z.string(),
   prime: z.string(),
   reference_manager: ReferenceManager,
@@ -66,6 +69,7 @@ export type ReferenceManager = z.infer<typeof ReferenceManager>;
 export type Reference = z.infer<typeof Reference>;
 export type ApTrackingData = z.infer<typeof ApTrackingData>;
 export type Identifier = z.infer<typeof Identifier>;
+export type Identifiers = z.infer<typeof Identifiers>;
 export type FlowTrackingData = z.infer<typeof FlowTrackingData>;
 export type Hint = z.infer<typeof Hint>;
 export type Hints = z.infer<typeof Hints>;
@@ -73,4 +77,46 @@ export type Program = z.infer<typeof Program>;
 
 export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
+}
+
+export function extractConstants(program: Program) {
+  const constants = new Map<string, Felt>();
+  Object.entries(program.identifiers).map(([name, identifier]) => {
+    switch (identifier.type) {
+      case 'const':
+        const value = identifier.value;
+        if (!value) throw new ExpectedFelt(value);
+        constants.set(name, value);
+        break;
+      case 'alias':
+        const originalConst = findConstFromAlias(
+          identifier.destination,
+          program.identifiers
+        );
+        if (originalConst) {
+          constants.set(name, originalConst);
+        }
+        break;
+      default:
+        break;
+    }
+  });
+  return constants;
+}
+
+function findConstFromAlias(
+  dest: string | undefined,
+  identifiers: Identifiers
+) {
+  if (!dest) throw new InvalidIdentifierDest(dest);
+  const identifier = identifiers[dest];
+  if (!identifier) throw new UnknownIdentifier(dest);
+  switch (identifier.type) {
+    case 'const':
+      return identifier.value;
+    case 'alias':
+      return findConstFromAlias(identifier.destination, identifiers);
+    default:
+      return undefined;
+  }
 }

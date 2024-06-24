@@ -42,3 +42,15 @@ export class ApTrackingDataGroupDifferHintRef extends IdsManagerError {
     );
   }
 }
+
+export class EmptyAccessibleScope extends IdsManagerError {
+  constructor() {
+    super('Cannot get a constant when the accessible scope is empty');
+  }
+}
+
+export class MissingConstant extends IdsManagerError {
+  constructor(name: string) {
+    super(`Constant ${name} is missing from the accessible scopes`);
+  }
+}

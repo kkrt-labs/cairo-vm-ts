@@ -31,7 +31,7 @@ export class CairoRunner {
 
   constructor(program: Program) {
     this.program = program;
-    const mainId = program.identifiers.get('__main__.main');
+    const mainId = program.identifiers['__main__.main'];
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
     this.vm = new VirtualMachine(program.hints);

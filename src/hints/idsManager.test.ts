@@ -157,4 +157,23 @@ describe('IdsManager', () => {
       expect(() => ids.get('val', vm)).toThrow(new UndefinedVariable('val'));
     });
   });
+
+  describe('getConst', () => {
+    test('should retrieve the const UPPER_BOUND', () => {
+      const ids = new IdsManager(
+        new Map<string, HintReference>(),
+        AP_TRACKING_DATA_DEFAULT,
+        [
+          'starkware.cairo.common.math',
+          'starkware.cairo.common.math.assert_250_bit',
+        ]
+      );
+      const upperBound = new Felt(250n);
+      const constants = new Map<string, Felt>([
+        ['starkware.cairo.common.math.assert_250_bit.UPPER_BOUND', upperBound],
+      ]);
+
+      expect(ids.getConst('UPPER_BOUND', constants)).toEqual(upperBound);
+    });
+  });
 });

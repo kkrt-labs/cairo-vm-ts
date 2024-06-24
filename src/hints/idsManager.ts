@@ -5,6 +5,8 @@ import {
   ApTrackingDataGroupDifferHintRef,
   InvalidRegister,
   UndefinedValue,
+  EmptyAccessibleScope,
+  MissingConstant,
 } from 'errors/idsManager';
 import { ExpectedRelocatable } from 'errors/primitives';
 
@@ -19,7 +21,8 @@ import { HintReference, ValueType, OffsetValue } from './hintReference';
 export class IdsManager {
   constructor(
     public references: Map<string, HintReference>,
-    public hintApTrackingData: ApTrackingData
+    public hintApTrackingData: ApTrackingData,
+    public accessibleScopes: string[] = []
   ) {
     this.references = references;
     this.hintApTrackingData = hintApTrackingData;
@@ -33,6 +36,19 @@ export class IdsManager {
       this.hintApTrackingData,
       vm
     );
+  }
+
+  getConst(name: string, constants: Map<string, Felt>) {
+    if (!this.accessibleScopes.length) throw new EmptyAccessibleScope();
+    for (let i = this.accessibleScopes.length - 1; i >= 0; i--) {
+      const constant = constants.get(
+        this.accessibleScopes[i].concat('.', name)
+      );
+      if (constant) {
+        return constant;
+      }
+    }
+    throw new MissingConstant(name);
   }
 
   static getValueFromReference(
