@@ -14,6 +14,7 @@ import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import { Memory } from 'memory/memory';
+import { HintProcessor } from 'hints/hint';
 import {
   ApUpdate,
   FpUpdate,
@@ -24,6 +25,7 @@ import {
   Register,
   ResLogic,
 } from './instruction';
+import { Hint, Hints } from './program';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -44,6 +46,8 @@ export type RelocatedMemory = {
 
 export class VirtualMachine {
   private currentStep: bigint;
+  private hints: Hints;
+  hintProcessor: HintProcessor;
   memory: Memory;
   pc: Relocatable;
   ap: Relocatable;
@@ -52,7 +56,7 @@ export class VirtualMachine {
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
 
-  constructor() {
+  constructor(hints: Hints = {}) {
     this.currentStep = 0n;
     this.memory = new Memory();
     this.trace = [];
@@ -62,6 +66,9 @@ export class VirtualMachine {
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
     this.fp = new Relocatable(1, 0);
+
+    this.hints = hints;
+    this.hintProcessor = new HintProcessor();
   }
 
   /**
@@ -70,6 +77,11 @@ export class VirtualMachine {
    * - Run the instruction
    */
   step(): void {
+    const hints = this.hints[this.pc.offset];
+    if (hints) {
+      hints.map((hint: Hint) => this.hintProcessor.execute(hint));
+    }
+
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new UndefinedInstruction(this.pc);

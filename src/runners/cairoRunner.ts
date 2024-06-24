@@ -34,7 +34,7 @@ export class CairoRunner {
     const mainId = program.identifiers.get('__main__.main');
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
-    this.vm = new VirtualMachine();
+    this.vm = new VirtualMachine(program.hints);
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
