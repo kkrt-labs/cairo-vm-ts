@@ -18,7 +18,7 @@ describe('Hints', () => {
           accessible_scopes: [],
           flow_tracking_data: {
             ap_tracking: AP_TRACKING_DATA_DEFAULT,
-            reference_ids: new Map<string, number>(),
+            reference_ids: {},
           },
           code: 'no-code',
         })

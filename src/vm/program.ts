@@ -34,9 +34,7 @@ const Identifier = z.object({
 
 const FlowTrackingData = z.object({
   ap_tracking: ApTrackingData,
-  reference_ids: z
-    .record(z.string(), z.number())
-    .transform((record) => new Map<string, number>(Object.entries(record))),
+  reference_ids: z.record(z.string(), z.number()),
 });
 
 const Hint = z.object({
