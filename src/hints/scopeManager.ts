@@ -46,7 +46,6 @@ export class ScopeManager {
 
   /** Delete the variable `name` from the latest scope */
   delete(name: string) {
-    const scope = this.data[this.data.length - 1];
-    delete scope[name];
+    delete this.data[this.data.length - 1][name];
   }
 }
