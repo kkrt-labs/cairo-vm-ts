@@ -1,10 +1,12 @@
 import { UnknownHint, UnreachableReference } from 'errors/hint';
 
-import { Hint, ProgramConstants, ReferenceManager } from 'vm/program';
+import { Hint, ReferenceManager } from 'vm/program';
+import { VirtualMachine } from 'vm/virtualMachine';
 import { HintReference } from './hintReference';
 import { IdsManager } from './idsManager';
 import { ScopeManager } from './scopeManager';
-import { VirtualMachine } from 'vm/virtualMachine';
+import * as hintCode from './hintCode';
+import { addECDSASignature } from './signature/ecdsa';
 
 export type HintData = {
   ids: IdsManager;
@@ -38,8 +40,11 @@ export class HintProcessor {
     };
   }
 
-  execute(hint: HintData, _constants: ProgramConstants, _vm: VirtualMachine) {
+  execute(hint: HintData, vm: VirtualMachine) {
     switch (hint.code) {
+      case hintCode.ADD_ECDSA_SIGNATURE:
+        addECDSASignature(hint.ids, vm);
+        break;
       default:
         throw new UnknownHint(hint.code);
     }

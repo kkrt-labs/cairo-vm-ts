@@ -83,9 +83,7 @@ export class VirtualMachine {
   step(hintProcessor: HintProcessor = new HintProcessor()): void {
     const hints = this.hints.get(this.pc.offset);
     if (hints) {
-      hints.map((hint: HintData) =>
-        hintProcessor.execute(hint, this.constants, this)
-      );
+      hints.map((hint: HintData) => hintProcessor.execute(hint, this));
     }
 
     const maybeEncodedInstruction = this.memory.get(this.pc);
