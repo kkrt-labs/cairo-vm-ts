@@ -1,9 +1,10 @@
 import { UnknownHint, UnreachableReference } from 'errors/hint';
 
-import { Hint, ReferenceManager } from 'vm/program';
+import { Hint, ProgramConstants, ReferenceManager } from 'vm/program';
 import { HintReference } from './hintReference';
 import { IdsManager } from './idsManager';
 import { ScopeManager } from './scopeManager';
+import { VirtualMachine } from 'vm/virtualMachine';
 
 export type HintData = {
   ids: IdsManager;
@@ -37,7 +38,7 @@ export class HintProcessor {
     };
   }
 
-  execute(hint: Hint) {
+  execute(hint: HintData, _constants: ProgramConstants, _vm: VirtualMachine) {
     switch (hint.code) {
       default:
         throw new UnknownHint(hint.code);

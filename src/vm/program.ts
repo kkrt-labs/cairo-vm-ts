@@ -74,13 +74,14 @@ export type FlowTrackingData = z.infer<typeof FlowTrackingData>;
 export type Hint = z.infer<typeof Hint>;
 export type Hints = z.infer<typeof Hints>;
 export type Program = z.infer<typeof Program>;
+export type ProgramConstants = Map<string, Felt>;
 
 export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
 }
 
-export function extractConstants(program: Program) {
-  const constants = new Map<string, Felt>();
+export function extractConstants(program: Program): ProgramConstants {
+  const constants: ProgramConstants = new Map<string, Felt>();
   Object.entries(program.identifiers).map(([name, identifier]) => {
     switch (identifier.type) {
       case 'const':
