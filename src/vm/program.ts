@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
-import { ExpectedFelt } from 'errors/primitives';
-import { InvalidIdentifierDest, UnknownIdentifier } from 'errors/program';
+import { InvalidIdentifierDest } from 'errors/program';
 
 import { Felt } from 'primitives/felt';
 
@@ -92,17 +91,18 @@ export function parseProgram(program: string): Program {
 export function extractConstants(program: Program): ProgramConstants {
   /** Recursively find the root const of an alias */
   function resolveIdentifier(
-    dest: string | undefined,
+    currIdentifier: Identifier,
     identifiers: Identifiers
   ) {
-    if (!dest) throw new InvalidIdentifierDest(dest);
-    const identifier = identifiers[dest];
-    if (!identifier) throw new UnknownIdentifier(dest);
-    switch (identifier.type) {
+    switch (currIdentifier.type) {
       case 'const':
-        return identifier.value;
+        return currIdentifier.value;
       case 'alias':
-        return resolveIdentifier(identifier.destination, identifiers);
+        const dest = currIdentifier.destination;
+        if (!dest) throw new InvalidIdentifierDest(dest);
+        const nextIdentifier = identifiers[dest];
+        if (!nextIdentifier) throw new InvalidIdentifierDest(dest);
+        return resolveIdentifier(nextIdentifier, identifiers);
       default:
         return undefined;
     }
@@ -110,23 +110,9 @@ export function extractConstants(program: Program): ProgramConstants {
 
   const constants: ProgramConstants = new ProgramConstants();
   Object.entries(program.identifiers).map(([name, identifier]) => {
-    switch (identifier.type) {
-      case 'const':
-        const value = identifier.value;
-        if (!value) throw new ExpectedFelt(value);
-        constants.set(name, value);
-        break;
-      case 'alias':
-        const originalConst = resolveIdentifier(
-          identifier.destination,
-          program.identifiers
-        );
-        if (originalConst) {
-          constants.set(name, originalConst);
-        }
-        break;
-      default:
-        break;
+    const value = resolveIdentifier(identifier, program.identifiers);
+    if (value) {
+      constants.set(name, value);
     }
   });
   return constants;
