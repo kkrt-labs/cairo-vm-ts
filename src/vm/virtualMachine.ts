@@ -14,7 +14,7 @@ import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import { Memory } from 'memory/memory';
-import { HintProcessor } from 'hints/hint';
+import { HintData, HintProcessor } from 'hints/hint';
 import {
   ApUpdate,
   FpUpdate,
@@ -25,7 +25,8 @@ import {
   Register,
   ResLogic,
 } from './instruction';
-import { Hint, Hints } from './program';
+import { ProgramConstants } from './program';
+import { CompiledHintData } from 'runners/cairoRunner';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -46,8 +47,8 @@ export type RelocatedMemory = {
 
 export class VirtualMachine {
   private currentStep: bigint;
-  private hints: Hints;
-  hintProcessor: HintProcessor;
+  constants: ProgramConstants;
+  hints: CompiledHintData;
   memory: Memory;
   pc: Relocatable;
   ap: Relocatable;
@@ -56,7 +57,10 @@ export class VirtualMachine {
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
 
-  constructor(hints: Hints = {}) {
+  constructor(
+    hints: CompiledHintData = new CompiledHintData(),
+    constants: ProgramConstants = new ProgramConstants()
+  ) {
     this.currentStep = 0n;
     this.memory = new Memory();
     this.trace = [];
@@ -68,7 +72,7 @@ export class VirtualMachine {
     this.fp = new Relocatable(1, 0);
 
     this.hints = hints;
-    this.hintProcessor = new HintProcessor();
+    this.constants = constants;
   }
 
   /**
@@ -76,10 +80,12 @@ export class VirtualMachine {
    * - Decode the instruction at PC
    * - Run the instruction
    */
-  step(): void {
-    const hints = this.hints[this.pc.offset];
+  step(hintProcessor: HintProcessor = new HintProcessor()): void {
+    const hints = this.hints.get(this.pc.offset);
     if (hints) {
-      hints.map((hint: Hint) => this.hintProcessor.execute(hint));
+      hints.map((hint: HintData) =>
+        hintProcessor.execute(hint, this.constants, this)
+      );
     }
 
     const maybeEncodedInstruction = this.memory.get(this.pc);

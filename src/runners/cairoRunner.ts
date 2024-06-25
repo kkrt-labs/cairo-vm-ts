@@ -3,9 +3,10 @@ import * as fs from 'fs';
 import { EmptyRelocatedMemory } from 'errors/cairoRunner';
 
 import { Relocatable } from 'primitives/relocatable';
-import { Program } from 'vm/program';
+import { Program, extractConstants } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
+import { HintData, HintProcessor } from 'hints/hint';
 
 /**
  * Configuration of the run
@@ -17,12 +18,19 @@ export type RunOptions = {
   offset: number;
 };
 
+export class CompiledHintData extends Map<number, HintData[]> {
+  constructor(value: Array<[number, HintData[]]> = []) {
+    super(value);
+  }
+}
+
 export class CairoRunner {
   program: Program;
   vm: VirtualMachine;
   programBase: Relocatable;
   executionBase: Relocatable;
   finalPc: Relocatable;
+  hintProcessor: HintProcessor;
 
   static readonly defaultRunOptions: RunOptions = {
     relocate: false,
@@ -34,7 +42,17 @@ export class CairoRunner {
     const mainId = program.identifiers['__main__.main'];
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
-    this.vm = new VirtualMachine(program.hints);
+    const constants = extractConstants(program);
+    this.hintProcessor = new HintProcessor();
+    const compiledHints = new CompiledHintData(
+      Object.entries(program.hints).map(([offset, hints]) => [
+        Number(offset),
+        hints.map((hint) =>
+          this.hintProcessor.compile(hint, program.reference_manager)
+        ),
+      ])
+    );
+    this.vm = new VirtualMachine(compiledHints, constants);
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
