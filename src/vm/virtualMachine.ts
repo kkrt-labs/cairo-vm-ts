@@ -47,12 +47,13 @@ export type RelocatedMemory = {
 
 export class VirtualMachine {
   private currentStep: bigint;
-  constants: ProgramConstants;
-  hints: CompiledHintData;
   memory: Memory;
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
+  constants: ProgramConstants;
+  hints: CompiledHintData;
+  hintProcessor: HintProcessor;
   trace: TraceEntry[];
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
@@ -73,6 +74,7 @@ export class VirtualMachine {
 
     this.hints = hints;
     this.constants = constants;
+    this.hintProcessor = new HintProcessor();
   }
 
   /**
@@ -80,10 +82,10 @@ export class VirtualMachine {
    * - Decode the instruction at PC
    * - Run the instruction
    */
-  step(hintProcessor: HintProcessor): void {
+  step(): void {
     const hints = this.hints.get(this.pc.offset);
     if (hints) {
-      hints.map((hint: HintData) => hintProcessor.execute(hint, this));
+      hints.map((hint: HintData) => this.hintProcessor.execute(hint, this));
     }
 
     const maybeEncodedInstruction = this.memory.get(this.pc);

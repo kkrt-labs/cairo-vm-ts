@@ -30,7 +30,6 @@ export class CairoRunner {
   programBase: Relocatable;
   executionBase: Relocatable;
   finalPc: Relocatable;
-  hintProcessor: HintProcessor;
 
   static readonly defaultRunOptions: RunOptions = {
     relocate: false,
@@ -43,7 +42,6 @@ export class CairoRunner {
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
     const constants = extractConstants(program);
-    this.hintProcessor = new HintProcessor();
     const compiledHints = new CompiledHintData(
       Object.entries(program.hints).map(([offset, hints]) => [
         Number(offset),
@@ -76,7 +74,7 @@ export class CairoRunner {
    */
   run(config: RunOptions = CairoRunner.defaultRunOptions): void {
     while (!this.vm.pc.eq(this.finalPc)) {
-      this.vm.step(this.hintProcessor);
+      this.vm.step();
     }
     const { relocate, offset } = config;
     if (relocate) this.vm.relocate(offset);

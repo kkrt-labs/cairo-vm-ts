@@ -7,6 +7,7 @@ import { HintData, HintProcessor } from './hint';
 import { HintReference, ValueType } from './hintReference';
 import { Register } from 'vm/instruction';
 import { IdsManager } from './idsManager';
+import { VirtualMachine } from 'vm/virtualMachine';
 
 const AP_TRACKING_DATA_DEFAULT: ApTrackingData = {
   group: 0,
@@ -16,7 +17,6 @@ const AP_TRACKING_DATA_DEFAULT: ApTrackingData = {
 describe('Hints', () => {
   describe('compile', () => {
     test('should correctly compile the given hint', () => {
-      const hintProcessor = new HintProcessor();
       const hint: Hint = {
         code: 'ids.a = ids.b',
         flow_tracking_data: {
@@ -79,12 +79,11 @@ describe('Hints', () => {
         code: 'ids.a = ids.b',
       };
 
-      const data = hintProcessor.compile(hint, refManager);
+      const data = HintProcessor.compile(hint, refManager);
       expect(data).toEqual(expectedData);
     });
 
     test('should throw when compiling a hint with a missing reference', () => {
-      const hintProcessor = new HintProcessor();
       const hint: Hint = {
         code: 'ids.a = ids.b',
         flow_tracking_data: {
@@ -98,7 +97,7 @@ describe('Hints', () => {
       };
       const refManager: ReferenceManager = { references: [] };
 
-      expect(() => hintProcessor.compile(hint, refManager)).toThrow(
+      expect(() => HintProcessor.compile(hint, refManager)).toThrow(
         new UnreachableReference(0, 0)
       );
     });
@@ -106,15 +105,18 @@ describe('Hints', () => {
 
   describe('execute', () => {
     test('should throw UnknownHint when executing a non-existing hint', () => {
+      const vm = new VirtualMachine();
       expect(() =>
-        new HintProcessor().execute({
-          accessible_scopes: [],
-          flow_tracking_data: {
-            ap_tracking: AP_TRACKING_DATA_DEFAULT,
-            reference_ids: {},
+        new HintProcessor().execute(
+          {
+            ids: new IdsManager(
+              new Map<string, HintReference>(),
+              AP_TRACKING_DATA_DEFAULT
+            ),
+            code: 'no-code',
           },
-          code: 'no-code',
-        })
+          vm
+        )
       ).toThrow(new UnknownHint('no-code'));
     });
   });
