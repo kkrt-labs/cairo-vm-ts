@@ -90,6 +90,24 @@ export function parseProgram(program: string): Program {
  * to return a map of constant name to their value
  */
 export function extractConstants(program: Program): ProgramConstants {
+  /** Recursively find the root const of an alias */
+  function resolveIdentifier(
+    dest: string | undefined,
+    identifiers: Identifiers
+  ) {
+    if (!dest) throw new InvalidIdentifierDest(dest);
+    const identifier = identifiers[dest];
+    if (!identifier) throw new UnknownIdentifier(dest);
+    switch (identifier.type) {
+      case 'const':
+        return identifier.value;
+      case 'alias':
+        return resolveIdentifier(identifier.destination, identifiers);
+      default:
+        return undefined;
+    }
+  }
+
   const constants: ProgramConstants = new ProgramConstants();
   Object.entries(program.identifiers).map(([name, identifier]) => {
     switch (identifier.type) {
@@ -99,7 +117,7 @@ export function extractConstants(program: Program): ProgramConstants {
         constants.set(name, value);
         break;
       case 'alias':
-        const originalConst = findConstFromAlias(
+        const originalConst = resolveIdentifier(
           identifier.destination,
           program.identifiers
         );
@@ -112,22 +130,4 @@ export function extractConstants(program: Program): ProgramConstants {
     }
   });
   return constants;
-}
-
-/** Recursively find the root const of an alias */
-function findConstFromAlias(
-  dest: string | undefined,
-  identifiers: Identifiers
-) {
-  if (!dest) throw new InvalidIdentifierDest(dest);
-  const identifier = identifiers[dest];
-  if (!identifier) throw new UnknownIdentifier(dest);
-  switch (identifier.type) {
-    case 'const':
-      return identifier.value;
-    case 'alias':
-      return findConstFromAlias(identifier.destination, identifiers);
-    default:
-      return undefined;
-  }
 }
