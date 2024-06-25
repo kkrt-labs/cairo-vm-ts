@@ -140,7 +140,6 @@ export class IdsManager {
       default:
         throw new InvalidRegister(offset, offset.register);
     }
-    if (!baseAddr) throw new Error('');
     if (offset.value === undefined) throw new UndefinedValue(offset);
     const address = baseAddr.add(offset.value);
     if (offset.dereferenced) {
