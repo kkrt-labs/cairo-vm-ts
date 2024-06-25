@@ -79,6 +79,7 @@ export class VirtualMachine {
 
   /**
    * Execute one step:
+   * - Execute the hints at PC
    * - Decode the instruction at PC
    * - Run the instruction
    */
