@@ -3,6 +3,7 @@ import { UnknownHint, UnreachableReference } from 'errors/hint';
 import { Hint, ReferenceManager } from 'vm/program';
 import { HintReference } from './hintReference';
 import { IdsManager } from './idsManager';
+import { ScopeManager } from './scopeManager';
 
 export type HintData = {
   ids: IdsManager;
@@ -10,6 +11,12 @@ export type HintData = {
 };
 
 export class HintProcessor {
+  public scopeManager: ScopeManager;
+
+  constructor() {
+    this.scopeManager = new ScopeManager();
+  }
+
   compile(hint: Hint, refManager: ReferenceManager): HintData {
     const references = new Map<string, HintReference>();
     Object.entries(hint.flow_tracking_data.reference_ids).map(
