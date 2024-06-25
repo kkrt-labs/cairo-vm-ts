@@ -80,10 +80,15 @@ export class ProgramConstants extends Map<string, Felt> {
   }
 }
 
+/** Parse the program compilation artifacts to a Program object */
 export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
 }
 
+/**
+ *  Parse the program identifiers
+ * to return a map of constant name to their value
+ */
 export function extractConstants(program: Program): ProgramConstants {
   const constants: ProgramConstants = new ProgramConstants();
   Object.entries(program.identifiers).map(([name, identifier]) => {
@@ -109,6 +114,7 @@ export function extractConstants(program: Program): ProgramConstants {
   return constants;
 }
 
+/** Recursively find the root const of an alias */
 function findConstFromAlias(
   dest: string | undefined,
   identifiers: Identifiers
