@@ -80,7 +80,7 @@ export class VirtualMachine {
    * - Decode the instruction at PC
    * - Run the instruction
    */
-  step(hintProcessor: HintProcessor = new HintProcessor()): void {
+  step(hintProcessor: HintProcessor): void {
     const hints = this.hints.get(this.pc.offset);
     if (hints) {
       hints.map((hint: HintData) => hintProcessor.execute(hint, this));

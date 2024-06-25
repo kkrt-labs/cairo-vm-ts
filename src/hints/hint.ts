@@ -20,7 +20,7 @@ export class HintProcessor {
     this.scopeManager = new ScopeManager();
   }
 
-  compile(hint: Hint, refManager: ReferenceManager): HintData {
+  static compile(hint: Hint, refManager: ReferenceManager): HintData {
     const references = new Map<string, HintReference>();
     Object.entries(hint.flow_tracking_data.reference_ids).map(
       ([name, index]) => {

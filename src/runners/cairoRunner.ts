@@ -48,7 +48,7 @@ export class CairoRunner {
       Object.entries(program.hints).map(([offset, hints]) => [
         Number(offset),
         hints.map((hint) =>
-          this.hintProcessor.compile(hint, program.reference_manager)
+          HintProcessor.compile(hint, program.reference_manager)
         ),
       ])
     );
@@ -76,7 +76,7 @@ export class CairoRunner {
    */
   run(config: RunOptions = CairoRunner.defaultRunOptions): void {
     while (!this.vm.pc.eq(this.finalPc)) {
-      this.vm.step();
+      this.vm.step(this.hintProcessor);
     }
     const { relocate, offset } = config;
     if (relocate) this.vm.relocate(offset);
