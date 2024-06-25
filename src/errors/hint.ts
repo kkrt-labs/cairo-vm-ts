@@ -5,10 +5,14 @@ export class UnknownHint extends HintError {
     super(`Unknown hint - ${code}`);
   }
 }
+
 export class UnreachableReference extends HintError {
-  constructor(index: number, refManagerLen: number) {
-    super(
-      `Cannot reach the reference ${index} as there is only ${refManagerLen} references`
-    );
+  constructor(index: number) {
+    super(`Cannot reach the reference ${index} in the reference manager`);
+  }
+}
+export class EmptyVariableName extends HintError {
+  constructor() {
+    super(`The variable name string is empty`);
   }
 }

@@ -1,4 +1,8 @@
-import { UnknownHint, UnreachableReference } from 'errors/hint';
+import {
+  EmptyVariableName,
+  UnknownHint,
+  UnreachableReference,
+} from 'errors/hint';
 
 import { Hint, ReferenceManager } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
@@ -27,18 +31,16 @@ export class HintProcessor {
    * @param refManager All the program references
    */
   static compile(hint: Hint, refManager: ReferenceManager): HintData {
-    const references = new Map<string, HintReference>();
-    Object.entries(hint.flow_tracking_data.reference_ids).map(
-      ([name, index]) => {
-        const refManagerLen = refManager.references.length;
-        if (index >= refManagerLen)
-          throw new UnreachableReference(index, refManagerLen);
-        const splitName = name.split('.');
-        references.set(
-          splitName[splitName.length - 1],
-          HintReference.parseReference(refManager.references[index])
-        );
-      }
+    const references = new Map<string, HintReference>(
+      Object.entries(hint.flow_tracking_data.reference_ids).map(
+        ([fullName, index]) => {
+          const reference = refManager.references[index];
+          if (!reference) throw new UnreachableReference(index);
+          const name = fullName.split('.').pop();
+          if (!name) throw new EmptyVariableName();
+          return [name, HintReference.parseReference(reference)];
+        }
+      )
     );
     return {
       ids: new IdsManager(references, hint.flow_tracking_data.ap_tracking),
