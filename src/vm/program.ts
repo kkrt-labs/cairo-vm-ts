@@ -58,3 +58,30 @@ export type Program = z.infer<typeof Program>;
 export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
 }
+
+const Cairo1HintRef = z.tuple([z.number(), z.array(z.any())]);
+
+const Cairo1Hints = z
+  .array(Cairo1HintRef)
+  .transform((hints) => new Map<number, any[]>(hints));
+
+export type Cairo1Hints = z.infer<typeof Cairo1Hints>;
+
+const Cairo1Program = z.object({
+  prime: z.string(),
+  compiler_version: z.string(),
+  bytecode: z
+    .array(z.string())
+    .transform((value) => value.map((v) => new Felt(BigInt(v)))),
+  hints: Cairo1Hints,
+  entrypoint: z.number(),
+  builtins: z.array(z.string()),
+});
+
+type Program2 = z.infer<typeof Cairo1Program>;
+
+export type Cairo1Program = Program2 & { builtins: string[] };
+
+export function parseCairo1Program(program: string): Cairo1Program {
+  return Cairo1Program.parse(JSON.parse(program));
+}

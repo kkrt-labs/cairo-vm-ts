@@ -3,9 +3,10 @@ import * as fs from 'fs';
 import { EmptyRelocatedMemory } from 'errors/cairoRunner';
 
 import { Relocatable } from 'primitives/relocatable';
-import { Program } from 'vm/program';
+import { Cairo1Program, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
+import { Felt } from 'primitives/felt';
 
 /**
  * Configuration of the run
@@ -18,7 +19,7 @@ export type RunOptions = {
 };
 
 export class CairoRunner {
-  program: Program;
+  program: Program | Cairo1Program;
   vm: VirtualMachine;
   programBase: Relocatable;
   executionBase: Relocatable;
@@ -29,16 +30,19 @@ export class CairoRunner {
     offset: 0,
   };
 
-  constructor(program: Program) {
+  constructor(
+    program: Program | Cairo1Program,
+    bytecode: Felt[],
+    mainOffset: number = 0,
+    builtins: string[] = []
+  ) {
     this.program = program;
-    const mainId = program.identifiers.get('__main__.main');
-    const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
-    const builtin_stack = program.builtins
+    const builtin_stack = builtins
       .map(getBuiltin)
       .map((builtin) => this.vm.memory.addSegment(builtin));
     const returnFp = this.vm.memory.addSegment();
@@ -49,8 +53,26 @@ export class CairoRunner {
     this.vm.ap = this.executionBase.add(stack.length);
     this.vm.fp = this.vm.ap;
 
-    this.vm.memory.setValues(this.programBase, this.program.data);
+    this.vm.memory.setValues(this.programBase, bytecode);
     this.vm.memory.setValues(this.executionBase, stack);
+  }
+
+  static fromProgram(program: Program): CairoRunner {
+    const mainId = program.identifiers.get('__main__.main');
+    const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
+
+    const builtins = program.builtins;
+
+    return new CairoRunner(program, program.data, mainOffset, builtins);
+  }
+
+  static fromCairo1Program(program: Cairo1Program): CairoRunner {
+    return new CairoRunner(
+      program,
+      program.bytecode,
+      program.entrypoint,
+      program.builtins
+    );
   }
 
   /**
