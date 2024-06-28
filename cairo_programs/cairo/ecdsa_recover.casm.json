@@ -4488,12 +4488,7 @@
     ]
   ],
   "pythonic_hints": [
-    [
-      26,
-      [
-        "memory[ap + 0] = segments.add()"
-      ]
-    ],
+    [26, ["memory[ap + 0] = segments.add()"]],
     [
       45,
       [
@@ -4568,18 +4563,8 @@
         "(memory[ap + 1], memory[ap + -9]) = divmod(memory[ap + -7] * memory[ap + -3], 2**128)"
       ]
     ],
-    [
-      332,
-      [
-        "memory[ap + 2] = memory[ap + -10] < 18446744073709551616"
-      ]
-    ],
-    [
-      346,
-      [
-        "memory[ap + 0] = memory[ap + -11] < 18446744073709551616"
-      ]
-    ],
+    [332, ["memory[ap + 2] = memory[ap + -10] < 18446744073709551616"]],
+    [346, ["memory[ap + 0] = memory[ap + -11] < 18446744073709551616"]],
     [
       359,
       [
@@ -4983,18 +4968,8 @@
         "(memory[ap + -1], memory[ap + -2]) = divmod(memory[ap + -17] * memory[fp + -4], 2**128)"
       ]
     ],
-    [
-      1480,
-      [
-        "memory[ap + 1] = memory[ap + -35] < memory[fp + -3]"
-      ]
-    ],
-    [
-      1492,
-      [
-        "memory[ap + 0] = memory[ap + -35] < memory[fp + -4]"
-      ]
-    ],
+    [1480, ["memory[ap + 1] = memory[ap + -35] < memory[fp + -3]"]],
+    [1492, ["memory[ap + 0] = memory[ap + -35] < memory[fp + -4]"]],
     [
       1507,
       [
@@ -5087,9 +5062,5 @@
     ]
   ],
   "entrypoint": 0,
-  "builtins": [
-    "range_check",
-    "ec_op",
-    "bitwise"
-  ]
+  "builtins": ["range_check", "ec_op", "bitwise"]
 }
