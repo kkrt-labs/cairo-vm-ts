@@ -1,0 +1,17 @@
+type felt252 = felt252 [storable: true, drop: true, dup: true, zero_sized: false];
+type Const<felt252, 10> = Const<felt252, 10> [storable: false, drop: false, dup: false, zero_sized: false];
+type Const<felt252, 12> = Const<felt252, 12> [storable: false, drop: false, dup: false, zero_sized: false];
+
+libfunc const_as_immediate<Const<felt252, 12>> = const_as_immediate<Const<felt252, 12>>;
+libfunc const_as_immediate<Const<felt252, 10>> = const_as_immediate<Const<felt252, 10>>;
+libfunc store_temp<felt252> = store_temp<felt252>;
+libfunc felt252_add = felt252_add;
+
+const_as_immediate<Const<felt252, 12>>() -> ([0]); // 0
+const_as_immediate<Const<felt252, 10>>() -> ([1]); // 1
+store_temp<felt252>([0]) -> ([0]); // 2
+felt252_add([0], [1]) -> ([2]); // 3
+store_temp<felt252>([2]) -> ([2]); // 4
+return([2]); // 5
+
+add::add::main@0() -> (felt252);

@@ -30,6 +30,7 @@ program
     })
   )
   .option('-s, --silent', 'silent all logs')
+  .option('--cairo-1', 'Run a Cairo program')
   .option('--no-relocate', 'do not relocate memory')
   .addOption(
     new Option(
