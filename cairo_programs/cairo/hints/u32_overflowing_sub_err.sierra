@@ -1,0 +1,33 @@
+type u32 = u32 [storable: true, drop: true, dup: true, zero_sized: false];
+type core::result::Result::<core::integer::u32, core::integer::u32> = Enum<ut@core::result::Result::<core::integer::u32, core::integer::u32>, u32, u32> [storable: true, drop: true, dup: true, zero_sized: false];
+type RangeCheck = RangeCheck [storable: true, drop: false, dup: false, zero_sized: false];
+type Const<u32, 12> = Const<u32, 12> [storable: false, drop: false, dup: false, zero_sized: false];
+type Const<u32, 10> = Const<u32, 10> [storable: false, drop: false, dup: false, zero_sized: false];
+
+libfunc const_as_immediate<Const<u32, 10>> = const_as_immediate<Const<u32, 10>>;
+libfunc const_as_immediate<Const<u32, 12>> = const_as_immediate<Const<u32, 12>>;
+libfunc store_temp<u32> = store_temp<u32>;
+libfunc u32_overflowing_sub = u32_overflowing_sub;
+libfunc branch_align = branch_align;
+libfunc enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 0> = enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 0>;
+libfunc store_temp<RangeCheck> = store_temp<RangeCheck>;
+libfunc store_temp<core::result::Result::<core::integer::u32, core::integer::u32>> = store_temp<core::result::Result::<core::integer::u32, core::integer::u32>>;
+libfunc enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 1> = enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 1>;
+
+const_as_immediate<Const<u32, 10>>() -> ([1]); // 0
+const_as_immediate<Const<u32, 12>>() -> ([2]); // 1
+store_temp<u32>([1]) -> ([1]); // 2
+store_temp<u32>([2]) -> ([2]); // 3
+u32_overflowing_sub([0], [1], [2]) { fallthrough([3], [4]) 10([5], [6]) }; // 4
+branch_align() -> (); // 5
+enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 0>([4]) -> ([7]); // 6
+store_temp<RangeCheck>([3]) -> ([3]); // 7
+store_temp<core::result::Result::<core::integer::u32, core::integer::u32>>([7]) -> ([7]); // 8
+return([3], [7]); // 9
+branch_align() -> (); // 10
+enum_init<core::result::Result::<core::integer::u32, core::integer::u32>, 1>([6]) -> ([8]); // 11
+store_temp<RangeCheck>([5]) -> ([5]); // 12
+store_temp<core::result::Result::<core::integer::u32, core::integer::u32>>([8]) -> ([8]); // 13
+return([5], [8]); // 14
+
+u32_overflowing_sub::u32_overflowing_sub::main@0([0]: RangeCheck) -> (RangeCheck, core::result::Result::<core::integer::u32, core::integer::u32>);
