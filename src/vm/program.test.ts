@@ -3,6 +3,8 @@ import * as fs from 'fs';
 
 import { Felt } from 'primitives/felt';
 import { parseCairo1Program, parseProgram } from './program';
+import { Hint, HintName, OpType } from 'hints/hintSchema';
+import { Register } from './instruction';
 
 describe('program', () => {
   describe('parseProgram', () => {
@@ -24,7 +26,7 @@ describe('program', () => {
   describe('parseCairo1Program', () => {
     test('should correctly parse the program', () => {
       const programContent = fs.readFileSync(
-        'cairo_programs/cairo/ecdsa_recover.casm.json',
+        'cairo_programs/cairo/hints/test_less_than.casm.json',
         'utf8'
       );
       const programJson = JSON.parse(programContent);
@@ -32,7 +34,27 @@ describe('program', () => {
         return new Felt(BigInt(element));
       });
 
-      const hints = new Map<number, any[]>(programJson.hints);
+      const hints = new Map<number, Hint[]>();
+      hints.set(5, [
+        {
+          type: HintName.TestLessThan,
+          lhs: {
+            type: OpType.Deref,
+            cell: {
+              register: Register.Ap,
+              offset: 0,
+            },
+          },
+          rhs: {
+            type: OpType.Immediate,
+            value: new Felt(BigInt('0x100000000')),
+          },
+          dst: {
+            register: Register.Ap,
+            offset: -1,
+          },
+        },
+      ]);
 
       const program = parseCairo1Program(programContent);
       expect(program.bytecode).toEqual(bytecode);

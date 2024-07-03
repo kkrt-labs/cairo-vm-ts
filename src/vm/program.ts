@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import { Felt } from 'primitives/felt';
+import { Hint, hintsGroup } from 'hints/hintSchema';
 
 const ApTrackingData = z.object({
   group: z.number(),
@@ -59,13 +60,11 @@ export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
 }
 
-const Cairo1HintRef = z.tuple([z.number(), z.array(z.any())]);
+export const hints = z
+  .array(hintsGroup)
+  .transform((hints) => new Map<number, Hint[]>(hints));
 
-const Cairo1Hints = z
-  .array(Cairo1HintRef)
-  .transform((hints) => new Map<number, any[]>(hints));
-
-export type Cairo1Hints = z.infer<typeof Cairo1Hints>;
+export type Hints = z.infer<typeof hints>;
 
 const Cairo1Program = z.object({
   prime: z.string(),
@@ -73,7 +72,7 @@ const Cairo1Program = z.object({
   bytecode: z
     .array(z.string())
     .transform((value) => value.map((v) => new Felt(BigInt(v)))),
-  hints: Cairo1Hints,
+  hints,
   entrypoint: z.number(),
   builtins: z.array(z.string()),
 });
