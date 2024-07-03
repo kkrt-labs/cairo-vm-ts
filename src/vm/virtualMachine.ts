@@ -24,6 +24,8 @@ import {
   Register,
   ResLogic,
 } from './instruction';
+import { Hint } from 'hints/hintSchema';
+import { HintProcessor } from 'hints/hintProcessor';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -66,10 +68,14 @@ export class VirtualMachine {
 
   /**
    * Execute one step:
+   * - Execute hints at PC
    * - Decode the instruction at PC
    * - Run the instruction
    */
-  step(): void {
+  step(hints?: Hint[]): void {
+    if (hints) {
+      hints.map((hint) => HintProcessor.execute(this, hint));
+    }
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new UndefinedInstruction(this.pc);

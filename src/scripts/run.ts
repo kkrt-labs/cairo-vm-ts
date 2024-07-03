@@ -11,6 +11,7 @@ export const run = (
   consola: ConsolaInstance,
   version: string
 ) => {
+  let runner: CairoRunner | undefined = undefined;
   try {
     const {
       silent,
@@ -42,7 +43,6 @@ export const run = (
 
     const file = fs.readFileSync(String(path), 'utf-8');
 
-    let runner: CairoRunner;
     if (cairo1) {
       const program = parseCairo1Program(file);
       runner = CairoRunner.fromCairo1Program(program);
@@ -92,6 +92,7 @@ export const run = (
     }
   } catch (err) {
     consola.fail(`Execution failed`);
+    if (runner) console.log(runner.vm.memory.toString());
     throw err;
   }
 };

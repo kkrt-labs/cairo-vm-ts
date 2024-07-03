@@ -1,12 +1,16 @@
 import * as fs from 'fs';
 
-import { EmptyRelocatedMemory } from 'errors/cairoRunner';
+import {
+  CairoZeroHintsNotSupported,
+  EmptyRelocatedMemory,
+} from 'errors/cairoRunner';
 
 import { Relocatable } from 'primitives/relocatable';
-import { Cairo1Program, Program } from 'vm/program';
+import { Cairo1Program, Hints, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 import { Felt } from 'primitives/felt';
+import { Hint } from 'hints/hintSchema';
 
 /**
  * Configuration of the run
@@ -20,6 +24,7 @@ export type RunOptions = {
 
 export class CairoRunner {
   program: Program | Cairo1Program;
+  hints: Hints;
   vm: VirtualMachine;
   programBase: Relocatable;
   executionBase: Relocatable;
@@ -34,10 +39,11 @@ export class CairoRunner {
     program: Program | Cairo1Program,
     bytecode: Felt[],
     mainOffset: number = 0,
-    builtins: string[] = []
+    builtins: string[] = [],
+    hints: Hints = new Map<number, Hint[]>()
   ) {
     this.program = program;
-
+    this.hints = hints;
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
@@ -63,6 +69,8 @@ export class CairoRunner {
 
     const builtins = program.builtins;
 
+    if (program.hints.length) throw new CairoZeroHintsNotSupported();
+
     return new CairoRunner(program, program.data, mainOffset, builtins);
   }
 
@@ -71,7 +79,8 @@ export class CairoRunner {
       program,
       program.bytecode,
       program.entrypoint,
-      program.builtins
+      program.builtins,
+      program.hints
     );
   }
 
@@ -80,7 +89,7 @@ export class CairoRunner {
    */
   run(config: RunOptions = CairoRunner.defaultRunOptions): void {
     while (!this.vm.pc.eq(this.finalPc)) {
-      this.vm.step();
+      this.vm.step(this.hints.get(this.vm.pc.offset));
     }
     const { relocate, offset } = config;
     if (relocate) this.vm.relocate(offset);
