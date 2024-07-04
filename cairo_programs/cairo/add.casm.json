@@ -11,5 +11,7 @@
   "hints": [],
   "pythonic_hints": [],
   "entrypoint": 0,
-  "builtins": []
+  "builtins": [],
+  "input_args_type": [],
+  "return_type": ["felt252"]
 }
