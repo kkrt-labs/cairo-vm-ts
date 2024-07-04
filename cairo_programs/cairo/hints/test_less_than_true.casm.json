@@ -48,7 +48,16 @@
       ]
     ]
   ],
-  "pythonic_hints": [[5, ["memory[ap + -1] = memory[ap + 0] < 4294967296"]]],
+  "pythonic_hints": [
+    [
+      5,
+      [
+        "memory[ap + -1] = memory[ap + 0] < 4294967296"
+      ]
+    ]
+  ],
   "entrypoint": 0,
-  "builtins": ["range_check"]
+  "builtins": [
+    "range_check"
+  ]
 }
