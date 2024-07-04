@@ -83,7 +83,7 @@ export enum HintName {
   TestLessThan,
 }
 
-const allocSegment = z
+export const allocSegment = z
   .object({ AllocSegment: z.object({ dst: cellRef }) })
   .transform(({ AllocSegment: { dst } }) => ({
     type: HintName.AllocSegment,

@@ -43,7 +43,7 @@ export class HintProcessor {
 
   static allocSegment(vm: VirtualMachine, dst: CellRef) {
     const segmentId = vm.memory.addSegment();
-    vm.memory.assertEq(segmentId, HintProcessor.cellRefToRelocatable(vm, dst));
+    vm.memory.assertEq(HintProcessor.cellRefToRelocatable(vm, dst), segmentId);
   }
 
   static testLessThan(
