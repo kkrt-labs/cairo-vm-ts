@@ -54,7 +54,7 @@ export class HintProcessor {
   ) {
     const lhsValue = HintProcessor.getResOperandValue(vm, lhs);
     const rhsValue = HintProcessor.getResOperandValue(vm, rhs);
-    const result = new Felt(lhsValue < rhsValue ? 1n : 0n);
+    const result = new Felt(BigInt(lhsValue < rhsValue));
     vm.memory.assertEq(HintProcessor.cellRefToRelocatable(vm, dst), result);
   }
 

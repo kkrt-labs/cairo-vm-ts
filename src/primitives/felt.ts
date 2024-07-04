@@ -74,6 +74,10 @@ export class Felt {
     return new Felt(CURVE.Fp.sqrt(this.inner));
   }
 
+  valueOf() {
+    return this.inner;
+  }
+
   toString(radix?: number): string {
     return this.inner.toString(radix);
   }
@@ -116,3 +120,8 @@ export class Felt {
     return new Felt(res);
   }
 }
+
+console.log(new Felt(-2n) < new Felt(10n));
+console.log(new Felt(2n) < new Felt(10n));
+console.log(new Felt(-2n).toString().length);
+console.log(new Felt(10n).toString());
