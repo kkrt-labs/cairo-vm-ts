@@ -48,7 +48,10 @@ describe('hints', () => {
       });
     });
 
-    test('should properly execute TestLessThan hint', () => {
+    test.each([
+      [new Felt(-2n), new Felt(0n)],
+      [new Felt(2n), new Felt(1n)],
+    ])('should properly execute TestLessThan hint', (lhs, expected) => {
       const hintObj = {
         TestLessThan: {
           lhs: {
@@ -72,12 +75,12 @@ describe('hints', () => {
       vm.memory.addSegment();
       vm.memory.addSegment();
       vm.ap = vm.ap.add(1);
-      vm.memory.assertEq(vm.ap, new Felt(10n));
+      vm.memory.assertEq(vm.ap, lhs);
 
       HintProcessor.execute(vm, hint);
       expect(
         vm.memory.get(HintProcessor.cellRefToRelocatable(vm, hint.dst))
-      ).toEqual(new Felt(1n));
+      ).toEqual(expected);
     });
   });
 });
