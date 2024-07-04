@@ -5062,5 +5062,7 @@
     ]
   ],
   "entrypoint": 0,
-  "builtins": ["range_check", "ec_op", "bitwise"]
+  "builtins": ["range_check", "ec_op", "bitwise"],
+  "input_args_type": [],
+  "return_type": ["core::panics::PanicResult::<(core::felt252)>"]
 }
