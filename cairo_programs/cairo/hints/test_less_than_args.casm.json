@@ -1,0 +1,106 @@
+{
+  "prime": "0x800000000000011000000000000000000000000000000000000000000000001",
+  "compiler_version": "2.6.4",
+  "bytecode": [
+    "0x48297ffc80017ffb",
+    "0xa0680017fff7fff",
+    "0x7",
+    "0x482480017fff8000",
+    "0x100000000000000000000000000000000",
+    "0x400280007ffa7fff",
+    "0x10780017fff7fff",
+    "0xb",
+    "0x400280007ffa7fff",
+    "0x40780017fff7fff",
+    "0x1",
+    "0x482680017ffa8000",
+    "0x1",
+    "0x480680017fff8000",
+    "0x0",
+    "0x10780017fff7fff",
+    "0x6",
+    "0x482680017ffa8000",
+    "0x1",
+    "0x480680017fff8000",
+    "0x1",
+    "0x48297ffd80017ffc",
+    "0xa0680017fff7fff",
+    "0x7",
+    "0x482480017fff8000",
+    "0x100000000000000000000000000000000",
+    "0x400080007ffb7fff",
+    "0x10780017fff7fff",
+    "0xb",
+    "0x400080007ffc7fff",
+    "0x40780017fff7fff",
+    "0x1",
+    "0x482480017ffb8000",
+    "0x1",
+    "0x480680017fff8000",
+    "0x0",
+    "0x10780017fff7fff",
+    "0x6",
+    "0x482480017ffb8000",
+    "0x1",
+    "0x480680017fff8000",
+    "0x1",
+    "0x48127ffe7fff8000",
+    "0x48127ff97fff8000",
+    "0x48127ffd7fff8000",
+    "0x208b7fff7fff7ffe"
+  ],
+  "hints": [
+    [
+      1,
+      [
+        {
+          "TestLessThan": {
+            "lhs": {
+              "Deref": {
+                "register": "AP",
+                "offset": 0
+              }
+            },
+            "rhs": {
+              "Immediate": "0x100000000"
+            },
+            "dst": {
+              "register": "AP",
+              "offset": -1
+            }
+          }
+        }
+      ]
+    ],
+    [
+      22,
+      [
+        {
+          "TestLessThan": {
+            "lhs": {
+              "Deref": {
+                "register": "AP",
+                "offset": 0
+              }
+            },
+            "rhs": {
+              "Immediate": "0x100000000"
+            },
+            "dst": {
+              "register": "AP",
+              "offset": -1
+            }
+          }
+        }
+      ]
+    ]
+  ],
+  "pythonic_hints": [
+    [1, ["memory[ap + -1] = memory[ap + 0] < 4294967296"]],
+    [22, ["memory[ap + -1] = memory[ap + 0] < 4294967296"]]
+  ],
+  "entrypoint": 0,
+  "builtins": ["range_check"],
+  "input_args_type": ["u32", "u32", "u32"],
+  "return_type": ["Tuple<core::bool, core::bool>"]
+}
