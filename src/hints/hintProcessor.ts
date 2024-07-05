@@ -21,6 +21,7 @@ import {
 } from './hintSchema';
 
 export class HintProcessor {
+  /** Maps a hint to its implementation */
   private static handlers: Record<
     HintName,
     (vm: VirtualMachine, hint: Hint) => void
@@ -35,17 +36,36 @@ export class HintProcessor {
     },
   };
 
+  /** Execute the `hint` if defined in the `handlers` map */
+
+  /**
+   * Execute the given `hint` in the context of the `vm`
+   * @param vm Virtual machine providing the execution context of the hint
+   * @param hint The hint to be executed
+   */
   static execute(vm: VirtualMachine, hint: Hint) {
     const handler = HintProcessor.handlers[hint.type];
     if (!handler) throw new UnknownHint(hint);
     handler(vm, hint);
   }
 
+  /**
+   * AllocSegment hint
+   *
+   * Add a new segment and store its pointer at `dst`
+   */
   static allocSegment(vm: VirtualMachine, dst: CellRef) {
     const segmentId = vm.memory.addSegment();
     vm.memory.assertEq(HintProcessor.cellRefToRelocatable(vm, dst), segmentId);
   }
 
+  /**
+   * TestLessThan hint
+   *
+   * Check whether the value at `lhs` is strictly less than the value at `rhs`
+   *
+   * Store the boolean result (0 or 1) at `dst`
+   */
   static testLessThan(
     vm: VirtualMachine,
     lhs: ResOp,
@@ -58,6 +78,9 @@ export class HintProcessor {
     vm.memory.assertEq(HintProcessor.cellRefToRelocatable(vm, dst), result);
   }
 
+  /**
+   * Return the memory address defined by `cell`
+   */
   static cellRefToRelocatable(vm: VirtualMachine, cell: CellRef) {
     let register: Relocatable;
     switch (cell.register) {
@@ -82,18 +105,38 @@ export class HintProcessor {
     return address;
   }
 
+  /**
+   * Return the memory value at the address defined by `cell`
+   *
+   * Expect a Felt, throw otherwise
+   */
   static getFelt(vm: VirtualMachine, cell: CellRef): Felt {
     const value = vm.memory.get(HintProcessor.cellRefToRelocatable(vm, cell));
     if (!value || !isFelt(value)) throw new ExpectedFelt(value);
     return value;
   }
 
+  /**
+   * Return the memory value at the address defined by `cell`
+   *
+   * Expect a Relocatable, throw otherwise
+   */
   static getRelocatable(vm: VirtualMachine, cell: CellRef): Relocatable {
     const value = vm.memory.get(HintProcessor.cellRefToRelocatable(vm, cell));
     if (!value || !isRelocatable(value)) throw new ExpectedRelocatable(value);
     return value;
   }
 
+  /**
+   * Return the value defined by `resOp`
+   *
+   * Generic patterns:
+   * - Deref: `[register + offset]`
+   * - DoubleDeref: `[[register + offset1] + offset2]`
+   * - Immediate: `0x1000`
+   * - BinOp (Add): `[register1 + offset1] + [register2 + offset2]`
+   * - BinOp (Mul): `[register1 + offset1] * [register2 + offset2]`
+   */
   static getResOperandValue(vm: VirtualMachine, resOp: ResOp): Felt {
     switch (resOp.type) {
       case OpType.Deref:
