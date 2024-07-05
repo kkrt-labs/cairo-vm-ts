@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { Felt } from 'primitives/felt';
-import { Hint, hintsGroup } from 'hints/hintSchema';
+import { hints } from 'hints/hintSchema';
 
 const ApTrackingData = z.object({
   group: z.number(),
@@ -59,12 +59,6 @@ export type Program = z.infer<typeof Program>;
 export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
 }
-
-export const hints = z
-  .array(hintsGroup)
-  .transform((hints) => new Map<number, Hint[]>(hints));
-
-export type Hints = z.infer<typeof hints>;
 
 const Cairo1Program = z.object({
   prime: z.string(),

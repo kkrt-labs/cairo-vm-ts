@@ -4,7 +4,7 @@ import { Register } from 'vm/instruction';
 import { Felt } from 'primitives/felt';
 
 /**
- * Types that can take a ResOp
+ * Types to distinguish ResOp pattern
  *
  * Generic patterns:
  * - Deref: `[register + offset]`
@@ -131,11 +131,13 @@ export type BinOp = z.infer<typeof binOp>;
 /** A ResOp is either a Deref, DoubleDeref, Immediate or BinOp */
 export type ResOp = z.infer<typeof resOp>;
 
+/** Name to identify which hint is executed  */
 export enum HintName {
-  AllocSegment,
-  TestLessThan,
+  AllocSegment = 'AllocSegment',
+  TestLessThan = 'TestLessThan',
 }
 
+/** Zod object to parse AllocSegment hint */
 export const allocSegment = z
   .object({ AllocSegment: z.object({ dst: cellRef }) })
   .transform(({ AllocSegment: { dst } }) => ({
@@ -143,6 +145,7 @@ export const allocSegment = z
     dst,
   }));
 
+/** Zod object to parse TestLessThan hint */
 export const testLessThan = z
   .object({
     TestLessThan: z.object({ lhs: resOp, rhs: resOp, dst: cellRef }),
@@ -154,12 +157,45 @@ export const testLessThan = z
     dst,
   }));
 
+/**
+ * AllocSegment hint
+ *
+ * Add a new segment and store its pointer to `dst`
+ */
 export type AllocSegment = z.infer<typeof allocSegment>;
+
+/**
+ * TestLessThan hint
+ *
+ * Store true at `dst` if value at `lhs` is stricty inferior to value at `rhs`.
+ * Store false otherwise
+ */
 export type TestLessThan = z.infer<typeof testLessThan>;
 
+/** Zod object to parse any implemented hints */
 const hint = z.union([allocSegment, testLessThan]);
 
+/** Zod object to parse an array of hints grouped on a given PC */
 export const hintsGroup = z.tuple([z.number(), z.array(hint)]);
 
+/** Zod object to parse an array of grouped hints */
+export const hints = z
+  .array(hintsGroup)
+  .transform((hints) => new Map<number, Hint[]>(hints));
+
+/** Union of all the implemented hints */
 export type Hint = z.infer<typeof hint>;
+
+/**
+ * Tuple representing hints grouped at a PC offset
+ *
+ * - Format: `[PC.offset, Hint[]]`
+ * - Example: `[5, [AllocSegment, TestLessThan]]`
+ */
 export type HintsGroup = z.infer<typeof hintsGroup>;
+
+/** Array of HintsGroup
+ *
+ * Example: `[[2, TestLessThan], [5, AllocSegment, TestLessTha]]`
+ */
+export type Hints = z.infer<typeof hints>;
