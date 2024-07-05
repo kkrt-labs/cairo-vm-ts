@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import * as fs from 'fs';
 
 import { Felt } from 'primitives/felt';
-import { parseCairo1Program, parseProgram } from './program';
+import { parseCairoProgram, parseProgram } from './program';
 import { Hint, HintName, OpType } from 'hints/hintSchema';
 import { Register } from './instruction';
 
@@ -56,7 +56,7 @@ describe('program', () => {
         },
       ]);
 
-      const program = parseCairo1Program(programContent);
+      const program = parseCairoProgram(programContent);
       expect(program.bytecode).toEqual(bytecode);
       expect(program.hints).toEqual(hints);
       expect(program.entrypoint).toEqual(programJson.entrypoint);
