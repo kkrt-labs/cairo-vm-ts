@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 
 import { ConsolaInstance, LogLevels } from 'consola';
-import { CairoRunner, RunOptions } from 'runners/cairoRunner';
-import { parseCairoProgram, parseProgram } from 'vm/program';
+
 import { TraceEntry } from 'vm/virtualMachine';
+import { parseCairoProgram, parseProgram } from 'vm/program';
+import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 
 export const run = (
   path: string,

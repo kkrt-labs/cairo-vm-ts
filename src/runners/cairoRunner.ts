@@ -5,11 +5,11 @@ import {
   EmptyRelocatedMemory,
 } from 'errors/cairoRunner';
 
+import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { CairoProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
-import { Felt } from 'primitives/felt';
 import { Hint, Hints } from 'hints/hintSchema';
 
 /**

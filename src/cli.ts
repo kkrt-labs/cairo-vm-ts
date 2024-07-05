@@ -1,9 +1,9 @@
 #! /usr/bin/env bun
 
 import { Command, Option } from '@commander-js/extra-typings';
-
 import { consola } from 'consola';
 import { Argument } from 'commander';
+
 import { run } from 'scripts/run';
 
 consola.options = {

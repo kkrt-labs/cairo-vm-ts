@@ -1,6 +1,7 @@
 import { test, expect, describe, spyOn } from 'bun:test';
 
 import { SegmentOutOfBounds, InconsistentMemory } from 'errors/memory';
+
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { Memory } from './memory';

@@ -5,11 +5,12 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+import { RangeCheckOutOfBounds } from 'errors/builtins';
+
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from './cairoRunner';
-import { RangeCheckOutOfBounds } from 'errors/builtins';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 

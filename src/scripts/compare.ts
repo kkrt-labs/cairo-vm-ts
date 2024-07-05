@@ -1,6 +1,7 @@
 #! /usr/bin/env bun
 
 import { ConsolaInstance, LogLevels } from 'consola';
+
 import { Felt } from 'primitives/felt';
 import { RelocatedTraceEntry } from 'vm/virtualMachine';
 
