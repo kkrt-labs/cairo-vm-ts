@@ -3,24 +3,24 @@ import { z } from 'zod';
 import { Felt } from 'primitives/felt';
 import { hints } from 'hints/hintSchema';
 
-const ApTrackingData = z.object({
+const apTrackingData = z.object({
   group: z.number(),
   offset: z.number(),
 });
 
-const Reference = z.object({
-  ap_tracking_data: ApTrackingData,
+const reference = z.object({
+  ap_tracking_data: apTrackingData,
   pc: z.number(),
   value: z.string(),
 });
 
-const ReferenceManager = z.object({
-  references: z.array(Reference),
+const referenceManager = z.object({
+  references: z.array(reference),
 });
 
-type ReferenceManager = z.infer<typeof ReferenceManager>;
+export type ReferenceManager = z.infer<typeof referenceManager>;
 
-const Identifier = z.object({
+const identifier = z.object({
   full_name: z.string().optional(),
   members: z.record(z.string(), z.any()).optional(),
   size: z.number().optional(),
@@ -35,9 +35,9 @@ const Identifier = z.object({
   destination: z.string().optional(),
 });
 
-export type Identifier = z.infer<typeof Identifier>;
+export type Identifier = z.infer<typeof identifier>;
 
-const Program = z.object({
+const program = z.object({
   attributes: z.any(),
   builtins: z.array(z.string()),
   compiler_version: z.string(),
@@ -47,20 +47,20 @@ const Program = z.object({
   debug_info: z.any(), // TODO: DebugInfo
   hints: z.record(z.string(), z.any()), // TODO: HintParams
   identifiers: z
-    .record(z.string(), Identifier)
+    .record(z.string(), identifier)
     .transform((value) => new Map<string, Identifier>(Object.entries(value))),
   main_scope: z.string(),
   prime: z.string(),
-  reference_manager: ReferenceManager,
+  reference_manager: referenceManager,
 });
 
-export type Program = z.infer<typeof Program>;
+export type Program = z.infer<typeof program>;
 
-export function parseProgram(program: string): Program {
-  return Program.parse(JSON.parse(program));
+export function parseProgram(prgm: string): Program {
+  return program.parse(JSON.parse(prgm));
 }
 
-const CairoProgram = z.object({
+const cairoProgram = z.object({
   prime: z.string(),
   compiler_version: z.string(),
   bytecode: z
@@ -71,10 +71,10 @@ const CairoProgram = z.object({
   builtins: z.array(z.string()),
 });
 
-type Program2 = z.infer<typeof CairoProgram>;
+type Program2 = z.infer<typeof cairoProgram>;
 
 export type CairoProgram = Program2;
 
 export function parseCairoProgram(program: string): CairoProgram {
-  return CairoProgram.parse(JSON.parse(program));
+  return cairoProgram.parse(JSON.parse(program));
 }
