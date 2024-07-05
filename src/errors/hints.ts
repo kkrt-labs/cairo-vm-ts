@@ -1,4 +1,5 @@
-import { CellRef, Hint } from 'hints/hintSchema';
+import { CellRef } from 'hints/hintBaseSchema';
+import { Hint } from 'hints/hintSchema';
 
 class HintError extends Error {}
 

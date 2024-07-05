@@ -1,10 +1,14 @@
 import { describe, expect, test } from 'bun:test';
+
 import * as fs from 'fs';
 
 import { Felt } from 'primitives/felt';
-import { parseCairoProgram, parseProgram } from './program';
-import { Hint, HintName, OpType } from 'hints/hintSchema';
+
+import { OpType } from 'hints/hintBaseSchema';
+import { Hint } from 'hints/hintSchema';
+import { HintName } from 'hints/hintName';
 import { Register } from './instruction';
+import { parseCairoProgram, parseProgram } from './program';
 
 describe('program', () => {
   describe('parseProgram', () => {
@@ -26,7 +30,7 @@ describe('program', () => {
   describe('parseCairo1Program', () => {
     test('should correctly parse the program', () => {
       const programContent = fs.readFileSync(
-        'cairo_programs/cairo/hints/test_less_than.casm.json',
+        'cairo_programs/cairo/hints/test_less_than_true.casm.json',
         'utf8'
       );
       const programJson = JSON.parse(programContent);

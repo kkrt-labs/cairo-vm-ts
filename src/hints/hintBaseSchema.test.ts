@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 
+import { Felt } from 'primitives/felt';
+import { Register } from 'vm/instruction';
 import {
   CellRef,
   OpType,
@@ -7,9 +9,7 @@ import {
   ResOp,
   cellRef,
   resOp,
-} from './hintSchema';
-import { Felt } from 'primitives/felt';
-import { Register } from 'vm/instruction';
+} from './hintBaseSchema';
 
 describe('hintSchema', () => {
   describe('hintParam', () => {
