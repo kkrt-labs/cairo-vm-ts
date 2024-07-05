@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { ConsolaInstance, LogLevels } from 'consola';
 
 import { TraceEntry } from 'vm/virtualMachine';
-import { parseCairoProgram, parseProgram } from 'vm/program';
+import { parseCairoProgram, parseCairoZeroProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 
 export const run = (
@@ -48,7 +48,7 @@ export const run = (
       const program = parseCairoProgram(file);
       runner = CairoRunner.fromCairoProgram(program);
     } else {
-      const program = parseProgram(file);
+      const program = parseCairoZeroProgram(file);
       runner = CairoRunner.fromCairoZeroProgram(program);
     }
     const config: RunOptions = { relocate: relocate, offset: offset };

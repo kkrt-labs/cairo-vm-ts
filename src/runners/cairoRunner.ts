@@ -7,7 +7,7 @@ import {
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
-import { CairoProgram, Program } from 'vm/program';
+import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 import { Hint, Hints } from 'hints/hintSchema';
@@ -23,7 +23,7 @@ export type RunOptions = {
 };
 
 export class CairoRunner {
-  program: Program | CairoProgram;
+  program: Program;
   hints: Hints;
   vm: VirtualMachine;
   programBase: Relocatable;
@@ -36,7 +36,7 @@ export class CairoRunner {
   };
 
   constructor(
-    program: Program | CairoProgram,
+    program: Program,
     bytecode: Felt[],
     mainOffset: number = 0,
     builtins: string[] = [],
@@ -63,7 +63,7 @@ export class CairoRunner {
     this.vm.memory.setValues(this.executionBase, stack);
   }
 
-  static fromCairoZeroProgram(program: Program): CairoRunner {
+  static fromCairoZeroProgram(program: CairoZeroProgram): CairoRunner {
     const mainId = program.identifiers.get('__main__.main');
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 

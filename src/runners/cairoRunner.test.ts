@@ -9,7 +9,7 @@ import { RangeCheckOutOfBounds } from 'errors/builtins';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
-import { parseProgram } from 'vm/program';
+import { parseCairoZeroProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from './cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
@@ -77,20 +77,26 @@ const BAD_RANGE_CHECK96_PROGRAM_STRING = fs.readFileSync(
   'utf8'
 );
 
-const FIBONACCI_PROGRAM = parseProgram(FIBONACCI_PROGRAM_STRING);
-const BITWISE_PROGRAM = parseProgram(BITWISE_PROGRAM_STRING);
-const EC_OP_PROGRAM = parseProgram(EC_OP_PROGRAM_STRING);
-const PEDERSEN_PROGRAM = parseProgram(PEDERSEN_PROGRAM_STRING);
-const POSEIDON_PROGRAM = parseProgram(POSEIDON_PROGRAM_STRING);
-const KECCAK_SEED_PROGRAM = parseProgram(KECCAK_SEED_PROGRAM_STRING);
-const KECCAK_PROGRAM = parseProgram(KECCAK_PROGRAM_STRING);
-const JMP_PROGRAM = parseProgram(JMP_PROGRAM_STRING);
-const BITWISE_OUTPUT_PROGRAM = parseProgram(BITWISE_OUTPUT_PROGRAM_STRING);
-const RANGE_CHECK_PROGRAM = parseProgram(RANGE_CHECK_PROGRAM_STRING);
-const RANGE_CHECK96_PROGRAM = parseProgram(RANGE_CHECK96_PROGRAM_STRING);
+const FIBONACCI_PROGRAM = parseCairoZeroProgram(FIBONACCI_PROGRAM_STRING);
+const BITWISE_PROGRAM = parseCairoZeroProgram(BITWISE_PROGRAM_STRING);
+const EC_OP_PROGRAM = parseCairoZeroProgram(EC_OP_PROGRAM_STRING);
+const PEDERSEN_PROGRAM = parseCairoZeroProgram(PEDERSEN_PROGRAM_STRING);
+const POSEIDON_PROGRAM = parseCairoZeroProgram(POSEIDON_PROGRAM_STRING);
+const KECCAK_SEED_PROGRAM = parseCairoZeroProgram(KECCAK_SEED_PROGRAM_STRING);
+const KECCAK_PROGRAM = parseCairoZeroProgram(KECCAK_PROGRAM_STRING);
+const JMP_PROGRAM = parseCairoZeroProgram(JMP_PROGRAM_STRING);
+const BITWISE_OUTPUT_PROGRAM = parseCairoZeroProgram(
+  BITWISE_OUTPUT_PROGRAM_STRING
+);
+const RANGE_CHECK_PROGRAM = parseCairoZeroProgram(RANGE_CHECK_PROGRAM_STRING);
+const RANGE_CHECK96_PROGRAM = parseCairoZeroProgram(
+  RANGE_CHECK96_PROGRAM_STRING
+);
 
-const BAD_RANGE_CHECK_PROGRAM = parseProgram(BAD_RANGE_CHECK_PROGRAM_STRING);
-const BAD_RANGE_CHECK96_PROGRAM = parseProgram(
+const BAD_RANGE_CHECK_PROGRAM = parseCairoZeroProgram(
+  BAD_RANGE_CHECK_PROGRAM_STRING
+);
+const BAD_RANGE_CHECK96_PROGRAM = parseCairoZeroProgram(
   BAD_RANGE_CHECK96_PROGRAM_STRING
 );
 
@@ -387,7 +393,9 @@ describe('cairoRunner', () => {
       const pyMemoryPath = path.join(tmpDir, 'memory_python.bin');
       await $`poetry run cairo-run --layout=starknet --program=${programPath} --memory_file ${pyMemoryPath}`;
 
-      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const program = parseCairoZeroProgram(
+        fs.readFileSync(programPath, 'utf8')
+      );
       const runner = CairoRunner.fromCairoZeroProgram(program);
       const config: RunOptions = { relocate: true, offset: 1 };
       runner.run(config);
@@ -405,7 +413,9 @@ describe('cairoRunner', () => {
       const pyTracePath = path.join(tmpDir, 'trace_python.bin');
       await $`poetry run cairo-run --layout=starknet --program=${programPath} --trace_file ${pyTracePath}`;
 
-      const program = parseProgram(fs.readFileSync(programPath, 'utf8'));
+      const program = parseCairoZeroProgram(
+        fs.readFileSync(programPath, 'utf8')
+      );
       const runner = CairoRunner.fromCairoZeroProgram(program);
       const config: RunOptions = { relocate: true, offset: 1 };
       runner.run(config);

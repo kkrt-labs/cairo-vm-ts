@@ -37,43 +37,42 @@ const identifier = z.object({
 
 export type Identifier = z.infer<typeof identifier>;
 
-const program = z.object({
-  attributes: z.any(),
-  builtins: z.array(z.string()),
+const programBase = z.object({
+  prime: z.string(),
   compiler_version: z.string(),
+  builtins: z.array(z.string()),
+});
+
+const cairoZeroProgram = programBase.extend({
   data: z
     .array(z.string())
     .transform((value) => value.map((v) => new Felt(BigInt(v)))),
-  debug_info: z.any(), // TODO: DebugInfo
   hints: z.record(z.string(), z.any()), // TODO: HintParams
+  debug_info: z.any(), // TODO: DebugInfo
+  builtins: z.array(z.string()),
+  attributes: z.any(),
   identifiers: z
     .record(z.string(), identifier)
     .transform((value) => new Map<string, Identifier>(Object.entries(value))),
   main_scope: z.string(),
-  prime: z.string(),
   reference_manager: referenceManager,
 });
 
-export type Program = z.infer<typeof program>;
-
-export function parseProgram(prgm: string): Program {
-  return program.parse(JSON.parse(prgm));
-}
-
-const cairoProgram = z.object({
-  prime: z.string(),
-  compiler_version: z.string(),
+const cairoProgram = programBase.extend({
   bytecode: z
     .array(z.string())
     .transform((value) => value.map((v) => new Felt(BigInt(v)))),
   hints,
   entrypoint: z.number(),
-  builtins: z.array(z.string()),
 });
 
-type Program2 = z.infer<typeof cairoProgram>;
+export type CairoZeroProgram = z.infer<typeof cairoZeroProgram>;
+export type CairoProgram = z.infer<typeof cairoProgram>;
+export type Program = CairoZeroProgram | CairoProgram;
 
-export type CairoProgram = Program2;
+export function parseCairoZeroProgram(prgm: string): CairoZeroProgram {
+  return cairoZeroProgram.parse(JSON.parse(prgm));
+}
 
 export function parseCairoProgram(program: string): CairoProgram {
   return cairoProgram.parse(JSON.parse(program));

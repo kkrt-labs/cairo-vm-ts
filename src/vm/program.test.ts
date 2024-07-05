@@ -8,10 +8,10 @@ import { OpType } from 'hints/hintParamsSchema';
 import { Hint } from 'hints/hintSchema';
 import { HintName } from 'hints/hintName';
 import { Register } from './instruction';
-import { parseCairoProgram, parseProgram } from './program';
+import { parseCairoProgram, parseCairoZeroProgram } from './program';
 
 describe('program', () => {
-  describe('parseProgram', () => {
+  describe('parseCairoZeroProgram', () => {
     test('should correctly parse the program data', () => {
       const programContent = fs.readFileSync(
         'cairo_programs/cairo_0/fibonacci.json',
@@ -22,7 +22,7 @@ describe('program', () => {
         return new Felt(BigInt(element));
       });
 
-      const program = parseProgram(programContent);
+      const program = parseCairoZeroProgram(programContent);
       expect(program.data).toEqual(data);
     });
   });
