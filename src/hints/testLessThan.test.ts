@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
-import { OpType } from 'hints/hintBaseSchema';
+import { OpType } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 import { testLessThanZod } from './testLessThan';
 

@@ -4,7 +4,7 @@ import * as fs from 'fs';
 
 import { Felt } from 'primitives/felt';
 
-import { OpType } from 'hints/hintBaseSchema';
+import { OpType } from 'hints/hintParamsSchema';
 import { Hint } from 'hints/hintSchema';
 import { HintName } from 'hints/hintName';
 import { Register } from './instruction';

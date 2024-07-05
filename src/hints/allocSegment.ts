@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { VirtualMachine } from 'vm/virtualMachine';
-import { cellRef, CellRef } from 'hints/hintBaseSchema';
+import { cellRef, CellRef } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 
 /** Zod object to parse AllocSegment hint */

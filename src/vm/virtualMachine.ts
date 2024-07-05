@@ -24,7 +24,7 @@ import {
   Operation,
   OpType,
   ResOp,
-} from 'hints/hintBaseSchema';
+} from 'hints/hintParamsSchema';
 import { allocSegment, AllocSegment } from 'hints/allocSegment';
 import { testLessThan, TestLessThan } from 'hints/testLessThan';
 import { Hint } from 'hints/hintSchema';
