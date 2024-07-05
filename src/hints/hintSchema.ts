@@ -4,10 +4,10 @@ import { Register } from 'vm/instruction';
 import { Felt } from 'primitives/felt';
 
 export enum OpType {
-  Deref,
-  DoubleDeref,
-  Immediate,
-  BinOp,
+  Deref = 'Deref',
+  DoubleDeref = 'DoubleDeref',
+  Immediate = 'Immediate',
+  BinOp = 'BinOp',
 }
 
 export const cellRef = z.object({
@@ -48,8 +48,8 @@ const immediate = z
   .transform((object) => ({ type: OpType.Immediate, value: object.Immediate }));
 
 export enum Operation {
-  Add,
-  Mul,
+  Add = 'Add',
+  Mul = 'Mul',
 }
 
 const binOp = z
