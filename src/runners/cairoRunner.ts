@@ -6,11 +6,11 @@ import {
 } from 'errors/cairoRunner';
 
 import { Relocatable } from 'primitives/relocatable';
-import { Cairo1Program, Hints, Program } from 'vm/program';
+import { Cairo1Program, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 import { Felt } from 'primitives/felt';
-import { Hint } from 'hints/hintSchema';
+import { Hint, Hints } from 'hints/hintSchema';
 
 /**
  * Configuration of the run
@@ -63,7 +63,7 @@ export class CairoRunner {
     this.vm.memory.setValues(this.executionBase, stack);
   }
 
-  static fromProgram(program: Program): CairoRunner {
+  static fromCairoZeroProgram(program: Program): CairoRunner {
     const mainId = program.identifiers.get('__main__.main');
     const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
 
@@ -74,7 +74,7 @@ export class CairoRunner {
     return new CairoRunner(program, program.data, mainOffset, builtins);
   }
 
-  static fromCairo1Program(program: Cairo1Program): CairoRunner {
+  static fromCairoProgram(program: Cairo1Program): CairoRunner {
     return new CairoRunner(
       program,
       program.bytecode,

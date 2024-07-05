@@ -45,10 +45,10 @@ export const run = (
 
     if (cairo1) {
       const program = parseCairo1Program(file);
-      runner = CairoRunner.fromCairo1Program(program);
+      runner = CairoRunner.fromCairoProgram(program);
     } else {
       const program = parseProgram(file);
-      runner = CairoRunner.fromProgram(program);
+      runner = CairoRunner.fromCairoZeroProgram(program);
     }
     const config: RunOptions = { relocate: relocate, offset: offset };
     runner.run(config);
