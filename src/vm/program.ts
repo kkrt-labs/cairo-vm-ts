@@ -60,7 +60,7 @@ export function parseProgram(program: string): Program {
   return Program.parse(JSON.parse(program));
 }
 
-const Cairo1Program = z.object({
+const CairoProgram = z.object({
   prime: z.string(),
   compiler_version: z.string(),
   bytecode: z
@@ -71,10 +71,10 @@ const Cairo1Program = z.object({
   builtins: z.array(z.string()),
 });
 
-type Program2 = z.infer<typeof Cairo1Program>;
+type Program2 = z.infer<typeof CairoProgram>;
 
-export type Cairo1Program = Program2 & { builtins: string[] };
+export type CairoProgram = Program2;
 
-export function parseCairo1Program(program: string): Cairo1Program {
-  return Cairo1Program.parse(JSON.parse(program));
+export function parseCairoProgram(program: string): CairoProgram {
+  return CairoProgram.parse(JSON.parse(program));
 }

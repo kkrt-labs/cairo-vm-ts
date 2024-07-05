@@ -2,7 +2,7 @@ import * as fs from 'fs';
 
 import { ConsolaInstance, LogLevels } from 'consola';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
-import { parseCairo1Program, parseProgram } from 'vm/program';
+import { parseCairoProgram, parseProgram } from 'vm/program';
 import { TraceEntry } from 'vm/virtualMachine';
 
 export const run = (
@@ -15,7 +15,7 @@ export const run = (
   try {
     const {
       silent,
-      cairo1,
+      cairo,
       relocate,
       offset,
       exportMemory,
@@ -43,8 +43,8 @@ export const run = (
 
     const file = fs.readFileSync(String(path), 'utf-8');
 
-    if (cairo1) {
-      const program = parseCairo1Program(file);
+    if (cairo) {
+      const program = parseCairoProgram(file);
       runner = CairoRunner.fromCairoProgram(program);
     } else {
       const program = parseProgram(file);
