@@ -40,7 +40,6 @@ export type Identifier = z.infer<typeof identifier>;
 const programBase = z.object({
   prime: z.string(),
   compiler_version: z.string(),
-  builtins: z.array(z.string()),
 });
 
 const cairoZeroProgram = programBase.extend({
@@ -58,12 +57,31 @@ const cairoZeroProgram = programBase.extend({
   reference_manager: referenceManager,
 });
 
+const cairoArg = z.object({
+  generic_id: z.string(),
+  size: z.number(),
+  debug_name: z.string(),
+});
+
+const cairoOutputArg = cairoArg.extend({
+  panic_inner_type: cairoArg.optional(),
+});
+
+const entrypoint = z.object({
+  offset: z.number(),
+  builtins: z.array(z.string()),
+  input_args: z.array(cairoArg),
+  return_arg: z.array(cairoOutputArg),
+});
+
+export type Entrypoint = z.infer<typeof entrypoint>;
+
 const cairoProgram = programBase.extend({
   bytecode: z
     .array(z.string())
     .transform((value) => value.map((v) => new Felt(BigInt(v)))),
   hints,
-  entrypoint: z.number(),
+  entry_points_by_function: z.record(z.string(), entrypoint),
 });
 
 export type CairoZeroProgram = z.infer<typeof cairoZeroProgram>;

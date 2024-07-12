@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import {
   CairoZeroHintsNotSupported,
   EmptyRelocatedMemory,
+  UndefinedEntrypoint,
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
@@ -74,12 +75,17 @@ export class CairoRunner {
     return new CairoRunner(program, program.data, mainOffset, builtins);
   }
 
-  static fromCairoProgram(program: CairoProgram): CairoRunner {
+  static fromCairoProgram(
+    program: CairoProgram,
+    fn_name: string = 'main'
+  ): CairoRunner {
+    const fn = program.entry_points_by_function[fn_name];
+    if (!fn) throw new UndefinedEntrypoint(fn_name);
     return new CairoRunner(
       program,
       program.bytecode,
-      program.entrypoint,
-      program.builtins,
+      fn.offset,
+      fn.builtins,
       program.hints
     );
   }
@@ -143,7 +149,7 @@ export class CairoRunner {
   }
 
   getOutput() {
-    const builtins = this.program.builtins;
+    const builtins = (this.program as CairoZeroProgram).builtins;
     const outputIdx = builtins.findIndex((name) => name === 'output');
     return outputIdx >= 0 ? this.vm.memory.segments[outputIdx + 2] : [];
   }

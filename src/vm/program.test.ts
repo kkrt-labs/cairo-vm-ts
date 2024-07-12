@@ -63,8 +63,9 @@ describe('program', () => {
       const program = parseCairoProgram(programContent);
       expect(program.bytecode).toEqual(bytecode);
       expect(program.hints).toEqual(hints);
-      expect(program.entrypoint).toEqual(programJson.entrypoint);
-      expect(program.builtins).toEqual(programJson.builtins);
+      expect(program.entry_points_by_function).toEqual(
+        programJson.entry_points_by_function
+      );
     });
   });
 });

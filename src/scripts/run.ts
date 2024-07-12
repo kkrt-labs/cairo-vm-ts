@@ -46,7 +46,7 @@ export const run = (
 
     if (cairo) {
       const program = parseCairoProgram(file);
-      runner = CairoRunner.fromCairoProgram(program);
+      runner = CairoRunner.fromCairoProgram(program, cairo);
     } else {
       const program = parseCairoZeroProgram(file);
       runner = CairoRunner.fromCairoZeroProgram(program);

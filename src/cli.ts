@@ -29,8 +29,11 @@ program
       return path;
     })
   )
+  .option(
+    '--cairo <FUNCTION>',
+    'Run a Cairo program, executing the given function'
+  )
   .option('-s, --silent', 'silent all logs')
-  .option('--cairo', 'Run a Cairo program')
   .option('--no-relocate', 'do not relocate memory')
   .addOption(
     new Option(
