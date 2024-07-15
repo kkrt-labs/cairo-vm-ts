@@ -69,7 +69,8 @@ export class CairoRunner {
     fnName: string = 'main'
   ): CairoRunner {
     const id = program.identifiers.get('__main__.'.concat(fnName));
-    const offset = id !== undefined ? id.pc ?? 0 : 0;
+    if (!id) throw new UndefinedEntrypoint(fnName);
+    const offset = id.pc;
 
     const builtins = program.builtins;
 
