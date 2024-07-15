@@ -50,8 +50,10 @@ describe('TestLessThan', () => {
   });
 
   test.each([
-    [new Felt(-2n), new Felt(0n)],
     [new Felt(2n), new Felt(1n)],
+    [new Felt(BigInt('0x0ffffffff')), new Felt(1n)],
+    [new Felt(BigInt('0x100000000')), new Felt(0n)],
+    [new Felt(-2n), new Felt(0n)],
   ])('should properly execute TestLessThan hint', (lhs, expected) => {
     const hint = testLessThanParser.parse(TEST_LESS_THAN);
     const vm = new VirtualMachine();
