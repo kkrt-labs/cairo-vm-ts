@@ -1,4 +1,6 @@
-.PHONY: compile-cairo-zero compile-cairo compile run-all diff-test bench build build-cairo-vm-cli build-cairo-vm-rs-cli build-cairo-vm-zig-cli build-cairo build-sierra-compiler build-cairo-compilerclean-diff-test clean--bench clean-tmp
+.PHONY: compile-cairo-zero compile-cairo compile build build-cairo-vm-cli \
+build-cairo-vm-rs-cli build-cairo-vm-zig-cli build-cairo build-sierra-compiler build-cairo-compiler \
+run-all diff-test bench clean-diff-test clean-bench clean-tmp
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
