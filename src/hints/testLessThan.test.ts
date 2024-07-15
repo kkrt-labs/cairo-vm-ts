@@ -5,7 +5,7 @@ import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { OpType } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
-import { testLessThanZod } from './testLessThan';
+import { testLessThanParser } from './testLessThan';
 
 const TEST_LESS_THAN = {
   TestLessThan: {
@@ -27,7 +27,7 @@ const TEST_LESS_THAN = {
 
 describe('TestLessThan', () => {
   test('should properly parse TestLessThan hint', () => {
-    const hint = testLessThanZod.parse(TEST_LESS_THAN);
+    const hint = testLessThanParser.parse(TEST_LESS_THAN);
 
     expect(hint).toEqual({
       type: HintName.TestLessThan,
@@ -53,7 +53,7 @@ describe('TestLessThan', () => {
     [new Felt(-2n), new Felt(0n)],
     [new Felt(2n), new Felt(1n)],
   ])('should properly execute TestLessThan hint', (lhs, expected) => {
-    const hint = testLessThanZod.parse(TEST_LESS_THAN);
+    const hint = testLessThanParser.parse(TEST_LESS_THAN);
     const vm = new VirtualMachine();
     vm.memory.addSegment();
     vm.memory.addSegment();

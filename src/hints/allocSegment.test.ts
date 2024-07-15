@@ -4,7 +4,7 @@ import { Relocatable } from 'primitives/relocatable';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { HintName } from 'hints/hintName';
-import { allocSegmentZod } from './allocSegment';
+import { allocSegmentParser } from './allocSegment';
 
 const ALLOC_SEGMENT = {
   AllocSegment: {
@@ -17,7 +17,7 @@ const ALLOC_SEGMENT = {
 
 describe('AllocSegment', () => {
   test('should properly parse AllocSegment hint', () => {
-    const hint = allocSegmentZod.parse(ALLOC_SEGMENT);
+    const hint = allocSegmentParser.parse(ALLOC_SEGMENT);
     expect(hint).toEqual({
       type: HintName.AllocSegment,
       dst: {
@@ -28,7 +28,7 @@ describe('AllocSegment', () => {
   });
 
   test('should properly execute AllocSegment hint', () => {
-    const hint = allocSegmentZod.parse(ALLOC_SEGMENT);
+    const hint = allocSegmentParser.parse(ALLOC_SEGMENT);
     const vm = new VirtualMachine();
     vm.memory.addSegment();
     vm.memory.addSegment();

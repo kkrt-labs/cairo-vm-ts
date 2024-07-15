@@ -6,7 +6,7 @@ import { cellRef, resOp, CellRef, ResOp } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 
 /** Zod object to parse TestLessThan hint */
-export const testLessThanZod = z
+export const testLessThanParser = z
   .object({
     TestLessThan: z.object({ lhs: resOp, rhs: resOp, dst: cellRef }),
   })
@@ -23,7 +23,7 @@ export const testLessThanZod = z
  * Store true at `dst` if value at `lhs` is stricty inferior to value at `rhs`.
  * Store false otherwise
  */
-export type TestLessThan = z.infer<typeof testLessThanZod>;
+export type TestLessThan = z.infer<typeof testLessThanParser>;
 
 /**
  * TestLessThan hint

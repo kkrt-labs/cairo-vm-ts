@@ -5,7 +5,7 @@ import { cellRef, CellRef } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 
 /** Zod object to parse AllocSegment hint */
-export const allocSegmentZod = z
+export const allocSegmentParser = z
   .object({ AllocSegment: z.object({ dst: cellRef }) })
   .transform(({ AllocSegment: { dst } }) => ({
     type: HintName.AllocSegment,
@@ -17,7 +17,7 @@ export const allocSegmentZod = z
  *
  * Add a new segment and store its pointer to `dst`
  */
-export type AllocSegment = z.infer<typeof allocSegmentZod>;
+export type AllocSegment = z.infer<typeof allocSegmentParser>;
 
 /**
  * Add a new segment and store its pointer at `dst`
