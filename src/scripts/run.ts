@@ -17,6 +17,7 @@ export const run = (
     const {
       silent,
       cairo,
+      fn,
       relocate,
       offset,
       exportMemory,
@@ -46,10 +47,10 @@ export const run = (
 
     if (cairo) {
       const program = parseCairoProgram(file);
-      runner = CairoRunner.fromCairoProgram(program, cairo);
+      runner = CairoRunner.fromCairoProgram(program, fn);
     } else {
       const program = parseCairoZeroProgram(file);
-      runner = CairoRunner.fromCairoZeroProgram(program);
+      runner = CairoRunner.fromCairoZeroProgram(program, fn);
     }
     const config: RunOptions = { relocate: relocate, offset: offset };
     runner.run(config);

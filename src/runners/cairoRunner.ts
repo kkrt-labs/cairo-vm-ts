@@ -64,23 +64,26 @@ export class CairoRunner {
     this.vm.memory.setValues(this.executionBase, stack);
   }
 
-  static fromCairoZeroProgram(program: CairoZeroProgram): CairoRunner {
-    const mainId = program.identifiers.get('__main__.main');
-    const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
+  static fromCairoZeroProgram(
+    program: CairoZeroProgram,
+    fnName: string = 'main'
+  ): CairoRunner {
+    const id = program.identifiers.get('__main__.'.concat(fnName));
+    const offset = id !== undefined ? id.pc ?? 0 : 0;
 
     const builtins = program.builtins;
 
     if (program.hints.length) throw new CairoZeroHintsNotSupported();
 
-    return new CairoRunner(program, program.data, mainOffset, builtins);
+    return new CairoRunner(program, program.data, offset, builtins);
   }
 
   static fromCairoProgram(
     program: CairoProgram,
-    fn_name: string = 'main'
+    fnName: string = 'main'
   ): CairoRunner {
-    const fn = program.entry_points_by_function[fn_name];
-    if (!fn) throw new UndefinedEntrypoint(fn_name);
+    const fn = program.entry_points_by_function[fnName];
+    if (!fn) throw new UndefinedEntrypoint(fnName);
     return new CairoRunner(
       program,
       program.bytecode,
