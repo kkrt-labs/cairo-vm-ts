@@ -7,13 +7,11 @@ CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
 CAIRO_VM_ZIG_CLI:=ziggy-starkdust/zig-out/bin/ziggy-starkdust
 
 $(CAIRO_VM_RS_CLI):
-	@git submodule init; \
-	git submodule update; \
+	@git submodule update --init cairo-vm; \
 	cd cairo-vm; cargo build --release --bin cairo-vm-cli
 
 $(CAIRO_VM_ZIG_CLI):
-	@git submodule init; \
-	git submodule update; \
+	@git submodule update --init ziggy-starkdust \
 	cd ziggy-starkdust; zig build
 
 build:
@@ -29,13 +27,11 @@ CAIRO_COMPILER=cairo/target/release/cairo-compile
 SIERRA_COMPILER=cairo/target/release/sierra-compile-json
 
 $(CAIRO_COMPILER):
-	@git submodule init; \
-	git submodule update; \
+	@git submodule update --init cairo; \
 	cd cairo; cargo build --release --bin cairo-compile
 
 $(SIERRA_COMPILER):
-	@git submodule init; \
-	git submodule update; \
+	@git submodule update --init cairo; \
 	cd cairo; cargo build --release --bin sierra-compile-json
 
 build-cairo-compiler: | $(CAIRO_COMPILER)
