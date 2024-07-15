@@ -39,7 +39,7 @@ export class CairoRunner {
   constructor(
     program: Program,
     bytecode: Felt[],
-    mainOffset: number = 0,
+    initialPc: number = 0,
     builtins: string[] = [],
     hints: Hints = new Map<number, Hint[]>()
   ) {
@@ -56,7 +56,7 @@ export class CairoRunner {
     this.finalPc = this.vm.memory.addSegment();
     const stack = [...builtin_stack, returnFp, this.finalPc];
 
-    this.vm.pc = this.programBase.add(mainOffset);
+    this.vm.pc = this.programBase.add(initialPc);
     this.vm.ap = this.executionBase.add(stack.length);
     this.vm.fp = this.vm.ap;
 
