@@ -5,3 +5,8 @@
 [submodule "ziggy-starkdust"]
 	path = ziggy-starkdust
 	url = git@github.com:keep-starknet-strange/ziggy-starkdust.git
+	shallow = true
+[submodule "cairo"]
+	path = cairo
+	url = git@github.com:zmalatrax/cairo.git
+	shallow = true
