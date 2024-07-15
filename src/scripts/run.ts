@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import { ConsolaInstance, LogLevels } from 'consola';
 
 import { TraceEntry } from 'vm/virtualMachine';
-import { parseCairoProgram, parseCairoZeroProgram } from 'vm/program';
+import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 
 export const run = (
@@ -16,7 +16,6 @@ export const run = (
   try {
     const {
       silent,
-      cairo,
       fn,
       relocate,
       offset,
@@ -45,13 +44,8 @@ export const run = (
 
     const file = fs.readFileSync(String(path), 'utf-8');
 
-    if (cairo) {
-      const program = parseCairoProgram(file);
-      runner = CairoRunner.fromCairoProgram(program, fn);
-    } else {
-      const program = parseCairoZeroProgram(file);
-      runner = CairoRunner.fromCairoZeroProgram(program, fn);
-    }
+    const program = parseProgram(file);
+    runner = CairoRunner.fromProgram(program, fn);
     const config: RunOptions = { relocate: relocate, offset: offset };
     runner.run(config);
     consola.success('Execution finished!');

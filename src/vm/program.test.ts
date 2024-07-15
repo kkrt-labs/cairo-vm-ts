@@ -30,7 +30,7 @@ describe('program', () => {
   describe('parseCairo1Program', () => {
     test('should correctly parse the program', () => {
       const programContent = fs.readFileSync(
-        'cairo_programs/cairo/hints/test_less_than_true.casm.json',
+        'cairo_programs/cairo/hints/test_less_than_true.json',
         'utf8'
       );
       const programJson = JSON.parse(programContent);

@@ -93,6 +93,16 @@ export class CairoRunner {
     );
   }
 
+  static fromProgram(program: Program, fnName: string = 'main') {
+    if (program.compiler_version.split('.')[0] == '0') {
+      return CairoRunner.fromCairoZeroProgram(
+        program as CairoZeroProgram,
+        fnName
+      );
+    }
+    return CairoRunner.fromCairoProgram(program as CairoProgram, fnName);
+  }
+
   /**
    * Run the loaded program with the given config
    */

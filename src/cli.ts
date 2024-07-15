@@ -30,7 +30,6 @@ program
     })
   )
   .option('-s, --silent', 'silent all logs')
-  .option('--cairo', 'Run a Cairo program')
   .addOption(
     new Option('--fn <NAME>', 'Function to be executed').default('main')
   )

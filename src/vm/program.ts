@@ -95,3 +95,14 @@ export function parseCairoZeroProgram(prgm: string): CairoZeroProgram {
 export function parseCairoProgram(program: string): CairoProgram {
   return cairoProgram.parse(JSON.parse(program));
 }
+
+export function parseProgram(prgm: string): Program {
+  const jsonPrgm = JSON.parse(prgm);
+  if (
+    jsonPrgm.compiler_version &&
+    jsonPrgm.compiler_version.split('.')[0] == '0'
+  ) {
+    return cairoZeroProgram.parse(jsonPrgm);
+  }
+  return cairoProgram.parse(jsonPrgm);
+}
