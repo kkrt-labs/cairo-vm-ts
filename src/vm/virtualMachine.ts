@@ -39,6 +39,7 @@ import {
   Register,
   ResLogic,
 } from './instruction';
+import { ScopeManager } from 'hints/scopeManager';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -63,6 +64,7 @@ export class VirtualMachine {
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
+  scopeManager: ScopeManager;
   trace: TraceEntry[];
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
@@ -90,6 +92,8 @@ export class VirtualMachine {
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
     this.fp = new Relocatable(1, 0);
+
+    this.scopeManager = new ScopeManager();
   }
 
   /**
