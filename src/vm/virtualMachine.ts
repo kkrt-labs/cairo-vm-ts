@@ -42,6 +42,7 @@ import {
   ResLogic,
 } from './instruction';
 import { ScopeManager } from 'hints/scopeManager';
+import { SquashedDictManager } from './squashedDict';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -69,6 +70,7 @@ export class VirtualMachine {
   ap: Relocatable;
   fp: Relocatable;
   dictManager: Map<number, Dictionnary>;
+  squashedDictManager: SquashedDictManager;
   scopeManager: ScopeManager;
   trace: TraceEntry[];
   relocatedMemory: RelocatedMemory[];
@@ -100,6 +102,7 @@ export class VirtualMachine {
 
     this.scopeManager = new ScopeManager();
     this.dictManager = new Map<number, Dictionnary>();
+    this.squashedDictManager = new SquashedDictManager();
   }
 
   /**

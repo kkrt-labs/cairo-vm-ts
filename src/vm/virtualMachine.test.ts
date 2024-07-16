@@ -549,14 +549,14 @@ describe('VirtualMachine', () => {
     test('should throw DictNotFound when accessing a non-existing dictionnary', () => {
       const vm = new VirtualMachine();
       const address = new Relocatable(2, 3);
-      expect(() => vm.getDict(address)).toThrowError(new DictNotFound(address));
+      expect(() => vm.getDict(address)).toThrow(new DictNotFound(address));
     });
 
     test('should throw DictValueNotFound when accessing a non-existing key in a dictionnary', () => {
       const vm = new VirtualMachine();
       const address = vm.newDict();
       const key = new Felt(0n);
-      expect(() => vm.getDictValue(address, key)).toThrowError(
+      expect(() => vm.getDictValue(address, key)).toThrow(
         new DictValueNotFound(address, key)
       );
     });
