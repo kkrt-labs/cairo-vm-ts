@@ -8,6 +8,8 @@ import {
   UndefinedOp0,
   InvalidCallOp0Value,
   UndefinedOp1,
+  DictNotFound,
+  DictValueNotFound,
 } from 'errors/virtualMachine';
 import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
 
@@ -58,12 +60,15 @@ export type RelocatedMemory = {
   value: Felt;
 };
 
+export class Dictionnary extends Map<Felt, SegmentValue> {}
+
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
+  dictManager: Map<number, Dictionnary>;
   scopeManager: ScopeManager;
   trace: TraceEntry[];
   relocatedMemory: RelocatedMemory[];
@@ -94,6 +99,7 @@ export class VirtualMachine {
     this.fp = new Relocatable(1, 0);
 
     this.scopeManager = new ScopeManager();
+    this.dictManager = new Map<number, Dictionnary>();
   }
 
   /**
@@ -597,5 +603,29 @@ export class VirtualMachine {
             return a.mul(b);
         }
     }
+  }
+
+  newDict(): Relocatable {
+    const dictAddr = this.memory.addSegment();
+    this.dictManager.set(dictAddr.segmentId, new Dictionnary());
+    return dictAddr;
+  }
+
+  getDict(address: Relocatable): Dictionnary {
+    const dict = this.dictManager.get(address.segmentId);
+    if (!dict) throw new DictNotFound(address);
+    return dict;
+  }
+
+  getDictValue(address: Relocatable, key: Felt): SegmentValue {
+    const dict = this.getDict(address);
+    const value = dict.get(key);
+    if (!value) throw new DictValueNotFound(address, key);
+    return value;
+  }
+
+  setDictValue(address: Relocatable, key: Felt, value: SegmentValue) {
+    const dict = this.getDict(address);
+    dict.set(key, value);
   }
 }

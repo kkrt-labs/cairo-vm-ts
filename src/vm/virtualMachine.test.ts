@@ -1,7 +1,11 @@
 import { test, expect, describe, spyOn } from 'bun:test';
 
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
-import { UnusedRes } from 'errors/virtualMachine';
+import {
+  DictNotFound,
+  DictValueNotFound,
+  UnusedRes,
+} from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
@@ -15,7 +19,7 @@ import {
   FpUpdate,
   Op1Src,
 } from './instruction';
-import { VirtualMachine } from './virtualMachine';
+import { Dictionnary, VirtualMachine } from './virtualMachine';
 
 const instructions = {
   InvalidAssertEq: new Instruction(
@@ -517,6 +521,44 @@ describe('VirtualMachine', () => {
       vm.relocatedMemoryToString();
 
       expect(logSpy.mock.results[0].value).toEqual(expectedStr);
+    });
+  });
+
+  describe('Dictionnary', () => {
+    test('should properly initialize the dict manager', () => {
+      const vm = new VirtualMachine();
+      expect(vm.dictManager.size).toEqual(0);
+    });
+
+    test('should properly create a new dictionnary', () => {
+      const vm = new VirtualMachine();
+      const address = vm.newDict();
+      expect(address).toEqual(new Relocatable(0, 0));
+      expect(vm.getDict(address)).toEqual(new Dictionnary());
+    });
+
+    test('should properly set and get value of a dictionnary', () => {
+      const vm = new VirtualMachine();
+      const address = vm.newDict();
+      const key = new Felt(12n);
+      const value = new Felt(5n);
+      vm.setDictValue(address, key, value);
+      expect(vm.getDictValue(address, key)).toEqual(value);
+    });
+
+    test('should throw DictNotFound when accessing a non-existing dictionnary', () => {
+      const vm = new VirtualMachine();
+      const address = new Relocatable(2, 3);
+      expect(() => vm.getDict(address)).toThrowError(new DictNotFound(address));
+    });
+
+    test('should throw DictValueNotFound when accessing a non-existing key in a dictionnary', () => {
+      const vm = new VirtualMachine();
+      const address = vm.newDict();
+      const key = new Felt(0n);
+      expect(() => vm.getDictValue(address, key)).toThrowError(
+        new DictValueNotFound(address, key)
+      );
     });
   });
 });
