@@ -1,3 +1,4 @@
+import { ResOp } from 'hints/hintParamsSchema';
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
@@ -56,6 +57,13 @@ export class InvalidOp1 extends VirtualMachineError {
 export class UndefinedOp1 extends VirtualMachineError {
   constructor() {
     super('op1 is undefined');
+  }
+}
+
+/** `resOp` is not of a valid type to extract buffer from it. */
+export class InvalidBufferResOp extends VirtualMachineError {
+  constructor(resOp: ResOp) {
+    super(`Cannot extract buffer from the given ResOp: ${resOp}`);
   }
 }
 

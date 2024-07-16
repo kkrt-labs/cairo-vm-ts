@@ -10,6 +10,7 @@ import {
   UndefinedOp1,
   DictNotFound,
   DictValueNotFound,
+  InvalidBufferResOp,
 } from 'errors/virtualMachine';
 import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
 
@@ -43,6 +44,7 @@ import {
 } from './instruction';
 import { ScopeManager } from 'hints/scopeManager';
 import { SquashedDictManager } from './squashedDict';
+import { allocFelt252Dict, AllocFelt252Dict } from 'hints/allocFelt252Dict';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -494,7 +496,7 @@ export class VirtualMachine {
    *
    * NOTE: used in Cairo hints
    */
-  cellRefToRelocatable(cell: CellRef) {
+  cellRefToRelocatable(cell: CellRef): Relocatable {
     let register: Relocatable;
     switch (cell.register) {
       case Register.Ap:
@@ -517,12 +519,10 @@ export class VirtualMachine {
    * NOTE: used in Cairo hints
    */
   getPointer(cell: CellRef, offset: Felt) {
-    const address = this.memory.get(
-      this.cellRefToRelocatable(cell).add(offset)
-    );
+    const address = this.memory.get(this.cellRefToRelocatable(cell));
     if (!address || !isRelocatable(address))
       throw new ExpectedRelocatable(address);
-    return address;
+    return address.add(offset);
   }
 
   /**
@@ -605,6 +605,29 @@ export class VirtualMachine {
           case Operation.Mul:
             return a.mul(b);
         }
+    }
+  }
+
+  /**
+   * Return the address defined at `resOp`.
+   *
+   * This method assume that resOp points to a Relocatable.
+   *
+   * Only Deref and BinOp with Immediate value are valid for extracting a buffer.
+   *
+   * NOTE: Used in Cairo hints.
+   */
+  extractBuffer(resOp: ResOp): [CellRef, Felt] {
+    switch (resOp.type) {
+      case OpType.Deref:
+        return [(resOp as Deref).cell, new Felt(0n)];
+      case OpType.BinOp:
+        const binOp = resOp as BinOp;
+        if (binOp.b.type !== OpType.Immediate)
+          throw new InvalidBufferResOp(resOp);
+        return [binOp.a, (binOp.b as Immediate).value];
+      default:
+        throw new InvalidBufferResOp(resOp);
     }
   }
 
