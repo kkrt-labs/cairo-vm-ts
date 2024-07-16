@@ -7,6 +7,7 @@ import { poseidonHandler } from './poseidon';
 import { keccakHandler } from './keccak';
 import { outputHandler } from './output';
 import { rangeCheckHandler } from './rangeCheck';
+import { segmentArenaHandler } from './segmentArena';
 
 /** Proxy handler to abstract validation & deduction rules off the VM */
 export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
@@ -20,7 +21,7 @@ export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
  * - Keccak: Builtin for keccak hash family
  * - Pedersen: Builtin for pedersen hash family
  * - Poseidon: Builtin for poseidon hash family
- * - Segment Arena: Unknown usage, must investigate
+ * - Segment Arena: Builtin to manage the dictionnaries
  * - Output: Output builtin
  */
 const BUILTIN_HANDLER: {
@@ -35,6 +36,7 @@ const BUILTIN_HANDLER: {
   keccak: keccakHandler,
   range_check: rangeCheckHandler(128n),
   range_check96: rangeCheckHandler(96n),
+  segment_arena: segmentArenaHandler,
 };
 
 /** Getter of the object `BUILTIN_HANDLER` */
