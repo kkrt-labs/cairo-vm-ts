@@ -1,25 +1,26 @@
 import { z } from 'zod';
 
 import { Felt } from 'primitives/felt';
+import { hints } from 'hints/hintSchema';
 
-const ApTrackingData = z.object({
+const apTrackingData = z.object({
   group: z.number(),
   offset: z.number(),
 });
 
-const Reference = z.object({
-  ap_tracking_data: ApTrackingData,
+const reference = z.object({
+  ap_tracking_data: apTrackingData,
   pc: z.number(),
   value: z.string(),
 });
 
-const ReferenceManager = z.object({
-  references: z.array(Reference),
+const referenceManager = z.object({
+  references: z.array(reference),
 });
 
-type ReferenceManager = z.infer<typeof ReferenceManager>;
+export type ReferenceManager = z.infer<typeof referenceManager>;
 
-const Identifier = z.object({
+const identifier = z.object({
   full_name: z.string().optional(),
   members: z.record(z.string(), z.any()).optional(),
   size: z.number().optional(),
@@ -34,27 +35,74 @@ const Identifier = z.object({
   destination: z.string().optional(),
 });
 
-export type Identifier = z.infer<typeof Identifier>;
+export type Identifier = z.infer<typeof identifier>;
 
-const Program = z.object({
-  attributes: z.any(),
-  builtins: z.array(z.string()),
+const programBase = z.object({
+  prime: z.string(),
   compiler_version: z.string(),
+});
+
+const cairoZeroProgram = programBase.extend({
   data: z
     .array(z.string())
     .transform((value) => value.map((v) => new Felt(BigInt(v)))),
-  debug_info: z.any(), // TODO: DebugInfo
   hints: z.record(z.string(), z.any()), // TODO: HintParams
+  debug_info: z.any(), // TODO: DebugInfo
+  builtins: z.array(z.string()),
+  attributes: z.any(),
   identifiers: z
-    .record(z.string(), Identifier)
+    .record(z.string(), identifier)
     .transform((value) => new Map<string, Identifier>(Object.entries(value))),
   main_scope: z.string(),
-  prime: z.string(),
-  reference_manager: ReferenceManager,
+  reference_manager: referenceManager,
 });
 
-export type Program = z.infer<typeof Program>;
+const cairoArg = z.object({
+  generic_id: z.string(),
+  size: z.number(),
+  debug_name: z.string(),
+});
 
-export function parseProgram(program: string): Program {
-  return Program.parse(JSON.parse(program));
+const cairoOutputArg = cairoArg.extend({
+  panic_inner_type: cairoArg.optional(),
+});
+
+const entrypoint = z.object({
+  offset: z.number(),
+  builtins: z.array(z.string()),
+  input_args: z.array(cairoArg),
+  return_arg: z.array(cairoOutputArg),
+});
+
+export type Entrypoint = z.infer<typeof entrypoint>;
+
+const cairoProgram = programBase.extend({
+  bytecode: z
+    .array(z.string())
+    .transform((value) => value.map((v) => new Felt(BigInt(v)))),
+  hints,
+  entry_points_by_function: z.record(z.string(), entrypoint),
+});
+
+export type CairoZeroProgram = z.infer<typeof cairoZeroProgram>;
+export type CairoProgram = z.infer<typeof cairoProgram>;
+export type Program = CairoZeroProgram | CairoProgram;
+
+export function parseCairoZeroProgram(prgm: string): CairoZeroProgram {
+  return cairoZeroProgram.parse(JSON.parse(prgm));
+}
+
+export function parseCairoProgram(program: string): CairoProgram {
+  return cairoProgram.parse(JSON.parse(program));
+}
+
+export function parseProgram(prgm: string): Program {
+  const jsonPrgm = JSON.parse(prgm);
+  if (
+    jsonPrgm.compiler_version &&
+    jsonPrgm.compiler_version.split('.')[0] == '0'
+  ) {
+    return cairoZeroProgram.parse(jsonPrgm);
+  }
+  return cairoProgram.parse(jsonPrgm);
 }

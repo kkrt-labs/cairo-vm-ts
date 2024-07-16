@@ -4,3 +4,4 @@ dist
 
 # Cairo compilation artifacts
 cairo_programs/**/*.json
+cairo_programs/**/*.sierra

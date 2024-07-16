@@ -1,7 +1,8 @@
+import { CURVE } from '@scure/starknet';
+
 import { CannotDivideByZero, ExpectedFelt } from 'errors/primitives';
 
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
-import { CURVE } from '@scure/starknet';
 
 export class Felt {
   private inner: bigint;
@@ -72,6 +73,10 @@ export class Felt {
 
   sqrt(): Felt {
     return new Felt(CURVE.Fp.sqrt(this.inner));
+  }
+
+  valueOf() {
+    return this.inner;
   }
 
   toString(radix?: number): string {

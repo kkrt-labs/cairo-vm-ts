@@ -1,9 +1,10 @@
 import * as fs from 'fs';
 
 import { ConsolaInstance, LogLevels } from 'consola';
-import { CairoRunner, RunOptions } from 'runners/cairoRunner';
-import { parseProgram } from 'vm/program';
+
 import { TraceEntry } from 'vm/virtualMachine';
+import { parseProgram } from 'vm/program';
+import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 
 export const run = (
   path: string,
@@ -11,9 +12,11 @@ export const run = (
   consola: ConsolaInstance,
   version: string
 ) => {
+  let runner: CairoRunner | undefined = undefined;
   try {
     const {
       silent,
+      fn,
       relocate,
       offset,
       exportMemory,
@@ -39,8 +42,10 @@ export const run = (
 
     consola.info(`Cairo VM TS ${version} - Execution Mode`);
 
-    const program = parseProgram(fs.readFileSync(String(path), 'utf-8'));
-    const runner = new CairoRunner(program);
+    const file = fs.readFileSync(String(path), 'utf-8');
+
+    const program = parseProgram(file);
+    runner = CairoRunner.fromProgram(program, fn);
     const config: RunOptions = { relocate: relocate, offset: offset };
     runner.run(config);
     consola.success('Execution finished!');
@@ -83,6 +88,7 @@ export const run = (
     }
   } catch (err) {
     consola.fail(`Execution failed`);
+    if (runner) console.log(runner.vm.memory.toString());
     throw err;
   }
 };

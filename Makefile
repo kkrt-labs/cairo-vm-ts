@@ -1,17 +1,17 @@
-.PHONY: compile run-all diff-test bench build build-cairo-vm-cli build-cairo-vm-rs-cli build-cairo-vm-zig-cli clean-diff-test clean--bench clean-tmp
+.PHONY: compile-cairo-zero compile-cairo compile build build-cairo-vm-cli \
+build-cairo-vm-rs-cli build-cairo-vm-zig-cli build-cairo build-sierra-compiler build-cairo-compiler \
+run-all diff-test bench clean-diff-test clean-bench clean-tmp
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
 CAIRO_VM_ZIG_CLI:=ziggy-starkdust/zig-out/bin/ziggy-starkdust
 
 $(CAIRO_VM_RS_CLI):
-	@git submodule init; \
-	git submodule update; \
+	@git submodule update --init cairo-vm; \
 	cd cairo-vm; cargo build --release --bin cairo-vm-cli
 
 $(CAIRO_VM_ZIG_CLI):
-	@git submodule init; \
-	git submodule update; \
+	@git submodule update --init ziggy-starkdust \
 	cd ziggy-starkdust; zig build
 
 build:
@@ -22,6 +22,21 @@ build-cairo-vm-rs-cli: | $(CAIRO_VM_RS_CLI)
 build-cairo-vm-zig-cli: | $(CAIRO_VM_ZIG_CLI)
 
 build-cairo-vm-cli: build build-cairo-vm-rs-cli build-cairo-vm-zig-cli
+
+CAIRO_COMPILER=cairo/target/release/cairo-compile
+SIERRA_COMPILER=cairo/target/release/sierra-compile-json
+
+$(CAIRO_COMPILER):
+	@git submodule update --init cairo; \
+	cd cairo; cargo build --release --bin cairo-compile
+
+$(SIERRA_COMPILER):
+	@git submodule update --init cairo; \
+	cd cairo; cargo build --release --bin sierra-compile-json
+
+build-cairo-compiler: | $(CAIRO_COMPILER)
+build-sierra-compiler: | $(SIERRA_COMPILER)
+build-cairo: build-cairo-compiler build-sierra-compiler
 
 TMP_PREFIX="cairo-vm-ts"
 
@@ -34,10 +49,26 @@ COMPILED_CAIRO_0_FILES:=$(CAIRO_0_FILES:%.cairo=%.json)
 COMPILED_CAIRO_0_BENCHMARK_FILES:=$(CAIRO_0_BENCHMARK_FILES:%.cairo=%.json)
 VALID_COMPILED_CAIRO_0_FILES:=$(VALID_CAIRO_0_FILES:%.cairo=%.json)
 
-compile: $(COMPILED_CAIRO_0_FILES)
+CAIRO_PATH=cairo_programs/cairo/
+CAIRO_FILES:=$(shell find $(CAIRO_PATH) -name '*.cairo')
+SIERRA_FILES:=$(CAIRO_FILES:%.cairo=%.sierra)
+COMPILED_CAIRO_FILES:=$(SIERRA_FILES:%.sierra=%.json)
+
+$(COMPILED_CAIRO_FILES): %.json: %.sierra
+	$(SIERRA_COMPILER) $< $@
 
 %.json: %.cairo
 	poetry run cairo-compile $< --output $@
+
+%.sierra: %.cairo
+	$(CAIRO_COMPILER) -r -s $< $@
+
+
+compile-cairo-zero: $(COMPILED_CAIRO_0_FILES)
+compile-cairo: $(COMPILED_CAIRO_FILES)
+compile: compile-cairo-zero compile-cairo
+
+
 
 run-all: $(VALID_COMPILED_CAIRO_0_FILES)
 	@failed_tests_ctr=0; \

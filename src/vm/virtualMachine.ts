@@ -9,11 +9,26 @@ import {
   InvalidCallOp0Value,
   UndefinedOp1,
 } from 'errors/virtualMachine';
+import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import { Memory } from 'memory/memory';
+import {
+  BinOp,
+  CellRef,
+  Deref,
+  DoubleDeref,
+  Immediate,
+  Operation,
+  OpType,
+  ResOp,
+} from 'hints/hintParamsSchema';
+import { allocSegment, AllocSegment } from 'hints/allocSegment';
+import { testLessThan, TestLessThan } from 'hints/testLessThan';
+import { Hint } from 'hints/hintSchema';
+import { HintName } from 'hints/hintName';
 import {
   ApUpdate,
   FpUpdate,
@@ -52,6 +67,19 @@ export class VirtualMachine {
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
 
+  /** Maps a hint to its implementation */
+  private handlers: Record<HintName, (vm: VirtualMachine, hint: Hint) => void> =
+    {
+      [HintName.AllocSegment]: (vm, hint) => {
+        const h = hint as AllocSegment;
+        allocSegment(vm, h.dst);
+      },
+      [HintName.TestLessThan]: (vm, hint) => {
+        const h = hint as TestLessThan;
+        testLessThan(vm, h.lhs, h.rhs, h.dst);
+      },
+    };
+
   constructor() {
     this.currentStep = 0n;
     this.memory = new Memory();
@@ -66,10 +94,14 @@ export class VirtualMachine {
 
   /**
    * Execute one step:
+   * - Execute hints at PC
    * - Decode the instruction at PC
    * - Run the instruction
    */
-  step(): void {
+  step(hints?: Hint[]): void {
+    if (hints) {
+      hints.map((hint) => this.executeHint(hint));
+    }
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new UndefinedInstruction(this.pc);
@@ -84,6 +116,15 @@ export class VirtualMachine {
     const instruction = Instruction.decodeInstruction(encodedInstruction);
 
     this.runInstruction(instruction);
+  }
+
+  /**
+   * Execute a given hint
+   */
+  executeHint(hint: Hint) {
+    const handler = this.handlers[hint.type];
+    if (!handler) throw new UnknownHint(hint);
+    handler(this, hint);
   }
 
   /**
@@ -433,5 +474,124 @@ export class VirtualMachine {
     ]
       .flat()
       .join('\n');
+  }
+
+  /**
+   * Return the memory address defined by `cell`
+   *
+   * NOTE: used in Cairo hints
+   */
+  cellRefToRelocatable(cell: CellRef) {
+    let register: Relocatable;
+    switch (cell.register) {
+      case Register.Ap:
+        register = this.ap;
+        break;
+      case Register.Fp:
+        register = this.fp;
+        break;
+      case Register.Pc:
+        throw new InvalidCellRefRegister(cell);
+    }
+    return register.add(cell.offset);
+  }
+
+  /**
+   * Return `[cell] + offset`
+   *
+   * Expect a Relocatable at `cell`, throw otherwise
+   *
+   * NOTE: used in Cairo hints
+   */
+  getPointer(cell: CellRef, offset: Felt) {
+    const address = this.memory.get(
+      this.cellRefToRelocatable(cell).add(offset)
+    );
+    if (!address || !isRelocatable(address))
+      throw new ExpectedRelocatable(address);
+    return address;
+  }
+
+  /**
+   * Return the memory value at the address defined by `cell`
+   *
+   * Expect a Felt, throw otherwise
+   *
+   * NOTE: used in Cairo hints
+   */
+  getFelt(cell: CellRef): Felt {
+    const value = this.memory.get(this.cellRefToRelocatable(cell));
+    if (!value || !isFelt(value)) throw new ExpectedFelt(value);
+    return value;
+  }
+
+  /**
+   * Return the memory value at the address defined by `cell`
+   *
+   * Expect a Relocatable, throw otherwise
+   *
+   * NOTE: used in Cairo hints
+   */
+  getRelocatable(cell: CellRef): Relocatable {
+    const value = this.memory.get(this.cellRefToRelocatable(cell));
+    if (!value || !isRelocatable(value)) throw new ExpectedRelocatable(value);
+    return value;
+  }
+
+  /**
+   * Return the value defined by `resOp`
+   *
+   * Generic patterns:
+   * - Deref: `[register + offset]`
+   * - DoubleDeref: `[[register + offset1] + offset2]`
+   * - Immediate: `0x1000`
+   * - BinOp (Add): `[register1 + offset1] + [register2 + offset2]`
+   * or `[register1 + offset1] + immediate`
+   * - BinOp (Mul): `[register1 + offset1] * [register2 + offset2]`
+   * or `[register1 + offset1] * immediate`
+   *
+   * NOTE: used in Cairo hints
+   */
+  getResOperandValue(resOp: ResOp): Felt {
+    switch (resOp.type) {
+      case OpType.Deref:
+        return this.getFelt((resOp as Deref).cell);
+
+      case OpType.DoubleDeref:
+        const dDeref = resOp as DoubleDeref;
+        const deref = this.getRelocatable(dDeref.cell);
+        const value = this.memory.get(deref.add(dDeref.offset));
+        if (!value || !isFelt(value)) throw new ExpectedFelt(value);
+        return value;
+
+      case OpType.Immediate:
+        return (resOp as Immediate).value;
+
+      case OpType.BinOp:
+        const binOp = resOp as BinOp;
+        const a = this.getFelt(binOp.a);
+
+        let b: Felt | undefined = undefined;
+        switch (binOp.b.type) {
+          case OpType.Deref:
+            b = this.getFelt((binOp.b as Deref).cell);
+            break;
+
+          case OpType.Immediate:
+            b = (binOp.b as Immediate).value;
+            break;
+
+          default:
+            throw new ExpectedFelt(b);
+        }
+
+        switch (binOp.op) {
+          case Operation.Add:
+            return a.add(b);
+
+          case Operation.Mul:
+            return a.mul(b);
+        }
+    }
   }
 }

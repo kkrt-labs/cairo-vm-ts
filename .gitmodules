@@ -1,7 +1,12 @@
 [submodule "cairo-vm"]
 	path = cairo-vm
-	url = git@github.com:lambdaclass/cairo-vm.git
+	url = https://github.com/lambdaclass/cairo-vm.git
 	shallow = true
 [submodule "ziggy-starkdust"]
 	path = ziggy-starkdust
-	url = git@github.com:keep-starknet-strange/ziggy-starkdust.git
+	url = https://github.com/keep-starknet-strange/ziggy-starkdust.git
+	shallow = true
+[submodule "cairo"]
+	path = cairo
+	url = https://github.com/zmalatrax/cairo.git
+	shallow = true

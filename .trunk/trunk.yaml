@@ -37,6 +37,10 @@ lint:
     - markdownlint@0.37.0
     - prettier@3.1.0
     - trufflehog@3.62.1
+  ignore:
+    - linters: [cairo]
+      paths:
+        - cairo_programs/cairo/**
 actions:
   disabled:
     - trunk-announce

@@ -1,9 +1,9 @@
 #! /usr/bin/env bun
 
 import { Command, Option } from '@commander-js/extra-typings';
-
 import { consola } from 'consola';
 import { Argument } from 'commander';
+
 import { run } from 'scripts/run';
 
 consola.options = {
@@ -30,6 +30,9 @@ program
     })
   )
   .option('-s, --silent', 'silent all logs')
+  .addOption(
+    new Option('--fn <NAME>', 'Function to be executed').default('main')
+  )
   .option('--no-relocate', 'do not relocate memory')
   .addOption(
     new Option(

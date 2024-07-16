@@ -22,6 +22,9 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Initialize and update submodules
+        run: git submodule update --init --recursive
+
       - name: Load cached Poetry installation
         id: cached-poetry
         uses: actions/cache@v3
@@ -49,6 +52,26 @@ jobs:
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
+
+      - name: Configure Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust dependencies
+        id: cached-cairo-compiler-dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            cairo/.cargo/bin
+            cairo/.cargo/registry/index
+            cairo/.cargo/registry/cache
+            cairo/.cargo/git/db
+            cairo/target
+            cairo/corelib
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Cairo compiler
+        if: steps.cached-cairo-compiler-dependencies.outputs.cache-hit != 'true'
+        run: make build-cairo
 
       - name: Compile cairo files
         run: make compile

@@ -1,11 +1,18 @@
 import * as fs from 'fs';
 
-import { EmptyRelocatedMemory } from 'errors/cairoRunner';
+import {
+  CairoOutputNotSupported,
+  CairoZeroHintsNotSupported,
+  EmptyRelocatedMemory,
+  UndefinedEntrypoint,
+} from 'errors/cairoRunner';
 
+import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
-import { Program } from 'vm/program';
+import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
+import { Hint, Hints } from 'hints/hintSchema';
 
 /**
  * Configuration of the run
@@ -19,6 +26,7 @@ export type RunOptions = {
 
 export class CairoRunner {
   program: Program;
+  hints: Hints;
   vm: VirtualMachine;
   programBase: Relocatable;
   executionBase: Relocatable;
@@ -29,28 +37,72 @@ export class CairoRunner {
     offset: 0,
   };
 
-  constructor(program: Program) {
+  constructor(
+    program: Program,
+    bytecode: Felt[],
+    initialPc: number = 0,
+    builtins: string[] = [],
+    hints: Hints = new Map<number, Hint[]>()
+  ) {
     this.program = program;
-    const mainId = program.identifiers.get('__main__.main');
-    const mainOffset = mainId !== undefined ? mainId.pc ?? 0 : 0;
-
+    this.hints = hints;
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
-    const builtin_stack = program.builtins
+    const builtin_stack = builtins
       .map(getBuiltin)
       .map((builtin) => this.vm.memory.addSegment(builtin));
     const returnFp = this.vm.memory.addSegment();
     this.finalPc = this.vm.memory.addSegment();
     const stack = [...builtin_stack, returnFp, this.finalPc];
 
-    this.vm.pc = this.programBase.add(mainOffset);
+    this.vm.pc = this.programBase.add(initialPc);
     this.vm.ap = this.executionBase.add(stack.length);
     this.vm.fp = this.vm.ap;
 
-    this.vm.memory.setValues(this.programBase, this.program.data);
+    this.vm.memory.setValues(this.programBase, bytecode);
     this.vm.memory.setValues(this.executionBase, stack);
+  }
+
+  static fromCairoZeroProgram(
+    program: CairoZeroProgram,
+    fnName: string = 'main'
+  ): CairoRunner {
+    const id = program.identifiers.get('__main__.'.concat(fnName));
+    if (!id) throw new UndefinedEntrypoint(fnName);
+    const offset = id.pc;
+
+    const builtins = program.builtins;
+
+    if (program.hints.length) throw new CairoZeroHintsNotSupported();
+
+    return new CairoRunner(program, program.data, offset, builtins);
+  }
+
+  static fromCairoProgram(
+    program: CairoProgram,
+    fnName: string = 'main'
+  ): CairoRunner {
+    const fn = program.entry_points_by_function[fnName];
+    if (!fn) throw new UndefinedEntrypoint(fnName);
+    return new CairoRunner(
+      program,
+      program.bytecode,
+      fn.offset,
+      fn.builtins,
+      program.hints
+    );
+  }
+
+  static fromProgram(program: Program, fnName: string = 'main') {
+    if (program.compiler_version.split('.')[0] == '0') {
+      return CairoRunner.fromCairoZeroProgram(
+        program as CairoZeroProgram,
+        fnName
+      );
+    }
+    return CairoRunner.fromCairoProgram(program as CairoProgram, fnName);
   }
 
   /**
@@ -58,7 +110,7 @@ export class CairoRunner {
    */
   run(config: RunOptions = CairoRunner.defaultRunOptions): void {
     while (!this.vm.pc.eq(this.finalPc)) {
-      this.vm.step();
+      this.vm.step(this.hints.get(this.vm.pc.offset));
     }
     const { relocate, offset } = config;
     if (relocate) this.vm.relocate(offset);
@@ -111,8 +163,16 @@ export class CairoRunner {
     fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
   }
 
+  /**
+   * @returns The output builtin segment.
+   *
+   * NOTE: Currently supports Cairo Zero programs only.
+   * Cairo programs need input args/return value logic to be implemented first.
+   *
+   */
   getOutput() {
-    const builtins = this.program.builtins;
+    const builtins = (this.program as CairoZeroProgram).builtins;
+    if (!builtins) throw new CairoOutputNotSupported();
     const outputIdx = builtins.findIndex((name) => name === 'output');
     return outputIdx >= 0 ? this.vm.memory.segments[outputIdx + 2] : [];
   }

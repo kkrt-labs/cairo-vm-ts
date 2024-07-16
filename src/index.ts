@@ -26,7 +26,12 @@ export {
   RelocatedMemory,
   RelocatedTraceEntry,
 } from 'vm/virtualMachine';
-export { parseProgram, Program, Identifier } from 'vm/program';
+export {
+  parseCairoProgram,
+  CairoZeroProgram,
+  CairoProgram,
+  Identifier,
+} from 'vm/program';
 
 export { BuiltinHandler, getBuiltin } from 'builtins/builtin';
 export { outputHandler } from 'builtins/output';

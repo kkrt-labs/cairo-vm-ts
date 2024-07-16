@@ -2,6 +2,7 @@
 
 import { Command, Argument } from '@commander-js/extra-typings';
 import { consola } from 'consola';
+
 import { compareMemory, compareTrace } from './compare';
 
 export const compare = async () => {
