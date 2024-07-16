@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 
 import {
+  CairoOutputNotSupported,
   CairoZeroHintsNotSupported,
   EmptyRelocatedMemory,
   UndefinedEntrypoint,
@@ -162,8 +163,16 @@ export class CairoRunner {
     fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
   }
 
+  /**
+   * @returns The output builtin segment.
+   *
+   * NOTE: Currently supports Cairo Zero programs only.
+   * Cairo programs need input args/return value logic to be implemented first.
+   *
+   */
   getOutput() {
     const builtins = (this.program as CairoZeroProgram).builtins;
+    if (!builtins) throw new CairoOutputNotSupported();
     const outputIdx = builtins.findIndex((name) => name === 'output');
     return outputIdx >= 0 ? this.vm.memory.segments[outputIdx + 2] : [];
   }
