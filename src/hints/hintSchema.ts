@@ -2,9 +2,14 @@ import { z } from 'zod';
 
 import { allocSegmentParser } from './allocSegment';
 import { testLessThanParser } from './testLessThan';
+import { allocFelt252DictParser } from './allocFelt252Dict';
 
 /** Zod object to parse any implemented hints */
-const hint = z.union([allocSegmentParser, testLessThanParser]);
+const hint = z.union([
+  allocSegmentParser,
+  testLessThanParser,
+  allocFelt252DictParser,
+]);
 
 /** Zod object to parse an array of hints grouped on a given PC */
 export const hintsGroup = z.tuple([z.number(), z.array(hint)]);

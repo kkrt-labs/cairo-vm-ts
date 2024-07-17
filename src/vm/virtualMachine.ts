@@ -89,6 +89,10 @@ export class VirtualMachine {
         const h = hint as TestLessThan;
         testLessThan(vm, h.lhs, h.rhs, h.dst);
       },
+      [HintName.AllocFelt252Dict]: (vm, hint) => {
+        const h = hint as AllocFelt252Dict;
+        allocFelt252Dict(vm, h.segment_arena_ptr);
+      },
     };
 
   constructor() {
