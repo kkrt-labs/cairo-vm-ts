@@ -33,8 +33,7 @@ export const allocFelt252Dict = (
   vm: VirtualMachine,
   segmentArenaPtr: ResOp
 ) => {
-  const [cell, offset] = vm.extractBuffer(segmentArenaPtr);
-  const arenaPtr = vm.getPointer(cell, offset);
+  const arenaPtr = vm.getPointer(...vm.extractBuffer(segmentArenaPtr));
   const dictNumber = vm.memory.get(arenaPtr.sub(2));
   if (!dictNumber || !isFelt(dictNumber)) throw new ExpectedFelt(dictNumber);
 
