@@ -45,6 +45,10 @@ import {
 import { ScopeManager } from 'hints/scopeManager';
 import { SquashedDictManager } from './squashedDict';
 import { allocFelt252Dict, AllocFelt252Dict } from 'hints/allocFelt252Dict';
+import {
+  getSegmentArenaIndex,
+  GetSegmentArenaIndex,
+} from 'hints/getSegmentArenaIndex';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -63,7 +67,12 @@ export type RelocatedMemory = {
   value: Felt;
 };
 
-export class Dictionnary extends Map<Felt, SegmentValue> {}
+export class Dictionnary extends Map<Felt, SegmentValue> {
+  constructor(public readonly id: Felt) {
+    super();
+    this.id = id;
+  }
+}
 
 export class VirtualMachine {
   private currentStep: bigint;
@@ -92,6 +101,10 @@ export class VirtualMachine {
       [HintName.AllocFelt252Dict]: (vm, hint) => {
         const h = hint as AllocFelt252Dict;
         allocFelt252Dict(vm, h.segment_arena_ptr);
+      },
+      [HintName.GetSegmentArenaIndex]: (vm, hint) => {
+        const h = hint as GetSegmentArenaIndex;
+        getSegmentArenaIndex(vm, h.dict_end_ptr, h.dict_index);
       },
     };
 
@@ -637,7 +650,10 @@ export class VirtualMachine {
 
   newDict(): Relocatable {
     const dictAddr = this.memory.addSegment();
-    this.dictManager.set(dictAddr.segmentId, new Dictionnary());
+    this.dictManager.set(
+      dictAddr.segmentId,
+      new Dictionnary(new Felt(BigInt(this.dictManager.size)))
+    );
     return dictAddr;
   }
 
