@@ -4,6 +4,7 @@ import { allocSegmentParser } from './allocSegment';
 import { testLessThanParser } from './testLessThan';
 import { allocFelt252DictParser } from './allocFelt252Dict';
 import { getSegmentArenaIndexParser } from './getSegmentArenaIndex';
+import { felt252DictEntryInitParser } from './felt252DictEntryInit';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -11,6 +12,7 @@ const hint = z.union([
   testLessThanParser,
   allocFelt252DictParser,
   getSegmentArenaIndexParser,
+  felt252DictEntryInitParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */

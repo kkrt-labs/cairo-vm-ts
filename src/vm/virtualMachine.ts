@@ -49,6 +49,10 @@ import {
   getSegmentArenaIndex,
   GetSegmentArenaIndex,
 } from 'hints/getSegmentArenaIndex';
+import {
+  felt252DictEntryInit,
+  Felt252DictEntryInit,
+} from 'hints/felt252DictEntryInit';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -105,6 +109,10 @@ export class VirtualMachine {
       [HintName.GetSegmentArenaIndex]: (vm, hint) => {
         const h = hint as GetSegmentArenaIndex;
         getSegmentArenaIndex(vm, h.dict_end_ptr, h.dict_index);
+      },
+      [HintName.Felt252DictEntryInit]: (vm, hint) => {
+        const h = hint as Felt252DictEntryInit;
+        felt252DictEntryInit(vm, h.dictPtr, h.key);
       },
     };
 
