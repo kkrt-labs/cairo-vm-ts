@@ -104,7 +104,7 @@ export class VirtualMachine {
       },
       [HintName.AllocFelt252Dict]: (vm, hint) => {
         const h = hint as AllocFelt252Dict;
-        allocFelt252Dict(vm, h.segment_arena_ptr);
+        allocFelt252Dict(vm, h.segmentArenaPtr);
       },
       [HintName.GetSegmentArenaIndex]: (vm, hint) => {
         const h = hint as GetSegmentArenaIndex;

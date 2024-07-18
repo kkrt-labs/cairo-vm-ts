@@ -12,7 +12,7 @@ export const allocFelt252DictParser = z
   .object({ AllocFelt252Dict: z.object({ segment_arena_ptr: resOp }) })
   .transform(({ AllocFelt252Dict: { segment_arena_ptr } }) => ({
     type: HintName.AllocFelt252Dict,
-    segment_arena_ptr,
+    segmentArenaPtr: segment_arena_ptr,
   }));
 
 /**

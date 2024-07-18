@@ -36,7 +36,7 @@ describe('AllocFelt252Dict', () => {
     const hint = allocFelt252DictParser.parse(ALLOC_FELT252_DICT);
     expect(hint).toEqual({
       type: HintName.AllocFelt252Dict,
-      segment_arena_ptr: {
+      segmentArenaPtr: {
         type: OpType.Deref,
         cell: {
           register: Register.Ap,
