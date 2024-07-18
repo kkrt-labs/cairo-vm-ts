@@ -53,6 +53,7 @@ import {
   felt252DictEntryInit,
   Felt252DictEntryInit,
 } from 'hints/felt252DictEntryInit';
+import { Felt252DictUpdate, felt252DictUpdate } from 'hints/felt252DictUpdate';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -113,6 +114,10 @@ export class VirtualMachine {
       [HintName.Felt252DictEntryInit]: (vm, hint) => {
         const h = hint as Felt252DictEntryInit;
         felt252DictEntryInit(vm, h.dictPtr, h.key);
+      },
+      [HintName.Felt252DictUpdate]: (vm, hint) => {
+        const h = hint as Felt252DictUpdate;
+        felt252DictUpdate(vm, h.dictPtr, h.value);
       },
     };
 

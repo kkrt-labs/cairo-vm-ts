@@ -5,4 +5,5 @@ export enum HintName {
   AllocFelt252Dict = 'AllocFelt252Dict',
   GetSegmentArenaIndex = 'GetSegmentArenaIndex',
   Felt252DictEntryInit = 'Felt252DictEntryInit',
+  Felt252DictUpdate = 'Felt252DictUpdate'
 }
