@@ -57,6 +57,7 @@ import {
   Felt252DictEntryUpdate,
   felt252DictEntryUpdate,
 } from 'hints/felt252DictEntryUpdate';
+import { initSquashData, InitSquashData } from 'hints/initSquashData';
 import { UndefinedSegmentValue } from 'errors/memory';
 
 export type TraceEntry = {
@@ -122,6 +123,17 @@ export class VirtualMachine {
       [HintName.Felt252DictEntryUpdate]: (vm, hint) => {
         const h = hint as Felt252DictEntryUpdate;
         felt252DictEntryUpdate(vm, h.dictPtr, h.value);
+      },
+      [HintName.InitSquashData]: (vm, hint) => {
+        const h = hint as InitSquashData;
+        initSquashData(
+          vm,
+          h.dictAccesses,
+          h.ptrDiff,
+          h.nAccesses,
+          h.bigKeys,
+          h.firstKey
+        );
       },
     };
 

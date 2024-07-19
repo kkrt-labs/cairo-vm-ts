@@ -16,6 +16,7 @@ const hint = z.union([
   getSegmentArenaIndexParser,
   felt252DictEntryInitParser,
   felt252DictEntryUpdateParser,
+  initSquashDataParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */
