@@ -1,10 +1,12 @@
 import { z } from 'zod';
 
 import { VirtualMachine } from 'vm/virtualMachine';
-import { resOp, ResOp } from 'hints/hintParamsSchema';
+import { Deref, OpType, resOp, ResOp } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 import { isFelt, isRelocatable } from 'primitives/segmentValue';
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
+import { Relocatable } from 'primitives/relocatable';
+import { UndefinedSegmentValue } from 'errors/memory';
 
 /** Zod object to parse Felt252DictUpdate hint */
 export const felt252DictUpdateParser = z
@@ -46,5 +48,15 @@ export const felt252DictUpdate = (
     throw new ExpectedRelocatable(keyAddress);
   const key = vm.memory.get(keyAddress);
   if (!key || !isFelt(key)) throw new ExpectedFelt(key);
-  vm.getDict(address).set(key, vm.getResOperandValue(value));
+  const val =
+    value.type === OpType.Deref
+      ? vm.memory.get(
+          new Relocatable(
+            (value as Deref).cell.register,
+            (value as Deref).cell.offset
+          )
+        )
+      : vm.getResOperandValue(value);
+  if (!val) throw new UndefinedSegmentValue();
+  vm.getDict(address).set(key, val);
 };
