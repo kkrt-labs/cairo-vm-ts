@@ -3,7 +3,7 @@ export enum HintName {
   AllocSegment = 'AllocSegment',
   TestLessThan = 'TestLessThan',
   AllocFelt252Dict = 'AllocFelt252Dict',
-  GetSegmentArenaIndex = 'GetSegmentArenaIndex',
   Felt252DictEntryInit = 'Felt252DictEntryInit',
-  Felt252DictUpdate = 'Felt252DictUpdate'
+  Felt252DictEntryUpdate = 'Felt252DictEntryUpdate',
+  GetSegmentArenaIndex = 'GetSegmentArenaIndex',
 }

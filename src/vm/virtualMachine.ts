@@ -53,7 +53,11 @@ import {
   felt252DictEntryInit,
   Felt252DictEntryInit,
 } from 'hints/felt252DictEntryInit';
-import { Felt252DictUpdate, felt252DictUpdate } from 'hints/felt252DictUpdate';
+import {
+  Felt252DictEntryUpdate,
+  felt252DictEntryUpdate,
+} from 'hints/felt252DictEntryUpdate';
+import { UndefinedSegmentValue } from 'errors/memory';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -115,9 +119,9 @@ export class VirtualMachine {
         const h = hint as Felt252DictEntryInit;
         felt252DictEntryInit(vm, h.dictPtr, h.key);
       },
-      [HintName.Felt252DictUpdate]: (vm, hint) => {
-        const h = hint as Felt252DictUpdate;
-        felt252DictUpdate(vm, h.dictPtr, h.value);
+      [HintName.Felt252DictEntryUpdate]: (vm, hint) => {
+        const h = hint as Felt252DictEntryUpdate;
+        felt252DictEntryUpdate(vm, h.dictPtr, h.value);
       },
     };
 
@@ -578,6 +582,12 @@ export class VirtualMachine {
   getRelocatable(cell: CellRef): Relocatable {
     const value = this.memory.get(this.cellRefToRelocatable(cell));
     if (!value || !isRelocatable(value)) throw new ExpectedRelocatable(value);
+    return value;
+  }
+
+  getSegmentValue(cell: CellRef): SegmentValue {
+    const value = this.memory.get(this.cellRefToRelocatable(cell));
+    if (!value) throw new UndefinedSegmentValue();
     return value;
   }
 

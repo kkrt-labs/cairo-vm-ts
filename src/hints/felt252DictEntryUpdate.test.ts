@@ -8,7 +8,7 @@ import { Felt } from 'primitives/felt';
 import { segmentArenaHandler } from 'builtins/segmentArena';
 import { Relocatable } from 'primitives/relocatable';
 import { allocFelt252DictParser } from './allocFelt252Dict';
-import { felt252DictUpdateParser } from './felt252DictUpdate';
+import { felt252DictEntryUpdateParser } from './felt252DictEntryUpdate';
 import { SegmentValue } from 'primitives/segmentValue';
 
 const initSegmentArenaBuiltin = (vm: VirtualMachine) => {
@@ -33,8 +33,8 @@ const ALLOC_FELT252_DICT = {
   },
 };
 
-const FELT252_DICT_UPDATE = {
-  Felt252DictUpdate: {
+const FELT252_DICT_ENTRY_UPDATE = {
+  Felt252DictEntryUpdate: {
     dict_ptr: {
       Deref: {
         register: 'AP',
@@ -50,11 +50,11 @@ const FELT252_DICT_UPDATE = {
   },
 };
 
-describe('Felt252DictUpdate', () => {
+describe('Felt252DictEntryUpdate', () => {
   test('should properly parse Felt252DictEntryUpdate hint', () => {
-    const hint = felt252DictUpdateParser.parse(FELT252_DICT_UPDATE);
+    const hint = felt252DictEntryUpdateParser.parse(FELT252_DICT_ENTRY_UPDATE);
     expect(hint).toEqual({
-      type: HintName.Felt252DictUpdate,
+      type: HintName.Felt252DictEntryUpdate,
       dictPtr: {
         type: OpType.Deref,
         cell: {
@@ -76,7 +76,9 @@ describe('Felt252DictUpdate', () => {
     'should properly execute Felt252DictUpdate hint',
     (value: SegmentValue) => {
       const allocHint = allocFelt252DictParser.parse(ALLOC_FELT252_DICT);
-      const hint = felt252DictUpdateParser.parse(FELT252_DICT_UPDATE);
+      const hint = felt252DictEntryUpdateParser.parse(
+        FELT252_DICT_ENTRY_UPDATE
+      );
       const vm = new VirtualMachine();
       vm.memory.addSegment();
       vm.memory.addSegment();
@@ -86,11 +88,9 @@ describe('Felt252DictUpdate', () => {
       vm.executeHint(allocHint);
 
       const newDictPtr = new Relocatable(4, 0);
-      const key = new Relocatable(1, 2);
       const keyValue = new Felt(5n);
       vm.memory.assertEq(vm.ap.add(1), newDictPtr.add(3));
-      vm.memory.assertEq(newDictPtr, key);
-      vm.memory.assertEq(vm.ap.add(2), keyValue);
+      vm.memory.assertEq(newDictPtr, keyValue);
       vm.memory.assertEq(vm.ap.add(3), value);
 
       const dict = vm.dictManager.get(newDictPtr.segmentId);
