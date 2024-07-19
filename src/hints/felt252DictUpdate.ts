@@ -41,12 +41,10 @@ export const felt252DictUpdate = (
   value: ResOp
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictPtr));
-  const keyAddr = vm.memory.get(address.sub(3));
-  if (!keyAddr || !isRelocatable(keyAddr))
-    throw new ExpectedRelocatable(keyAddr);
-  const key = vm.memory.get(keyAddr);
+  const keyAddress = vm.memory.get(address.sub(3));
+  if (!keyAddress || !isRelocatable(keyAddress))
+    throw new ExpectedRelocatable(keyAddress);
+  const key = vm.memory.get(keyAddress);
   if (!key || !isFelt(key)) throw new ExpectedFelt(key);
-  const val = vm.getResOperandValue(value);
-  const dict = vm.getDict(address);
-  dict.set(key, val);
+  vm.getDict(address).set(key, vm.getResOperandValue(value));
 };
