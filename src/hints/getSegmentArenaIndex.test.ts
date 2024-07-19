@@ -78,9 +78,7 @@ describe('GetSegmentArenaIndex', () => {
     vm.executeHint(allocHint);
 
     const newDictPtr = new Relocatable(4, 0);
-    const index = new Relocatable(4, 2);
     vm.memory.assertEq(vm.ap.add(1), newDictPtr);
-    vm.memory.assertEq(vm.ap.add(2), index);
 
     vm.executeHint(hint);
 
@@ -88,7 +86,7 @@ describe('GetSegmentArenaIndex', () => {
     expect(dict).not.toBeUndefined();
 
     if (dict) {
-      expect(vm.memory.get(index)).toEqual(dict.id);
+      expect(vm.memory.get(vm.ap.add(2))).toEqual(dict.id);
     }
   });
 });

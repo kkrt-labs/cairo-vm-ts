@@ -39,8 +39,7 @@ export const getSegmentArenaIndex = (
   dictEndPtr: ResOp,
   dictIndex: CellRef
 ) => {
-  const index = vm.getRelocatable(dictIndex);
   const address = vm.getPointer(...vm.extractBuffer(dictEndPtr));
   const dict = vm.getDict(address);
-  vm.memory.assertEq(index, dict.id);
+  vm.memory.assertEq(vm.cellRefToRelocatable(dictIndex), dict.id);
 };
