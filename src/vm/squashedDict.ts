@@ -2,18 +2,19 @@ import { EmptyIndex, EmptyIndices, EmptyKeys } from 'errors/squashedDict';
 import { Felt } from 'primitives/felt';
 
 export class SquashedDictManager {
-  public keyToIndices: Map<Felt, Felt[]>;
+  public keyToIndices: Map<string, Felt[]>;
   public keys: Felt[];
 
   constructor() {
-    this.keyToIndices = new Map<Felt, Felt[]>();
+    this.keyToIndices = new Map<string, Felt[]>();
     this.keys = [];
   }
 
   insert(key: Felt, index: Felt) {
-    const indices = this.keyToIndices.get(key);
+    const keyStr = key.toString();
+    const indices = this.keyToIndices.get(keyStr);
     if (!indices) {
-      this.keyToIndices.set(key, [index]);
+      this.keyToIndices.set(keyStr, [index]);
     } else {
       indices.push(index);
     }
@@ -33,7 +34,7 @@ export class SquashedDictManager {
 
   lastIndices(): Felt[] {
     const key = this.lastKey();
-    const indices = this.keyToIndices.get(key);
+    const indices = this.keyToIndices.get(key.toString());
     if (!indices) throw new EmptyIndices(key);
     return indices;
   }

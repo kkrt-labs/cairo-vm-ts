@@ -745,7 +745,7 @@ describe('VirtualMachine', () => {
       const vm = new VirtualMachine();
       const address = vm.newDict();
       expect(address).toEqual(new Relocatable(0, 0));
-      expect(vm.getDict(address)).toEqual(new Dictionnary(new Felt(BigInt(0))));
+      expect(vm.getDict(address)).toEqual(new Dictionnary(new Felt(0n)));
     });
 
     test('should properly set and get value of a dictionnary', () => {

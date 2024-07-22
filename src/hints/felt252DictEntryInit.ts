@@ -42,7 +42,7 @@ export const felt252DictEntryInit = (
   key: ResOp
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictPtr));
-  const keyValue = vm.getResOperandValue(key);
+  const keyValue = vm.getResOperandValue(key).toString();
   const dict = vm.getDict(address);
   const prevValue = dict.get(keyValue) || new Felt(0n);
   dict.set(keyValue, prevValue);

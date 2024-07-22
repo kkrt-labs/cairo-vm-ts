@@ -74,7 +74,7 @@ export const initSquashData = (
   }
   vm.squashedDictManager.keyToIndices.forEach((values, key) => {
     values.reverse();
-    vm.squashedDictManager.keys.push(key);
+    vm.squashedDictManager.keys.push(new Felt(BigInt(key)));
   });
   vm.squashedDictManager.keys.sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
   vm.memory.assertEq(

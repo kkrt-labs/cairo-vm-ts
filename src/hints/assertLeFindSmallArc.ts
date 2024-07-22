@@ -57,8 +57,6 @@ export const assertLeFindSmallArcs = (
 
   const primeOver3High = new Felt(3544607988759775765608368578435044694n);
   const primeOver2High = new Felt(5316911983139663648412552867652567041n);
-  if (!primeOver3High.eq(new Felt((Felt.PRIME / 3n) >> 127n)))
-    throw new Error('Felt over 3 is not equal to the given expression');
   const ptr = vm.getPointer(...vm.extractBuffer(rangeCheckPtr));
 
   vm.memory.assertEq(ptr, arcs[0].value.mod(primeOver3High));

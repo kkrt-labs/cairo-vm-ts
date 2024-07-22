@@ -99,7 +99,7 @@ describe('Felt252DictEntryUpdate', () => {
       vm.executeHint(hint);
 
       if (dict) {
-        expect(dict.get(keyValue)).toEqual(value);
+        expect(dict.get(keyValue.toString())).toEqual(value);
       }
     }
   );

@@ -91,12 +91,12 @@ describe('Felt252DictEntryInit', () => {
     expect(dict).not.toBeUndefined();
 
     const keyValue = new Felt(13n);
-    dict?.set(key, keyValue);
+    dict?.set(key.toString(), keyValue);
 
     vm.executeHint(hint);
 
     if (dict) {
-      expect(dict.get(key)).toEqual(new Felt(13n));
+      expect(dict.get(key.toString())).toEqual(new Felt(13n));
       expect(vm.memory.get(newDictPtr.add(1))).toEqual(keyValue);
     }
   });

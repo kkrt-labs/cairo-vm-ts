@@ -106,7 +106,7 @@ export type RelocatedMemory = {
   value: Felt;
 };
 
-export class Dictionnary extends Map<Felt, SegmentValue> {
+export class Dictionnary extends Map<string, SegmentValue> {
   constructor(public readonly id: Felt) {
     super();
     this.id = id;
@@ -762,13 +762,13 @@ export class VirtualMachine {
 
   getDictValue(address: Relocatable, key: Felt): SegmentValue {
     const dict = this.getDict(address);
-    const value = dict.get(key);
+    const value = dict.get(key.toString());
     if (!value) throw new DictValueNotFound(address, key);
     return value;
   }
 
   setDictValue(address: Relocatable, key: Felt, value: SegmentValue) {
     const dict = this.getDict(address);
-    dict.set(key, value);
+    dict.set(key.toString(), value);
   }
 }

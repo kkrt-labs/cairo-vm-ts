@@ -49,5 +49,5 @@ export const felt252DictEntryUpdate = (
     value.type === OpType.Deref
       ? vm.getSegmentValue((value as Deref).cell)
       : vm.getResOperandValue(value);
-  vm.getDict(address).set(key, val);
+  vm.getDict(address).set(key.toString(), val);
 };
