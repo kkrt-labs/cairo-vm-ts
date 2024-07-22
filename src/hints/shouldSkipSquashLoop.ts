@@ -29,9 +29,10 @@ export const shouldSkipSquashLoop = (
   vm: VirtualMachine,
   shouldSkipLoop: CellRef
 ) => {
-  const flag = vm.squashedDictManager.lastIndices().length
-    ? new Felt(1n)
-    : new Felt(0n);
+  const flag =
+    vm.squashedDictManager.lastIndices().length > 1
+      ? new Felt(0n)
+      : new Felt(1n);
 
   vm.memory.assertEq(vm.cellRefToRelocatable(shouldSkipLoop), flag);
 };

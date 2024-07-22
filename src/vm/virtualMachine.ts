@@ -1,4 +1,5 @@
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
+import { UndefinedSegmentValue } from 'errors/memory';
 import {
   InvalidDst,
   InvalidOp1,
@@ -58,7 +59,6 @@ import {
   felt252DictEntryUpdate,
 } from 'hints/felt252DictEntryUpdate';
 import { initSquashData, InitSquashData } from 'hints/initSquashData';
-import { UndefinedSegmentValue } from 'errors/memory';
 import {
   getCurrentAccessIndex,
   GetCurrentAccessIndex,
@@ -67,6 +67,14 @@ import {
   shouldSkipSquashLoop,
   ShouldSkipSquashLoop,
 } from 'hints/shouldSkipSquashLoop';
+import {
+  GetCurrentAccessDelta,
+  getCurrentAccessDelta,
+} from 'hints/getCurrentAccessDelta';
+import {
+  shouldContinueSquashLoop,
+  ShouldContinueSquashLoop,
+} from 'hints/shouldContinueSquashLoop';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -151,6 +159,14 @@ export class VirtualMachine {
       [HintName.ShouldSkipSquashLoop]: (vm, hint) => {
         const h = hint as ShouldSkipSquashLoop;
         shouldSkipSquashLoop(vm, h.shouldSkipLoop);
+      },
+      [HintName.GetCurrentAccessDelta]: (vm, hint) => {
+        const h = hint as GetCurrentAccessDelta;
+        getCurrentAccessDelta(vm, h.indexDeltaMinusOne);
+      },
+      [HintName.ShouldContinueSquashLoop]: (vm, hint) => {
+        const h = hint as ShouldContinueSquashLoop;
+        shouldContinueSquashLoop(vm, h.shouldContinue);
       },
     };
 

@@ -9,4 +9,6 @@ export enum HintName {
   InitSquashData = 'InitSquashData',
   GetCurrentAccessIndex = 'GetCurrentAccessIndex',
   ShouldSkipSquashLoop = 'ShouldSkipSquashLoop',
+  GetCurrentAccessDelta = 'GetCurrentAccessDelta',
+  ShouldContinueSquashLoop = 'ShouldContinueSquashLoop',
 }
