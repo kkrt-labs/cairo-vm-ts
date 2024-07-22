@@ -60,7 +60,7 @@ export const assertLeFindSmallArcs = (
   const ptr = vm.getPointer(...vm.extractBuffer(rangeCheckPtr));
 
   vm.memory.assertEq(ptr, arcs[0].value.mod(primeOver3High));
-  vm.memory.assertEq(ptr, arcs[0].value.div(primeOver3High));
-  vm.memory.assertEq(ptr, arcs[1].value.mod(primeOver2High));
-  vm.memory.assertEq(ptr, arcs[1].value.div(primeOver2High));
+  vm.memory.assertEq(ptr.add(1), arcs[0].value.div(primeOver3High));
+  vm.memory.assertEq(ptr.add(2), arcs[1].value.mod(primeOver2High));
+  vm.memory.assertEq(ptr.add(3), arcs[1].value.div(primeOver2High));
 };
