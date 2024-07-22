@@ -12,6 +12,9 @@ import { shouldSkipSquashLoopParser } from './shouldSkipSquashLoop';
 import { getCurrentAccessDeltaParser } from './getCurrentAccessDelta';
 import { shouldContinueSquashLoopParser } from './shouldContinueSquashLoop';
 import { getNextDictKeyParser } from './getNextDictKey';
+import { assertLeIsFirstArcExcludedParser } from './assertLeIsFirstArcExcluded';
+import { assertLeFindSmallArcsParser } from './assertLeFindSmallArc';
+import { assertLeIsSecondArcExcludedParser } from './assertLeIsSecondArcExcluded';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -27,6 +30,9 @@ const hint = z.union([
   getCurrentAccessDeltaParser,
   shouldContinueSquashLoopParser,
   getNextDictKeyParser,
+  assertLeFindSmallArcsParser,
+  assertLeIsFirstArcExcludedParser,
+  assertLeIsSecondArcExcludedParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */

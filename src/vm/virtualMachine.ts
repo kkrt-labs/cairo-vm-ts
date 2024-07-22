@@ -76,6 +76,18 @@ import {
   ShouldContinueSquashLoop,
 } from 'hints/shouldContinueSquashLoop';
 import { getNextDictKey, GetNextDictKey } from 'hints/getNextDictKey';
+import {
+  assertLeFindSmallArcs,
+  AssertLeFindSmallArcs,
+} from 'hints/assertLeFindSmallArc';
+import {
+  assertLeIsFirstArcExcluded,
+  AssertLeIsFirstArcExcluded,
+} from 'hints/assertLeIsFirstArcExcluded';
+import {
+  assertLeIsSecondArcExcluded,
+  AssertLeIsSecondArcExcluded,
+} from 'hints/assertLeIsSecondArcExcluded';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -172,6 +184,18 @@ export class VirtualMachine {
       [HintName.GetNextDictKey]: (vm, hint) => {
         const h = hint as GetNextDictKey;
         getNextDictKey(vm, h.nextKey);
+      },
+      [HintName.AssertLeFindSmallArcs]: (vm, hint) => {
+        const h = hint as AssertLeFindSmallArcs;
+        assertLeFindSmallArcs(vm, h.rangeCheckPtr, h.a, h.b);
+      },
+      [HintName.AssertLeIsFirstArcExcluded]: (vm, hint) => {
+        const h = hint as AssertLeIsFirstArcExcluded;
+        assertLeIsFirstArcExcluded(vm, h.skipExcludeFirstArc);
+      },
+      [HintName.AssertLeIsSecondArcExcluded]: (vm, hint) => {
+        const h = hint as AssertLeIsSecondArcExcluded;
+        assertLeIsSecondArcExcluded(vm, h.skipExcludeSecondArc);
       },
     };
 

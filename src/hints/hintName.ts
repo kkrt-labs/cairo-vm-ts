@@ -12,4 +12,7 @@ export enum HintName {
   GetCurrentAccessDelta = 'GetCurrentAccessDelta',
   ShouldContinueSquashLoop = 'ShouldContinueSquashLoop',
   GetNextDictKey = 'GetNextDictKey',
+  AssertLeFindSmallArcs = 'AssertLeFindSmallArcs',
+  AssertLeIsFirstArcExcluded = 'AssertLeIsFirstArcExcluded',
+  AssertLeIsSecondArcExcluded = 'AssertLeIsSecondArcExcluded',
 }

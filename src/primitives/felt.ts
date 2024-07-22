@@ -77,6 +77,11 @@ export class Felt {
     return this.mul(other.inv());
   }
 
+  mod(other: SegmentValue): Felt {
+    if (!isFelt(other)) throw new ExpectedFelt(other);
+    return new Felt(this.inner % other.inner);
+  }
+
   eq(other: SegmentValue): boolean {
     return !isRelocatable(other) && this.inner === other.inner;
   }
