@@ -40,16 +40,16 @@ export const initSquashDataParser = z
 /**
  * InitSquashData hint
  *
- * Set a value in a dict: `dict[key] = value`
+ * Initialize the squashed dictionnary data.
  */
 export type InitSquashData = z.infer<typeof initSquashDataParser>;
 
 /**
- * Get the dictionnary `dict` at `dictPtr`
+ * Initialize the squashed dictionnary
  *
- * Get the key at address `dict - 3`
- *
- * `dict[key] = value`
+ * - Insert all accessed keys
+ * - Assert the biggest key to `bigKeys` address
+ * - Assert the smallest (first) key to `firstKey` address
  *
  */
 export const initSquashData = (
@@ -72,21 +72,19 @@ export const initSquashData = (
     if (!key || !isFelt(key)) throw new ExpectedFelt(key);
     vm.squashedDictManager.insert(key, new Felt(BigInt(i)));
   }
-  vm.squashedDictManager.keyToIndices.forEach((value, key) => {
-    value.reverse();
+  vm.squashedDictManager.keyToIndices.forEach((values, key) => {
+    values.reverse();
     vm.squashedDictManager.keys.push(key);
   });
   vm.squashedDictManager.keys.sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
-  const bigKeysAddress = vm.getRelocatable(bigKeys);
   vm.memory.assertEq(
-    bigKeysAddress,
+    vm.cellRefToRelocatable(bigKeys),
     vm.squashedDictManager.keys[0] > new Felt(1n << 128n)
       ? new Felt(1n)
       : new Felt(0n)
   );
-  const firstKeyAddress = vm.getRelocatable(firstKey);
   vm.memory.assertEq(
-    firstKeyAddress,
+    vm.cellRefToRelocatable(firstKey),
     vm.squashedDictManager.keys[vm.squashedDictManager.keys.length - 1]
   );
 };
