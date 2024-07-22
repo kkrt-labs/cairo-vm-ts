@@ -32,7 +32,7 @@ export const shouldContinueSquashLoop = (
   shouldContinue: CellRef
 ) => {
   const flag =
-    vm.squashedDictManager.lastIndices().length <= 1
+    vm.squashedDictManager.lastIndices().length > 1
       ? new Felt(1n)
       : new Felt(0n);
 
