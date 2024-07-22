@@ -24,15 +24,17 @@ export type AssertLeIsSecondArcExcluded = z.infer<
 >;
 
 /**
- * Check whether the first arc from `` is excluded.
+ * Check whether the second arc from `AssertLeFindSmallArcs` is excluded.
+ *
+ * Read the value in scope at `excluded_arc`
  */
 export const assertLeIsSecondArcExcluded = (
   vm: VirtualMachine,
-  skipExcludeAFlag: CellRef
+  skipExcludeSecondArc: CellRef
 ) => {
   const excludedArc = vm.scopeManager.get('excluded_arc');
   vm.memory.assertEq(
-    vm.cellRefToRelocatable(skipExcludeAFlag),
+    vm.cellRefToRelocatable(skipExcludeSecondArc),
     (excludedArc as Arc).pos != 1 ? new Felt(1n) : new Felt(0n)
   );
 };

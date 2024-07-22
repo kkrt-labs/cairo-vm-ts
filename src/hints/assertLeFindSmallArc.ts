@@ -32,7 +32,12 @@ export type Arc = {
 };
 
 /**
- * Check whether the first arc from `` is excluded.
+ * Compute the three arcs `a`, `b - a` and `PRIME - 1 - b`
+ *
+ * Set the biggest arc to the scope variable `excluded_arc`
+ *
+ * Store the modulo and remainder of the smallest arc (resp. second smallest arc)
+ * against `Math.ceil(Felt.PRIME / 3) >> 128n` (resp. `Math.ceil(Felt.PRIME / 2) >> 128n`)
  */
 export const assertLeFindSmallArcs = (
   vm: VirtualMachine,
@@ -52,6 +57,8 @@ export const assertLeFindSmallArcs = (
 
   const primeOver3High = new Felt(3544607988759775765608368578435044694n);
   const primeOver2High = new Felt(5316911983139663648412552867652567041n);
+  if (!primeOver3High.eq(new Felt((Felt.PRIME / 3n) >> 127n)))
+    throw new Error('Felt over 3 is not equal to the given expression');
   const ptr = vm.getPointer(...vm.extractBuffer(rangeCheckPtr));
 
   vm.memory.assertEq(ptr, arcs[0].value.mod(primeOver3High));

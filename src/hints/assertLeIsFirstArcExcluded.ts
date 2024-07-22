@@ -24,7 +24,9 @@ export type AssertLeIsFirstArcExcluded = z.infer<
 >;
 
 /**
- * Check whether the first arc from `` is excluded.
+ * Check whether the first arc from `AssertLeFindSmallArcs` is excluded.
+ *
+ * Read the value in scope at `excluded_arc`
  */
 export const assertLeIsFirstArcExcluded = (
   vm: VirtualMachine,
