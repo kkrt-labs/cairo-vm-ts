@@ -11,4 +11,5 @@ export enum HintName {
   ShouldSkipSquashLoop = 'ShouldSkipSquashLoop',
   GetCurrentAccessDelta = 'GetCurrentAccessDelta',
   ShouldContinueSquashLoop = 'ShouldContinueSquashLoop',
+  GetNextDictKey = 'GetNextDictKey',
 }

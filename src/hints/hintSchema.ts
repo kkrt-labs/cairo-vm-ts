@@ -11,6 +11,7 @@ import { getCurrentAccessIndexParser } from './getCurrentAccessIndex';
 import { shouldSkipSquashLoopParser } from './shouldSkipSquashLoop';
 import { getCurrentAccessDeltaParser } from './getCurrentAccessDelta';
 import { shouldContinueSquashLoopParser } from './shouldContinueSquashLoop';
+import { getNextDictKeyParser } from './getNextDictKey';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -25,6 +26,7 @@ const hint = z.union([
   shouldSkipSquashLoopParser,
   getCurrentAccessDeltaParser,
   shouldContinueSquashLoopParser,
+  getNextDictKeyParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */

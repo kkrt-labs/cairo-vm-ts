@@ -75,6 +75,7 @@ import {
   shouldContinueSquashLoop,
   ShouldContinueSquashLoop,
 } from 'hints/shouldContinueSquashLoop';
+import { getNextDictKey, GetNextDictKey } from 'hints/getNextDictKey';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -167,6 +168,10 @@ export class VirtualMachine {
       [HintName.ShouldContinueSquashLoop]: (vm, hint) => {
         const h = hint as ShouldContinueSquashLoop;
         shouldContinueSquashLoop(vm, h.shouldContinue);
+      },
+      [HintName.GetNextDictKey]: (vm, hint) => {
+        const h = hint as GetNextDictKey;
+        getNextDictKey(vm, h.nextKey);
       },
     };
 
