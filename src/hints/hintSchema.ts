@@ -8,6 +8,7 @@ import { felt252DictEntryInitParser } from './felt252DictEntryInit';
 import { felt252DictEntryUpdateParser } from './felt252DictEntryUpdate';
 import { initSquashDataParser } from './initSquashData';
 import { getCurrentAccessIndexParser } from './getCurrentAccessIndex';
+import { shouldSkipSquashLoopParser } from './shouldSkipSquashLoop';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -19,6 +20,7 @@ const hint = z.union([
   felt252DictEntryUpdateParser,
   initSquashDataParser,
   getCurrentAccessIndexParser,
+  shouldSkipSquashLoopParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */

@@ -61,8 +61,12 @@ import { initSquashData, InitSquashData } from 'hints/initSquashData';
 import { UndefinedSegmentValue } from 'errors/memory';
 import {
   getCurrentAccessIndex,
-  GetCurrentAccessIndexParser,
+  GetCurrentAccessIndex,
 } from 'hints/getCurrentAccessIndex';
+import {
+  shouldSkipSquashLoop,
+  ShouldSkipSquashLoop,
+} from 'hints/shouldSkipSquashLoop';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -141,8 +145,12 @@ export class VirtualMachine {
         );
       },
       [HintName.GetCurrentAccessIndex]: (vm, hint) => {
-        const h = hint as GetCurrentAccessIndexParser;
+        const h = hint as GetCurrentAccessIndex;
         getCurrentAccessIndex(vm, h.rangeCheckPtr);
+      },
+      [HintName.ShouldSkipSquashLoop]: (vm, hint) => {
+        const h = hint as ShouldSkipSquashLoop;
+        shouldSkipSquashLoop(vm, h.shouldSkipLoop);
       },
     };
 

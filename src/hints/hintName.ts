@@ -8,4 +8,5 @@ export enum HintName {
   GetSegmentArenaIndex = 'GetSegmentArenaIndex',
   InitSquashData = 'InitSquashData',
   GetCurrentAccessIndex = 'GetCurrentAccessIndex',
+  ShouldSkipSquashLoop = 'ShouldSkipSquashLoop',
 }
