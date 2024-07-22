@@ -7,6 +7,7 @@ import { getSegmentArenaIndexParser } from './getSegmentArenaIndex';
 import { felt252DictEntryInitParser } from './felt252DictEntryInit';
 import { felt252DictEntryUpdateParser } from './felt252DictEntryUpdate';
 import { initSquashDataParser } from './initSquashData';
+import { getCurrentAccessIndexParser } from './getCurrentAccessIndex';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -17,6 +18,7 @@ const hint = z.union([
   felt252DictEntryInitParser,
   felt252DictEntryUpdateParser,
   initSquashDataParser,
+  getCurrentAccessIndexParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */

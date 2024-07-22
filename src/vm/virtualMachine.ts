@@ -59,6 +59,10 @@ import {
 } from 'hints/felt252DictEntryUpdate';
 import { initSquashData, InitSquashData } from 'hints/initSquashData';
 import { UndefinedSegmentValue } from 'errors/memory';
+import {
+  getCurrentAccessIndex,
+  GetCurrentAccessIndexParser,
+} from 'hints/getCurrentAccessIndex';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -124,6 +128,7 @@ export class VirtualMachine {
         const h = hint as Felt252DictEntryUpdate;
         felt252DictEntryUpdate(vm, h.dictPtr, h.value);
       },
+
       [HintName.InitSquashData]: (vm, hint) => {
         const h = hint as InitSquashData;
         initSquashData(
@@ -134,6 +139,10 @@ export class VirtualMachine {
           h.bigKeys,
           h.firstKey
         );
+      },
+      [HintName.GetCurrentAccessIndex]: (vm, hint) => {
+        const h = hint as GetCurrentAccessIndexParser;
+        getCurrentAccessIndex(vm, h.rangeCheckPtr);
       },
     };
 
@@ -652,7 +661,7 @@ export class VirtualMachine {
 
         switch (binOp.op) {
           case Operation.Add:
-            return a.add(b);
+            return a.add(b) as Felt;
 
           case Operation.Mul:
             return a.mul(b);

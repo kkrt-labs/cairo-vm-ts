@@ -36,18 +36,18 @@ const FELT252_DICT_ENTRY_INIT = {
   Felt252DictEntryInit: {
     dict_ptr: {
       Deref: {
-        register: "AP",
-        offset: 1
-      }
+        register: 'AP',
+        offset: 1,
+      },
     },
     key: {
       Deref: {
-        register: "AP",
-        offset: 2
-      }
-    }
-  }
-}
+        register: 'AP',
+        offset: 2,
+      },
+    },
+  },
+};
 
 describe('Felt252DictEntryInit', () => {
   test('should properly parse Felt252DictEntryInit hint', () => {
@@ -90,8 +90,8 @@ describe('Felt252DictEntryInit', () => {
     const dict = vm.dictManager.get(newDictPtr.segmentId);
     expect(dict).not.toBeUndefined();
 
-    const keyValue = new Felt(13n)
-    dict?.set(key, keyValue)
+    const keyValue = new Felt(13n);
+    dict?.set(key, keyValue);
 
     vm.executeHint(hint);
 
