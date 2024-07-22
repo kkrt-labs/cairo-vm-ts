@@ -3,6 +3,7 @@ import { CURVE } from '@scure/starknet';
 import { CannotDivideByZero, ExpectedFelt } from 'errors/primitives';
 
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
+import { Relocatable } from './relocatable';
 
 export class Felt {
   private inner: bigint;
@@ -29,7 +30,13 @@ export class Felt {
     this.inner = _inner % Felt.PRIME;
   }
 
-  add(other: SegmentValue): Felt {
+  add(other: Felt): Felt;
+  add(other: Relocatable): Relocatable;
+  add(other: SegmentValue): SegmentValue;
+  add(other: SegmentValue): SegmentValue {
+    if (isRelocatable(other)) {
+      return other.add(this);
+    }
     if (!isFelt(other)) {
       throw new ExpectedFelt(other);
     }
@@ -37,7 +44,10 @@ export class Felt {
     return new Felt(this.inner + other.inner);
   }
 
-  sub(other: SegmentValue): Felt {
+  sub(other: Felt): Felt;
+  sub(other: Relocatable): never;
+  sub(other: SegmentValue): SegmentValue;
+  sub(other: SegmentValue): SegmentValue {
     if (!isFelt(other)) {
       throw new ExpectedFelt(other);
     }
