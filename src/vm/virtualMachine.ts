@@ -108,9 +108,7 @@ export class VirtualMachine {
    * - Run the instruction
    */
   step(hints?: Hint[]): void {
-    if (hints) {
-      hints.map((hint) => this.executeHint(hint));
-    }
+    hints?.forEach((hint) => this.executeHint(hint));
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new UndefinedInstruction(this.pc);
