@@ -29,10 +29,7 @@ import {
   OpType,
   ResOp,
 } from 'hints/hintParamsSchema';
-import { allocSegment, AllocSegment } from 'hints/allocSegment';
-import { testLessThan, TestLessThan } from 'hints/math/testLessThan';
 import { Hint } from 'hints/hintSchema';
-import { HintName } from 'hints/hintName';
 import {
   ApUpdate,
   FpUpdate,
@@ -45,52 +42,7 @@ import {
 } from './instruction';
 import { ScopeManager } from 'hints/scopeManager';
 import { SquashedDictManager } from './squashedDict';
-import {
-  allocFelt252Dict,
-  AllocFelt252Dict,
-} from 'hints/dict/allocFelt252Dict';
-import {
-  getSegmentArenaIndex,
-  GetSegmentArenaIndex,
-} from 'hints/dict/getSegmentArenaIndex';
-import {
-  felt252DictEntryInit,
-  Felt252DictEntryInit,
-} from 'hints/dict/felt252DictEntryInit';
-import {
-  Felt252DictEntryUpdate,
-  felt252DictEntryUpdate,
-} from 'hints/dict/felt252DictEntryUpdate';
-import { initSquashData, InitSquashData } from 'hints/dict/initSquashData';
-import {
-  getCurrentAccessIndex,
-  GetCurrentAccessIndex,
-} from 'hints/dict/getCurrentAccessIndex';
-import {
-  shouldSkipSquashLoop,
-  ShouldSkipSquashLoop,
-} from 'hints/dict/shouldSkipSquashLoop';
-import {
-  GetCurrentAccessDelta,
-  getCurrentAccessDelta,
-} from 'hints/dict/getCurrentAccessDelta';
-import {
-  shouldContinueSquashLoop,
-  ShouldContinueSquashLoop,
-} from 'hints/dict/shouldContinueSquashLoop';
-import { getNextDictKey, GetNextDictKey } from 'hints/dict/getNextDictKey';
-import {
-  assertLeFindSmallArcs,
-  AssertLeFindSmallArcs,
-} from 'hints/assertLeFindSmallArc';
-import {
-  assertLeIsFirstArcExcluded,
-  AssertLeIsFirstArcExcluded,
-} from 'hints/assertLeIsFirstArcExcluded';
-import {
-  assertLeIsSecondArcExcluded,
-  AssertLeIsSecondArcExcluded,
-} from 'hints/assertLeIsSecondArcExcluded';
+import { handlers } from 'hints/hintHandler';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -130,77 +82,7 @@ export class VirtualMachine {
   relocatedTrace: RelocatedTraceEntry[];
 
   /** Maps a hint to its implementation */
-  private handlers: Record<HintName, (vm: VirtualMachine, hint: Hint) => void> =
-    {
-      [HintName.AllocSegment]: (vm, hint) => {
-        const h = hint as AllocSegment;
-        allocSegment(vm, h.dst);
-      },
-      [HintName.TestLessThan]: (vm, hint) => {
-        const h = hint as TestLessThan;
-        testLessThan(vm, h.lhs, h.rhs, h.dst);
-      },
-      [HintName.AllocFelt252Dict]: (vm, hint) => {
-        const h = hint as AllocFelt252Dict;
-        allocFelt252Dict(vm, h.segmentArenaPtr);
-      },
-      [HintName.GetSegmentArenaIndex]: (vm, hint) => {
-        const h = hint as GetSegmentArenaIndex;
-        getSegmentArenaIndex(vm, h.dict_end_ptr, h.dict_index);
-      },
-      [HintName.Felt252DictEntryInit]: (vm, hint) => {
-        const h = hint as Felt252DictEntryInit;
-        felt252DictEntryInit(vm, h.dictPtr, h.key);
-      },
-      [HintName.Felt252DictEntryUpdate]: (vm, hint) => {
-        const h = hint as Felt252DictEntryUpdate;
-        felt252DictEntryUpdate(vm, h.dictPtr, h.value);
-      },
-
-      [HintName.InitSquashData]: (vm, hint) => {
-        const h = hint as InitSquashData;
-        initSquashData(
-          vm,
-          h.dictAccesses,
-          h.ptrDiff,
-          h.nAccesses,
-          h.bigKeys,
-          h.firstKey
-        );
-      },
-      [HintName.GetCurrentAccessIndex]: (vm, hint) => {
-        const h = hint as GetCurrentAccessIndex;
-        getCurrentAccessIndex(vm, h.rangeCheckPtr);
-      },
-      [HintName.ShouldSkipSquashLoop]: (vm, hint) => {
-        const h = hint as ShouldSkipSquashLoop;
-        shouldSkipSquashLoop(vm, h.shouldSkipLoop);
-      },
-      [HintName.GetCurrentAccessDelta]: (vm, hint) => {
-        const h = hint as GetCurrentAccessDelta;
-        getCurrentAccessDelta(vm, h.indexDeltaMinusOne);
-      },
-      [HintName.ShouldContinueSquashLoop]: (vm, hint) => {
-        const h = hint as ShouldContinueSquashLoop;
-        shouldContinueSquashLoop(vm, h.shouldContinue);
-      },
-      [HintName.GetNextDictKey]: (vm, hint) => {
-        const h = hint as GetNextDictKey;
-        getNextDictKey(vm, h.nextKey);
-      },
-      [HintName.AssertLeFindSmallArcs]: (vm, hint) => {
-        const h = hint as AssertLeFindSmallArcs;
-        assertLeFindSmallArcs(vm, h.rangeCheckPtr, h.a, h.b);
-      },
-      [HintName.AssertLeIsFirstArcExcluded]: (vm, hint) => {
-        const h = hint as AssertLeIsFirstArcExcluded;
-        assertLeIsFirstArcExcluded(vm, h.skipExcludeFirstArc);
-      },
-      [HintName.AssertLeIsSecondArcExcluded]: (vm, hint) => {
-        const h = hint as AssertLeIsSecondArcExcluded;
-        assertLeIsSecondArcExcluded(vm, h.skipExcludeSecondArc);
-      },
-    };
+  private handlers = handlers;
 
   constructor() {
     this.currentStep = 0n;
