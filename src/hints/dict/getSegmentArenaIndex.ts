@@ -15,8 +15,8 @@ export const getSegmentArenaIndexParser = z
   })
   .transform(({ GetSegmentArenaIndex: { dict_end_ptr, dict_index } }) => ({
     type: HintName.GetSegmentArenaIndex,
-    dict_end_ptr,
-    dict_index,
+    dictEndptr: dict_end_ptr,
+    dictIndex: dict_index,
   }));
 
 /**

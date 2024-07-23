@@ -95,7 +95,7 @@ export const handlers: Record<
   },
   [HintName.GetSegmentArenaIndex]: (vm, hint) => {
     const h = hint as GetSegmentArenaIndex;
-    getSegmentArenaIndex(vm, h.dict_end_ptr, h.dict_index);
+    getSegmentArenaIndex(vm, h.dictEndptr, h.dictIndex);
   },
   [HintName.InitSquashData]: (vm, hint) => {
     const h = hint as InitSquashData;
