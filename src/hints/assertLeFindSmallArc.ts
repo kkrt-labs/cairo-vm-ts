@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
-import { VirtualMachine } from 'vm/virtualMachine';
-import { ResOp, resOp } from 'hints/hintParamsSchema';
-import { HintName } from 'hints/hintName';
 import { Felt } from 'primitives/felt';
+import { VirtualMachine } from 'vm/virtualMachine';
+
+import { HintName } from 'hints/hintName';
+import { ResOp, resOp } from 'hints/hintParamsSchema';
 
 /** Zod object to parse AssertLeFindSmallArcs hint */
 export const assertLeFindSmallArcsParser = z

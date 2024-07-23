@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
 import { VirtualMachine } from 'vm/virtualMachine';
-import { resOp, ResOp, cellRef, CellRef } from 'hints/hintParamsSchema';
+
 import { HintName } from 'hints/hintName';
+import { resOp, ResOp, cellRef, CellRef } from 'hints/hintParamsSchema';
 
 /** Zod object to parse GetSegmentArenaIndex hint */
 export const getSegmentArenaIndexParser = z

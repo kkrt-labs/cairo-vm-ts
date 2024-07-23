@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
+
 import {
   CellRef,
   OpType,

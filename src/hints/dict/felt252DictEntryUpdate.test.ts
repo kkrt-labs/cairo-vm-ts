@@ -1,15 +1,16 @@
 import { describe, expect, test } from 'bun:test';
 
+import { Felt } from 'primitives/felt';
+import { Relocatable } from 'primitives/relocatable';
+import { SegmentValue } from 'primitives/segmentValue';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
-import { HintName } from 'hints/hintName';
-import { OpType } from '../hintParamsSchema';
-import { Felt } from 'primitives/felt';
 import { segmentArenaHandler } from 'builtins/segmentArena';
-import { Relocatable } from 'primitives/relocatable';
+
+import { HintName } from 'hints/hintName';
+import { OpType } from 'hints/hintParamsSchema';
 import { allocFelt252DictParser } from './allocFelt252Dict';
 import { felt252DictEntryUpdateParser } from './felt252DictEntryUpdate';
-import { SegmentValue } from 'primitives/segmentValue';
 
 const initSegmentArenaBuiltin = (vm: VirtualMachine) => {
   const info = [

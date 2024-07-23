@@ -1,10 +1,12 @@
 import { z } from 'zod';
 
-import { VirtualMachine } from 'vm/virtualMachine';
-import { Deref, OpType, resOp, ResOp } from 'hints/hintParamsSchema';
-import { HintName } from 'hints/hintName';
-import { isFelt } from 'primitives/segmentValue';
 import { ExpectedFelt } from 'errors/primitives';
+
+import { isFelt } from 'primitives/segmentValue';
+import { VirtualMachine } from 'vm/virtualMachine';
+
+import { HintName } from 'hints/hintName';
+import { Deref, OpType, resOp, ResOp } from 'hints/hintParamsSchema';
 
 /** Zod object to parse Felt252DictEntryUpdate hint */
 export const felt252DictEntryUpdateParser = z

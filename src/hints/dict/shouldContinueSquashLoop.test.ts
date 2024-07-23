@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 
+import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
+
 import { HintName } from 'hints/hintName';
-import { Felt } from 'primitives/felt';
 import { shouldContinueSquashLoopParser } from './shouldContinueSquashLoop';
 
 const SHOULD_CONTINUE_SQUASH_LOOP = {

@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { ScopeManager } from './scopeManager';
+
 import { CannotExitMainScope, VariableNotInScope } from 'errors/scopeManager';
+
 import { Felt } from 'primitives/felt';
+import { ScopeManager } from './scopeManager';
 
 describe('ScopeManager', () => {
   test('constructor', () => {

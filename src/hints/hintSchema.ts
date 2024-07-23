@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { allocSegmentParser } from './allocSegment';
 import { assertLeFindSmallArcsParser } from './assertLeFindSmallArc';
 import { assertLeIsFirstArcExcludedParser } from './assertLeIsFirstArcExcluded';

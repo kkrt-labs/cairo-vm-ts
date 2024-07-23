@@ -1,12 +1,13 @@
 import { describe, expect, test } from 'bun:test';
 
+import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
-import { HintName } from 'hints/hintName';
-import { Felt } from 'primitives/felt';
-import { getCurrentAccessIndexParser } from './getCurrentAccessIndex';
-import { OpType } from 'hints/hintParamsSchema';
 import { rangeCheckHandler } from 'builtins/rangeCheck';
+
+import { HintName } from 'hints/hintName';
+import { OpType } from 'hints/hintParamsSchema';
+import { getCurrentAccessIndexParser } from './getCurrentAccessIndex';
 
 const GET_CURRENT_ACCESS_INDEX = {
   GetCurrentAccessIndex: {

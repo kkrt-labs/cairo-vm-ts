@@ -1,4 +1,8 @@
 import { VirtualMachine } from 'vm/virtualMachine';
+
+import { Hint } from './hintSchema';
+import { HintName } from './hintName';
+
 import { AllocSegment, allocSegment } from './allocSegment';
 import {
   AssertLeFindSmallArcs,
@@ -43,8 +47,6 @@ import {
   ShouldSkipSquashLoop,
   shouldSkipSquashLoop,
 } from './dict/shouldSkipSquashLoop';
-import { HintName } from './hintName';
-import { Hint } from './hintSchema';
 import { TestLessThan, testLessThan } from './math/testLessThan';
 
 export const handlers: Record<

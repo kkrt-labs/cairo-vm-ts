@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
-import { VirtualMachine } from 'vm/virtualMachine';
-import { resOp, ResOp } from 'hints/hintParamsSchema';
-import { HintName } from 'hints/hintName';
-import { isFelt, isRelocatable } from 'primitives/segmentValue';
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
+
 import { Felt } from 'primitives/felt';
+import { isFelt, isRelocatable } from 'primitives/segmentValue';
+import { VirtualMachine } from 'vm/virtualMachine';
+
+import { HintName } from 'hints/hintName';
+import { resOp, ResOp } from 'hints/hintParamsSchema';
 
 /** Zod object to parse AllocFelt252Dict hint */
 export const allocFelt252DictParser = z

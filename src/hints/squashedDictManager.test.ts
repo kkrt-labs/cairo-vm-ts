@@ -1,7 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { SquashedDictManager } from './squashedDictManager';
-import { Felt } from 'primitives/felt';
+
 import { EmptyKeys } from 'errors/squashedDict';
+
+import { Felt } from 'primitives/felt';
+import { SquashedDictManager } from './squashedDictManager';
 
 describe('SquashedDictManager', () => {
   test('should properly initialize a SquashedDictManager', () => {

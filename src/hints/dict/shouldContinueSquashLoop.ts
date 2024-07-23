@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
+import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
+
 import { cellRef, CellRef } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
-import { Felt } from 'primitives/felt';
 
 /** Zod object to parse ShouldContinueSquashLoop hint */
 export const shouldContinueSquashLoopParser = z

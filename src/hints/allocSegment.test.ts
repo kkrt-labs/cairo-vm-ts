@@ -3,6 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { Relocatable } from 'primitives/relocatable';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
+
 import { HintName } from 'hints/hintName';
 import { allocSegmentParser } from './allocSegment';
 

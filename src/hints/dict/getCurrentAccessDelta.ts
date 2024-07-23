@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
-import { VirtualMachine } from 'vm/virtualMachine';
-import { cellRef, CellRef } from 'hints/hintParamsSchema';
-import { HintName } from 'hints/hintName';
 import { Felt } from 'primitives/felt';
+import { VirtualMachine } from 'vm/virtualMachine';
+
+import { HintName } from 'hints/hintName';
+import { cellRef, CellRef } from 'hints/hintParamsSchema';
 
 /** Zod object to parse GetCurrentAccessDelta hint */
 export const getCurrentAccessDeltaParser = z

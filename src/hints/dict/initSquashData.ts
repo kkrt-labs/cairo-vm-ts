@@ -1,11 +1,13 @@
 import { z } from 'zod';
 
-import { VirtualMachine } from 'vm/virtualMachine';
-import { CellRef, cellRef, resOp, ResOp } from 'hints/hintParamsSchema';
-import { HintName } from 'hints/hintName';
-import { isFelt } from 'primitives/segmentValue';
 import { ExpectedFelt } from 'errors/primitives';
+
 import { Felt } from 'primitives/felt';
+import { isFelt } from 'primitives/segmentValue';
+import { VirtualMachine } from 'vm/virtualMachine';
+
+import { HintName } from 'hints/hintName';
+import { CellRef, cellRef, resOp, ResOp } from 'hints/hintParamsSchema';
 
 /** Zod object to parse InitSquashData hint */
 export const initSquashDataParser = z

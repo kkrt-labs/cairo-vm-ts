@@ -1,8 +1,9 @@
 import { z } from 'zod';
 
 import { VirtualMachine } from 'vm/virtualMachine';
-import { cellRef, CellRef } from 'hints/hintParamsSchema';
+
 import { HintName } from 'hints/hintName';
+import { cellRef, CellRef } from 'hints/hintParamsSchema';
 
 /** Zod object to parse GetNextDictKey hint */
 export const getNextDictKeyParser = z

@@ -1,9 +1,10 @@
 import { z } from 'zod';
 
+import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
+
 import { resOp, ResOp } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
-import { Felt } from 'primitives/felt';
 
 /** Zod object to parse Felt252DictEntryInit hint */
 export const felt252DictEntryInitParser = z

@@ -2,8 +2,9 @@ import { z } from 'zod';
 
 import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
-import { cellRef, resOp, CellRef, ResOp } from 'hints/hintParamsSchema';
+
 import { HintName } from 'hints/hintName';
+import { cellRef, resOp, CellRef, ResOp } from 'hints/hintParamsSchema';
 
 /** Zod object to parse TestLessThan hint */
 export const testLessThanParser = z
