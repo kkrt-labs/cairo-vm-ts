@@ -165,14 +165,16 @@ You can still add it as a dependency with a local copy:
 | [Keccak](https://github.com/kkrt-labs/cairo-vm-ts/issues/69)         | &#9745; |
 | [Poseidon](https://github.com/kkrt-labs/cairo-vm-ts/issues/71)       | &#9745; |
 | [Range Check 96](https://github.com/kkrt-labs/cairo-vm-ts/issues/81) | &#9745; |
-| Segment Arena                                                        | &#9744; |
+| [Segment Arena](https://github.com/kkrt-labs/cairo-vm-ts/pull/106)   | &#9745; |
 | AddMod                                                               | &#9744; |
 | MulMod                                                               | &#9744; |
 
 ### Hints
 
-<!-- Add a table with the hint list and state done/to be done -->
-<!-- If the list is too long, maybe separate in chunks, put the list in an issue to track it and reference the issue here -->
+Hints are currently being implemented.
+
+Their development can be tracked
+[here](https://github.com/kkrt-labs/cairo-vm-ts/issues/90).
 
 ### Differential Testing & Benchmark
 
