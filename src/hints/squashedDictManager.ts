@@ -1,4 +1,8 @@
-import { EmptyIndex, EmptyIndices, EmptyKeys } from 'errors/squashedDict';
+import {
+  EmptyIndex,
+  EmptyIndices,
+  EmptyKeys,
+} from 'errors/squashedDictManager';
 
 import { Felt } from 'primitives/felt';
 

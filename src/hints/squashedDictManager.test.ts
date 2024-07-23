@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test';
 
-import { EmptyKeys } from 'errors/squashedDict';
+import { EmptyKeys } from 'errors/squashedDictManager';
 
 import { Felt } from 'primitives/felt';
 import { SquashedDictManager } from './squashedDictManager';
