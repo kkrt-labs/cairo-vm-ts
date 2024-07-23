@@ -30,7 +30,7 @@ import {
   ResOp,
 } from 'hints/hintParamsSchema';
 import { allocSegment, AllocSegment } from 'hints/allocSegment';
-import { testLessThan, TestLessThan } from 'hints/testLessThan';
+import { testLessThan, TestLessThan } from 'hints/math/testLessThan';
 import { Hint } from 'hints/hintSchema';
 import { HintName } from 'hints/hintName';
 import {
@@ -45,37 +45,40 @@ import {
 } from './instruction';
 import { ScopeManager } from 'hints/scopeManager';
 import { SquashedDictManager } from './squashedDict';
-import { allocFelt252Dict, AllocFelt252Dict } from 'hints/allocFelt252Dict';
+import {
+  allocFelt252Dict,
+  AllocFelt252Dict,
+} from 'hints/dict/allocFelt252Dict';
 import {
   getSegmentArenaIndex,
   GetSegmentArenaIndex,
-} from 'hints/getSegmentArenaIndex';
+} from 'hints/dict/getSegmentArenaIndex';
 import {
   felt252DictEntryInit,
   Felt252DictEntryInit,
-} from 'hints/felt252DictEntryInit';
+} from 'hints/dict/felt252DictEntryInit';
 import {
   Felt252DictEntryUpdate,
   felt252DictEntryUpdate,
-} from 'hints/felt252DictEntryUpdate';
-import { initSquashData, InitSquashData } from 'hints/initSquashData';
+} from 'hints/dict/felt252DictEntryUpdate';
+import { initSquashData, InitSquashData } from 'hints/dict/initSquashData';
 import {
   getCurrentAccessIndex,
   GetCurrentAccessIndex,
-} from 'hints/getCurrentAccessIndex';
+} from 'hints/dict/getCurrentAccessIndex';
 import {
   shouldSkipSquashLoop,
   ShouldSkipSquashLoop,
-} from 'hints/shouldSkipSquashLoop';
+} from 'hints/dict/shouldSkipSquashLoop';
 import {
   GetCurrentAccessDelta,
   getCurrentAccessDelta,
-} from 'hints/getCurrentAccessDelta';
+} from 'hints/dict/getCurrentAccessDelta';
 import {
   shouldContinueSquashLoop,
   ShouldContinueSquashLoop,
-} from 'hints/shouldContinueSquashLoop';
-import { getNextDictKey, GetNextDictKey } from 'hints/getNextDictKey';
+} from 'hints/dict/shouldContinueSquashLoop';
+import { getNextDictKey, GetNextDictKey } from 'hints/dict/getNextDictKey';
 import {
   assertLeFindSmallArcs,
   AssertLeFindSmallArcs,

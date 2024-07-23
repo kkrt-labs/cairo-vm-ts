@@ -3,12 +3,12 @@ import { describe, expect, test } from 'bun:test';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { HintName } from 'hints/hintName';
-import { OpType } from './hintParamsSchema';
+import { OpType } from '../hintParamsSchema';
 import { Felt } from 'primitives/felt';
 import { segmentArenaHandler } from 'builtins/segmentArena';
 import { Relocatable } from 'primitives/relocatable';
-import { getSegmentArenaIndexParser } from './getSegmentArenaIndex';
 import { allocFelt252DictParser } from './allocFelt252Dict';
+import { felt252DictEntryInitParser } from './felt252DictEntryInit';
 
 const initSegmentArenaBuiltin = (vm: VirtualMachine) => {
   const info = [
@@ -32,43 +32,48 @@ const ALLOC_FELT252_DICT = {
   },
 };
 
-const GET_SEGMENT_ARENA_INDEX = {
-  GetSegmentArenaIndex: {
-    dict_end_ptr: {
+const FELT252_DICT_ENTRY_INIT = {
+  Felt252DictEntryInit: {
+    dict_ptr: {
       Deref: {
         register: 'AP',
         offset: 1,
       },
     },
-    dict_index: {
-      register: 'AP',
-      offset: 2,
+    key: {
+      Deref: {
+        register: 'AP',
+        offset: 2,
+      },
     },
   },
 };
 
-describe('GetSegmentArenaIndex', () => {
-  test('should properly parse GetSegmentArenaIndex hint', () => {
-    const hint = getSegmentArenaIndexParser.parse(GET_SEGMENT_ARENA_INDEX);
+describe('Felt252DictEntryInit', () => {
+  test('should properly parse Felt252DictEntryInit hint', () => {
+    const hint = felt252DictEntryInitParser.parse(FELT252_DICT_ENTRY_INIT);
     expect(hint).toEqual({
-      type: HintName.GetSegmentArenaIndex,
-      dict_end_ptr: {
+      type: HintName.Felt252DictEntryInit,
+      dictPtr: {
         type: OpType.Deref,
         cell: {
           register: Register.Ap,
           offset: 1,
         },
       },
-      dict_index: {
-        register: Register.Ap,
-        offset: 2,
+      key: {
+        type: OpType.Deref,
+        cell: {
+          register: Register.Ap,
+          offset: 2,
+        },
       },
     });
   });
 
-  test('should properly execute GetSegmentArenaIndex hint', () => {
+  test('should properly execute Felt252DictEntryInit hint', () => {
     const allocHint = allocFelt252DictParser.parse(ALLOC_FELT252_DICT);
-    const hint = getSegmentArenaIndexParser.parse(GET_SEGMENT_ARENA_INDEX);
+    const hint = felt252DictEntryInitParser.parse(FELT252_DICT_ENTRY_INIT);
     const vm = new VirtualMachine();
     vm.memory.addSegment();
     vm.memory.addSegment();
@@ -78,15 +83,21 @@ describe('GetSegmentArenaIndex', () => {
     vm.executeHint(allocHint);
 
     const newDictPtr = new Relocatable(4, 0);
+    const key = new Felt(5n);
     vm.memory.assertEq(vm.ap.add(1), newDictPtr);
-
-    vm.executeHint(hint);
+    vm.memory.assertEq(vm.ap.add(2), key);
 
     const dict = vm.dictManager.get(newDictPtr.segmentId);
     expect(dict).not.toBeUndefined();
 
+    const keyValue = new Felt(13n);
+    dict?.set(key.toString(), keyValue);
+
+    vm.executeHint(hint);
+
     if (dict) {
-      expect(vm.memory.get(vm.ap.add(2))).toEqual(dict.id);
+      expect(dict.get(key.toString())).toEqual(new Felt(13n));
+      expect(vm.memory.get(newDictPtr.add(1))).toEqual(keyValue);
     }
   });
 });

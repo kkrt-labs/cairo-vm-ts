@@ -3,7 +3,7 @@ import { describe, expect, test } from 'bun:test';
 import { Register } from 'vm/instruction';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { HintName } from 'hints/hintName';
-import { OpType } from './hintParamsSchema';
+import { OpType } from '../hintParamsSchema';
 import { Felt } from 'primitives/felt';
 import { segmentArenaHandler } from 'builtins/segmentArena';
 import { Relocatable } from 'primitives/relocatable';
