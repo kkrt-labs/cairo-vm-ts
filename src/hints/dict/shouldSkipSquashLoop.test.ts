@@ -16,7 +16,7 @@ const SHOULD_SKIP_SQUASH_LOOP = {
 };
 
 describe('shouldSkipSquashLoop', () => {
-  test('should properly parse shouldSkipSquashLoop hint', () => {
+  test('should properly parse ShouldSkipSquashLoop hint', () => {
     const hint = shouldSkipSquashLoopParser.parse(SHOULD_SKIP_SQUASH_LOOP);
     expect(hint).toEqual({
       type: HintName.ShouldSkipSquashLoop,
@@ -30,7 +30,7 @@ describe('shouldSkipSquashLoop', () => {
   test.each([
     [[new Felt(4n)], new Felt(1n)],
     [[new Felt(13n), new Felt(15n)], new Felt(0n)],
-  ])('should properly execute shouldSkipSquashLoop hint', (values, flag) => {
+  ])('should properly execute ShouldSkipSquashLoop hint', (values, flag) => {
     const hint = shouldSkipSquashLoopParser.parse(SHOULD_SKIP_SQUASH_LOOP);
     const vm = new VirtualMachine();
     vm.memory.addSegment();
