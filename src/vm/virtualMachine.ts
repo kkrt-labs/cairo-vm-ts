@@ -600,7 +600,7 @@ export class VirtualMachine {
 
         switch (binOp.op) {
           case Operation.Add:
-            return a.add(b) as Felt;
+            return a.add(b);
 
           case Operation.Mul:
             return a.mul(b);
