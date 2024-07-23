@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { SquashedDictManager } from './squashedDict';
+import { SquashedDictManager } from './squashedDictManager';
 import { Felt } from 'primitives/felt';
 import { EmptyKeys } from 'errors/squashedDict';
 
-describe('squashed dictionnary', () => {
+describe('SquashedDictManager', () => {
   test('should properly initialize a SquashedDictManager', () => {
     const squashedDictManager = new SquashedDictManager();
     expect(squashedDictManager.keys.length).toEqual(0);

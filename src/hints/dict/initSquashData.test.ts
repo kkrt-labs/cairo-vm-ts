@@ -9,7 +9,7 @@ import { Felt } from 'primitives/felt';
 import { segmentArenaHandler } from 'builtins/segmentArena';
 import { allocFelt252DictParser } from './allocFelt252Dict';
 import { Relocatable } from 'primitives/relocatable';
-import { SquashedDictManager } from 'vm/squashedDict';
+import { SquashedDictManager } from 'hints/squashedDictManager';
 
 const initSegmentArenaBuiltin = (vm: VirtualMachine) => {
   const info = [

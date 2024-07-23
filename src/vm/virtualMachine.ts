@@ -30,6 +30,10 @@ import {
   ResOp,
 } from 'hints/hintParamsSchema';
 import { Hint } from 'hints/hintSchema';
+import { ScopeManager } from 'hints/scopeManager';
+import { SquashedDictManager } from '../hints/squashedDictManager';
+import { handlers } from 'hints/hintHandler';
+
 import {
   ApUpdate,
   FpUpdate,
@@ -40,9 +44,6 @@ import {
   Register,
   ResLogic,
 } from './instruction';
-import { ScopeManager } from 'hints/scopeManager';
-import { SquashedDictManager } from './squashedDict';
-import { handlers } from 'hints/hintHandler';
 
 export type TraceEntry = {
   pc: Relocatable;
