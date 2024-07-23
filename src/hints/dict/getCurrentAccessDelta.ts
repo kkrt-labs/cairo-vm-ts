@@ -34,6 +34,6 @@ export const getCurrentAccessDelta = (
 
   vm.memory.assertEq(
     vm.cellRefToRelocatable(indexDeltaMinusOne),
-    currIndex.sub(prevIndex).sub(new Felt(1n))
+    currIndex.sub(prevIndex).sub(1)
   );
 };

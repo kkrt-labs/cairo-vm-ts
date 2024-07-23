@@ -43,8 +43,6 @@ describe('GetCurrentAccessDelta', () => {
 
     vm.executeHint(hint);
 
-    expect(vm.memory.get(vm.ap)).toEqual(
-      lastIndex.sub(poppedIndex).sub(new Felt(1n))
-    );
+    expect(vm.memory.get(vm.ap)).toEqual(lastIndex.sub(poppedIndex).sub(1));
   });
 });

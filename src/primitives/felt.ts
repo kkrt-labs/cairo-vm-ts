@@ -31,28 +31,35 @@ export class Felt {
   }
 
   add(other: Felt): Felt;
+  add(other: number): Felt;
   add(other: Relocatable): Relocatable;
   add(other: SegmentValue): SegmentValue;
-  add(other: SegmentValue): SegmentValue {
+  add(other: SegmentValue | number): SegmentValue {
     if (isRelocatable(other)) {
       return other.add(this);
     }
-    if (!isFelt(other)) {
-      throw new ExpectedFelt(other);
+
+    if (isFelt(other)) {
+      return new Felt(this.inner + other.inner);
     }
 
-    return new Felt(this.inner + other.inner);
+    return new Felt(this.inner + BigInt(other));
   }
 
   sub(other: Felt): Felt;
+  sub(other: number): Felt;
   sub(other: Relocatable): never;
   sub(other: SegmentValue): SegmentValue;
-  sub(other: SegmentValue): SegmentValue {
-    if (!isFelt(other)) {
+  sub(other: SegmentValue | number): SegmentValue {
+    if (isFelt(other)) {
+      return new Felt(this.inner - other.inner);
+    }
+
+    if (isRelocatable(other)) {
       throw new ExpectedFelt(other);
     }
 
-    return new Felt(this.inner - other.inner);
+    return new Felt(this.inner - BigInt(other));
   }
 
   mul(other: SegmentValue): Felt {

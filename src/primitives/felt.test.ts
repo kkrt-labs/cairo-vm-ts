@@ -72,6 +72,12 @@ describe('Felt', () => {
       const expected = new Felt(1n);
       expect(result.eq(expected)).toBeTrue();
     });
+    test('should add a felt and a number properly', () => {
+      const a = new Felt(10n);
+      const b = 20;
+      const expected = new Felt(30n);
+      expect(a.add(b)).toEqual(expected);
+    });
   });
 
   describe('sub', () => {
@@ -88,6 +94,12 @@ describe('Felt', () => {
       const result = a.sub(b);
       const expected = new Felt(Felt.PRIME - 3n);
       expect(result.eq(expected)).toBeTrue();
+    });
+    test('should sub a felt and a number properly', () => {
+      const a = new Felt(10n);
+      const b = 20;
+      const expected = new Felt(-10n);
+      expect(a.sub(b)).toEqual(expected);
     });
   });
 

@@ -131,21 +131,17 @@ describe('InitSquashData', () => {
 
     values.reduce((prev, curr, i) => {
       const index = i - 1;
-      const keyIndex = new Felt(BigInt(index * dictAccessSize));
-      const prevIndex = new Felt(BigInt(index * dictAccessSize + 1));
-      const currIndex = new Felt(BigInt(index * dictAccessSize + 2));
-      const prevValue = prev !== undefined ? prev : new Felt(0n);
-      vm.memory.assertEq(dictPtr.add(keyIndex), key);
-      vm.memory.assertEq(dictPtr.add(prevIndex), prevValue);
-      vm.memory.assertEq(dictPtr.add(currIndex), curr);
+      vm.memory.assertEq(dictPtr.add(index * dictAccessSize), key);
+      vm.memory.assertEq(dictPtr.add(index * dictAccessSize + 1), prev);
+      vm.memory.assertEq(dictPtr.add(index * dictAccessSize + 2), curr);
       return curr;
     });
 
     const nAccesses = values.length - 1;
     const ptrDiff = nAccesses * dictAccessSize;
-    vm.memory.assertEq(vm.ap.add(new Felt(1n)), dictPtr);
-    vm.memory.assertEq(vm.ap.add(new Felt(2n)), new Felt(BigInt(ptrDiff)));
-    vm.memory.assertEq(vm.ap.add(new Felt(3n)), new Felt(BigInt(nAccesses)));
+    vm.memory.assertEq(vm.ap.add(1), dictPtr);
+    vm.memory.assertEq(vm.ap.add(2), new Felt(BigInt(ptrDiff)));
+    vm.memory.assertEq(vm.ap.add(3), new Felt(BigInt(nAccesses)));
 
     vm.executeHint(hint);
 
