@@ -44,7 +44,7 @@ describe('GetCurrentAccessIndex', () => {
     vm.memory.assertEq(vm.ap, rangeCheck);
 
     const key = new Felt(0n);
-    const indices = [new Felt(6n), new Felt(3n), new Felt(35n)];
+    const indices = [new Felt(35n), new Felt(6n), new Felt(3n)];
     vm.squashedDictManager.keyToIndices.set(key.toString(), indices);
     vm.squashedDictManager.keys = [key];
 
