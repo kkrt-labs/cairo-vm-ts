@@ -5,6 +5,8 @@ import { EmptyKeys } from 'errors/squashedDictManager';
 import { Felt } from 'primitives/felt';
 import { SquashedDictManager } from './squashedDictManager';
 
+const INDICES = [new Felt(0n), new Felt(3n), new Felt(5n), new Felt(1n)];
+
 describe('SquashedDictManager', () => {
   test('should properly initialize a SquashedDictManager', () => {
     const squashedDictManager = new SquashedDictManager();
@@ -15,32 +17,29 @@ describe('SquashedDictManager', () => {
   test('should properly insert new index', () => {
     const squashedDictManager = new SquashedDictManager();
     const key = new Felt(2n);
-    const indices = [new Felt(3n), new Felt(5n), new Felt(1n)];
     squashedDictManager.keys.push(key);
-    indices.map((index) => squashedDictManager.insert(key, index));
-    expect(squashedDictManager.lastIndices()).toEqual(indices);
+    INDICES.map((index) => squashedDictManager.insert(key, index));
+    expect(squashedDictManager.lastIndices()).toEqual(INDICES);
   });
 
   test('should properly get the last index', () => {
     const squashedDictManager = new SquashedDictManager();
     const key = new Felt(2n);
-    const indices = [new Felt(3n), new Felt(5n), new Felt(1n)];
     squashedDictManager.keys.push(key);
-    indices.map((index) => squashedDictManager.insert(key, index));
+    INDICES.map((index) => squashedDictManager.insert(key, index));
     expect(squashedDictManager.lastIndex()).toEqual(
-      indices[indices.length - 1]
+      INDICES[INDICES.length - 1]
     );
   });
 
   test('should properly pop the last index', () => {
     const squashedDictManager = new SquashedDictManager();
     const key = new Felt(2n);
-    const indices = [new Felt(3n), new Felt(5n), new Felt(1n)];
     squashedDictManager.keys.push(key);
-    indices.map((index) => squashedDictManager.insert(key, index));
-    expect(squashedDictManager.popIndex()).toEqual(indices[indices.length - 1]);
+    INDICES.map((index) => squashedDictManager.insert(key, index));
+    expect(squashedDictManager.popIndex()).toEqual(INDICES[INDICES.length - 1]);
     expect(squashedDictManager.lastIndices()).toEqual(
-      indices.slice(0, indices.length - 1)
+      INDICES.slice(0, INDICES.length - 1)
     );
   });
 
