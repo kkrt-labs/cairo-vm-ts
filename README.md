@@ -178,7 +178,7 @@ Their development can be tracked
 
 #### How to implement a hint ?
 
-A how-to guide has been written [here](/src/hints/howToImplementAHint.md).
+A how-to guide has been written [here](/docs/howToImplementAHint.md).
 
 ### Differential Testing & Benchmark
 
