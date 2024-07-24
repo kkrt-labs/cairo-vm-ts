@@ -53,14 +53,14 @@ describe('GetSegmentArenaIndex', () => {
     const hint = getSegmentArenaIndexParser.parse(GET_SEGMENT_ARENA_INDEX);
     expect(hint).toEqual({
       type: HintName.GetSegmentArenaIndex,
-      dict_end_ptr: {
+      dictEndptr: {
         type: OpType.Deref,
         cell: {
           register: Register.Ap,
           offset: 1,
         },
       },
-      dict_index: {
+      dictIndex: {
         register: Register.Ap,
         offset: 2,
       },
