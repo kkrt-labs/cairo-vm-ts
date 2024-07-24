@@ -15,8 +15,8 @@ GetSegmentArenaIndex { dict_end_ptr: ResOperand, dict_index: CellRef },
 
 Here, `dict_end_ptr` is a `ResOperand` while `dict_index` is a `CellRef`.
 
-The definitions of `Cellref` and `ResOperand` can be found in `hintParamSchema.ts`.
-Hint arguments can only be one of these two types.
+The definitions of `Cellref` and `ResOperand` can be found in
+`hintParamSchema.ts`. Hint arguments can only be one of these two types.
 
 ## Parsing
 

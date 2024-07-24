@@ -7,7 +7,12 @@ import { isFelt } from 'primitives/segmentValue';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { CellRef, cellRef, resOperand, ResOperand } from 'hints/hintParamsSchema';
+import {
+  CellRef,
+  cellRef,
+  resOperand,
+  ResOperand,
+} from 'hints/hintParamsSchema';
 
 /** Zod object to parse InitSquashData hint */
 export const initSquashDataParser = z

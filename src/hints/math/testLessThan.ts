@@ -4,7 +4,12 @@ import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { cellRef, resOperand, CellRef, ResOperand } from 'hints/hintParamsSchema';
+import {
+  cellRef,
+  resOperand,
+  CellRef,
+  ResOperand,
+} from 'hints/hintParamsSchema';
 
 /** Zod object to parse TestLessThan hint */
 export const testLessThanParser = z
