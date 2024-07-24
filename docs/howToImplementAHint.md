@@ -13,9 +13,9 @@ Find the signature of the hint in the
 GetSegmentArenaIndex { dict_end_ptr: ResOperand, dict_index: CellRef },
 ```
 
-Here, `dict_end_ptr` is a `ResOp` while `dict_index` is a `CellRef`.
+Here, `dict_end_ptr` is a `ResOperand` while `dict_index` is a `CellRef`.
 
-The definitions of `Cellref` and `ResOp` can be found in `hintParamSchema.ts`.
+The definitions of `Cellref` and `ResOperand` can be found in `hintParamSchema.ts`.
 Hint arguments can only be one of these two types.
 
 ## Parsing
@@ -64,7 +64,7 @@ The GetSegmentArenaIndex hint can be found in a format similar to this one:
   export const getSegmentArenaIndexParser = z
     .object({
       GetSegmentArenaIndex: z.object({
-        dict_end_ptr: resOp,
+        dict_end_ptr: resOperand,
         dict_index: cellRef,
       }),
     })
@@ -104,7 +104,7 @@ The parameters of the function are the virtual machine, as the hint must
 interact with it, and the signature of the hint.
 
 So, in our case, the function signature would be
-`export getSegmentArenaIndex(vm: VirtualMachine, dictEndPtr: ResOp, dictIndex: CellRef)`
+`export getSegmentArenaIndex(vm: VirtualMachine, dictEndPtr: ResOperand, dictIndex: CellRef)`
 
 To implement the logic, refer yourself to its implementation in the
 [`cairo-vm`](https://github.com/lambdaclass/cairo-vm/blob/24c2349cc19832fd8c1552304fe0439765ed82c6/vm/src/hint_processor/cairo_1_hint_processor/hint_processor.rs#L427-L444)

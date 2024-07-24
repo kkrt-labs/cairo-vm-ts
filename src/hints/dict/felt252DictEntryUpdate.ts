@@ -6,14 +6,14 @@ import { isFelt } from 'primitives/segmentValue';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { Deref, OpType, resOp, ResOp } from 'hints/hintParamsSchema';
+import { Deref, OpType, resOperand, ResOperand } from 'hints/hintParamsSchema';
 
 /** Zod object to parse Felt252DictEntryUpdate hint */
 export const felt252DictEntryUpdateParser = z
   .object({
     Felt252DictEntryUpdate: z.object({
-      dict_ptr: resOp,
-      value: resOp,
+      dict_ptr: resOperand,
+      value: resOperand,
     }),
   })
   .transform(({ Felt252DictEntryUpdate: { dict_ptr, value } }) => ({
@@ -41,8 +41,8 @@ export type Felt252DictEntryUpdate = z.infer<
  */
 export const felt252DictEntryUpdate = (
   vm: VirtualMachine,
-  dictPtr: ResOp,
-  value: ResOp
+  dictPtr: ResOperand,
+  value: ResOperand
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictPtr));
   const key = vm.memory.get(address.sub(3));

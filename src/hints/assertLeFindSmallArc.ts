@@ -4,15 +4,15 @@ import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { ResOp, resOp } from 'hints/hintParamsSchema';
+import { ResOperand, resOperand } from 'hints/hintParamsSchema';
 
 /** Zod object to parse AssertLeFindSmallArcs hint */
 export const assertLeFindSmallArcsParser = z
   .object({
     AssertLeFindSmallArcs: z.object({
-      range_check_ptr: resOp,
-      a: resOp,
-      b: resOp,
+      range_check_ptr: resOperand,
+      a: resOperand,
+      b: resOperand,
     }),
   })
   .transform(({ AssertLeFindSmallArcs: { range_check_ptr, a, b } }) => ({
@@ -42,9 +42,9 @@ export type Arc = {
  */
 export const assertLeFindSmallArcs = (
   vm: VirtualMachine,
-  rangeCheckPtr: ResOp,
-  a: ResOp,
-  b: ResOp
+  rangeCheckPtr: ResOperand,
+  a: ResOperand,
+  b: ResOperand
 ) => {
   const aVal = vm.getResOperandValue(a);
   const bVal = vm.getResOperandValue(b);

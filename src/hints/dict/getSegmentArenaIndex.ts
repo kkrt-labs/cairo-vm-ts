@@ -3,13 +3,13 @@ import { z } from 'zod';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { resOp, ResOp, cellRef, CellRef } from 'hints/hintParamsSchema';
+import { resOperand, ResOperand, cellRef, CellRef } from 'hints/hintParamsSchema';
 
 /** Zod object to parse GetSegmentArenaIndex hint */
 export const getSegmentArenaIndexParser = z
   .object({
     GetSegmentArenaIndex: z.object({
-      dict_end_ptr: resOp,
+      dict_end_ptr: resOperand,
       dict_index: cellRef,
     }),
   })
@@ -37,7 +37,7 @@ export type GetSegmentArenaIndex = z.infer<typeof getSegmentArenaIndexParser>;
  */
 export const getSegmentArenaIndex = (
   vm: VirtualMachine,
-  dictEndPtr: ResOp,
+  dictEndPtr: ResOperand,
   dictIndex: CellRef
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictEndPtr));

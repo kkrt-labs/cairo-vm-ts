@@ -21,7 +21,7 @@ import {
   Op1Src,
 } from './instruction';
 import { Dictionnary, VirtualMachine } from './virtualMachine';
-import { CellRef, Operation, OpType, ResOp } from 'hints/hintParamsSchema';
+import { CellRef, Operation, OpType, ResOperand } from 'hints/hintParamsSchema';
 
 const instructions = {
   InvalidAssertEq: new Instruction(
@@ -610,10 +610,15 @@ describe('VirtualMachine', () => {
           },
           [{ register: Register.Fp, offset: 2 }, new Felt(5n)],
         ],
-      ])('should properly extract a buffer', (resOp: ResOp, expected) => {
-        const vm = new VirtualMachine();
-        expect(vm.extractBuffer(resOp)).toEqual(expected as [CellRef, Felt]);
-      });
+      ])(
+        'should properly extract a buffer',
+        (resOperand: ResOperand, expected) => {
+          const vm = new VirtualMachine();
+          expect(vm.extractBuffer(resOperand)).toEqual(
+            expected as [CellRef, Felt]
+          );
+        }
+      );
 
       test.each([
         {
@@ -646,11 +651,11 @@ describe('VirtualMachine', () => {
           value: new Felt(4n),
         },
       ])(
-        'should throw when extracting a buffer with the wrong resOp',
-        (resOp: ResOp) => {
+        'should throw when extracting a buffer with the wrong resOperand',
+        (resOperand: ResOperand) => {
           const vm = new VirtualMachine();
-          expect(() => vm.extractBuffer(resOp)).toThrow(
-            new InvalidBufferResOp(resOp)
+          expect(() => vm.extractBuffer(resOperand)).toThrow(
+            new InvalidBufferResOp(resOperand)
           );
         }
       );
@@ -720,18 +725,21 @@ describe('VirtualMachine', () => {
           },
           new Felt(21n),
         ],
-      ])('should properly read ResOp', (resOp: ResOp, expected: Felt) => {
-        const vm = new VirtualMachine();
-        vm.memory.addSegment();
-        vm.memory.addSegment();
-        const value0 = new Felt(3n);
-        const value1 = new Felt(7n);
-        const address = new Relocatable(1, 0);
-        vm.memory.assertEq(vm.ap, value0);
-        vm.memory.assertEq(vm.ap.add(1), value1);
-        vm.memory.assertEq(vm.ap.add(2), address);
-        expect(vm.getResOperandValue(resOp)).toEqual(expected);
-      });
+      ])(
+        'should properly read ResOperand',
+        (resOperand: ResOperand, expected: Felt) => {
+          const vm = new VirtualMachine();
+          vm.memory.addSegment();
+          vm.memory.addSegment();
+          const value0 = new Felt(3n);
+          const value1 = new Felt(7n);
+          const address = new Relocatable(1, 0);
+          vm.memory.assertEq(vm.ap, value0);
+          vm.memory.assertEq(vm.ap.add(1), value1);
+          vm.memory.assertEq(vm.ap.add(2), address);
+          expect(vm.getResOperandValue(resOperand)).toEqual(expected);
+        }
+      );
     });
   });
 

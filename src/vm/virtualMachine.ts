@@ -27,7 +27,7 @@ import {
   Immediate,
   Operation,
   OpType,
-  ResOp,
+  ResOperand,
 } from 'hints/hintParamsSchema';
 import { Hint } from 'hints/hintSchema';
 import { ScopeManager } from 'hints/scopeManager';
@@ -550,7 +550,7 @@ export class VirtualMachine {
   }
 
   /**
-   * Return the value defined by `resOp`
+   * Return the value defined by `resOperand`
    *
    * Generic patterns:
    * - Deref: `[register + offset]`
@@ -563,23 +563,23 @@ export class VirtualMachine {
    *
    * NOTE: used in Cairo hints
    */
-  getResOperandValue(resOp: ResOp): Felt {
-    switch (resOp.type) {
+  getResOperandValue(resOperand: ResOperand): Felt {
+    switch (resOperand.type) {
       case OpType.Deref:
-        return this.getFelt((resOp as Deref).cell);
+        return this.getFelt((resOperand as Deref).cell);
 
       case OpType.DoubleDeref:
-        const dDeref = resOp as DoubleDeref;
+        const dDeref = resOperand as DoubleDeref;
         const deref = this.getRelocatable(dDeref.cell);
         const value = this.memory.get(deref.add(dDeref.offset));
         if (!value || !isFelt(value)) throw new ExpectedFelt(value);
         return value;
 
       case OpType.Immediate:
-        return (resOp as Immediate).value;
+        return (resOperand as Immediate).value;
 
       case OpType.BinOp:
-        const binOp = resOp as BinOp;
+        const binOp = resOperand as BinOp;
         const a = this.getFelt(binOp.a);
 
         let b: Felt | undefined = undefined;
@@ -607,25 +607,25 @@ export class VirtualMachine {
   }
 
   /**
-   * Return the address defined at `resOp`.
+   * Return the address defined at `resOperand`.
    *
-   * This method assume that resOp points to a Relocatable.
+   * This method assume that resOperand points to a Relocatable.
    *
    * Only Deref and BinOp with Immediate value are valid for extracting a buffer.
    *
    * NOTE: Used in Cairo hints.
    */
-  extractBuffer(resOp: ResOp): [CellRef, Felt] {
-    switch (resOp.type) {
+  extractBuffer(resOperand: ResOperand): [CellRef, Felt] {
+    switch (resOperand.type) {
       case OpType.Deref:
-        return [(resOp as Deref).cell, new Felt(0n)];
+        return [(resOperand as Deref).cell, new Felt(0n)];
       case OpType.BinOp:
-        const binOp = resOp as BinOp;
+        const binOp = resOperand as BinOp;
         if (binOp.b.type !== OpType.Immediate)
-          throw new InvalidBufferResOp(resOp);
+          throw new InvalidBufferResOp(resOperand);
         return [binOp.a, (binOp.b as Immediate).value];
       default:
-        throw new InvalidBufferResOp(resOp);
+        throw new InvalidBufferResOp(resOperand);
     }
   }
 

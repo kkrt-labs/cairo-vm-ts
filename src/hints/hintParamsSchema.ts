@@ -4,7 +4,7 @@ import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
 
 /**
- * Types to distinguish ResOp pattern
+ * Types to distinguish ResOperand pattern
  *
  * Generic patterns:
  * - Deref: `[register + offset]`
@@ -87,8 +87,8 @@ const binOp = z
     b: object.BinOp.b,
   }));
 
-/** Zod object to parse a ResOp */
-export const resOp = z.union([deref, doubleDeref, immediate, binOp]);
+/** Zod object to parse a ResOperand */
+export const resOperand = z.union([deref, doubleDeref, immediate, binOp]);
 
 /**
  * A CellRef is an object defining a register and an offset
@@ -128,5 +128,5 @@ export type Immediate = z.infer<typeof immediate>;
  */
 export type BinOp = z.infer<typeof binOp>;
 
-/** A ResOp is either a Deref, DoubleDeref, Immediate or BinOp */
-export type ResOp = z.infer<typeof resOp>;
+/** A ResOperand is either a Deref, DoubleDeref, Immediate or BinOp */
+export type ResOperand = z.infer<typeof resOperand>;

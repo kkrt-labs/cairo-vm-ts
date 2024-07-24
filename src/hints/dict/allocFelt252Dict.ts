@@ -7,11 +7,11 @@ import { isFelt, isRelocatable } from 'primitives/segmentValue';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { resOp, ResOp } from 'hints/hintParamsSchema';
+import { resOperand, ResOperand } from 'hints/hintParamsSchema';
 
 /** Zod object to parse AllocFelt252Dict hint */
 export const allocFelt252DictParser = z
-  .object({ AllocFelt252Dict: z.object({ segment_arena_ptr: resOp }) })
+  .object({ AllocFelt252Dict: z.object({ segment_arena_ptr: resOperand }) })
   .transform(({ AllocFelt252Dict: { segment_arena_ptr } }) => ({
     type: HintName.AllocFelt252Dict,
     segmentArenaPtr: segment_arena_ptr,
@@ -33,7 +33,7 @@ export type AllocFelt252Dict = z.infer<typeof allocFelt252DictParser>;
  */
 export const allocFelt252Dict = (
   vm: VirtualMachine,
-  segmentArenaPtr: ResOp
+  segmentArenaPtr: ResOperand
 ) => {
   const arenaPtr = vm.getPointer(...vm.extractBuffer(segmentArenaPtr));
   const dictNumber = vm.memory.get(arenaPtr.sub(2));

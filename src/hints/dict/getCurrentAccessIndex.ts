@@ -2,12 +2,12 @@ import { z } from 'zod';
 
 import { VirtualMachine } from 'vm/virtualMachine';
 
-import { resOp, ResOp } from 'hints/hintParamsSchema';
+import { resOperand, ResOperand } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 
 /** Zod object to parse GetCurrentAccessIndex hint */
 export const getCurrentAccessIndexParser = z
-  .object({ GetCurrentAccessIndex: z.object({ range_check_ptr: resOp }) })
+  .object({ GetCurrentAccessIndex: z.object({ range_check_ptr: resOperand }) })
   .transform(({ GetCurrentAccessIndex: { range_check_ptr } }) => ({
     type: HintName.GetCurrentAccessIndex,
     rangeCheckPtr: range_check_ptr,
@@ -24,7 +24,7 @@ export type GetCurrentAccessIndex = z.infer<typeof getCurrentAccessIndexParser>;
  */
 export const getCurrentAccessIndex = (
   vm: VirtualMachine,
-  rangeCheckPtr: ResOp
+  rangeCheckPtr: ResOperand
 ) => {
   vm.memory.assertEq(
     vm.getPointer(...vm.extractBuffer(rangeCheckPtr)),

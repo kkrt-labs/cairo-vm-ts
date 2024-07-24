@@ -7,9 +7,9 @@ import {
   CellRef,
   OpType,
   Operation,
-  ResOp,
+  ResOperand,
   cellRef,
-  resOp,
+  resOperand,
 } from './hintParamsSchema';
 
 describe('hintParamsSchema', () => {
@@ -128,7 +128,7 @@ describe('hintParamsSchema', () => {
         },
       },
     ],
-  ])('should properly parse ResOp', (value, expected: ResOp) => {
-    expect(resOp.parse(value)).toEqual(expected);
+  ])('should properly parse ResOperand', (value, expected: ResOperand) => {
+    expect(resOperand.parse(value)).toEqual(expected);
   });
 });

@@ -3,15 +3,15 @@ import { z } from 'zod';
 import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
 
-import { resOp, ResOp } from 'hints/hintParamsSchema';
+import { resOperand, ResOperand } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 
 /** Zod object to parse Felt252DictEntryInit hint */
 export const felt252DictEntryInitParser = z
   .object({
     Felt252DictEntryInit: z.object({
-      dict_ptr: resOp,
-      key: resOp,
+      dict_ptr: resOperand,
+      key: resOperand,
     }),
   })
   .transform(({ Felt252DictEntryInit: { dict_ptr, key } }) => ({
@@ -39,8 +39,8 @@ export type Felt252DictEntryInit = z.infer<typeof felt252DictEntryInitParser>;
  */
 export const felt252DictEntryInit = (
   vm: VirtualMachine,
-  dictPtr: ResOp,
-  key: ResOp
+  dictPtr: ResOperand,
+  key: ResOperand
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictPtr));
   const keyValue = vm.getResOperandValue(key).toString();

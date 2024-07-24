@@ -7,15 +7,15 @@ import { isFelt } from 'primitives/segmentValue';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
-import { CellRef, cellRef, resOp, ResOp } from 'hints/hintParamsSchema';
+import { CellRef, cellRef, resOperand, ResOperand } from 'hints/hintParamsSchema';
 
 /** Zod object to parse InitSquashData hint */
 export const initSquashDataParser = z
   .object({
     InitSquashData: z.object({
-      dict_accesses: resOp,
-      ptr_diff: resOp,
-      n_accesses: resOp,
+      dict_accesses: resOperand,
+      ptr_diff: resOperand,
+      n_accesses: resOperand,
       big_keys: cellRef,
       first_key: cellRef,
     }),
@@ -56,9 +56,9 @@ export type InitSquashData = z.infer<typeof initSquashDataParser>;
  */
 export const initSquashData = (
   vm: VirtualMachine,
-  dictAccesses: ResOp,
-  ptrDiff: ResOp,
-  nAccesses: ResOp,
+  dictAccesses: ResOperand,
+  ptrDiff: ResOperand,
+  nAccesses: ResOperand,
   bigKeys: CellRef,
   firstKey: CellRef
 ) => {
