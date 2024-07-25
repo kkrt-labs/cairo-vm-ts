@@ -31,10 +31,12 @@ program
   )
   .option('-s, --silent', 'silent all logs')
   .addOption(
-    new Option('--layout <LAYOUT>', 'Layout to be used').default('plain')
+    new Option('-l, --layout <LAYOUT>', 'Layout to be used').default('plain')
   )
   .addOption(
-    new Option('--fn <NAME>', 'Function to be executed').default('main')
+    new Option('-f, --function <NAME>', 'Function to be executed').default(
+      'main'
+    )
   )
   .option('--no-relocate', 'do not relocate memory')
   .addOption(
