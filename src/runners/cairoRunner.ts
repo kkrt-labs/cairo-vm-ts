@@ -14,7 +14,7 @@ import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 import { Hint, Hints } from 'hints/hintSchema';
-import { isSubsequence, layouts } from './layout';
+import { isSubsequence, Layout, layouts } from './layout';
 
 /**
  * Configuration of the run
@@ -28,6 +28,7 @@ export type RunOptions = {
 
 export class CairoRunner {
   program: Program;
+  layout: Layout;
   hints: Hints;
   vm: VirtualMachine;
   programBase: Relocatable;
@@ -53,9 +54,9 @@ export class CairoRunner {
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
-    const layout = layouts[layoutName];
-    if (!isSubsequence(builtins, layout.builtins))
-      throw new UnorderedBuiltins(builtins, layout.builtins, layoutName);
+    this.layout = layouts[layoutName];
+    if (!isSubsequence(builtins, this.layout.builtins))
+      throw new UnorderedBuiltins(builtins, this.layout.builtins, layoutName);
 
     const builtin_stack = builtins
       .map(getBuiltin)
