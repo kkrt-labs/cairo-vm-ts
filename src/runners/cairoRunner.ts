@@ -4,7 +4,6 @@ import {
   CairoOutputNotSupported,
   CairoZeroHintsNotSupported,
   EmptyRelocatedMemory,
-  InvalidBuiltins,
   UndefinedEntrypoint,
   UnorderedBuiltins,
 } from 'errors/cairoRunner';
@@ -55,13 +54,8 @@ export class CairoRunner {
     this.executionBase = this.vm.memory.addSegment();
 
     const layout = layouts[layoutName];
-    const invalidBuiltins = builtins.filter(
-      (builtin) => !layout.builtins.includes(builtin)
-    );
-    if (invalidBuiltins.length)
-      throw new InvalidBuiltins(invalidBuiltins, layoutName);
     if (!isSubsequence(builtins, layout.builtins))
-      throw new UnorderedBuiltins();
+      throw new UnorderedBuiltins(builtins, layout.builtins, layoutName);
 
     const builtin_stack = builtins
       .map(getBuiltin)

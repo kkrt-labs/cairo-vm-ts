@@ -28,22 +28,17 @@ export class UndefinedEntrypoint extends CairoRunnerError {
   }
 }
 
-/** The program builtins has builtins that are not available in the chosen layout. */
-export class InvalidBuiltins extends CairoRunnerError {
-  constructor(builtins: string[], layout: string) {
-    super(
-      `The program contains builtins that are not supported by the layout ${layout}: ${builtins.join(
-        ', '
-      )}. Choose another layout to execute this program.`
-    );
-  }
-}
-
-/** The program builtins are not ordered as a subsequence of the builtins available in the layout. */
+/** The program builtins are not a subsequence of the builtins available in the chosen layout. */
 export class UnorderedBuiltins extends CairoRunnerError {
-  constructor() {
+  constructor(
+    programBuiltins: string[],
+    layoutBuiltins: string[],
+    layout: string
+  ) {
     super(
-      'The program builtins are not in the right order. It must follow the layout order.'
+      `The program builtins are not a subsequence of the '${layout}' layout builtins.
+Program builtins: ${programBuiltins.join(', ')}
+Layout builtins: ${layoutBuiltins.join(', ')}`
     );
   }
 }
