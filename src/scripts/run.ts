@@ -68,7 +68,7 @@ Use one from {${layoutNames.join(', ')}}`
     const file = fs.readFileSync(String(path), 'utf-8');
 
     const program = parseProgram(file);
-    runner = CairoRunner.fromProgram(program, fn);
+    runner = CairoRunner.fromProgram(program, layout, fn);
     const config: RunOptions = { relocate: relocate, offset: offset };
     runner.run(config);
     consola.success('Execution finished!');

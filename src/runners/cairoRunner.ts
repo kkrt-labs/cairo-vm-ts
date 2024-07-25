@@ -4,7 +4,9 @@ import {
   CairoOutputNotSupported,
   CairoZeroHintsNotSupported,
   EmptyRelocatedMemory,
+  InvalidBuiltins,
   UndefinedEntrypoint,
+  UnorderedBuiltins,
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
@@ -13,6 +15,7 @@ import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 import { Hint, Hints } from 'hints/hintSchema';
+import { isSubsequence, layouts } from './layout';
 
 /**
  * Configuration of the run
@@ -40,6 +43,7 @@ export class CairoRunner {
   constructor(
     program: Program,
     bytecode: Felt[],
+    layoutName: string = 'plain',
     initialPc: number = 0,
     builtins: string[] = [],
     hints: Hints = new Map<number, Hint[]>()
@@ -49,6 +53,15 @@ export class CairoRunner {
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
+
+    const layout = layouts[layoutName];
+    const invalidBuiltins = builtins.filter(
+      (builtin) => builtin in layout.builtins
+    );
+    if (invalidBuiltins.length)
+      throw new InvalidBuiltins(invalidBuiltins, layoutName);
+    if (!isSubsequence(builtins, layout.builtins))
+      throw new UnorderedBuiltins();
 
     const builtin_stack = builtins
       .map(getBuiltin)
@@ -67,6 +80,7 @@ export class CairoRunner {
 
   static fromCairoZeroProgram(
     program: CairoZeroProgram,
+    layoutName: string = 'plain',
     fnName: string = 'main'
   ): CairoRunner {
     const id = program.identifiers.get('__main__.'.concat(fnName));
@@ -77,11 +91,12 @@ export class CairoRunner {
 
     if (program.hints.length) throw new CairoZeroHintsNotSupported();
 
-    return new CairoRunner(program, program.data, offset, builtins);
+    return new CairoRunner(program, program.data, layoutName, offset, builtins);
   }
 
   static fromCairoProgram(
     program: CairoProgram,
+    layoutName: string = 'plain',
     fnName: string = 'main'
   ): CairoRunner {
     const fn = program.entry_points_by_function[fnName];
@@ -89,20 +104,30 @@ export class CairoRunner {
     return new CairoRunner(
       program,
       program.bytecode,
+      layoutName,
       fn.offset,
       fn.builtins,
       program.hints
     );
   }
 
-  static fromProgram(program: Program, fnName: string = 'main') {
+  static fromProgram(
+    program: Program,
+    layout: string = 'plain',
+    fnName: string = 'main'
+  ) {
     if (program.compiler_version.split('.')[0] == '0') {
       return CairoRunner.fromCairoZeroProgram(
         program as CairoZeroProgram,
+        layout,
         fnName
       );
     }
-    return CairoRunner.fromCairoProgram(program as CairoProgram, fnName);
+    return CairoRunner.fromCairoProgram(
+      program as CairoProgram,
+      layout,
+      fnName
+    );
   }
 
   /**
