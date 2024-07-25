@@ -125,6 +125,8 @@ export const layouts: { [key: string]: Layout } = {
   },
 };
 
+export const ALL_LAYOUTS = Object.keys(layouts);
+
 export function isSubsequence(
   subsequence: string[],
   sequence: string[]

@@ -5,20 +5,7 @@ import { ConsolaInstance, LogLevels } from 'consola';
 import { TraceEntry } from 'vm/virtualMachine';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
-
-const layoutNames = [
-  'plain',
-  'small',
-  'dex',
-  'recursive',
-  'starknet',
-  'starknet_with_keccak',
-  'recursive_large_output',
-  'recursive_with_poseidon',
-  'all_cairo',
-  'all_solidity',
-  'dynamic',
-];
+import { ALL_LAYOUTS } from 'runners/layout';
 
 export const run = (
   path: string,
@@ -44,10 +31,10 @@ export const run = (
 
     if (silent) consola.level = LogLevels.silent;
 
-    if (layoutNames.findIndex((name) => layout == name) === -1) {
+    if (ALL_LAYOUTS.findIndex((name) => layout == name) === -1) {
       consola.error(
         `Layout "${layout}" is not a valid layout.
-Use one from {${layoutNames.join(', ')}}`
+Use one from {${ALL_LAYOUTS.join(', ')}}`
       );
       process.exit(1);
     }
