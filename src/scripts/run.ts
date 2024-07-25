@@ -6,6 +6,20 @@ import { TraceEntry } from 'vm/virtualMachine';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
 
+const layoutNames = [
+  'plain',
+  'small',
+  'dex',
+  'recursive',
+  'starknet',
+  'starknet_with_keccak',
+  'recursive_large_output',
+  'recursive_with_poseidon',
+  'all_cairo',
+  'all_solidity',
+  'dynamic',
+];
+
 export const run = (
   path: string,
   options: any,
@@ -16,6 +30,7 @@ export const run = (
   try {
     const {
       silent,
+      layout,
       fn,
       relocate,
       offset,
@@ -29,12 +44,20 @@ export const run = (
 
     if (silent) consola.level = LogLevels.silent;
 
+    if (layoutNames.findIndex((name) => layout == name) === -1) {
+      consola.error(
+        `Layout "${layout}" is not a valid layout.
+Use one from {${layoutNames.join(', ')}}`
+      );
+      process.exit(1);
+    }
+
     if (
       (!relocate && !!offset) ||
       (!relocate && exportMemory) ||
       (!relocate && printRelocatedMemory)
     ) {
-      consola.log(
+      consola.error(
         "option '--no-relocate' cannot be used with options '--offset <OFFSET>', '--export-memory <MEMORY_FILENAME>' or '--print-relocated-memory'"
       );
       process.exit(1);
