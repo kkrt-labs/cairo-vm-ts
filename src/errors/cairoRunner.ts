@@ -29,7 +29,7 @@ export class UndefinedEntrypoint extends CairoRunnerError {
 }
 
 /** The program builtins are not a subsequence of the builtins available in the chosen layout. */
-export class UnorderedBuiltins extends CairoRunnerError {
+export class InvalidBuiltins extends CairoRunnerError {
   constructor(
     programBuiltins: string[],
     layoutBuiltins: string[],

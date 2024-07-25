@@ -5,7 +5,7 @@ import {
   CairoZeroHintsNotSupported,
   EmptyRelocatedMemory,
   UndefinedEntrypoint,
-  UnorderedBuiltins,
+  InvalidBuiltins,
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
@@ -56,7 +56,7 @@ export class CairoRunner {
 
     this.layout = layouts[layoutName];
     if (!isSubsequence(builtins, this.layout.builtins))
-      throw new UnorderedBuiltins(builtins, this.layout.builtins, layoutName);
+      throw new InvalidBuiltins(builtins, this.layout.builtins, layoutName);
 
     const builtin_stack = builtins
       .map(getBuiltin)
