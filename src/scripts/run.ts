@@ -31,7 +31,7 @@ export const run = (
 
     if (silent) consola.level = LogLevels.silent;
 
-    if (ALL_LAYOUTS.findIndex((name) => layout == name) === -1) {
+    if (!ALL_LAYOUTS.includes(layout)) {
       consola.error(
         `Layout "${layout}" is not a valid layout.
 Use one from {${ALL_LAYOUTS.join(', ')}}`

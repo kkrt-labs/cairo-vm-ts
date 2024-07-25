@@ -56,7 +56,7 @@ export class CairoRunner {
 
     const layout = layouts[layoutName];
     const invalidBuiltins = builtins.filter(
-      (builtin) => layout.builtins.findIndex((name) => builtin === name) === -1
+      (builtin) => !layout.builtins.includes(builtin)
     );
     if (invalidBuiltins.length)
       throw new InvalidBuiltins(invalidBuiltins, layoutName);
