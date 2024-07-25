@@ -11,6 +11,8 @@ import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from './cairoRunner';
+import { layouts } from './layout';
+import { InvalidBuiltins } from 'errors/cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
@@ -430,5 +432,65 @@ describe('cairoRunner', () => {
       const pyTrace = fs.readFileSync(pyTracePath);
       expect(tsTrace.equals(pyTrace)).toBeTrue();
     });
+  });
+
+  describe('layout', () => {
+    test.each([
+      [[], 'plain'],
+      [['bitwise'], 'recursive'],
+      [['output', 'pedersen'], 'small'],
+      [['output', 'pedersen', 'range_check'], 'small'],
+      [['output', 'range_check', 'poseidon'], 'starknet'],
+    ])(
+      'should correctly parse a program with an appropriate layout',
+      (builtins, layout) => {
+        const dummyProgram = parseProgram(
+          fs.readFileSync('cairo_programs/cairo_0/fibonacci.json', 'utf-8')
+        );
+        const dummyBytecode: Felt[] = [];
+        const dummyPc = 0;
+
+        expect(
+          () =>
+            new CairoRunner(
+              dummyProgram,
+              dummyBytecode,
+              layout,
+              dummyPc,
+              builtins
+            )
+        ).not.toThrow();
+      }
+    );
+
+    test.each([
+      [['output'], 'plain'],
+      [['ecdsa'], 'recursive'],
+      [['output', 'range_check', 'pedersen'], 'small'],
+      [['output', 'pedersen', 'range_check', 'ecdsa', 'ec_op'], 'small'],
+      [['output', 'range_check', 'poseidon', 'range_check96'], 'starknet'],
+    ])(
+      'should throw InvalidBuiltins if builtins are not within the layout or unordered',
+      (builtins, layout) => {
+        const dummyProgram = parseProgram(
+          fs.readFileSync('cairo_programs/cairo_0/fibonacci.json', 'utf-8')
+        );
+        const dummyBytecode: Felt[] = [];
+        const dummyPc = 0;
+
+        expect(
+          () =>
+            new CairoRunner(
+              dummyProgram,
+              dummyBytecode,
+              layout,
+              dummyPc,
+              builtins
+            )
+        ).toThrow(
+          new InvalidBuiltins(builtins, layouts[layout].builtins, layout)
+        );
+      }
+    );
   });
 });
