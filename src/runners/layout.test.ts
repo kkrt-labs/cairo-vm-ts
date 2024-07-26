@@ -139,6 +139,7 @@ describe('layouts', () => {
 
   describe('isSubsequence', () => {
     test.each([
+      [[], ['output', 'pedersen', 'range_check'], true],
       [
         ['output', 'pedersen', 'range_check'],
         ['output', 'pedersen', 'range_check', 'ecdsa'],

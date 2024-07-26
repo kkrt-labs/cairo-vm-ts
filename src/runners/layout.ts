@@ -131,16 +131,10 @@ export function isSubsequence(
   subsequence: string[],
   sequence: string[]
 ): boolean {
-  return subsequence.reduce(
-    (acc, str) => {
-      const index = acc.sequence.findIndex((value) => value === str);
-      if (index === -1) {
-        acc.found = false;
-      } else {
-        acc.sequence = acc.sequence.slice(index + 1);
-      }
-      return acc;
-    },
-    { sequence, found: true }
-  ).found;
+  if (!subsequence.length) return true;
+
+  const index = sequence.findIndex((name) => name === subsequence[0]);
+  if (index === -1) return false;
+
+  return isSubsequence(subsequence.slice(1), sequence.slice(index + 1));
 }
