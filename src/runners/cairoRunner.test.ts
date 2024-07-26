@@ -5,14 +5,16 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+import { InvalidBuiltins } from 'errors/cairoRunner';
 import { RangeCheckOutOfBounds } from 'errors/builtins';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
-import { CairoRunner, RunOptions } from './cairoRunner';
+import { outputHandler } from 'builtins/output';
+import { bitwiseHandler } from 'builtins/bitwise';
 import { layouts } from './layout';
-import { InvalidBuiltins } from 'errors/cairoRunner';
+import { CairoRunner, RunOptions } from './cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
@@ -155,17 +157,26 @@ describe('cairoRunner', () => {
 
   describe('builtins', () => {
     describe('bitwise', () => {
-      test('should compute bitwise operations 12 & 10, 12 ^10 and 12 | 10', () => {
+      test('should compute bitwise operations 12 & 10, 12 ^ 10 and 12 | 10', () => {
         const runner = CairoRunner.fromProgram(BITWISE_PROGRAM, 'all_cairo');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
+
+        const expectedAnd = new Felt(8n);
+        const expectedXor = new Felt(6n);
+        const expectedOr = new Felt(14n);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
-        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(new Felt(8n));
-        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(new Felt(6n));
-        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(
-          new Felt(14n)
+        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(expectedAnd);
+        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(expectedXor);
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(expectedOr);
+
+        const bitwiseSegment = runner.getBuiltinSegment('bitwise');
+        const expectedBitwiseSegment = new Proxy(
+          [new Felt(12n), new Felt(10n), expectedAnd, expectedXor, expectedOr],
+          bitwiseHandler
         );
+        expect(bitwiseSegment).toEqual(expectedBitwiseSegment);
       });
     });
 
@@ -336,9 +347,13 @@ describe('cairoRunner', () => {
         );
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
-        const output = runner.getOutput();
-        expect(output.length).toEqual(1);
-        expect(output[0]).toEqual(new Felt(0n));
+
+        expect(runner.getBuiltinSegment('bitwise')).toEqual(
+          new Proxy([new Felt(1n), new Felt(2n), new Felt(0n)], bitwiseHandler)
+        );
+        expect(runner.getOutput()).toEqual(
+          new Proxy([new Felt(0n)], outputHandler)
+        );
       });
     });
 

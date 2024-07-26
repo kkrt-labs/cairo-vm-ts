@@ -14,13 +14,6 @@ export class CairoZeroHintsNotSupported extends CairoRunnerError {
   }
 }
 
-/** The output serialization of Cairo programs is not supported. */
-export class CairoOutputNotSupported extends CairoRunnerError {
-  constructor() {
-    super('The output serialization of Cairo programs is not supported yet.');
-  }
-}
-
 /** The given entrypoint is not in the program, it cannot be executed. */
 export class UndefinedEntrypoint extends CairoRunnerError {
   constructor(name: string) {
