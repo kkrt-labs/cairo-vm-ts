@@ -447,18 +447,9 @@ describe('cairoRunner', () => {
         const dummyProgram = parseProgram(
           fs.readFileSync('cairo_programs/cairo_0/fibonacci.json', 'utf-8')
         );
-        const dummyBytecode: Felt[] = [];
-        const dummyPc = 0;
 
         expect(
-          () =>
-            new CairoRunner(
-              dummyProgram,
-              dummyBytecode,
-              layout,
-              dummyPc,
-              builtins
-            )
+          () => new CairoRunner(dummyProgram, [], layout, 'main', 0, builtins)
         ).not.toThrow();
       }
     );
@@ -475,18 +466,9 @@ describe('cairoRunner', () => {
         const dummyProgram = parseProgram(
           fs.readFileSync('cairo_programs/cairo_0/fibonacci.json', 'utf-8')
         );
-        const dummyBytecode: Felt[] = [];
-        const dummyPc = 0;
 
         expect(
-          () =>
-            new CairoRunner(
-              dummyProgram,
-              dummyBytecode,
-              layout,
-              dummyPc,
-              builtins
-            )
+          () => new CairoRunner(dummyProgram, [], layout, 'main', 0, builtins)
         ).toThrow(
           new InvalidBuiltins(builtins, layouts[layout].builtins, layout)
         );
