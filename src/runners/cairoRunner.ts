@@ -201,13 +201,7 @@ export class CairoRunner {
     return this.vm.memory.segments[builtinId + offset];
   }
 
-  /**
-   * @returns The output builtin segment.
-   *
-   * NOTE: Currently supports Cairo Zero programs only.
-   * Cairo programs need input args/return value logic to be implemented first.
-   *
-   */
+  /** @returns The output builtin segment. */
   getOutput() {
     return this.getBuiltinSegment('output') ?? [];
   }
