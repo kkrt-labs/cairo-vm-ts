@@ -464,7 +464,7 @@ describe('cairoRunner', () => {
         );
 
         expect(
-          () => new CairoRunner(dummyProgram, [], layout, 'main', 0, builtins)
+          () => new CairoRunner(dummyProgram, [], layout, 0, builtins)
         ).not.toThrow();
       }
     );
@@ -483,7 +483,7 @@ describe('cairoRunner', () => {
         );
 
         expect(
-          () => new CairoRunner(dummyProgram, [], layout, 'main', 0, builtins)
+          () => new CairoRunner(dummyProgram, [], layout, 0, builtins)
         ).toThrow(
           new InvalidBuiltins(builtins, layouts[layout].builtins, layout)
         );

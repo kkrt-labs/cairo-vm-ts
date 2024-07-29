@@ -34,7 +34,6 @@ export class CairoRunner {
   executionBase: Relocatable;
   layout: Layout;
   builtins: string[];
-  entrypoint: string;
   finalPc: Relocatable;
 
   static readonly defaultRunOptions: RunOptions = {
@@ -46,7 +45,6 @@ export class CairoRunner {
     program: Program,
     bytecode: Felt[],
     layoutName: string = 'plain',
-    entrypoint: string = 'main',
     initialPc: number = 0,
     builtins: string[] = [],
     hints: Hints = new Map<number, Hint[]>()
@@ -57,7 +55,6 @@ export class CairoRunner {
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
-    this.entrypoint = entrypoint;
     this.layout = layouts[layoutName];
     if (!isSubsequence(builtins, this.layout.builtins))
       throw new InvalidBuiltins(builtins, this.layout.builtins, layoutName);
@@ -91,14 +88,7 @@ export class CairoRunner {
 
     if (program.hints.length) throw new CairoZeroHintsNotSupported();
 
-    return new CairoRunner(
-      program,
-      program.data,
-      layoutName,
-      fnName,
-      offset,
-      builtins
-    );
+    return new CairoRunner(program, program.data, layoutName, offset, builtins);
   }
 
   static fromCairoProgram(
@@ -112,7 +102,6 @@ export class CairoRunner {
       program,
       program.bytecode,
       layoutName,
-      fnName,
       fn.offset,
       fn.builtins,
       program.hints
