@@ -56,7 +56,12 @@ export class CairoRunner {
     this.executionBase = this.vm.memory.addSegment();
 
     this.layout = layouts[layoutName];
-    if (!isSubsequence(builtins, this.layout.builtins))
+    const allowedBuiltins = this.layout.builtins.concat([
+      'segment_arena',
+      'gas_builtin',
+      'system',
+    ]);
+    if (!isSubsequence(builtins, allowedBuiltins))
       throw new InvalidBuiltins(builtins, this.layout.builtins, layoutName);
 
     this.builtins = builtins;
@@ -187,12 +192,13 @@ export class CairoRunner {
 
   /** @returns The builtin segment from a given name */
   getBuiltinSegment(name: string): SegmentValue[] | undefined {
-    const builtinIndex = this.builtins.findIndex(
-      (builtinName) => builtinName === name
-    );
-    return builtinIndex !== -1
-      ? this.vm.memory.segments[builtinIndex + 2]
-      : undefined;
+    const builtinId = this.builtins.indexOf(name);
+    const segmentArenaId = this.builtins.indexOf('segment_arena');
+
+    if (builtinId === -1) return undefined;
+
+    const offset = segmentArenaId !== -1 && builtinId >= segmentArenaId ? 3 : 2;
+    return this.vm.memory.segments[builtinId + offset];
   }
 
   /**

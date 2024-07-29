@@ -456,6 +456,9 @@ describe('cairoRunner', () => {
       [['output', 'pedersen'], 'small'],
       [['output', 'pedersen', 'range_check'], 'small'],
       [['output', 'range_check', 'poseidon'], 'starknet'],
+      [['output', 'range_check', 'segment_arena'], 'all_cairo'],
+      [['output', 'range_check', 'gas_builtin'], 'all_cairo'],
+      [['output', 'range_check', 'system'], 'starknet'],
     ])(
       'should correctly parse a program with an appropriate layout',
       (builtins, layout) => {
@@ -475,6 +478,7 @@ describe('cairoRunner', () => {
       [['output', 'range_check', 'pedersen'], 'small'],
       [['output', 'pedersen', 'range_check', 'ecdsa', 'ec_op'], 'small'],
       [['output', 'range_check', 'poseidon', 'range_check96'], 'starknet'],
+      [['output', 'segment_arena', 'range_check'], 'all_cairo'],
     ])(
       'should throw InvalidBuiltins if builtins are not within the layout or unordered',
       (builtins, layout) => {
