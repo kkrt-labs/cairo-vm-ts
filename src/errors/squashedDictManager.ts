@@ -2,7 +2,7 @@ import { Felt } from 'primitives/felt';
 
 class SquashedDictManagerError extends Error {}
 
-/** There is no keys in the squashedDictionnaryManager */
+/** There is no key in the squashed dictionnary manager */
 export class EmptyKeys extends SquashedDictManagerError {
   constructor() {
     super('There is no keys left in the squashed dictionnary manager.');
