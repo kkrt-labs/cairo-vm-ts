@@ -12,7 +12,7 @@ $(CAIRO_VM_RS_CLI):
 
 $(CAIRO_VM_ZIG_CLI):
 	@git submodule update --init ziggy-starkdust \
-	cd ziggy-starkdust; zig build
+	cd ziggy-starkdust; zig build -Doptimize=ReleaseFast
 
 build:
 	@bun install; bun link
