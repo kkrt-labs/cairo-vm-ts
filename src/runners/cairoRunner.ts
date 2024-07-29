@@ -80,6 +80,7 @@ export class CairoRunner {
     this.vm.memory.setValues(this.executionBase, stack);
   }
 
+  /** Instantiate a CairoRunner from parsed Cairo Zero compilation artifacts. */
   static fromCairoZeroProgram(
     program: CairoZeroProgram,
     layoutName: string = 'plain',
@@ -96,6 +97,7 @@ export class CairoRunner {
     return new CairoRunner(program, program.data, layoutName, offset, builtins);
   }
 
+  /** Instantiate a CairoRunner from parsed Cairo compilation artifacts. */
   static fromCairoProgram(
     program: CairoProgram,
     layoutName: string = 'plain',
@@ -113,6 +115,7 @@ export class CairoRunner {
     );
   }
 
+  /** Instantiate a CairoRunner from any Cairo or Cairo Zero compilation artifacts. */
   static fromProgram(
     program: Program,
     layout: string = 'plain',

@@ -16,6 +16,7 @@ describe('layouts', () => {
       expect(plain.dilutedPool).toBeUndefined();
       expect(plain.ratios).toBeUndefined();
     });
+
     test.each([
       [
         'small',

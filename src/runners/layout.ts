@@ -35,6 +35,20 @@ export const DEFAULT_DILUTED_POOL: DilutedPool = {
   nBits: 16,
 };
 
+/**
+ * Dictionnary containing all the available layouts:
+ * - plain
+ * - small
+ * - dex
+ * - recursive
+ * - starknet
+ * - starknet_with_keccak
+ * - recursive_large_output
+ * - recursive_with_poseidon
+ * - all_cairo
+ * - all_solidity
+ * - dynamic
+ */
 export const layouts: { [key: string]: Layout } = {
   plain: {
     builtins: [],
@@ -212,6 +226,7 @@ export const layouts: { [key: string]: Layout } = {
   },
 };
 
+/** Array of all the available layouts name */
 export const ALL_LAYOUTS = Object.keys(layouts);
 
 /** Return whether `subsequence` is a subsequence of `sequence` */
