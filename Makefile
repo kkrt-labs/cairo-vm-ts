@@ -70,13 +70,13 @@ compile: compile-cairo-zero compile-cairo
 
 
 
-run-all: $(VALID_COMPILED_CAIRO_0_FILES)
+run-all: $(VALID_COMPILED_CAIRO_0_FILES) $(COMPILED_CAIRO_FILES)
 	@failed_tests_ctr=0; \
 	failed_tests=""; \
 	passed_tests_ctr=0; \
 	for file in $^; do \
 		echo "Running $$file..."; \
-		cairo run -s $$file; \
+		cairo run -s -l all_cairo $$file; \
 		exit_code=$$?; \
 		if [ $$exit_code -ne 0 ]; then \
 			failed_tests_ctr=$$((failed_tests_ctr + 1)); \
