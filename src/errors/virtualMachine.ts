@@ -1,5 +1,4 @@
 import { ResOperand } from 'hints/hintParamsSchema';
-import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
 
@@ -71,14 +70,5 @@ export class InvalidBufferResOp extends VirtualMachineError {
 export class DictNotFound extends VirtualMachineError {
   constructor(address: Relocatable) {
     super(`Cannot found any Dictionnary at address ${address.toString()}`);
-  }
-}
-
-/** Cannot find value at `key` in Dictionnary at `address */
-export class DictValueNotFound extends VirtualMachineError {
-  constructor(address: Relocatable, key: Felt) {
-    super(
-      `Cannot found value at ${key.toString()} from Dictionnary at address ${address.toString()}`
-    );
   }
 }

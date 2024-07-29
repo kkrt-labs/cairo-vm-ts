@@ -3,7 +3,6 @@ import { test, expect, describe, spyOn } from 'bun:test';
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
 import {
   DictNotFound,
-  DictValueNotFound,
   InvalidBufferResOp,
   UnusedRes,
 } from 'errors/virtualMachine';
@@ -756,28 +755,10 @@ describe('VirtualMachine', () => {
       expect(vm.getDict(address)).toEqual(new Dictionnary(new Felt(0n)));
     });
 
-    test('should properly set and get value of a dictionnary', () => {
-      const vm = new VirtualMachine();
-      const address = vm.newDict();
-      const key = new Felt(12n);
-      const value = new Felt(5n);
-      vm.setDictValue(address, key, value);
-      expect(vm.getDictValue(address, key)).toEqual(value);
-    });
-
     test('should throw DictNotFound when accessing a non-existing dictionnary', () => {
       const vm = new VirtualMachine();
       const address = new Relocatable(2, 3);
       expect(() => vm.getDict(address)).toThrow(new DictNotFound(address));
-    });
-
-    test('should throw DictValueNotFound when accessing a non-existing key in a dictionnary', () => {
-      const vm = new VirtualMachine();
-      const address = vm.newDict();
-      const key = new Felt(0n);
-      expect(() => vm.getDictValue(address, key)).toThrow(
-        new DictValueNotFound(address, key)
-      );
     });
   });
 });

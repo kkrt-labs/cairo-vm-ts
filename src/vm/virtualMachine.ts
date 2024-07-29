@@ -10,7 +10,6 @@ import {
   InvalidCallOp0Value,
   UndefinedOp1,
   DictNotFound,
-  DictValueNotFound,
   InvalidBufferResOp,
 } from 'errors/virtualMachine';
 import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
@@ -32,7 +31,7 @@ import {
 import { Hint } from 'hints/hintSchema';
 import { ScopeManager } from 'hints/scopeManager';
 import { SquashedDictManager } from '../hints/squashedDictManager';
-import { handlers } from 'hints/hintHandler';
+import { handlers, HintHandler } from 'hints/hintHandler';
 
 import {
   ApUpdate,
@@ -82,8 +81,7 @@ export class VirtualMachine {
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
 
-  /** Maps a hint to its implementation */
-  private handlers = handlers;
+  private handlers: HintHandler = handlers;
 
   constructor() {
     this.currentStep = 0n;
@@ -543,6 +541,13 @@ export class VirtualMachine {
     return value;
   }
 
+  /**
+   * Return the memory value at the address defined by `cell`
+   *
+   * Throw if the value is `undefined`
+   *
+   * NOTE: used in Cairo hints
+   */
   getSegmentValue(cell: CellRef): SegmentValue {
     const value = this.memory.get(this.cellRefToRelocatable(cell));
     if (!value) throw new UndefinedSegmentValue();
@@ -629,6 +634,11 @@ export class VirtualMachine {
     }
   }
 
+  /**
+   * Creates a new dictionnary.
+   *
+   * NOTE: used in Cairo hints
+   */
   newDict(): Relocatable {
     const dictAddr = this.memory.addSegment();
     this.dictManager.set(
@@ -638,21 +648,16 @@ export class VirtualMachine {
     return dictAddr;
   }
 
+  /**
+   * Return the dictionnary at `address`
+   *
+   * Throw if dictionnary was not found
+   *
+   * NOTE: used in Cairo hints
+   */
   getDict(address: Relocatable): Dictionnary {
     const dict = this.dictManager.get(address.segmentId);
     if (!dict) throw new DictNotFound(address);
     return dict;
-  }
-
-  getDictValue(address: Relocatable, key: Felt): SegmentValue {
-    const dict = this.getDict(address);
-    const value = dict.get(key.toString());
-    if (!value) throw new DictValueNotFound(address, key);
-    return value;
-  }
-
-  setDictValue(address: Relocatable, key: Felt, value: SegmentValue) {
-    const dict = this.getDict(address);
-    dict.set(key.toString(), value);
   }
 }
