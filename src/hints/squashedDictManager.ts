@@ -12,7 +12,7 @@ import { Felt } from 'primitives/felt';
 export class SquashedDictManager {
   /** Maps the key of a dictionnary to its taken values accross the run. */
   public keyToIndices: Map<string, Felt[]>;
-  /** An array containing the keys that still needs to be squashed. */
+  /** An array containing the keys that still need to be squashed. */
   public keys: Felt[];
 
   constructor() {

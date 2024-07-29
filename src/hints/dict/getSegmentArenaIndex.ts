@@ -27,7 +27,7 @@ export const getSegmentArenaIndexParser = z
 /**
  * GetSegmentArenaIndex hint
  *
- * Assert the index of the dictionnary to its segment.
+ * Retrieve the index of the given dict in the info segment.
  * Used when finalizing the dictionnaries.
  */
 export type GetSegmentArenaIndex = z.infer<typeof getSegmentArenaIndexParser>;

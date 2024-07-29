@@ -25,7 +25,7 @@ export const felt252DictEntryUpdateParser = z
 /**
  * Felt252DictEntryUpdate hint
  *
- * Set a value in a dict: `dict[key] = value`
+ * Update an existing dict entry `key` to `value`: `dict[key] = value`
  */
 export type Felt252DictEntryUpdate = z.infer<
   typeof felt252DictEntryUpdateParser

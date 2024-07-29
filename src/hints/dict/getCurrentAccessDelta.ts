@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
@@ -17,7 +16,7 @@ export const getCurrentAccessDeltaParser = z
 /**
  * GetCurrentAccessDelta hint
  *
- * Assert to memory the difference between the current and previous indices.
+ * Assert to memory the difference between the current index to the next one.
  *
  */
 export type GetCurrentAccessDelta = z.infer<typeof getCurrentAccessDeltaParser>;

@@ -34,7 +34,7 @@ export type Felt252DictEntryInit = z.infer<typeof felt252DictEntryInitParser>;
  * Read the current value at `key` if any,
  * Initialize `dict[key]` to 0 if undefined.
  *
- * Assert the value at key to the `dict` segment.
+ * Assert the value at `key` to the `dict` segment.
  *
  */
 export const felt252DictEntryInit = (

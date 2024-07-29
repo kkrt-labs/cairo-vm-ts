@@ -13,10 +13,7 @@ export const getCurrentAccessIndexParser = z
     rangeCheckPtr: range_check_ptr,
   }));
 
-/**
- * GetCurrentAccessIndex hint
- *
- */
+/** GetCurrentAccessIndex hint */
 export type GetCurrentAccessIndex = z.infer<typeof getCurrentAccessIndexParser>;
 
 /**

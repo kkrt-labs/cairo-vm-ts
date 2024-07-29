@@ -14,19 +14,15 @@ export const shouldContinueSquashLoopParser = z
     shouldContinue: should_continue,
   }));
 
-/**
- * ShouldContinueSquashLoop hint
- *
- * Check whether the squash loop should be skipped.
- */
+/** ShouldContinueSquashLoop hint */
 export type ShouldContinueSquashLoop = z.infer<
   typeof shouldContinueSquashLoopParser
 >;
 
 /**
- * Check whether the squash loop should be skipped.
+ * Assert whether the squash loop should be continued.
  *
- * If there is still indices to be squashed, the loop is skipped.
+ * If there is still indices to be squashed, the loop continue.
  */
 export const shouldContinueSquashLoop = (
   vm: VirtualMachine,

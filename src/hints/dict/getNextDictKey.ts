@@ -13,9 +13,7 @@ export const getNextDictKeyParser = z
     nextKey: next_key,
   }));
 
-/**
- * GetNextDictKey hint
- */
+/** GetNextDictKey hint */
 export type GetNextDictKey = z.infer<typeof getNextDictKeyParser>;
 
 /**

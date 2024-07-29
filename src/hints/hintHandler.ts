@@ -49,10 +49,15 @@ import {
 } from './dict/shouldSkipSquashLoop';
 import { TestLessThan, testLessThan } from './math/testLessThan';
 
-export const handlers: Record<
+/**
+ * Map hint names to the function executing their logic.
+ */
+export type HintHandler = Record<
   HintName,
   (vm: VirtualMachine, hint: Hint) => void
-> = {
+>;
+
+export const handlers: HintHandler = {
   [HintName.AllocFelt252Dict]: (vm, hint) => {
     const h = hint as AllocFelt252Dict;
     allocFelt252Dict(vm, h.segmentArenaPtr);

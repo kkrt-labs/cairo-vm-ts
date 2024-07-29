@@ -24,6 +24,9 @@ export const assertLeFindSmallArcsParser = z
 
 /**
  * AssertLeFindSmallArcs hint
+ *
+ * Find the two small arcs from [(0, a), (a, b), (b, PRIME)] and
+ * assert them to the range check segment.
  */
 export type AssertLeFindSmallArcs = z.infer<typeof assertLeFindSmallArcsParser>;
 
@@ -33,7 +36,7 @@ export type Arc = {
 };
 
 /**
- * Compute the three arcs `a`, `b - a` and `PRIME - 1 - b`
+ * Compute the three arcs [(0, a), (a, b), (b, PRIME)]
  *
  * Set the biggest arc to the scope variable `excluded_arc`
  *

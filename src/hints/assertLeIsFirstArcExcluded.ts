@@ -19,13 +19,15 @@ export const assertLeIsFirstArcExcludedParser = z
 
 /**
  * AssertLeIsFirstArcExcluded hint
+ *
+ * Assert if the arc (0, a) was excluded.
  */
 export type AssertLeIsFirstArcExcluded = z.infer<
   typeof assertLeIsFirstArcExcludedParser
 >;
 
 /**
- * Check whether the first arc from `AssertLeFindSmallArcs` is excluded.
+ * Assert if the arc (0, a) from `AssertLeFindSmallArcs` was excluded.
  *
  * Read the value in scope at `excluded_arc`
  */

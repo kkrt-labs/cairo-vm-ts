@@ -14,17 +14,13 @@ export const shouldSkipSquashLoopParser = z
     shouldSkipLoop: should_skip_loop,
   }));
 
-/**
- * ShouldSkipSquashLoop hint
- *
- * Check whether the squash loop should be skipped.
- */
+/** ShouldSkipSquashLoop hint */
 export type ShouldSkipSquashLoop = z.infer<typeof shouldSkipSquashLoopParser>;
 
 /**
  * Check whether the squash loop should be skipped.
  *
- * If there is still indices to be squashed, the loop is skipped.
+ * If there is no more indices to be squashed, the loop is skipped.
  */
 export const shouldSkipSquashLoop = (
   vm: VirtualMachine,
