@@ -4,7 +4,7 @@ import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
 
 import { Felt } from 'primitives/felt';
 import { isFelt, isRelocatable } from 'primitives/segmentValue';
-import { VirtualMachine } from 'vm/virtualMachine';
+import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
 import { resOperand, ResOperand } from 'hints/hintParamsSchema';
@@ -44,5 +44,5 @@ export const allocFelt252Dict = (
     throw new ExpectedRelocatable(infoPtr);
 
   const newDict = vm.newDict();
-  vm.memory.assertEq(infoPtr.add(dictNumber.mul(new Felt(3n))), newDict);
+  vm.memory.assertEq(infoPtr.add(dictNumber.mul(DICT_ACCESS_SIZE)), newDict);
 };

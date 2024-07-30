@@ -68,6 +68,8 @@ export class Dictionnary extends Map<string, SegmentValue> {
   }
 }
 
+export const DICT_ACCESS_SIZE = 3;
+
 export class VirtualMachine {
   private currentStep: bigint;
   memory: Memory;

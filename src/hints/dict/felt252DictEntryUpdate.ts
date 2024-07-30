@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { ExpectedFelt } from 'errors/primitives';
 
 import { isFelt } from 'primitives/segmentValue';
-import { VirtualMachine } from 'vm/virtualMachine';
+import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
 import { Deref, OpType, resOperand, ResOperand } from 'hints/hintParamsSchema';
@@ -45,7 +45,7 @@ export const felt252DictEntryUpdate = (
   value: ResOperand
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictPtr));
-  const key = vm.memory.get(address.sub(3));
+  const key = vm.memory.get(address.sub(DICT_ACCESS_SIZE));
   if (!key || !isFelt(key)) throw new ExpectedFelt(key);
   const val =
     value.type === OpType.Deref

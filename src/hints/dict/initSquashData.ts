@@ -4,7 +4,7 @@ import { ExpectedFelt } from 'errors/primitives';
 
 import { Felt } from 'primitives/felt';
 import { isFelt } from 'primitives/segmentValue';
-import { VirtualMachine } from 'vm/virtualMachine';
+import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
 import {
@@ -67,23 +67,27 @@ export const initSquashData = (
   bigKeys: CellRef,
   firstKey: CellRef
 ) => {
-  const dictAccessSize = 3;
   const address = vm.getPointer(...vm.extractBuffer(dictAccesses));
-  if (Number(vm.getResOperandValue(ptrDiff)) % dictAccessSize)
+
+  const ptrDiffValue = Number(vm.getResOperandValue(ptrDiff));
+  if (ptrDiffValue % DICT_ACCESS_SIZE)
     throw new Error(
       'Accessess array size must be divisible by the dict size (3)'
     );
+
   const nbAccesses = Number(vm.getResOperandValue(nAccesses));
   for (let i = 0; i < nbAccesses; i++) {
-    const key = vm.memory.get(address.add(i * dictAccessSize));
+    const key = vm.memory.get(address.add(i * DICT_ACCESS_SIZE));
     if (!key || !isFelt(key)) throw new ExpectedFelt(key);
     vm.squashedDictManager.insert(key, new Felt(BigInt(i)));
   }
+
   vm.squashedDictManager.keyToIndices.forEach((values, key) => {
     values.reverse();
     vm.squashedDictManager.keys.push(new Felt(BigInt(key)));
   });
   vm.squashedDictManager.keys.sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+
   vm.memory.assertEq(
     vm.cellRefToRelocatable(bigKeys),
     vm.squashedDictManager.keys[0] > new Felt(1n << 128n)
