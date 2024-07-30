@@ -13,11 +13,18 @@ export const getNextDictKeyParser = z
     nextKey: next_key,
   }));
 
-/** GetNextDictKey hint */
+/**
+ * GetNextDictKey hint
+ *
+ * Get the next key to be squashed.
+ */
 export type GetNextDictKey = z.infer<typeof getNextDictKeyParser>;
 
 /**
- * Pop the current key and assert the next one to `nextKey`
+ * Get the next key to be squashed.
+ *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param {CellRef} nextKey - Address to store the next key to be squashed.
  */
 export const getNextDictKey = (vm: VirtualMachine, nextKey: CellRef) => {
   vm.squashedDictManager.popKey();
