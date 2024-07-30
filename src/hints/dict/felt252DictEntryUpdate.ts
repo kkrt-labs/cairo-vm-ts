@@ -26,19 +26,18 @@ export const felt252DictEntryUpdateParser = z
 /**
  * Felt252DictEntryUpdate hint
  *
- * Update an existing dict entry `key` to `value`: `dict[key] = value`
+ * Updates a dictionary entry.
  */
 export type Felt252DictEntryUpdate = z.infer<
   typeof felt252DictEntryUpdateParser
 >;
 
 /**
- * Get the dictionary `dict` at `dictPtr`
+ * Updates a dictionary entry.
  *
- * Get the key at address `dict - 3`
- *
- * `dict[key] = value`
- *
+ * @param {VirtualMachine} vm - The virtual machine instance.
+ * @param {ResOperand} dictPtr - Pointer to the next dictionary access.
+ * @param {ResOperand} value - The new value to be set.
  */
 export const felt252DictEntryUpdate = (
   vm: VirtualMachine,
