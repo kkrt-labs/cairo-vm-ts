@@ -14,7 +14,7 @@ export type DilutedPool = {
  * - rcUnits: Range Check Units.
  * - publicMemoryFraction: The ratios total memory cells over public memory cells.
  * - dilutedPool: The diluted pool, used for additionnal checks on Bitwise & Keccak
- * - ratios: Dictionnary mapping each builtin name to its ratio.
+ * - ratios: Dictionary mapping each builtin name to its ratio.
  *
  * NOTE: The builtins `segment_arena`, `gas_builtin` and `system` which can be found
  * in the program builtins are not part of the layouts because they're not proven as such.
@@ -38,7 +38,7 @@ export const DEFAULT_DILUTED_POOL: DilutedPool = {
 };
 
 /**
- * Dictionnary containing all the available layouts:
+ * Dictionary containing all the available layouts:
  * - plain
  * - small
  * - dex

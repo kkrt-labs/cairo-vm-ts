@@ -21,7 +21,7 @@ export type BuiltinHandler = ProxyHandler<Array<SegmentValue>>;
  * - Keccak: Builtin for keccak hash family
  * - Pedersen: Builtin for pedersen hash family
  * - Poseidon: Builtin for poseidon hash family
- * - Segment Arena: Builtin to manage the dictionnaries
+ * - Segment Arena: Builtin to manage the dictionaries
  * - Output: Output builtin
  */
 const BUILTIN_HANDLER: {

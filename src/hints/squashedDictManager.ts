@@ -7,10 +7,10 @@ import {
 import { Felt } from 'primitives/felt';
 
 /**
- *  Handle the squashing of dictionnaries.
+ *  Handle the squashing of dictionaries.
  */
 export class SquashedDictManager {
-  /** Maps the key of a dictionnary to its taken values accross the run. */
+  /** Maps the key of a dictionary to its taken values accross the run. */
   public keyToIndices: Map<string, Felt[]>;
   /** An array containing the keys that still need to be squashed. */
   public keys: Felt[];
@@ -31,14 +31,14 @@ export class SquashedDictManager {
     }
   }
 
-  /** Return the last key of the dictionnary. */
+  /** Return the last key of the dictionary. */
   lastKey(): Felt {
     const len = this.keys.length;
     if (!len) throw new EmptyKeys();
     return this.keys[len - 1];
   }
 
-  /** Remove and return the last key of the dictionnary. */
+  /** Remove and return the last key of the dictionary. */
   popKey(): Felt {
     const key = this.keys.pop();
     if (!key) throw new EmptyKeys();

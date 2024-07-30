@@ -2,10 +2,10 @@ import { Felt } from 'primitives/felt';
 
 class SquashedDictManagerError extends Error {}
 
-/** There are no keys left in the squashed dictionnary manager */
+/** There are no keys left in the squashed dictionary manager */
 export class EmptyKeys extends SquashedDictManagerError {
   constructor() {
-    super('There are no keys left in the squashed dictionnary manager.');
+    super('There are no keys left in the squashed dictionary manager.');
   }
 }
 
@@ -15,14 +15,14 @@ export class EmptyIndices extends SquashedDictManagerError {
     super(
       `There are no indices at key ${
         key ? key.toString() : key
-      } in the squashed dictionnary manager.`
+      } in the squashed dictionary manager.`
     );
   }
 }
 
-/** The last index of the squashed dictionnary manager is empty. */
+/** The last index of the squashed dictionary manager is empty. */
 export class EmptyIndex extends SquashedDictManagerError {
   constructor() {
-    super('The last index of the squashed dictionnary manager is empty.');
+    super('The last index of the squashed dictionary manager is empty.');
   }
 }

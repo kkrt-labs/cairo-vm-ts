@@ -61,7 +61,7 @@ export type RelocatedMemory = {
   value: Felt;
 };
 
-export class Dictionnary extends Map<string, SegmentValue> {
+export class Dictionary extends Map<string, SegmentValue> {
   constructor(public readonly id: Felt) {
     super();
     this.id = id;
@@ -76,7 +76,7 @@ export class VirtualMachine {
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
-  dictManager: Map<number, Dictionnary>;
+  dictManager: Map<number, Dictionary>;
   squashedDictManager: SquashedDictManager;
   scopeManager: ScopeManager;
   trace: TraceEntry[];
@@ -97,7 +97,7 @@ export class VirtualMachine {
     this.fp = new Relocatable(1, 0);
 
     this.scopeManager = new ScopeManager();
-    this.dictManager = new Map<number, Dictionnary>();
+    this.dictManager = new Map<number, Dictionary>();
     this.squashedDictManager = new SquashedDictManager();
   }
 
@@ -637,7 +637,7 @@ export class VirtualMachine {
   }
 
   /**
-   * Creates a new dictionnary.
+   * Creates a new dictionary.
    *
    * NOTE: used in Cairo hints
    */
@@ -645,19 +645,19 @@ export class VirtualMachine {
     const dictAddr = this.memory.addSegment();
     this.dictManager.set(
       dictAddr.segmentId,
-      new Dictionnary(new Felt(BigInt(this.dictManager.size)))
+      new Dictionary(new Felt(BigInt(this.dictManager.size)))
     );
     return dictAddr;
   }
 
   /**
-   * Return the dictionnary at `address`
+   * Return the dictionary at `address`
    *
-   * Throw if dictionnary was not found
+   * Throw if dictionary was not found
    *
    * NOTE: used in Cairo hints
    */
-  getDict(address: Relocatable): Dictionnary {
+  getDict(address: Relocatable): Dictionary {
     const dict = this.dictManager.get(address.segmentId);
     if (!dict) throw new DictNotFound(address);
     return dict;

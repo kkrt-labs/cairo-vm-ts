@@ -32,7 +32,7 @@ export type Felt252DictEntryUpdate = z.infer<
 >;
 
 /**
- * Get the dictionnary `dict` at `dictPtr`
+ * Get the dictionary `dict` at `dictPtr`
  *
  * Get the key at address `dict - 3`
  *

@@ -22,11 +22,11 @@ export class RangeCheckOutOfBounds extends BuiltinError {
   }
 }
 
-/** ECDSA signature cannot be retrieved from dictionnary at `offset` */
+/** ECDSA signature cannot be retrieved from dictionary at `offset` */
 export class UndefinedECDSASignature extends BuiltinError {
   constructor(offset: number) {
     super(
-      `ECDSA signature cannot be retrieved from dictionnary at offset ${offset}`
+      `ECDSA signature cannot be retrieved from dictionary at offset ${offset}`
     );
   }
 }
@@ -48,7 +48,7 @@ public key (negative): ${pubKeyNegHex}
   }
 }
 
-/** The signature dictionnary is undefined */
+/** The signature dictionary is undefined */
 export class UndefinedSignatureDict extends BuiltinError {}
 
 /** An offset of type number is expected */

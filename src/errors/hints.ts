@@ -28,7 +28,7 @@ export class UnknownHint extends HintError {
 export class InvalidDictAccessesNumber extends HintError {
   constructor(ptrDiffValue: number, dictAccessSize: number) {
     super(
-      `The number of dictionnary accesses (${ptrDiffValue}) must be a multiple of the dictionnary access size (${dictAccessSize})`
+      `The number of dictionary accesses (${ptrDiffValue}) must be a multiple of the dictionary access size (${dictAccessSize})`
     );
   }
 }

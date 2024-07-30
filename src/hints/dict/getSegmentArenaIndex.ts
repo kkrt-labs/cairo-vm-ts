@@ -28,16 +28,16 @@ export const getSegmentArenaIndexParser = z
  * GetSegmentArenaIndex hint
  *
  * Retrieve the index of the given dict in the info segment.
- * Used when finalizing the dictionnaries.
+ * Used when finalizing the dictionaries.
  */
 export type GetSegmentArenaIndex = z.infer<typeof getSegmentArenaIndexParser>;
 
 /**
  * Assert that `dictIndex` address stores the identifier of the
- * dictionnary found at `dictEndPtr`.
+ * dictionary found at `dictEndPtr`.
  *
- * The identifier `id` the is dictionnary number,
- * n for the n-th dictionnary, starting at 0.
+ * The identifier `id` the is dictionary number,
+ * n for the n-th dictionary, starting at 0.
  *
  */
 export const getSegmentArenaIndex = (

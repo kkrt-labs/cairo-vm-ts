@@ -54,7 +54,7 @@ The GetSegmentArenaIndex hint can be found in a format similar to this one:
 
 - Create the file `src/hints/dict/getSegmentArenaIndex.ts`. Place the file in
   the appropriate sub-folder category, here `dict` because the hint is dedicated
-  to dictionnaries.
+  to dictionaries.
 
 - Create and export a Zod object `getSegmentArenaIndexParser` which follows the
   hint signature:
@@ -118,7 +118,7 @@ The last step is adding the hint to the handler object.
 
 The handler is defined in `src/hints/hintHandler.ts`
 
-It is a dictionnary which maps a `HintName` value to a function executing the
+It is a dictionary which maps a `HintName` value to a function executing the
 corresponding core logic function.
 
 ```typescript

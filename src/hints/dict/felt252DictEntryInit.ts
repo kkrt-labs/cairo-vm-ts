@@ -23,12 +23,12 @@ export const felt252DictEntryInitParser = z
 /**
  * Felt252DictEntryInit hint
  *
- * Initialize the entry to be added to a given dictionnary.
+ * Initialize the entry to be added to a given dictionary.
  */
 export type Felt252DictEntryInit = z.infer<typeof felt252DictEntryInitParser>;
 
 /**
- * Get the dictionnary `dict` at `dictPtr`
+ * Get the dictionary `dict` at `dictPtr`
  * Get the `key` to be initialized
  *
  * Read the current value at `key` if any,

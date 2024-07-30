@@ -17,7 +17,7 @@ export const getCurrentAccessIndexParser = z
 export type GetCurrentAccessIndex = z.infer<typeof getCurrentAccessIndexParser>;
 
 /**
- * Assert that the biggest key of the squashed dictionnary is < 2 ** 128
+ * Assert that the biggest key of the squashed dictionary is < 2 ** 128
  */
 export const getCurrentAccessIndex = (
   vm: VirtualMachine,

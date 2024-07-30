@@ -48,12 +48,12 @@ export const initSquashDataParser = z
 /**
  * InitSquashData hint
  *
- * Initialize the squashed dictionnary data.
+ * Initialize the squashed dictionary data.
  */
 export type InitSquashData = z.infer<typeof initSquashDataParser>;
 
 /**
- * Initialize the squashed dictionnary
+ * Initialize the squashed dictionary
  *
  * - Insert all accessed keys
  * - Assert the biggest key to `bigKeys` address

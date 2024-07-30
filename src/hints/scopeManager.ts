@@ -1,7 +1,7 @@
 import { VariableNotInScope, CannotExitMainScope } from 'errors/scopeManager';
 
 /**
- * A dictionnary mapping a variable name to its value,
+ * A dictionary mapping a variable name to its value,
  * which can be anything
  */
 export type Scope = {
