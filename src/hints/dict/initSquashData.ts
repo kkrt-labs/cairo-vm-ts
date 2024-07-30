@@ -49,17 +49,19 @@ export const initSquashDataParser = z
 /**
  * InitSquashData hint
  *
- * Initialize the squashed dictionary data.
+ * Initialize the squashing of a dictionary.
  */
 export type InitSquashData = z.infer<typeof initSquashDataParser>;
 
 /**
- * Initialize the squashed dictionary
+ * Initialize the squashing of a dictionary.
  *
- * - Insert all accessed keys
- * - Assert the biggest key to `bigKeys` address
- * - Assert the smallest (first) key to `firstKey` address
- *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param {ResOperand} dictAccesses - Pointer to the start of the dictionary to be squashed.
+ * @param {ResOperand} ptrDiff - The difference between dictionary end and start pointers.
+ * @param {ResOperand} nAccesses - Number of dictonary accesses.
+ * @param {CellRef} bigKeys - Address to store if the biggest key of the dictionary is above 2 ** 128 or not.
+ * @param {CellRef} firstKey - Address to store the first key to be squashed.
  */
 export const initSquashData = (
   vm: VirtualMachine,
