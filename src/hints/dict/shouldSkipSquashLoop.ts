@@ -14,13 +14,20 @@ export const shouldSkipSquashLoopParser = z
     shouldSkipLoop: should_skip_loop,
   }));
 
-/** ShouldSkipSquashLoop hint */
+/**
+ * ShouldSkipSquashLoop hint
+ *
+ * Assert in memory if there are keys that haven't been squashed yet.
+ */
 export type ShouldSkipSquashLoop = z.infer<typeof shouldSkipSquashLoopParser>;
 
 /**
- * Check whether the squash loop should be skipped.
+ * Assert in memory if there are keys that haven't been squashed yet.
  *
- * If there is no more indices to be squashed, the loop is skipped.
+ * This is the opposite of `ShouldContinueSquashLoop`.
+ *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param shouldSkipLoop - Address to store whether the squash loop must be skipped.
  */
 export const shouldSkipSquashLoop = (
   vm: VirtualMachine,
