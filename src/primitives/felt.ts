@@ -62,12 +62,20 @@ export class Felt {
     return new Felt(this.inner - BigInt(other));
   }
 
-  mul(other: SegmentValue): Felt {
-    if (!isFelt(other)) {
+  mul(other: Felt): Felt;
+  mul(other: number): Felt;
+  mul(other: Relocatable): never;
+  mul(other: SegmentValue): SegmentValue;
+  mul(other: SegmentValue | number): SegmentValue {
+    if (isRelocatable(other)) {
       throw new ExpectedFelt(other);
     }
 
-    return new Felt(this.inner * other.inner);
+    if (isFelt(other)) {
+      return new Felt(this.inner * other.inner);
+    }
+
+    return new Felt(this.inner * BigInt(other));
   }
 
   neg(): Felt {

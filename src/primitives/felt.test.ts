@@ -120,6 +120,12 @@ describe('Felt', () => {
       );
       expect(result.eq(expected)).toBeTrue();
     });
+    test('should multiply a felt and a number properly', () => {
+      const a = new Felt(10n);
+      const b = 20;
+      const expected = new Felt(200n);
+      expect(a.mul(b)).toEqual(expected);
+    });
   });
 
   describe('div', () => {
