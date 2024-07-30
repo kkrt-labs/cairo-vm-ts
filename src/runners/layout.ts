@@ -11,11 +11,13 @@ export type DilutedPool = {
 /**
  * Layout provides a configuration when generating a proof
  * - Builtins: List of available builtins.
- *   segment_arena, gas_builtin and system are not proven.
  * - rcUnits: Range Check Units.
  * - publicMemoryFraction: The ratios total memory cells over public memory cells.
  * - dilutedPool: The diluted pool, used for additionnal checks on Bitwise & Keccak
  * - ratios: Dictionnary mapping each builtin name to its ratio.
+ *
+ * NOTE: The builtins `segment_arena`, `gas_builtin` and `system` which can be found
+ * in the program builtins are not part of the layouts because they're not proven as such.
  *
  * NOTE: A ratio defines the number of steps over the number of builtin instances.
  * For every ratio steps, we have one instance.
