@@ -13,11 +13,21 @@ export const getCurrentAccessIndexParser = z
     rangeCheckPtr: range_check_ptr,
   }));
 
-/** GetCurrentAccessIndex hint */
+/**
+ * GetCurrentAccessIndex hint
+ * Assert that the accessed index is strictly inferior to 2 ** 128.
+ *
+ * A dictionary cannot have more than 2 ** 128 accesses in a single run.
+ */
 export type GetCurrentAccessIndex = z.infer<typeof getCurrentAccessIndexParser>;
 
 /**
- * Assert that the biggest key of the squashed dictionary is < 2 ** 128
+ * Assert that the accessed index is strictly inferior to 2 ** 128.
+ *
+ * A dictionary cannot have more than 2 ** 128 accesses in a single run.
+ *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param {ResOperand} rangeCheckPtr - Pointer to the range check builtin.
  */
 export const getCurrentAccessIndex = (
   vm: VirtualMachine,
