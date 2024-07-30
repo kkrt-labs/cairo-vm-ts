@@ -16,13 +16,16 @@ export const getCurrentAccessDeltaParser = z
 /**
  * GetCurrentAccessDelta hint
  *
- * Assert to memory the difference between the current index to the next one.
+ * Computes the delta between the last two indices.
  *
  */
 export type GetCurrentAccessDelta = z.infer<typeof getCurrentAccessDeltaParser>;
 
 /**
- * Assert `currIndex - prevIndex - 1` to `indexDeltaMinusOne`
+ * Computes the delta between the last two indices.
+ *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param {CellRef} indexDeltaMinusOne - The address where the index delta should be asserted.
  */
 export const getCurrentAccessDelta = (
   vm: VirtualMachine,
