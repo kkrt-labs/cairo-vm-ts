@@ -14,15 +14,22 @@ export const shouldContinueSquashLoopParser = z
     shouldContinue: should_continue,
   }));
 
-/** ShouldContinueSquashLoop hint */
+/**
+ * ShouldContinueSquashLoop hint
+ *
+ * Assert in memory if there are keys that haven't been squashed yet.
+ */
 export type ShouldContinueSquashLoop = z.infer<
   typeof shouldContinueSquashLoopParser
 >;
 
 /**
- * Assert whether the squash loop should be continued.
+ * Assert in memory if there are keys that haven't been squashed yet.
  *
- * If there is still indices to be squashed, the loop continue.
+ * This is the opposite of `ShouldSkipSquashLoop`.
+ *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param {CellRef} shouldContinue - Address to store whether the squash loop must continue.
  */
 export const shouldContinueSquashLoop = (
   vm: VirtualMachine,
