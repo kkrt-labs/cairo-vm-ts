@@ -24,19 +24,24 @@ export const felt252DictEntryInitParser = z
 /**
  * Felt252DictEntryInit hint
  *
- * Initialize the entry to be added to a given dictionary.
+ * Initializes a dictionary access by asserting that
+ * the previous value cell holds the current value
+ * of the dictionary (initialized to zero if undefined).
+ *
  */
 export type Felt252DictEntryInit = z.infer<typeof felt252DictEntryInitParser>;
 
 /**
- * Get the dictionary `dict` at `dictPtr`
- * Get the `key` to be initialized
+ * Initializes a dictionary access to a key by asserting that
+ * the previous value cell contains the current value
+ * of this dictionary key.
  *
- * Read the current value at `key` if any,
- * Initialize `dict[key]` to 0 if undefined.
+ * If it is the first entry for this key,
+ * the previous value will be zero.
  *
- * Assert the value at `key` to the `dict` segment.
- *
+ * @param {VirtualMachine} vm - The virtual machine instance.
+ * @param {ResOperand} dictPtr - Pointer to the dictionary access to be initialized.
+ * @param key - The dictionary key to access to.
  */
 export const felt252DictEntryInit = (
   vm: VirtualMachine,
