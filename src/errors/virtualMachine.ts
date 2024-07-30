@@ -65,10 +65,3 @@ export class InvalidBufferResOp extends VirtualMachineError {
     super(`Cannot extract buffer from the given ResOperand: ${resOperand}`);
   }
 }
-
-/** Cannot find Dictionary at `address` */
-export class DictNotFound extends VirtualMachineError {
-  constructor(address: Relocatable) {
-    super(`Cannot found any Dictionary at address ${address.toString()}`);
-  }
-}

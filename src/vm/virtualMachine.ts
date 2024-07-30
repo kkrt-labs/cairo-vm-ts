@@ -9,15 +9,16 @@ import {
   UndefinedOp0,
   InvalidCallOp0Value,
   UndefinedOp1,
-  DictNotFound,
   InvalidBufferResOp,
 } from 'errors/virtualMachine';
+import { DictNotFound } from 'errors/dictionary';
 import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import { Memory } from 'memory/memory';
+
 import {
   BinOp,
   CellRef,
@@ -29,9 +30,10 @@ import {
   ResOperand,
 } from 'hints/hintParamsSchema';
 import { Hint } from 'hints/hintSchema';
-import { ScopeManager } from 'hints/scopeManager';
-import { SquashedDictManager } from '../hints/squashedDictManager';
 import { handlers, HintHandler } from 'hints/hintHandler';
+import { Dictionary } from 'hints/dictionary';
+import { ScopeManager } from 'hints/scopeManager';
+import { SquashedDictManager } from 'hints/squashedDictManager';
 
 import {
   ApUpdate,
@@ -60,15 +62,6 @@ export type RelocatedMemory = {
   address: number;
   value: Felt;
 };
-
-export class Dictionary extends Map<string, SegmentValue> {
-  constructor(public readonly id: Felt) {
-    super();
-    this.id = id;
-  }
-}
-
-export const DICT_ACCESS_SIZE = 3;
 
 export class VirtualMachine {
   private currentStep: bigint;

@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 import { ExpectedFelt } from 'errors/primitives';
+import { InvalidDictAccessesNumber } from 'errors/hints';
 
 import { Felt } from 'primitives/felt';
 import { isFelt } from 'primitives/segmentValue';
-import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
+import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
 import {
@@ -13,7 +14,7 @@ import {
   resOperand,
   ResOperand,
 } from 'hints/hintParamsSchema';
-import { InvalidDictAccessesNumber } from 'errors/hints';
+import { DICT_ACCESS_SIZE } from 'hints/dictionary';
 
 /** Zod object to parse InitSquashData hint */
 export const initSquashDataParser = z

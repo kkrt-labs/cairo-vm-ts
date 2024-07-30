@@ -3,10 +3,12 @@ import { z } from 'zod';
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
 
 import { isFelt, isRelocatable } from 'primitives/segmentValue';
-import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
+import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
 import { resOperand, ResOperand } from 'hints/hintParamsSchema';
+import { DICT_ACCESS_SIZE } from 'hints/dictionary';
+import { DICT_NUMBER_OFFSET, INFO_PTR_OFFSET } from 'builtins/segmentArena';
 
 /** Zod object to parse AllocFelt252Dict hint */
 export const allocFelt252DictParser = z
@@ -42,10 +44,10 @@ export const allocFelt252Dict = (
   segmentArenaPtr: ResOperand
 ) => {
   const arenaPtr = vm.getPointer(...vm.extractBuffer(segmentArenaPtr));
-  const dictNumber = vm.memory.get(arenaPtr.sub(2));
+  const dictNumber = vm.memory.get(arenaPtr.sub(DICT_NUMBER_OFFSET));
   if (!dictNumber || !isFelt(dictNumber)) throw new ExpectedFelt(dictNumber);
 
-  const infoPtr = vm.memory.get(arenaPtr.sub(3));
+  const infoPtr = vm.memory.get(arenaPtr.sub(INFO_PTR_OFFSET));
   if (!infoPtr || !isRelocatable(infoPtr))
     throw new ExpectedRelocatable(infoPtr);
 

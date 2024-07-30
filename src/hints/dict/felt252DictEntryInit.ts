@@ -5,6 +5,7 @@ import { VirtualMachine } from 'vm/virtualMachine';
 
 import { resOperand, ResOperand } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
+import { PREV_VALUE_OFFSET } from 'hints/dictionary';
 
 /** Zod object to parse Felt252DictEntryInit hint */
 export const felt252DictEntryInitParser = z
@@ -47,5 +48,5 @@ export const felt252DictEntryInit = (
   const dict = vm.getDict(address);
   const prevValue = dict.get(keyValue) || new Felt(0n);
   dict.set(keyValue, prevValue);
-  vm.memory.assertEq(address.add(1), prevValue);
+  vm.memory.assertEq(address.add(PREV_VALUE_OFFSET), prevValue);
 };

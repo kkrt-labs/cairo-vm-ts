@@ -3,10 +3,11 @@ import { z } from 'zod';
 import { ExpectedFelt } from 'errors/primitives';
 
 import { isFelt } from 'primitives/segmentValue';
-import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
+import { VirtualMachine } from 'vm/virtualMachine';
 
 import { HintName } from 'hints/hintName';
 import { Deref, OpType, resOperand, ResOperand } from 'hints/hintParamsSchema';
+import { KEY_OFFSET } from 'hints/dictionary';
 
 /** Zod object to parse Felt252DictEntryUpdate hint */
 export const felt252DictEntryUpdateParser = z
@@ -45,7 +46,7 @@ export const felt252DictEntryUpdate = (
   value: ResOperand
 ) => {
   const address = vm.getPointer(...vm.extractBuffer(dictPtr));
-  const key = vm.memory.get(address.sub(DICT_ACCESS_SIZE));
+  const key = vm.memory.get(address.sub(KEY_OFFSET));
   if (!key || !isFelt(key)) throw new ExpectedFelt(key);
   const val =
     value.type === OpType.Deref
