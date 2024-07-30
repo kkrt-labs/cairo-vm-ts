@@ -139,4 +139,16 @@ describe('Felt', () => {
       expect(result).toStrictEqual(a);
     });
   });
+
+  describe('compare', () => {
+    test.each([
+      [new Felt(1n), new Felt(0n), 1],
+      [new Felt(1n), new Felt(1n), 0],
+      [new Felt(0n), new Felt(1n), -1],
+      [new Felt(-1n), new Felt(-10n), 1],
+      [new Felt(-1n), new Felt(Felt.PRIME - 1n), 0],
+    ])('should properly compare two Felt', (a, b, expected) => {
+      expect(a.compare(b)).toEqual(expected);
+    });
+  });
 });

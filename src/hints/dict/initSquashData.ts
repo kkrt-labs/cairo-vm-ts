@@ -85,7 +85,7 @@ export const initSquashData = (
     values.reverse();
     vm.squashedDictManager.keys.push(new Felt(BigInt(key)));
   });
-  vm.squashedDictManager.keys.sort((a, b) => (a < b ? 1 : a > b ? -1 : 0));
+  vm.squashedDictManager.keys.sort((a, b) => b.compare(a));
 
   vm.memory.assertEq(
     vm.cellRefToRelocatable(bigKeys),

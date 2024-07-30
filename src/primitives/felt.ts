@@ -101,6 +101,17 @@ export class Felt {
     return !isRelocatable(other) && this.inner === other.inner;
   }
 
+  /**
+   * Compare two Felt.
+   *
+   * @param other - The Felt to compare against.
+   * @returns {number} A positive value if `this > other`,
+   * a negative value if `this < other` and zero if they're equal.
+   */
+  compare(other: Felt): number {
+    return this > other ? 1 : this < other ? -1 : 0;
+  }
+
   sqrt(): Felt {
     return new Felt(CURVE.Fp.sqrt(this.inner));
   }

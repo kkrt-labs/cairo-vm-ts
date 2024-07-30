@@ -55,7 +55,7 @@ export const assertLeFindSmallArcs = (
     { value: aVal, pos: 0 },
     { value: bVal.sub(aVal), pos: 1 },
     { value: new Felt(-1n).sub(bVal), pos: 2 },
-  ].sort((a, b) => (a.value > b.value ? 1 : a.value < b.value ? -1 : 0));
+  ].sort((a, b) => a.value.compare(b.value));
 
   vm.scopeManager.set('excluded_arc', arcs[2].pos);
 
