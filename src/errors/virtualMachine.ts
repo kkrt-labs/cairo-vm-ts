@@ -66,7 +66,7 @@ export class InvalidBufferResOp extends VirtualMachineError {
   }
 }
 
-/** Cannot find Dictionnary at `address */
+/** Cannot find Dictionnary at `address` */
 export class DictNotFound extends VirtualMachineError {
   constructor(address: Relocatable) {
     super(`Cannot found any Dictionnary at address ${address.toString()}`);
