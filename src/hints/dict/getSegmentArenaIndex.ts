@@ -27,18 +27,16 @@ export const getSegmentArenaIndexParser = z
 /**
  * GetSegmentArenaIndex hint
  *
- * Retrieve the index of the given dict in the info segment.
- * Used when finalizing the dictionaries.
+ * Assert the index of the dictionary to be squashed in memory
  */
 export type GetSegmentArenaIndex = z.infer<typeof getSegmentArenaIndexParser>;
 
 /**
- * Assert that `dictIndex` address stores the identifier of the
- * dictionary found at `dictEndPtr`.
+ * Assert the index of the dictionary to be squashed in memory.
  *
- * The identifier `id` the is dictionary number,
- * n for the n-th dictionary, starting at 0.
- *
+ * @param {VirtualMachine} vm - The virtual machine instance
+ * @param {ResOperand} dictEndPtr - Pointer to the end of the dictionary.
+ * @param {CellRef} dictIndex - Address to store the index of the dictionary.
  */
 export const getSegmentArenaIndex = (
   vm: VirtualMachine,
