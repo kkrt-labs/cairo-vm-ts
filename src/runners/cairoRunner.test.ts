@@ -5,11 +5,15 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as os from 'os';
 
+import { InvalidBuiltins } from 'errors/cairoRunner';
 import { RangeCheckOutOfBounds } from 'errors/builtins';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { parseProgram } from 'vm/program';
+import { outputHandler } from 'builtins/output';
+import { bitwiseHandler } from 'builtins/bitwise';
+import { layouts } from './layout';
 import { CairoRunner, RunOptions } from './cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
@@ -153,23 +157,32 @@ describe('cairoRunner', () => {
 
   describe('builtins', () => {
     describe('bitwise', () => {
-      test('should compute bitwise operations 12 & 10, 12 ^10 and 12 | 10', () => {
-        const runner = CairoRunner.fromProgram(BITWISE_PROGRAM);
+      test('should compute bitwise operations 12 & 10, 12 ^ 10 and 12 | 10', () => {
+        const runner = CairoRunner.fromProgram(BITWISE_PROGRAM, 'all_cairo');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
+
+        const expectedAnd = new Felt(8n);
+        const expectedXor = new Felt(6n);
+        const expectedOr = new Felt(14n);
         const executionSize = runner.vm.memory.getSegmentSize(1);
         const executionEnd = runner.executionBase.add(executionSize);
-        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(new Felt(8n));
-        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(new Felt(6n));
-        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(
-          new Felt(14n)
+        expect(runner.vm.memory.get(executionEnd.sub(4))).toEqual(expectedAnd);
+        expect(runner.vm.memory.get(executionEnd.sub(3))).toEqual(expectedXor);
+        expect(runner.vm.memory.get(executionEnd.sub(2))).toEqual(expectedOr);
+
+        const bitwiseSegment = runner.getBuiltinSegment('bitwise');
+        const expectedBitwiseSegment = new Proxy(
+          [new Felt(12n), new Felt(10n), expectedAnd, expectedXor, expectedOr],
+          bitwiseHandler
         );
+        expect(bitwiseSegment).toEqual(expectedBitwiseSegment);
       });
     });
 
     describe('ec_op', () => {
       test('should properly compute  R = P + 34Q', () => {
-        const runner = CairoRunner.fromProgram(EC_OP_PROGRAM);
+        const runner = CairoRunner.fromProgram(EC_OP_PROGRAM, 'all_cairo');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
@@ -189,7 +202,7 @@ describe('cairoRunner', () => {
 
     describe('pedersen', () => {
       test('should properly compute Pedersen hashes of (0, 0), (0, 1), (1, 0) and (54, 1249832432) tuples', () => {
-        const runner = CairoRunner.fromProgram(PEDERSEN_PROGRAM);
+        const runner = CairoRunner.fromProgram(PEDERSEN_PROGRAM, 'all_cairo');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
@@ -218,7 +231,7 @@ describe('cairoRunner', () => {
 
     describe('poseidon', () => {
       test('should properly compute Poseidon states from initial states (1, 2, 3) and (13, 40, 36)', () => {
-        const runner = CairoRunner.fromProgram(POSEIDON_PROGRAM);
+        const runner = CairoRunner.fromProgram(POSEIDON_PROGRAM, 'all_cairo');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
@@ -262,7 +275,10 @@ describe('cairoRunner', () => {
 
     describe('keccak', () => {
       test('Should properly compute state from input state KeccakBuiltinState(0, 0, 0, 0, 0, 0, 0, 0)', () => {
-        const runner = CairoRunner.fromProgram(KECCAK_SEED_PROGRAM);
+        const runner = CairoRunner.fromProgram(
+          KECCAK_SEED_PROGRAM,
+          'all_cairo'
+        );
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
@@ -288,7 +304,7 @@ describe('cairoRunner', () => {
       });
 
       test('Should properly compute state from input state KeccakBuiltinState(1, 2, 3, 4, 5, 6, 7, 8)', () => {
-        const runner = CairoRunner.fromProgram(KECCAK_PROGRAM);
+        const runner = CairoRunner.fromProgram(KECCAK_PROGRAM, 'all_cairo');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
 
@@ -316,7 +332,7 @@ describe('cairoRunner', () => {
 
     describe('output', () => {
       test('Should properly store the jmp dest value in the output segment', () => {
-        const runner = CairoRunner.fromProgram(JMP_PROGRAM);
+        const runner = CairoRunner.fromProgram(JMP_PROGRAM, 'small');
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const output = runner.getOutput();
@@ -325,18 +341,28 @@ describe('cairoRunner', () => {
       });
 
       test('Should properly write the result of bitwise 1 & 2 to output segment', () => {
-        const runner = CairoRunner.fromProgram(BITWISE_OUTPUT_PROGRAM);
+        const runner = CairoRunner.fromProgram(
+          BITWISE_OUTPUT_PROGRAM,
+          'all_cairo'
+        );
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
-        const output = runner.getOutput();
-        expect(output.length).toEqual(1);
-        expect(output[0]).toEqual(new Felt(0n));
+
+        expect(runner.getBuiltinSegment('bitwise')).toEqual(
+          new Proxy([new Felt(1n), new Felt(2n), new Felt(0n)], bitwiseHandler)
+        );
+        expect(runner.getOutput()).toEqual(
+          new Proxy([new Felt(0n)], outputHandler)
+        );
       });
     });
 
     describe('range_check', () => {
       test('should properly write 2 ** 128 - 1 to the range check segment', () => {
-        const runner = CairoRunner.fromProgram(RANGE_CHECK_PROGRAM);
+        const runner = CairoRunner.fromProgram(
+          RANGE_CHECK_PROGRAM,
+          'all_cairo'
+        );
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
@@ -347,7 +373,10 @@ describe('cairoRunner', () => {
       });
 
       test('should crash the VM when trying to assert -1 to the range check segment', () => {
-        const runner = CairoRunner.fromProgram(BAD_RANGE_CHECK_PROGRAM);
+        const runner = CairoRunner.fromProgram(
+          BAD_RANGE_CHECK_PROGRAM,
+          'all_cairo'
+        );
         const config: RunOptions = { relocate: true, offset: 1 };
         expect(() => runner.run(config)).toThrow(
           new RangeCheckOutOfBounds(new Felt(-1n), 128n)
@@ -357,7 +386,10 @@ describe('cairoRunner', () => {
 
     describe('range_check96', () => {
       test('should properly write 2 ** 96 - 1 to the range check segment', () => {
-        const runner = CairoRunner.fromProgram(RANGE_CHECK96_PROGRAM);
+        const runner = CairoRunner.fromProgram(
+          RANGE_CHECK96_PROGRAM,
+          'all_cairo'
+        );
         const config: RunOptions = { relocate: true, offset: 1 };
         runner.run(config);
         const executionSize = runner.vm.memory.getSegmentSize(1);
@@ -368,7 +400,10 @@ describe('cairoRunner', () => {
       });
 
       test('should crash the VM when trying to assert 2 ** 96 to the range check segment', () => {
-        const runner = CairoRunner.fromProgram(BAD_RANGE_CHECK96_PROGRAM);
+        const runner = CairoRunner.fromProgram(
+          BAD_RANGE_CHECK96_PROGRAM,
+          'all_cairo'
+        );
         const config: RunOptions = { relocate: true, offset: 1 };
         expect(() => runner.run(config)).toThrow(
           new RangeCheckOutOfBounds(new Felt(2n ** 96n), 96n)
@@ -412,5 +447,53 @@ describe('cairoRunner', () => {
       const pyTrace = fs.readFileSync(pyTracePath);
       expect(tsTrace.equals(pyTrace)).toBeTrue();
     });
+  });
+
+  describe('layout', () => {
+    test.each([
+      [[], 'plain'],
+      [['bitwise'], 'recursive'],
+      [['output', 'pedersen'], 'small'],
+      [['output', 'pedersen', 'range_check'], 'small'],
+      [['pedersen', 'range_check'], 'small'],
+      [['output', 'range_check', 'poseidon'], 'starknet'],
+      [['output', 'range_check', 'segment_arena'], 'all_cairo'],
+      [['range_check', 'gas_builtin'], 'all_cairo'],
+      [['output', 'range_check', 'segment_arena', 'system'], 'starknet'],
+    ])(
+      'should correctly parse a program with an appropriate layout',
+      (builtins, layout) => {
+        const dummyProgram = parseProgram(
+          fs.readFileSync('cairo_programs/cairo_0/fibonacci.json', 'utf-8')
+        );
+
+        expect(
+          () => new CairoRunner(dummyProgram, [], layout, 0, builtins)
+        ).not.toThrow();
+      }
+    );
+
+    test.each([
+      [['output'], 'plain'],
+      [['ecdsa'], 'recursive'],
+      [['output', 'range_check', 'pedersen'], 'small'],
+      [['output', 'pedersen', 'range_check', 'ecdsa', 'ec_op'], 'small'],
+      [['output', 'range_check', 'poseidon', 'range_check96'], 'starknet'],
+      [['output', 'segment_arena', 'range_check'], 'all_cairo'],
+      [['output', 'range_check', 'gas_builtin', 'segment_arena'], 'all_cairo'],
+    ])(
+      'should throw InvalidBuiltins if builtins are not within the layout or unordered',
+      (builtins, layout) => {
+        const dummyProgram = parseProgram(
+          fs.readFileSync('cairo_programs/cairo_0/fibonacci.json', 'utf-8')
+        );
+
+        expect(
+          () => new CairoRunner(dummyProgram, [], layout, 0, builtins)
+        ).toThrow(
+          new InvalidBuiltins(builtins, layouts[layout].builtins, layout)
+        );
+      }
+    );
   });
 });

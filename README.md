@@ -144,7 +144,7 @@ You can still add it as a dependency with a local copy:
 | Goals                        | Done?   |
 | ---------------------------- | ------- |
 | Run basic Cairo Zero program | &#9745; |
-| Run basic Cairo program      | &#9744; |
+| Run basic Cairo program      | &#9745; |
 | Add [builtins](#builtins)    | &#9745; |
 | Add [hints](#hints)          | &#9744; |
 | Run StarkNet contracts       | &#9744; |

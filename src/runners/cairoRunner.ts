@@ -1,18 +1,20 @@
 import * as fs from 'fs';
 
 import {
-  CairoOutputNotSupported,
   CairoZeroHintsNotSupported,
   EmptyRelocatedMemory,
   UndefinedEntrypoint,
+  InvalidBuiltins,
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
+import { SegmentValue } from 'primitives/segmentValue';
 import { Relocatable } from 'primitives/relocatable';
 import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { getBuiltin } from 'builtins/builtin';
 import { Hint, Hints } from 'hints/hintSchema';
+import { isSubsequence, Layout, layouts } from './layout';
 
 /**
  * Configuration of the run
@@ -30,6 +32,8 @@ export class CairoRunner {
   vm: VirtualMachine;
   programBase: Relocatable;
   executionBase: Relocatable;
+  layout: Layout;
+  builtins: string[];
   finalPc: Relocatable;
 
   static readonly defaultRunOptions: RunOptions = {
@@ -40,6 +44,7 @@ export class CairoRunner {
   constructor(
     program: Program,
     bytecode: Felt[],
+    layoutName: string = 'plain',
     initialPc: number = 0,
     builtins: string[] = [],
     hints: Hints = new Map<number, Hint[]>()
@@ -50,6 +55,16 @@ export class CairoRunner {
     this.programBase = this.vm.memory.addSegment();
     this.executionBase = this.vm.memory.addSegment();
 
+    this.layout = layouts[layoutName];
+    const allowedBuiltins = this.layout.builtins.concat([
+      'segment_arena',
+      'gas_builtin',
+      'system',
+    ]);
+    if (!isSubsequence(builtins, allowedBuiltins))
+      throw new InvalidBuiltins(builtins, this.layout.builtins, layoutName);
+
+    this.builtins = builtins;
     const builtin_stack = builtins
       .map(getBuiltin)
       .map((builtin) => this.vm.memory.addSegment(builtin));
@@ -65,8 +80,10 @@ export class CairoRunner {
     this.vm.memory.setValues(this.executionBase, stack);
   }
 
+  /** Instantiate a CairoRunner from parsed Cairo Zero compilation artifacts. */
   static fromCairoZeroProgram(
     program: CairoZeroProgram,
+    layoutName: string = 'plain',
     fnName: string = 'main'
   ): CairoRunner {
     const id = program.identifiers.get('__main__.'.concat(fnName));
@@ -77,11 +94,13 @@ export class CairoRunner {
 
     if (program.hints.length) throw new CairoZeroHintsNotSupported();
 
-    return new CairoRunner(program, program.data, offset, builtins);
+    return new CairoRunner(program, program.data, layoutName, offset, builtins);
   }
 
+  /** Instantiate a CairoRunner from parsed Cairo compilation artifacts. */
   static fromCairoProgram(
     program: CairoProgram,
+    layoutName: string = 'plain',
     fnName: string = 'main'
   ): CairoRunner {
     const fn = program.entry_points_by_function[fnName];
@@ -89,20 +108,31 @@ export class CairoRunner {
     return new CairoRunner(
       program,
       program.bytecode,
+      layoutName,
       fn.offset,
       fn.builtins,
       program.hints
     );
   }
 
-  static fromProgram(program: Program, fnName: string = 'main') {
+  /** Instantiate a CairoRunner from any Cairo or Cairo Zero compilation artifacts. */
+  static fromProgram(
+    program: Program,
+    layout: string = 'plain',
+    fnName: string = 'main'
+  ) {
     if (program.compiler_version.split('.')[0] == '0') {
       return CairoRunner.fromCairoZeroProgram(
         program as CairoZeroProgram,
+        layout,
         fnName
       );
     }
-    return CairoRunner.fromCairoProgram(program as CairoProgram, fnName);
+    return CairoRunner.fromCairoProgram(
+      program as CairoProgram,
+      layout,
+      fnName
+    );
   }
 
   /**
@@ -163,17 +193,19 @@ export class CairoRunner {
     fs.writeFileSync(filename, Buffer.from(buffer), { flag: 'w+' });
   }
 
-  /**
-   * @returns The output builtin segment.
-   *
-   * NOTE: Currently supports Cairo Zero programs only.
-   * Cairo programs need input args/return value logic to be implemented first.
-   *
-   */
+  /** @returns The builtin segment from a given name */
+  getBuiltinSegment(name: string): SegmentValue[] | undefined {
+    const builtinId = this.builtins.indexOf(name);
+    const segmentArenaId = this.builtins.indexOf('segment_arena');
+
+    if (builtinId === -1) return undefined;
+
+    const offset = segmentArenaId !== -1 && builtinId >= segmentArenaId ? 3 : 2;
+    return this.vm.memory.segments[builtinId + offset];
+  }
+
+  /** @returns The output builtin segment. */
   getOutput() {
-    const builtins = (this.program as CairoZeroProgram).builtins;
-    if (!builtins) throw new CairoOutputNotSupported();
-    const outputIdx = builtins.findIndex((name) => name === 'output');
-    return outputIdx >= 0 ? this.vm.memory.segments[outputIdx + 2] : [];
+    return this.getBuiltinSegment('output') ?? [];
   }
 }

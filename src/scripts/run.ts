@@ -5,6 +5,7 @@ import { ConsolaInstance, LogLevels } from 'consola';
 import { TraceEntry } from 'vm/virtualMachine';
 import { parseProgram } from 'vm/program';
 import { CairoRunner, RunOptions } from 'runners/cairoRunner';
+import { ALL_LAYOUTS } from 'runners/layout';
 
 export const run = (
   path: string,
@@ -16,6 +17,7 @@ export const run = (
   try {
     const {
       silent,
+      layout,
       fn,
       relocate,
       offset,
@@ -29,12 +31,20 @@ export const run = (
 
     if (silent) consola.level = LogLevels.silent;
 
+    if (!ALL_LAYOUTS.includes(layout)) {
+      consola.error(
+        `Layout "${layout}" is not a valid layout.
+Use one from {${ALL_LAYOUTS.join(', ')}}`
+      );
+      process.exit(1);
+    }
+
     if (
       (!relocate && !!offset) ||
       (!relocate && exportMemory) ||
       (!relocate && printRelocatedMemory)
     ) {
-      consola.log(
+      consola.error(
         "option '--no-relocate' cannot be used with options '--offset <OFFSET>', '--export-memory <MEMORY_FILENAME>' or '--print-relocated-memory'"
       );
       process.exit(1);
@@ -45,7 +55,7 @@ export const run = (
     const file = fs.readFileSync(String(path), 'utf-8');
 
     const program = parseProgram(file);
-    runner = CairoRunner.fromProgram(program, fn);
+    runner = CairoRunner.fromProgram(program, layout, fn);
     const config: RunOptions = { relocate: relocate, offset: offset };
     runner.run(config);
     consola.success('Execution finished!');
