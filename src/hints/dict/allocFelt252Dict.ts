@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
 
-import { Felt } from 'primitives/felt';
 import { isFelt, isRelocatable } from 'primitives/segmentValue';
 import { DICT_ACCESS_SIZE, VirtualMachine } from 'vm/virtualMachine';
 
@@ -20,16 +19,23 @@ export const allocFelt252DictParser = z
 /**
  * AllocFelt252Dict hint
  *
- * Add a new dictionnary.
+ * Allocates a new dictionary using the segment arena builtin.
  */
 export type AllocFelt252Dict = z.infer<typeof allocFelt252DictParser>;
 
 /**
- * Add a new dictionnary.
+ * Allocates a new dictionary using the segment arena builtin.
  *
- * - Extract the current number of dictionnaries: `dictNumber`
- * - Extract the segment info pointer: `infoPtr`
- * - Create a new dictionnary at `infoPtr + 3 * dictNumber`
+ * The segment arena builtin works by block of 3 cells:
+ * - The first cell contains the base address of the info segment.
+ * - The second cell contains the current number of allocated dictionaries.
+ * - The third cell contains the current number of squashed dictionaries.
+ *
+ * @param {VirtualMachine} vm - The virtual machine instance.
+ * @param {ResOperand} segmentArenaPtr -  Pointer to the first cell of the next segment arena block.
+ * @throws {ExpectedFelt} If the number of dictionaries is not a valid Felt.
+ * @throws {ExpectedRelocatable} If the info pointer read is not a valid Relocatable.
+
  */
 export const allocFelt252Dict = (
   vm: VirtualMachine,
