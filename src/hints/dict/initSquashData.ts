@@ -13,6 +13,7 @@ import {
   resOperand,
   ResOperand,
 } from 'hints/hintParamsSchema';
+import { InvalidDictAccessesNumber } from 'errors/hints';
 
 /** Zod object to parse InitSquashData hint */
 export const initSquashDataParser = z
@@ -71,9 +72,7 @@ export const initSquashData = (
 
   const ptrDiffValue = Number(vm.getResOperandValue(ptrDiff));
   if (ptrDiffValue % DICT_ACCESS_SIZE)
-    throw new Error(
-      'Accessess array size must be divisible by the dict size (3)'
-    );
+    throw new InvalidDictAccessesNumber(ptrDiffValue, DICT_ACCESS_SIZE);
 
   const nbAccesses = Number(vm.getResOperandValue(nAccesses));
   for (let i = 0; i < nbAccesses; i++) {
