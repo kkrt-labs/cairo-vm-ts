@@ -68,16 +68,16 @@ export class CairoRunner {
     const builtin_stack = builtins.map((builtin) => {
       const handler = getBuiltin(builtin);
       if (builtin === 'segment_arena') {
-        const info = [
+        const initialValues = [
           this.vm.memory.addSegment(handler),
           new Felt(0n),
           new Felt(0n),
         ];
         const base = this.vm.memory.addSegment(handler);
-        info.map((value, offset) =>
+        initialValues.map((value, offset) =>
           this.vm.memory.assertEq(base.add(offset), value)
         );
-        return base.add(info.length);
+        return base.add(initialValues.length);
       }
       return this.vm.memory.addSegment(handler);
     });
