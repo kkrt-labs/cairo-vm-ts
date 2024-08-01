@@ -30,6 +30,7 @@ program
     })
   )
   .option('-s, --silent', 'silent all logs')
+  .option('--proof-mode', 'run in proof mode')
   .addOption(
     new Option('-l, --layout <LAYOUT>', 'Layout to be used').default('plain')
   )

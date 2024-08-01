@@ -5,6 +5,7 @@ import {
   EmptyRelocatedMemory,
   UndefinedEntrypoint,
   InvalidBuiltins,
+  MissingEndLabel,
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
@@ -26,13 +27,20 @@ export type RunOptions = {
   offset: number;
 };
 
+export enum RunnerMode {
+  ExecutionMode = 'Execution Mode',
+  ProofModeCairoZero = 'Proof Mode - Cairo Zero',
+  ProofModeCairo = 'Proof Mode - Cairo',
+}
+
 export class CairoRunner {
   program: Program;
+  layout: Layout;
+  mode: RunnerMode;
   hints: Hints;
   vm: VirtualMachine;
   programBase: Relocatable;
   executionBase: Relocatable;
-  layout: Layout;
   builtins: string[];
   finalPc: Relocatable;
 
@@ -45,11 +53,13 @@ export class CairoRunner {
     program: Program,
     bytecode: Felt[],
     layoutName: string = 'plain',
+    mode: RunnerMode = RunnerMode.ExecutionMode,
     initialPc: number = 0,
     builtins: string[] = [],
     hints: Hints = new Map<number, Hint[]>()
   ) {
     this.program = program;
+    this.mode = mode;
     this.hints = hints;
     this.vm = new VirtualMachine();
     this.programBase = this.vm.memory.addSegment();
@@ -64,29 +74,69 @@ export class CairoRunner {
     if (!isSubsequence(builtins, allowedBuiltins))
       throw new InvalidBuiltins(builtins, this.layout.builtins, layoutName);
 
-    this.builtins = builtins;
-    const builtin_stack = builtins.map((builtin) => {
-      const handler = getBuiltin(builtin);
-      if (builtin === 'segment_arena') {
-        const initialValues = [
-          this.vm.memory.addSegment(handler),
-          new Felt(0n),
-          new Felt(0n),
-        ];
-        const base = this.vm.memory.addSegment(handler);
-        initialValues.map((value, offset) =>
-          this.vm.memory.assertEq(base.add(offset), value)
-        );
-        return base.add(initialValues.length);
-      }
-      return this.vm.memory.addSegment(handler);
-    });
-    const returnFp = this.vm.memory.addSegment();
-    this.finalPc = this.vm.memory.addSegment();
-    const stack = [...builtin_stack, returnFp, this.finalPc];
+    const isProofMode = mode !== RunnerMode.ExecutionMode;
+    this.builtins = isProofMode
+      ? [...new Set(this.layout.builtins.concat(builtins))]
+      : builtins;
+    const builtin_stack = this.builtins
+      .map((builtin) => {
+        const handler = getBuiltin(builtin);
+        let base: Relocatable;
+        if (builtin === 'segment_arena') {
+          const initialValues = [
+            this.vm.memory.addSegment(handler),
+            new Felt(0n),
+            new Felt(0n),
+          ];
+          base = this.vm.memory.addSegment(handler);
+          initialValues.map((value, offset) =>
+            this.vm.memory.assertEq(base.add(offset), value)
+          );
+          base = base.add(initialValues.length);
+        } else {
+          base = this.vm.memory.addSegment(handler);
+        }
+        if (isProofMode) {
+          return builtins.includes(builtin) ? base : 0;
+        }
+        return base;
+      })
+      .filter((value) => value !== 0);
+
+    let stack: SegmentValue[] = [];
+    let apOffset: number = 0;
+    switch (mode) {
+      case RunnerMode.ExecutionMode:
+        const returnFp = this.vm.memory.addSegment();
+        this.finalPc = this.vm.memory.addSegment();
+        stack = [...builtin_stack, returnFp, this.finalPc];
+        apOffset = stack.length;
+        break;
+
+      case RunnerMode.ProofModeCairoZero:
+        const finalPc = (program as CairoZeroProgram).identifiers.get(
+          '__main__.__end__'
+        )?.pc;
+        if (!finalPc) throw new MissingEndLabel();
+        this.finalPc = this.programBase.add(finalPc);
+
+        stack = [this.executionBase.add(2), new Felt(0n), ...builtin_stack];
+        apOffset = 2;
+        break;
+      case RunnerMode.ProofModeCairo:
+        const retFp = this.vm.memory.addSegment();
+        this.finalPc = this.vm.memory.addSegment();
+        const jmpRelInstruction = new Felt(BigInt('0x10780017FFF7FFF'));
+        this.vm.memory.assertEq(this.finalPc, jmpRelInstruction);
+        this.vm.memory.assertEq(this.finalPc.add(1), new Felt(0n));
+
+        stack = [...builtin_stack, retFp, this.finalPc];
+        apOffset = stack.length;
+        break;
+    }
 
     this.vm.pc = this.programBase.add(initialPc);
-    this.vm.ap = this.executionBase.add(stack.length);
+    this.vm.ap = this.executionBase.add(apOffset);
     this.vm.fp = this.vm.ap;
 
     this.vm.memory.setValues(this.programBase, bytecode);
@@ -97,32 +147,51 @@ export class CairoRunner {
   static fromCairoZeroProgram(
     program: CairoZeroProgram,
     layoutName: string = 'plain',
+    proofMode: boolean = false,
     fnName: string = 'main'
   ): CairoRunner {
-    const id = program.identifiers.get('__main__.'.concat(fnName));
-    if (!id) throw new UndefinedEntrypoint(fnName);
+    const identifier = proofMode ? '__start__' : fnName;
+    const id = program.identifiers.get('__main__.'.concat(identifier));
+    if (!id) throw new UndefinedEntrypoint(identifier);
     const offset = id.pc;
 
     const builtins = program.builtins;
+    const mode = proofMode
+      ? RunnerMode.ProofModeCairoZero
+      : RunnerMode.ExecutionMode;
 
     if (program.hints.length) throw new CairoZeroHintsNotSupported();
 
-    return new CairoRunner(program, program.data, layoutName, offset, builtins);
+    return new CairoRunner(
+      program,
+      program.data,
+      layoutName,
+      mode,
+      offset,
+      builtins
+    );
   }
 
   /** Instantiate a CairoRunner from parsed Cairo compilation artifacts. */
   static fromCairoProgram(
     program: CairoProgram,
     layoutName: string = 'plain',
+    proofMode: boolean = false,
     fnName: string = 'main'
   ): CairoRunner {
     const fn = program.entry_points_by_function[fnName];
     if (!fn) throw new UndefinedEntrypoint(fnName);
+    const mode = proofMode
+      ? RunnerMode.ProofModeCairo
+      : RunnerMode.ExecutionMode;
+
+    const offset = proofMode ? 0 : fn.offset;
     return new CairoRunner(
       program,
       program.bytecode,
       layoutName,
-      fn.offset,
+      mode,
+      offset,
       fn.builtins,
       program.hints
     );
@@ -132,18 +201,21 @@ export class CairoRunner {
   static fromProgram(
     program: Program,
     layout: string = 'plain',
+    proofMode: boolean = false,
     fnName: string = 'main'
   ) {
     if (program.compiler_version.split('.')[0] == '0') {
       return CairoRunner.fromCairoZeroProgram(
         program as CairoZeroProgram,
         layout,
+        proofMode,
         fnName
       );
     }
     return CairoRunner.fromCairoProgram(
       program as CairoProgram,
       layout,
+      proofMode,
       fnName
     );
   }

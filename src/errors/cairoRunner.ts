@@ -17,7 +17,7 @@ export class CairoZeroHintsNotSupported extends CairoRunnerError {
 /** The given entrypoint is not in the program, it cannot be executed. */
 export class UndefinedEntrypoint extends CairoRunnerError {
   constructor(name: string) {
-    super(`The function to be executed doesn't exist: ${name}`);
+    super(`The entrypoint to be executed doesn't exist: ${name}`);
   }
 }
 
@@ -33,5 +33,15 @@ export class InvalidBuiltins extends CairoRunnerError {
 Program builtins: ${programBuiltins.join(', ')}
 Layout builtins: ${layoutBuiltins.join(', ')}`
     );
+  }
+}
+
+/**
+ * The label `__main__.__end__` must be in the compilation artifacts
+ * to run a Cairo Zero program in proof mode.
+ */
+export class MissingEndLabel extends CairoRunnerError {
+  constructor() {
+    super(`Label __end__ not found in program.`);
   }
 }
