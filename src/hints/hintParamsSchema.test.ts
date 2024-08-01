@@ -2,13 +2,14 @@ import { describe, expect, test } from 'bun:test';
 
 import { Felt } from 'primitives/felt';
 import { Register } from 'vm/instruction';
+
 import {
   CellRef,
   OpType,
   Operation,
-  ResOp,
+  ResOperand,
   cellRef,
-  resOp,
+  resOperand,
 } from './hintParamsSchema';
 
 describe('hintParamsSchema', () => {
@@ -127,7 +128,7 @@ describe('hintParamsSchema', () => {
         },
       },
     ],
-  ])('should properly parse ResOp', (value, expected: ResOp) => {
-    expect(resOp.parse(value)).toEqual(expected);
+  ])('should properly parse ResOperand', (value, expected: ResOperand) => {
+    expect(resOperand.parse(value)).toEqual(expected);
   });
 });

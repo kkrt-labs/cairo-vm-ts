@@ -1,4 +1,5 @@
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
+import { UndefinedSegmentValue } from 'errors/memory';
 import {
   InvalidDst,
   InvalidOp1,
@@ -8,13 +9,16 @@ import {
   UndefinedOp0,
   InvalidCallOp0Value,
   UndefinedOp1,
+  InvalidBufferResOp,
 } from 'errors/virtualMachine';
+import { DictNotFound } from 'errors/dictionary';
 import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue, isFelt, isRelocatable } from 'primitives/segmentValue';
 import { Memory } from 'memory/memory';
+
 import {
   BinOp,
   CellRef,
@@ -23,12 +27,14 @@ import {
   Immediate,
   Operation,
   OpType,
-  ResOp,
+  ResOperand,
 } from 'hints/hintParamsSchema';
-import { allocSegment, AllocSegment } from 'hints/allocSegment';
-import { testLessThan, TestLessThan } from 'hints/testLessThan';
 import { Hint } from 'hints/hintSchema';
-import { HintName } from 'hints/hintName';
+import { handlers, HintHandler } from 'hints/hintHandler';
+import { Dictionary } from 'hints/dictionary';
+import { ScopeManager } from 'hints/scopeManager';
+import { SquashedDictManager } from 'hints/squashedDictManager';
+
 import {
   ApUpdate,
   FpUpdate,
@@ -63,22 +69,14 @@ export class VirtualMachine {
   pc: Relocatable;
   ap: Relocatable;
   fp: Relocatable;
+  dictManager: Map<number, Dictionary>;
+  squashedDictManager: SquashedDictManager;
+  scopeManager: ScopeManager;
   trace: TraceEntry[];
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
 
-  /** Maps a hint to its implementation */
-  private handlers: Record<HintName, (vm: VirtualMachine, hint: Hint) => void> =
-    {
-      [HintName.AllocSegment]: (vm, hint) => {
-        const h = hint as AllocSegment;
-        allocSegment(vm, h.dst);
-      },
-      [HintName.TestLessThan]: (vm, hint) => {
-        const h = hint as TestLessThan;
-        testLessThan(vm, h.lhs, h.rhs, h.dst);
-      },
-    };
+  private handlers: HintHandler = handlers;
 
   constructor() {
     this.currentStep = 0n;
@@ -90,6 +88,10 @@ export class VirtualMachine {
     this.pc = new Relocatable(0, 0);
     this.ap = new Relocatable(1, 0);
     this.fp = new Relocatable(1, 0);
+
+    this.scopeManager = new ScopeManager();
+    this.dictManager = new Map<number, Dictionary>();
+    this.squashedDictManager = new SquashedDictManager();
   }
 
   /**
@@ -99,9 +101,7 @@ export class VirtualMachine {
    * - Run the instruction
    */
   step(hints?: Hint[]): void {
-    if (hints) {
-      hints.map((hint) => this.executeHint(hint));
-    }
+    hints?.forEach((hint) => this.executeHint(hint));
     const maybeEncodedInstruction = this.memory.get(this.pc);
     if (maybeEncodedInstruction === undefined) {
       throw new UndefinedInstruction(this.pc);
@@ -481,7 +481,7 @@ export class VirtualMachine {
    *
    * NOTE: used in Cairo hints
    */
-  cellRefToRelocatable(cell: CellRef) {
+  cellRefToRelocatable(cell: CellRef): Relocatable {
     let register: Relocatable;
     switch (cell.register) {
       case Register.Ap:
@@ -504,12 +504,10 @@ export class VirtualMachine {
    * NOTE: used in Cairo hints
    */
   getPointer(cell: CellRef, offset: Felt) {
-    const address = this.memory.get(
-      this.cellRefToRelocatable(cell).add(offset)
-    );
+    const address = this.memory.get(this.cellRefToRelocatable(cell));
     if (!address || !isRelocatable(address))
       throw new ExpectedRelocatable(address);
-    return address;
+    return address.add(offset);
   }
 
   /**
@@ -539,7 +537,20 @@ export class VirtualMachine {
   }
 
   /**
-   * Return the value defined by `resOp`
+   * Return the memory value at the address defined by `cell`
+   *
+   * Throw if the value is `undefined`
+   *
+   * NOTE: used in Cairo hints
+   */
+  getSegmentValue(cell: CellRef): SegmentValue {
+    const value = this.memory.get(this.cellRefToRelocatable(cell));
+    if (!value) throw new UndefinedSegmentValue();
+    return value;
+  }
+
+  /**
+   * Return the value defined by `resOperand`
    *
    * Generic patterns:
    * - Deref: `[register + offset]`
@@ -552,23 +563,23 @@ export class VirtualMachine {
    *
    * NOTE: used in Cairo hints
    */
-  getResOperandValue(resOp: ResOp): Felt {
-    switch (resOp.type) {
+  getResOperandValue(resOperand: ResOperand): Felt {
+    switch (resOperand.type) {
       case OpType.Deref:
-        return this.getFelt((resOp as Deref).cell);
+        return this.getFelt((resOperand as Deref).cell);
 
       case OpType.DoubleDeref:
-        const dDeref = resOp as DoubleDeref;
+        const dDeref = resOperand as DoubleDeref;
         const deref = this.getRelocatable(dDeref.cell);
         const value = this.memory.get(deref.add(dDeref.offset));
         if (!value || !isFelt(value)) throw new ExpectedFelt(value);
         return value;
 
       case OpType.Immediate:
-        return (resOp as Immediate).value;
+        return (resOperand as Immediate).value;
 
       case OpType.BinOp:
-        const binOp = resOp as BinOp;
+        const binOp = resOperand as BinOp;
         const a = this.getFelt(binOp.a);
 
         let b: Felt | undefined = undefined;
@@ -593,5 +604,55 @@ export class VirtualMachine {
             return a.mul(b);
         }
     }
+  }
+
+  /**
+   * Return the address defined at `resOperand`.
+   *
+   * This method assume that resOperand points to a Relocatable.
+   *
+   * Only Deref and BinOp with Immediate value are valid for extracting a buffer.
+   *
+   * NOTE: Used in Cairo hints.
+   */
+  extractBuffer(resOperand: ResOperand): [CellRef, Felt] {
+    switch (resOperand.type) {
+      case OpType.Deref:
+        return [(resOperand as Deref).cell, new Felt(0n)];
+      case OpType.BinOp:
+        const binOp = resOperand as BinOp;
+        if (binOp.b.type !== OpType.Immediate)
+          throw new InvalidBufferResOp(resOperand);
+        return [binOp.a, (binOp.b as Immediate).value];
+      default:
+        throw new InvalidBufferResOp(resOperand);
+    }
+  }
+
+  /**
+   * Creates a new dictionary.
+   *
+   * NOTE: used in Cairo hints
+   */
+  newDict(): Relocatable {
+    const dictAddr = this.memory.addSegment();
+    this.dictManager.set(
+      dictAddr.segmentId,
+      new Dictionary(new Felt(BigInt(this.dictManager.size)))
+    );
+    return dictAddr;
+  }
+
+  /**
+   * Return the dictionary at `address`
+   *
+   * Throw if dictionary was not found
+   *
+   * NOTE: used in Cairo hints
+   */
+  getDict(address: Relocatable): Dictionary {
+    const dict = this.dictManager.get(address.segmentId);
+    if (!dict) throw new DictNotFound(address);
+    return dict;
   }
 }

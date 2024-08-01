@@ -65,9 +65,22 @@ export class CairoRunner {
       throw new InvalidBuiltins(builtins, this.layout.builtins, layoutName);
 
     this.builtins = builtins;
-    const builtin_stack = builtins
-      .map(getBuiltin)
-      .map((builtin) => this.vm.memory.addSegment(builtin));
+    const builtin_stack = builtins.map((builtin) => {
+      const handler = getBuiltin(builtin);
+      if (builtin === 'segment_arena') {
+        const initialValues = [
+          this.vm.memory.addSegment(handler),
+          new Felt(0n),
+          new Felt(0n),
+        ];
+        const base = this.vm.memory.addSegment(handler);
+        initialValues.map((value, offset) =>
+          this.vm.memory.assertEq(base.add(offset), value)
+        );
+        return base.add(initialValues.length);
+      }
+      return this.vm.memory.addSegment(handler);
+    });
     const returnFp = this.vm.memory.addSegment();
     this.finalPc = this.vm.memory.addSegment();
     const stack = [...builtin_stack, returnFp, this.finalPc];

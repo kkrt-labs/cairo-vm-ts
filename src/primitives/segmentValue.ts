@@ -17,7 +17,7 @@ export function isRelocatable(
   segmentValue: SegmentValue
 ): segmentValue is Relocatable;
 export function isRelocatable(
-  segmentValue: Relocatable | number
+  segmentValue: SegmentValue | number
 ): segmentValue is Relocatable;
 export function isRelocatable(
   segmentValue: SegmentValue | number

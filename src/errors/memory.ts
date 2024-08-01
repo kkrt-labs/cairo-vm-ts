@@ -24,3 +24,10 @@ export class SegmentOutOfBounds extends MemoryError {
     );
   }
 }
+
+/** Expected a SegmentValue but read `undefined` */
+export class UndefinedSegmentValue extends MemoryError {
+  constructor() {
+    super(`Expected a SegmentValue, read undefined`);
+  }
+}

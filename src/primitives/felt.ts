@@ -3,6 +3,7 @@ import { CURVE } from '@scure/starknet';
 import { CannotDivideByZero, ExpectedFelt } from 'errors/primitives';
 
 import { SegmentValue, isFelt, isRelocatable } from './segmentValue';
+import { Relocatable } from './relocatable';
 
 export class Felt {
   private inner: bigint;
@@ -29,28 +30,52 @@ export class Felt {
     this.inner = _inner % Felt.PRIME;
   }
 
-  add(other: SegmentValue): Felt {
-    if (!isFelt(other)) {
-      throw new ExpectedFelt(other);
+  add(other: Felt): Felt;
+  add(other: number): Felt;
+  add(other: Relocatable): Relocatable;
+  add(other: SegmentValue): SegmentValue;
+  add(other: SegmentValue | number): SegmentValue {
+    if (isRelocatable(other)) {
+      return other.add(this);
     }
 
-    return new Felt(this.inner + other.inner);
+    if (isFelt(other)) {
+      return new Felt(this.inner + other.inner);
+    }
+
+    return new Felt(this.inner + BigInt(other));
   }
 
-  sub(other: SegmentValue): Felt {
-    if (!isFelt(other)) {
+  sub(other: Felt): Felt;
+  sub(other: number): Felt;
+  sub(other: Relocatable): never;
+  sub(other: SegmentValue): SegmentValue;
+  sub(other: SegmentValue | number): SegmentValue {
+    if (isFelt(other)) {
+      return new Felt(this.inner - other.inner);
+    }
+
+    if (isRelocatable(other)) {
       throw new ExpectedFelt(other);
     }
 
-    return new Felt(this.inner - other.inner);
+    return new Felt(this.inner - BigInt(other));
   }
 
-  mul(other: SegmentValue): Felt {
-    if (!isFelt(other)) {
+  mul(other: Felt): Felt;
+  mul(other: number): Felt;
+  mul(other: Relocatable): never;
+  mul(other: SegmentValue): SegmentValue;
+  mul(other: SegmentValue | number): SegmentValue {
+    if (isRelocatable(other)) {
       throw new ExpectedFelt(other);
     }
 
-    return new Felt(this.inner * other.inner);
+    if (isFelt(other)) {
+      return new Felt(this.inner * other.inner);
+    }
+
+    return new Felt(this.inner * BigInt(other));
   }
 
   neg(): Felt {
@@ -67,8 +92,24 @@ export class Felt {
     return this.mul(other.inv());
   }
 
+  mod(other: SegmentValue): Felt {
+    if (!isFelt(other)) throw new ExpectedFelt(other);
+    return new Felt(this.inner % other.inner);
+  }
+
   eq(other: SegmentValue): boolean {
     return !isRelocatable(other) && this.inner === other.inner;
+  }
+
+  /**
+   * Compare two Felt.
+   *
+   * @param other - The Felt to compare against.
+   * @returns {number} A positive value if `this > other`,
+   * a negative value if `this < other` and zero if they're equal.
+   */
+  compare(other: Felt): number {
+    return this > other ? 1 : this < other ? -1 : 0;
   }
 
   sqrt(): Felt {

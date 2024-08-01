@@ -1,3 +1,4 @@
+import { ResOperand } from 'hints/hintParamsSchema';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
 
@@ -55,5 +56,12 @@ export class InvalidOp1 extends VirtualMachineError {
 export class UndefinedOp1 extends VirtualMachineError {
   constructor() {
     super('op1 is undefined');
+  }
+}
+
+/** `resOperand` is not of a valid type to extract buffer from it. */
+export class InvalidBufferResOp extends VirtualMachineError {
+  constructor(resOperand: ResOperand) {
+    super(`Cannot extract buffer from the given ResOperand: ${resOperand}`);
   }
 }

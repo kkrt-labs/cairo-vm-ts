@@ -2,13 +2,19 @@ import { z } from 'zod';
 
 import { Felt } from 'primitives/felt';
 import { VirtualMachine } from 'vm/virtualMachine';
-import { cellRef, resOp, CellRef, ResOp } from 'hints/hintParamsSchema';
+
 import { HintName } from 'hints/hintName';
+import {
+  cellRef,
+  resOperand,
+  CellRef,
+  ResOperand,
+} from 'hints/hintParamsSchema';
 
 /** Zod object to parse TestLessThan hint */
 export const testLessThanParser = z
   .object({
-    TestLessThan: z.object({ lhs: resOp, rhs: resOp, dst: cellRef }),
+    TestLessThan: z.object({ lhs: resOperand, rhs: resOperand, dst: cellRef }),
   })
   .transform(({ TestLessThan: { lhs, rhs, dst } }) => ({
     type: HintName.TestLessThan,
@@ -34,8 +40,8 @@ export type TestLessThan = z.infer<typeof testLessThanParser>;
  */
 export const testLessThan = (
   vm: VirtualMachine,
-  lhs: ResOp,
-  rhs: ResOp,
+  lhs: ResOperand,
+  rhs: ResOperand,
   dst: CellRef
 ) => {
   const lhsValue = vm.getResOperandValue(lhs);

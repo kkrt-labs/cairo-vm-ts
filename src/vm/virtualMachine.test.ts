@@ -1,7 +1,7 @@
 import { test, expect, describe, spyOn } from 'bun:test';
 
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
-import { UnusedRes } from 'errors/virtualMachine';
+import { InvalidBufferResOp, UnusedRes } from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
@@ -16,6 +16,7 @@ import {
   Op1Src,
 } from './instruction';
 import { VirtualMachine } from './virtualMachine';
+import { CellRef, Operation, OpType, ResOperand } from 'hints/hintParamsSchema';
 
 const instructions = {
   InvalidAssertEq: new Instruction(
@@ -517,6 +518,223 @@ describe('VirtualMachine', () => {
       vm.relocatedMemoryToString();
 
       expect(logSpy.mock.results[0].value).toEqual(expectedStr);
+    });
+  });
+
+  describe('hint processor', () => {
+    describe('cellRefToRelocatable', () => {
+      test.each([
+        [{ register: Register.Ap, offset: 0 }, new Relocatable(1, 0)],
+        [{ register: Register.Ap, offset: 5 }, new Relocatable(1, 5)],
+        [{ register: Register.Fp, offset: 3 }, new Relocatable(1, 3)],
+      ])(
+        'should properly read the cellRef',
+        (cellRef: CellRef, expected: Relocatable) => {
+          const vm = new VirtualMachine();
+          expect(vm.cellRefToRelocatable(cellRef)).toEqual(expected);
+        }
+      );
+
+      test('should properly read a Felt', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const value = new Felt(10n);
+        const cellRef: CellRef = { register: Register.Ap, offset: 0 };
+        vm.memory.assertEq(vm.ap, value);
+        expect(vm.getFelt(cellRef)).toEqual(value);
+      });
+
+      test('should properly read a Relocatable', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const value = new Relocatable(0, 10);
+        const cellRef: CellRef = { register: Register.Ap, offset: 0 };
+        vm.memory.assertEq(vm.ap, value);
+        expect(vm.getRelocatable(cellRef)).toEqual(value);
+      });
+
+      test('should throw when reading a Relocatable as a Felt', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const value = new Relocatable(0, 10);
+        const cellRef: CellRef = { register: Register.Ap, offset: 0 };
+        vm.memory.assertEq(vm.ap, value);
+        expect(() => vm.getFelt(cellRef)).toThrow(new ExpectedFelt(value));
+      });
+
+      test('should throw when reading a Felt as a Relocatable', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const value = new Felt(10n);
+        const cellRef: CellRef = { register: Register.Ap, offset: 0 };
+        vm.memory.assertEq(vm.ap, value);
+        expect(() => vm.getRelocatable(cellRef)).toThrow(
+          new ExpectedRelocatable(value)
+        );
+      });
+
+      test('should properly read a pointer', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const cell: CellRef = { register: Register.Ap, offset: 0 };
+        const offset = new Felt(3n);
+        const value = new Relocatable(0, 4);
+        vm.memory.assertEq(vm.ap, value);
+        expect(vm.getPointer(cell, offset)).toEqual(value.add(offset));
+      });
+
+      test.each([
+        [
+          {
+            type: OpType.Deref,
+            cell: { register: Register.Ap, offset: 0 },
+          },
+          [{ register: Register.Ap, offset: 0 }, new Felt(0n)],
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Add,
+            a: { register: Register.Fp, offset: 2 },
+            b: { type: OpType.Immediate, value: new Felt(5n) },
+          },
+          [{ register: Register.Fp, offset: 2 }, new Felt(5n)],
+        ],
+      ])(
+        'should properly extract a buffer',
+        (resOperand: ResOperand, expected) => {
+          const vm = new VirtualMachine();
+          expect(vm.extractBuffer(resOperand)).toEqual(
+            expected as [CellRef, Felt]
+          );
+        }
+      );
+
+      test.each([
+        {
+          type: OpType.DoubleDeref,
+          cell: { register: Register.Ap, offset: 0 },
+          offset: 1,
+        },
+
+        {
+          type: OpType.BinOp,
+          op: Operation.Add,
+          a: { register: Register.Fp, offset: 2 },
+          b: {
+            type: OpType.Deref,
+            cell: { register: Register.Ap, offset: 5 },
+          },
+        },
+
+        {
+          type: OpType.BinOp,
+          op: Operation.Add,
+          a: { register: Register.Fp, offset: 2 },
+          b: {
+            type: OpType.Deref,
+            cell: { register: Register.Ap, offset: 5 },
+          },
+        },
+        {
+          type: OpType.Immediate,
+          value: new Felt(4n),
+        },
+      ])(
+        'should throw when extracting a buffer with the wrong resOperand',
+        (resOperand: ResOperand) => {
+          const vm = new VirtualMachine();
+          expect(() => vm.extractBuffer(resOperand)).toThrow(
+            new InvalidBufferResOp(resOperand)
+          );
+        }
+      );
+
+      test.each([
+        [
+          {
+            type: OpType.Deref,
+            cell: { register: Register.Ap, offset: 0 },
+          },
+          new Felt(3n),
+        ],
+        [
+          {
+            type: OpType.DoubleDeref,
+            cell: { register: Register.Ap, offset: 2 },
+            offset: 1,
+          },
+          new Felt(7n),
+        ],
+        [
+          {
+            type: OpType.Immediate,
+            value: new Felt(5n),
+          },
+          new Felt(5n),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Add,
+            a: { register: Register.Fp, offset: 0 },
+            b: { type: OpType.Immediate, value: new Felt(5n) },
+          },
+          new Felt(8n),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Mul,
+            a: { register: Register.Fp, offset: 0 },
+            b: { type: OpType.Immediate, value: new Felt(5n) },
+          },
+          new Felt(15n),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Add,
+            a: { register: Register.Ap, offset: 0 },
+            b: {
+              type: OpType.Deref,
+              cell: { register: Register.Ap, offset: 1 },
+            },
+          },
+          new Felt(10n),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Mul,
+            a: { register: Register.Ap, offset: 0 },
+            b: {
+              type: OpType.Deref,
+              cell: { register: Register.Ap, offset: 1 },
+            },
+          },
+          new Felt(21n),
+        ],
+      ])(
+        'should properly read ResOperand',
+        (resOperand: ResOperand, expected: Felt) => {
+          const vm = new VirtualMachine();
+          vm.memory.addSegment();
+          vm.memory.addSegment();
+          const value0 = new Felt(3n);
+          const value1 = new Felt(7n);
+          const address = new Relocatable(1, 0);
+          vm.memory.assertEq(vm.ap, value0);
+          vm.memory.assertEq(vm.ap.add(1), value1);
+          vm.memory.assertEq(vm.ap.add(2), address);
+          expect(vm.getResOperandValue(resOperand)).toEqual(expected);
+        }
+      );
     });
   });
 });
