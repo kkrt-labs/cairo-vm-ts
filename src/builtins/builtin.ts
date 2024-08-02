@@ -2,7 +2,7 @@ import { SegmentValue } from 'primitives/segmentValue';
 
 import { outputHandler } from './output';
 import { CELLS_PER_PEDERSEN, pedersenHandler } from './pedersen';
-import { rangeCheckHandler } from './rangeCheck';
+import { rangeCheckHandler, RC_BITS, RC_BITS_96 } from './rangeCheck';
 import { CELLS_PER_ECDSA, ecdsaHandler } from './ecdsa';
 import { bitwiseHandler, CELLS_PER_BITWISE } from './bitwise';
 import { CELLS_PER_EC_OP, ecOpHandler } from './ecop';
@@ -30,13 +30,13 @@ const BUILTIN_HANDLER: {
 } = {
   output: outputHandler,
   pedersen: pedersenHandler,
-  range_check: rangeCheckHandler(128n),
+  range_check: rangeCheckHandler(RC_BITS),
   ecdsa: ecdsaHandler,
   bitwise: bitwiseHandler,
   ec_op: ecOpHandler,
   keccak: keccakHandler,
   poseidon: poseidonHandler,
-  range_check96: rangeCheckHandler(96n),
+  range_check96: rangeCheckHandler(RC_BITS_96),
   segment_arena: segmentArenaHandler,
 };
 
