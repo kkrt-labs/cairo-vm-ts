@@ -24,11 +24,12 @@ export type DilutedPool = {
  * An empty ratio represents a dynamic ratio.
  */
 export type Layout = {
+  name: string;
   builtins: string[];
   rcUnits: number;
   publicMemoryFraction: number;
   dilutedPool?: DilutedPool;
-  ratios?: { [key: string]: number };
+  ratios: { [key: string]: number };
 };
 
 export const DEFAULT_DILUTED_POOL: DilutedPool = {
@@ -53,11 +54,14 @@ export const DEFAULT_DILUTED_POOL: DilutedPool = {
  */
 export const layouts: { [key: string]: Layout } = {
   plain: {
+    name: 'plain',
     builtins: [],
     rcUnits: 16,
     publicMemoryFraction: 4,
+    ratios: {},
   },
   small: {
+    name: 'small',
     builtins: ['output', 'pedersen', 'range_check', 'ecdsa'],
     rcUnits: 16,
     publicMemoryFraction: 4,
@@ -68,6 +72,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   dex: {
+    name: 'dex',
     builtins: ['output', 'pedersen', 'range_check', 'ecdsa'],
     rcUnits: 4,
     publicMemoryFraction: 4,
@@ -78,6 +83,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   recursive: {
+    name: 'recursive',
     builtins: ['output', 'pedersen', 'range_check', 'bitwise'],
     rcUnits: 4,
     publicMemoryFraction: 8,
@@ -89,6 +95,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   starknet: {
+    name: 'starknet',
     builtins: [
       'output',
       'pedersen',
@@ -115,6 +122,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   starknet_with_keccak: {
+    name: 'starknet_with_keccak',
     builtins: [
       'output',
       'pedersen',
@@ -139,6 +147,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   recursive_large_output: {
+    name: 'recursive_large_output',
     builtins: ['output', 'pedersen', 'range_check', 'bitwise', 'poseidon'],
     rcUnits: 4,
     publicMemoryFraction: 8,
@@ -151,6 +160,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   recursive_with_poseidon: {
+    name: 'recursive_with_poseidon',
     builtins: ['output', 'pedersen', 'range_check', 'bitwise', 'poseidon'],
     rcUnits: 4,
     publicMemoryFraction: 8,
@@ -167,6 +177,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   all_cairo: {
+    name: 'all_cairo',
     builtins: [
       'output',
       'pedersen',
@@ -193,6 +204,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   all_solidity: {
+    name: 'all_solidity',
     builtins: [
       'output',
       'pedersen',
@@ -213,6 +225,7 @@ export const layouts: { [key: string]: Layout } = {
     },
   },
   dynamic: {
+    name: 'dynamic',
     builtins: [
       'output',
       'pedersen',
