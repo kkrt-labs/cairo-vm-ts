@@ -45,6 +45,7 @@ import {
   Register,
   ResLogic,
 } from './instruction';
+import { nextPowerOfTwo } from 'primitives/utils';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -474,6 +475,10 @@ export class VirtualMachine {
     ]
       .flat()
       .join('\n');
+  }
+
+  nextPowerOfTwoStep(): number {
+    return nextPowerOfTwo(Number(this.currentStep));
   }
 
   /**

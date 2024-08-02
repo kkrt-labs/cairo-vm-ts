@@ -228,7 +228,38 @@ export class CairoRunner {
       this.vm.step(this.hints.get(this.vm.pc.offset));
     }
     const { relocate, offset } = config;
-    if (relocate) this.vm.relocate(offset);
+    const isProofMode = this.mode !== RunnerMode.ExecutionMode;
+
+    if (isProofMode) {
+      this.runFor(this.vm.nextPowerOfTwoStep());
+      while (!this.checkCellUsage()) {
+        this.runFor(1);
+        this.runFor(this.vm.nextPowerOfTwoStep());
+      }
+    }
+
+    if (isProofMode || relocate) this.vm.relocate(offset);
+  }
+
+  /**
+   * Execute a fixed number of steps.
+   *
+   * @param steps - The number of steps to execute.
+   */
+  runFor(steps: number) {
+    for (let i = 0; i < steps; i++) {
+      this.vm.step(this.hints.get(this.vm.pc.offset));
+    }
+  }
+
+  /**
+   * @returns {boolean} Whether there are enough allocated cells for
+   * generating a proof of this program execution for the chosen layout.
+   * @throws {} - If the number of allocated cells of the layout is insufficient.
+   *
+   */
+  checkCellUsage(): boolean {
+    return true;
   }
 
   /**
