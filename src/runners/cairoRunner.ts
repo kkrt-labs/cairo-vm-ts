@@ -11,14 +11,27 @@ import {
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
-import { SegmentValue } from 'primitives/segmentValue';
+import { isFelt, SegmentValue } from 'primitives/segmentValue';
 import { Relocatable } from 'primitives/relocatable';
 import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
-import { VirtualMachine } from 'vm/virtualMachine';
+import { RcLimits, VirtualMachine } from 'vm/virtualMachine';
 import { CELLS_PER_INSTANCE, getBuiltin } from 'builtins/builtin';
 import { Hint, Hints } from 'hints/hintSchema';
-import { isSubsequence, Layout, layouts } from './layout';
+import {
+  isSubsequence,
+  Layout,
+  layouts,
+  MEMORY_UNITS_PER_STEP,
+} from './layout';
 import { nextPowerOfTwo } from 'primitives/utils';
+import { ExpectedFelt } from 'errors/primitives';
+import {
+  INNER_RC_BOUND_MASK,
+  INNER_RC_BOUND_SHIFT,
+  RC_N_PARTS,
+  RC_N_PARTS_96,
+} from 'builtins/rangeCheck';
+import { KECCAK_DILUTED_CELLS } from 'builtins/keccak';
 
 /**
  * Configuration of the run
@@ -35,6 +48,8 @@ export enum RunnerMode {
   ProofModeCairoZero = 'Proof Mode - Cairo Zero',
   ProofModeCairo = 'Proof Mode - Cairo',
 }
+
+const MISSING_STEPS_CAPACITY = -1;
 
 export class CairoRunner {
   program: Program;
@@ -259,45 +274,15 @@ export class CairoRunner {
   /**
    * @returns {boolean} Whether there are enough allocated cells for
    * generating a proof of this program execution for the chosen layout.
-   * @throws {} - If the number of allocated cells of the layout is insufficient.
+   * @throws {InsufficientAllocatedCells} - If the number of allocated cells of the layout is insufficient.
    *
    */
   checkCellUsage(): boolean {
     const builtinChecks = this.builtins
-      .filter(
-        (builtin) =>
-          !['output', 'segment_arena', 'gas_builtin', 'system'].includes(
-            builtin
-          )
-      )
+      .filter((builtin) => !['gas_builtin', 'system'].includes(builtin))
       .map((builtin) => {
-        // const instancesPerComponent = builtin === 'keccak' ? 16 : 1;
-        const segment = this.getBuiltinSegment(builtin);
-        if (!segment) throw new UndefinedBuiltinSegment(builtin);
-
-        const ratio = this.layout.ratios[builtin];
-        const cellsPerInstance = CELLS_PER_INSTANCE[builtin];
-        // TODO: set size to segment.length - SEGMENT_ARENA_INITIAL_SIZE (3)
-        // when implementing this builtin
-        const size = segment.length;
-        let capacity: number = 0;
-
-        if (this.layout.name === 'dynamic') {
-          const instances = Math.ceil(size / cellsPerInstance);
-          const instancesPerComponent = builtin === 'keccak' ? 16 : 1;
-          const components = nextPowerOfTwo(instances / instancesPerComponent);
-          capacity = cellsPerInstance * instancesPerComponent * components;
-        } else {
-          const minStep = ratio * cellsPerInstance;
-          if (this.vm.currentStep < minStep) {
-            console.log(
-              `PROOF MODE (${builtin}): minimum steps (${minStep}) not reached yet: ${this.vm.currentStep} steps`
-            );
-            return false;
-          }
-          capacity = (this.vm.currentStep / ratio) * cellsPerInstance;
-        }
-
+        const { size, capacity } = this.getSizeAndCapacity(builtin);
+        if (capacity === MISSING_STEPS_CAPACITY) return false;
         if (size > capacity) {
           throw new InsufficientAllocatedCells(
             this.layout.name,
@@ -306,8 +291,159 @@ export class CairoRunner {
           );
         }
         return true;
-      });
-    return builtinChecks.reduce((prev, curr) => prev && curr);
+      })
+      .reduce((prev, curr) => prev && curr);
+
+    const initialBounds: RcLimits = { rcMin: 0, rcMax: 1 };
+    const { rcMin, rcMax }: RcLimits = this.builtins
+      .filter((builtin) => ['range_check', 'range_check96'].includes(builtin))
+      .map((builtin) => {
+        const segment = this.getBuiltinSegment(builtin);
+        if (!segment) throw new UndefinedBuiltinSegment(builtin);
+        if (!segment.length) return { rcMin: 0, rcMax: 0 };
+        return segment.reduce((_, value) => {
+          if (!isFelt(value)) throw new ExpectedFelt(value);
+          const nParts = builtin === 'range_check' ? RC_N_PARTS : RC_N_PARTS_96;
+          return value
+            .to64BitsWords()
+            .flatMap((limb) =>
+              [3, 2, 1, 0].map(
+                (i) =>
+                  (limb >> BigInt(i * INNER_RC_BOUND_SHIFT)) &
+                  INNER_RC_BOUND_MASK
+              )
+            )
+            .slice(nParts)
+            .reduce((bounds, curr) => {
+              const x = Number(curr);
+              return {
+                rcMin: Math.min(bounds.rcMin, x),
+                rcMax: Math.max(bounds.rcMax, x),
+              };
+            }, initialBounds);
+        }, initialBounds);
+      })
+      .concat([this.vm.rcLimits])
+      .reduce((acc, curr) => ({
+        rcMin: Math.min(acc.rcMin, curr.rcMin),
+        rcMax: Math.max(curr.rcMin, curr.rcMax),
+      }));
+
+    const usedRcUnits = this.builtins
+      .filter((builtin) => ['range_check', 'range_check96'].includes(builtin))
+      .map((builtin) => {
+        const segment = this.getBuiltinSegment(builtin);
+        if (!segment) throw new UndefinedBuiltinSegment(builtin);
+        return builtin === 'range_check'
+          ? segment.length * RC_N_PARTS
+          : segment.length * RC_N_PARTS_96;
+      })
+      .reduce((acc, curr) => acc + curr);
+
+    const unusedRcUnits =
+      (this.layout.rcUnits - 3) * this.vm.currentStep - usedRcUnits;
+    const rcUnitsCheck = unusedRcUnits >= rcMax - rcMin;
+
+    const builtinsCapacity = this.builtins
+      .map((builtin) => this.getSizeAndCapacity(builtin).capacity)
+      .reduce((acc, curr) => acc + curr);
+    const totalMemoryCapacity = this.vm.currentStep * MEMORY_UNITS_PER_STEP;
+    if (totalMemoryCapacity % this.layout.publicMemoryFraction)
+      throw new Error(
+        'Total memory capacity is not a multiple of public memory fraction.'
+      );
+    const publicMemoryCapacity =
+      totalMemoryCapacity / this.layout.publicMemoryFraction;
+
+    const instructionCapacity = this.vm.currentStep * 4;
+    const unusedMemoryCapacity =
+      totalMemoryCapacity -
+      (publicMemoryCapacity + instructionCapacity + builtinsCapacity);
+    const memoryHoles = this.vm.memory.segments.reduce(
+      (acc, currSegment) =>
+        acc + currSegment.reduce((acc, _) => acc--, currSegment.length),
+      0
+    );
+    const memoryCheck = unusedMemoryCapacity >= memoryHoles;
+
+    let dilutedCheck: boolean = true;
+    const dilutedPool = this.layout.dilutedPool;
+    if (dilutedPool) {
+      const dilutedUsedCapacity = this.builtins
+        .filter((builtin) => ['bitwise', 'keccak'].includes(builtin))
+        .map((builtin) => {
+          const multiplier =
+            this.layout.name === 'dynamic'
+              ? this.vm.currentStep
+              : this.vm.currentStep / this.layout.ratios[builtin];
+          if (builtin === 'bitwise') {
+            const totalNBits = 251;
+            const { nBits, spacing } = dilutedPool;
+            const step = nBits * spacing;
+            const partition: number[] = [];
+            for (let i = 0; i < totalNBits; i += step) {
+              for (let j = 0; j < spacing; j++) {
+                if (i + j < totalNBits) {
+                  partition.push(i + j);
+                }
+              }
+            }
+            const trimmedNumber = partition.filter(
+              (value) => value + spacing * (nBits - 1) + 1 > totalNBits
+            ).length;
+
+            return (4 * partition.length + trimmedNumber) * multiplier;
+          }
+          return (KECCAK_DILUTED_CELLS / dilutedPool.nBits) * multiplier;
+        })
+        .reduce((acc, curr) => acc + curr);
+
+      const dilutedUnits = this.vm.currentStep * dilutedPool.unitsPerStep;
+      const unusedDilutedCapacity = dilutedUnits - dilutedUsedCapacity;
+      dilutedCheck = unusedDilutedCapacity >= 1 << dilutedPool.nBits;
+    }
+
+    return builtinChecks && rcUnitsCheck && memoryCheck && dilutedCheck;
+  }
+
+  /** @returns The size of a builtin and its capacity for the chosen layout. */
+  private getSizeAndCapacity(builtin: string): {
+    size: number;
+    capacity: number;
+  } {
+    const segment = this.getBuiltinSegment(builtin);
+    if (!segment) throw new UndefinedBuiltinSegment(builtin);
+    const size =
+      builtin === 'segment_arena' ? segment.length - 3 : segment.length;
+
+    if (builtin === 'output' || builtin === 'segment_arena') {
+      return { size, capacity: size };
+    }
+
+    const ratio = this.layout.ratios[builtin];
+    const cellsPerInstance = CELLS_PER_INSTANCE[builtin];
+    let capacity: number = 0;
+
+    switch (this.layout.name) {
+      case 'dynamic':
+        const instances = Math.ceil(size / cellsPerInstance);
+        const instancesPerComponent = builtin === 'keccak' ? 16 : 1;
+        const components = nextPowerOfTwo(instances / instancesPerComponent);
+        capacity = cellsPerInstance * instancesPerComponent * components;
+        break;
+      default:
+        const minStep = ratio * cellsPerInstance;
+        if (this.vm.currentStep < minStep) {
+          // console.log(
+          //   `PROOF MODE (${builtin}): minimum steps (${minStep}) not reached yet: ${this.vm.currentStep} steps`
+          // );
+          return { size, capacity: MISSING_STEPS_CAPACITY };
+        }
+        capacity = (this.vm.currentStep / ratio) * cellsPerInstance;
+        break;
+    }
+
+    return { size, capacity };
   }
 
   /**

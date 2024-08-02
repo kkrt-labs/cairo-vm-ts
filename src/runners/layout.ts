@@ -38,6 +38,8 @@ export const DEFAULT_DILUTED_POOL: DilutedPool = {
   nBits: 16,
 };
 
+export const MEMORY_UNITS_PER_STEP = 8;
+
 /**
  * Dictionary containing all the available layouts:
  * - plain

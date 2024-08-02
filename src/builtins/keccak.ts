@@ -18,6 +18,23 @@ export const CELLS_PER_KECCAK = 16;
 export const INPUT_CELLS_PER_KECCAK = 8;
 
 /**
+ * The diluted cells are:
+ * - state - 25 rounds times 1600 elements.
+ * - parity - 24 rounds times 1600/5 elements times 3 auxiliaries.
+ * - after_theta_rho_pi - 24 rounds times 1600 elements.
+ * - theta_aux - 24 rounds times 1600 elements.
+ * - chi_iota_aux - 24 rounds times 1600 elements times 2 auxiliaries.
+ *
+ * In total 25 * 1600 + 24 * 320 * 3 + 24 * 1600 + 24 * 1600 + 24 * 1600 * 2 = 216640.
+ *
+ * But we actually allocate 4 virtual columns, of dimensions 64 * 1024, in which we embed the
+ * real cells, and we don't free the unused ones.
+ *
+ * So the real number is 4 * 64 * 1024 = 262144.
+ */
+export const KECCAK_DILUTED_CELLS = 262144;
+
+/**
  * Compute the new state of the keccak-f1600 block permutation on 24 rounds
  *
  * - Input: State s, 1600 bits on 8 memory cells (200 bits each)

@@ -63,6 +63,12 @@ export type RelocatedMemory = {
   value: Felt;
 };
 
+/** The bounds of the range_check builtins during a run. */
+export type RcLimits = {
+  rcMin: number;
+  rcMax: number;
+};
+
 export class VirtualMachine {
   currentStep: number;
   memory: Memory;
@@ -73,6 +79,7 @@ export class VirtualMachine {
   squashedDictManager: SquashedDictManager;
   scopeManager: ScopeManager;
   trace: TraceEntry[];
+  rcLimits: RcLimits;
   relocatedMemory: RelocatedMemory[];
   relocatedTrace: RelocatedTraceEntry[];
 
@@ -82,6 +89,7 @@ export class VirtualMachine {
     this.currentStep = 0;
     this.memory = new Memory();
     this.trace = [];
+    this.rcLimits = { rcMin: 0, rcMax: 0 };
     this.relocatedMemory = [];
     this.relocatedTrace = [];
 
@@ -138,6 +146,12 @@ export class VirtualMachine {
     const { res, dst } = this.computeStepValues(instruction);
 
     this.trace.push({ pc: this.pc, ap: this.ap, fp: this.fp });
+
+    const { dstOffset, op0Offset, op1Offset } = instruction;
+    this.rcLimits = {
+      rcMin: Math.min(dstOffset, op0Offset, op1Offset),
+      rcMax: Math.max(dstOffset, op0Offset, op1Offset),
+    };
 
     this.updateRegisters(instruction, res, dst);
 
