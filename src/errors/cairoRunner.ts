@@ -42,6 +42,22 @@ Layout builtins: ${layoutBuiltins.join(', ')}`
  */
 export class MissingEndLabel extends CairoRunnerError {
   constructor() {
-    super(`Label __end__ not found in program.`);
+    super('Label __end__ not found in program.');
+  }
+}
+
+/** The requested builtin segment is undefined. */
+export class UndefinedBuiltinSegment extends CairoRunnerError {
+  constructor(builtin: string) {
+    super(`The requested builtin segment '${builtin}' is undefined.`);
+  }
+}
+
+/** The program consumes too many steps for the chosen layout. */
+export class InsufficientAllocatedCells extends CairoRunnerError {
+  constructor(layout: string, used: number, capacity: number) {
+    super(
+      `The chosen layout ${layout} only has a capacity of ${capacity} cells, but the program used ${used} cells.`
+    );
   }
 }

@@ -6,6 +6,8 @@ import {
   UndefinedEntrypoint,
   InvalidBuiltins,
   MissingEndLabel,
+  UndefinedBuiltinSegment,
+  InsufficientAllocatedCells,
 } from 'errors/cairoRunner';
 
 import { Felt } from 'primitives/felt';
@@ -13,9 +15,10 @@ import { SegmentValue } from 'primitives/segmentValue';
 import { Relocatable } from 'primitives/relocatable';
 import { CairoProgram, CairoZeroProgram, Program } from 'vm/program';
 import { VirtualMachine } from 'vm/virtualMachine';
-import { getBuiltin } from 'builtins/builtin';
+import { CELLS_PER_INSTANCE, getBuiltin } from 'builtins/builtin';
 import { Hint, Hints } from 'hints/hintSchema';
 import { isSubsequence, Layout, layouts } from './layout';
+import { nextPowerOfTwo } from 'primitives/utils';
 
 /**
  * Configuration of the run
@@ -231,13 +234,14 @@ export class CairoRunner {
     const isProofMode = this.mode !== RunnerMode.ExecutionMode;
 
     if (isProofMode) {
-      this.runFor(this.vm.nextPowerOfTwoStep());
+      this.runFor(nextPowerOfTwo(this.vm.currentStep));
       while (!this.checkCellUsage()) {
         this.runFor(1);
-        this.runFor(this.vm.nextPowerOfTwoStep());
+        this.runFor(nextPowerOfTwo(this.vm.currentStep) - this.vm.currentStep);
       }
     }
 
+    console.log('steps: ', this.vm.currentStep);
     if (isProofMode || relocate) this.vm.relocate(offset);
   }
 
@@ -259,7 +263,51 @@ export class CairoRunner {
    *
    */
   checkCellUsage(): boolean {
-    return true;
+    const builtinChecks = this.builtins
+      .filter(
+        (builtin) =>
+          !['output', 'segment_arena', 'gas_builtin', 'system'].includes(
+            builtin
+          )
+      )
+      .map((builtin) => {
+        // const instancesPerComponent = builtin === 'keccak' ? 16 : 1;
+        const segment = this.getBuiltinSegment(builtin);
+        if (!segment) throw new UndefinedBuiltinSegment(builtin);
+
+        const ratio = this.layout.ratios[builtin];
+        const cellsPerInstance = CELLS_PER_INSTANCE[builtin];
+        // TODO: set size to segment.length - SEGMENT_ARENA_INITIAL_SIZE (3)
+        // when implementing this builtin
+        const size = segment.length;
+        let capacity: number = 0;
+
+        if (this.layout.name === 'dynamic') {
+          const instances = Math.ceil(size / cellsPerInstance);
+          const instancesPerComponent = builtin === 'keccak' ? 16 : 1;
+          const components = nextPowerOfTwo(instances / instancesPerComponent);
+          capacity = cellsPerInstance * instancesPerComponent * components;
+        } else {
+          const minStep = ratio * cellsPerInstance;
+          if (this.vm.currentStep < minStep) {
+            console.log(
+              `PROOF MODE (${builtin}): minimum steps (${minStep}) not reached yet: ${this.vm.currentStep} steps`
+            );
+            return false;
+          }
+          capacity = (this.vm.currentStep / ratio) * cellsPerInstance;
+        }
+
+        if (size > capacity) {
+          throw new InsufficientAllocatedCells(
+            this.layout.name,
+            size,
+            capacity
+          );
+        }
+        return true;
+      });
+    return builtinChecks.reduce((prev, curr) => prev && curr);
   }
 
   /**
