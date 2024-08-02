@@ -45,7 +45,6 @@ import {
   Register,
   ResLogic,
 } from './instruction';
-import { nextPowerOfTwo } from 'primitives/utils';
 
 export type TraceEntry = {
   pc: Relocatable;
@@ -65,7 +64,7 @@ export type RelocatedMemory = {
 };
 
 export class VirtualMachine {
-  private currentStep: bigint;
+  currentStep: number;
   memory: Memory;
   pc: Relocatable;
   ap: Relocatable;
@@ -80,7 +79,7 @@ export class VirtualMachine {
   private handlers: HintHandler = handlers;
 
   constructor() {
-    this.currentStep = 0n;
+    this.currentStep = 0;
     this.memory = new Memory();
     this.trace = [];
     this.relocatedMemory = [];
@@ -142,7 +141,7 @@ export class VirtualMachine {
 
     this.updateRegisters(instruction, res, dst);
 
-    this.currentStep += 1n;
+    this.currentStep += 1;
   }
 
   /**
@@ -475,10 +474,6 @@ export class VirtualMachine {
     ]
       .flat()
       .join('\n');
-  }
-
-  nextPowerOfTwoStep(): number {
-    return nextPowerOfTwo(Number(this.currentStep));
   }
 
   /**
