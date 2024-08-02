@@ -11,6 +11,12 @@ import { BuiltinHandler } from './builtin';
 const KECCAK_BYTES = 25;
 const KECCAK_BITS = 200n;
 
+/** Total number of cells per keccak operation */
+export const CELLS_PER_KECCAK = 16;
+
+/** Number of input cells for a keccak operation */
+export const INPUT_CELLS_PER_KECCAK = 8;
+
 /**
  * Compute the new state of the keccak-f1600 block permutation on 24 rounds
  *
@@ -24,17 +30,14 @@ export const keccakHandler: BuiltinHandler = {
       return Reflect.get(target, prop);
     }
 
-    const cellsPerKeccak = 16;
-    const inputCellsPerKeccak = 8;
-
     const offset = Number(prop);
-    const keccakIndex = offset % cellsPerKeccak;
-    if (keccakIndex < inputCellsPerKeccak || target[offset]) {
+    const keccakIndex = offset % CELLS_PER_KECCAK;
+    if (keccakIndex < INPUT_CELLS_PER_KECCAK || target[offset]) {
       return target[offset];
     }
 
     const inputOffset = offset - keccakIndex;
-    const outputOffset = inputOffset + inputCellsPerKeccak;
+    const outputOffset = inputOffset + INPUT_CELLS_PER_KECCAK;
 
     const input = concatBytes(
       ...target.slice(inputOffset, outputOffset).map((value) => {
@@ -53,7 +56,7 @@ export const keccakHandler: BuiltinHandler = {
     ).map(bytesToNumberLE);
 
     return (target[offset] = new Felt(
-      outputs[keccakIndex - inputCellsPerKeccak]
+      outputs[keccakIndex - INPUT_CELLS_PER_KECCAK]
     ));
   },
 };
