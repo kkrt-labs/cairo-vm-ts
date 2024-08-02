@@ -256,7 +256,6 @@ export class CairoRunner {
       }
     }
 
-    console.log('steps: ', this.vm.currentStep);
     if (isProofMode || relocate) this.vm.relocate(offset);
   }
 
@@ -434,9 +433,6 @@ export class CairoRunner {
       default:
         const minStep = ratio * cellsPerInstance;
         if (this.vm.currentStep < minStep) {
-          // console.log(
-          //   `PROOF MODE (${builtin}): minimum steps (${minStep}) not reached yet: ${this.vm.currentStep} steps`
-          // );
           return { size, capacity: MISSING_STEPS_CAPACITY };
         }
         capacity = (this.vm.currentStep / ratio) * cellsPerInstance;
