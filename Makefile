@@ -90,6 +90,7 @@ run-all: $(VALID_COMPILED_CAIRO_0_FILES) $(COMPILED_CAIRO_FILES)
 		for file in $$failed_tests; do \
 			echo $$file; \
 		done; \
+		exit 1; \
 	else \
 		echo "All $$passed_tests_ctr tests passed."; \
 	fi
