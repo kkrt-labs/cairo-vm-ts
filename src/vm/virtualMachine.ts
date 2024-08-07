@@ -550,7 +550,31 @@ export class VirtualMachine {
   }
 
   /**
-   * Return the value defined by `resOperand`
+   * Get the Felt defined by `resOperand`
+   *
+   * @param resOperand - The ResOperand to extract a Felt from.
+   * @returns {Felt} The value expressed by the given ResOperand.
+   */
+  getResOperandValue(resOperand: ResOperand): Felt {
+    const value = this.getResOperandSegmentValue(resOperand);
+    if (!isFelt(value)) throw new ExpectedFelt(value);
+    return value;
+  }
+
+  /**
+   * Get the Relocatable defined by `resOperand`
+   *
+   * @param resOperand - The ResOperand to extract a Relocatable from.
+   * @returns {Relocatable} The value expressed by the given ResOperand.
+   */
+  getResOperandRelocatable(resOperand: ResOperand): Relocatable {
+    const value = this.getResOperandSegmentValue(resOperand);
+    if (!isRelocatable(value)) throw new ExpectedRelocatable(value);
+    return value;
+  }
+
+  /**
+   * Return the SegmentValue value defined by `resOperand`
    *
    * Generic patterns:
    * - Deref: `[register + offset]`
@@ -561,18 +585,22 @@ export class VirtualMachine {
    * - BinOp (Mul): `[register1 + offset1] * [register2 + offset2]`
    * or `[register1 + offset1] * immediate`
    *
+   * @param {ResOperand} resOperand - The ResOperand to extract a Felt from.
+   * @returns {Felt} The value expressed by the given ResOperand.
+   * @throws {ExpectedFelt} If ResOperand is a BinOp (Mul) with `a` being a Relocatable.
+   *
    * NOTE: used in Cairo hints
    */
-  getResOperandValue(resOperand: ResOperand): Felt {
+  getResOperandSegmentValue(resOperand: ResOperand): SegmentValue {
     switch (resOperand.type) {
       case OpType.Deref:
-        return this.getFelt((resOperand as Deref).cell);
+        return this.getSegmentValue((resOperand as Deref).cell);
 
       case OpType.DoubleDeref:
         const dDeref = resOperand as DoubleDeref;
         const deref = this.getRelocatable(dDeref.cell);
         const value = this.memory.get(deref.add(dDeref.offset));
-        if (!value || !isFelt(value)) throw new ExpectedFelt(value);
+        if (!value) throw new UndefinedSegmentValue();
         return value;
 
       case OpType.Immediate:
@@ -580,7 +608,7 @@ export class VirtualMachine {
 
       case OpType.BinOp:
         const binOp = resOperand as BinOp;
-        const a = this.getFelt(binOp.a);
+        const a = this.getSegmentValue(binOp.a);
 
         let b: Felt | undefined = undefined;
         switch (binOp.b.type) {
@@ -601,6 +629,7 @@ export class VirtualMachine {
             return a.add(b);
 
           case Operation.Mul:
+            if (!isFelt(a)) throw new ExpectedFelt(a);
             return a.mul(b);
         }
     }

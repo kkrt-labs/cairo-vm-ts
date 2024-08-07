@@ -721,7 +721,7 @@ describe('VirtualMachine', () => {
           new Felt(21n),
         ],
       ])(
-        'should properly read ResOperand',
+        'should properly read ResOperand as Felt',
         (resOperand: ResOperand, expected: Felt) => {
           const vm = new VirtualMachine();
           vm.memory.addSegment();
@@ -733,6 +733,119 @@ describe('VirtualMachine', () => {
           vm.memory.assertEq(vm.ap.add(1), value1);
           vm.memory.assertEq(vm.ap.add(2), address);
           expect(vm.getResOperandValue(resOperand)).toEqual(expected);
+        }
+      );
+
+      test.each([
+        [
+          {
+            type: OpType.Deref,
+            cell: { register: Register.Ap, offset: 0 },
+          },
+          new Relocatable(2, 4),
+        ],
+        [
+          {
+            type: OpType.DoubleDeref,
+            cell: { register: Register.Ap, offset: 1 },
+            offset: -1,
+          },
+          new Relocatable(2, 4),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Add,
+            a: { register: Register.Fp, offset: 0 },
+            b: { type: OpType.Immediate, value: new Felt(5n) },
+          },
+          new Relocatable(2, 9),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Add,
+            a: { register: Register.Ap, offset: 0 },
+            b: {
+              type: OpType.Deref,
+              cell: { register: Register.Ap, offset: 2 },
+            },
+          },
+          new Relocatable(2, 16),
+        ],
+      ])(
+        'should properly read ResOperand as Relocatable',
+        (resOperand: ResOperand, expected: Relocatable) => {
+          const vm = new VirtualMachine();
+          vm.memory.addSegment();
+          vm.memory.addSegment();
+          const address0 = new Relocatable(2, 4);
+          const address1 = new Relocatable(1, 1);
+          const value = new Felt(12n);
+          vm.memory.assertEq(vm.ap, address0);
+          vm.memory.assertEq(vm.ap.add(1), address1);
+          vm.memory.assertEq(vm.ap.add(2), value);
+          expect(vm.getResOperandRelocatable(resOperand)).toEqual(expected);
+        }
+      );
+
+      test('should throw ExpectedRelocatable when extracting from an Immediate ResOperand', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const address0 = new Relocatable(2, 4);
+        const address1 = new Relocatable(1, 1);
+        const value = new Felt(12n);
+        vm.memory.assertEq(vm.ap, address0);
+        vm.memory.assertEq(vm.ap.add(1), address1);
+        vm.memory.assertEq(vm.ap.add(2), value);
+
+        const resOperand = {
+          type: OpType.Immediate,
+          value: new Felt(5n),
+        };
+        expect(() => vm.getResOperandRelocatable(resOperand)).toThrow(
+          new ExpectedRelocatable(resOperand.value)
+        );
+      });
+
+      test.each([
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Mul,
+            a: { register: Register.Fp, offset: 0 },
+            b: { type: OpType.Immediate, value: new Felt(5n) },
+          },
+          new Relocatable(2, 4),
+        ],
+        [
+          {
+            type: OpType.BinOp,
+            op: Operation.Mul,
+            a: { register: Register.Ap, offset: 0 },
+            b: {
+              type: OpType.Deref,
+              cell: { register: Register.Ap, offset: 2 },
+            },
+          },
+          new Relocatable(2, 4),
+        ],
+      ])(
+        'should throw ExpectedFelt with BinOp + Operation.Mul ResOperand',
+        (resOperand: ResOperand, receivedValue: Relocatable) => {
+          const vm = new VirtualMachine();
+          vm.memory.addSegment();
+          vm.memory.addSegment();
+          const address0 = new Relocatable(2, 4);
+          const address1 = new Relocatable(1, 1);
+          const value = new Felt(12n);
+          vm.memory.assertEq(vm.ap, address0);
+          vm.memory.assertEq(vm.ap.add(1), address1);
+          vm.memory.assertEq(vm.ap.add(2), value);
+          expect(() => vm.getResOperandRelocatable(resOperand)).toThrow(
+            new ExpectedFelt(receivedValue)
+          );
         }
       );
     });
