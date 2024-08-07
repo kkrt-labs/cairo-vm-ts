@@ -4,7 +4,6 @@ import * as fs from 'fs';
 
 import { Felt } from 'primitives/felt';
 
-import { OpType } from 'hints/hintParamsSchema';
 import { Hint } from 'hints/hintSchema';
 import { HintName } from 'hints/hintName';
 import { Register } from './instruction';
@@ -27,10 +26,10 @@ describe('program', () => {
     });
   });
 
-  describe('parseCairo1Program', () => {
+  describe('parseCairoProgram', () => {
     test('should correctly parse the program', () => {
       const programContent = fs.readFileSync(
-        'cairo_programs/cairo/hints/test_less_than_true.json',
+        'cairo_programs/cairo/hints/array_append.json',
         'utf8'
       );
       const programJson = JSON.parse(programContent);
@@ -39,24 +38,10 @@ describe('program', () => {
       });
 
       const hints = new Map<number, Hint[]>();
-      hints.set(5, [
+      hints.set(0, [
         {
-          type: HintName.TestLessThan,
-          lhs: {
-            type: OpType.Deref,
-            cell: {
-              register: Register.Ap,
-              offset: 0,
-            },
-          },
-          rhs: {
-            type: OpType.Immediate,
-            value: new Felt(BigInt('0x100000000')),
-          },
-          dst: {
-            register: Register.Ap,
-            offset: -1,
-          },
+          type: HintName.AllocSegment,
+          dst: { register: Register.Ap, offset: 0 },
         },
       ]);
 
