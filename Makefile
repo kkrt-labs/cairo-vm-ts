@@ -68,8 +68,6 @@ compile-cairo-zero: $(COMPILED_CAIRO_0_FILES)
 compile-cairo: $(COMPILED_CAIRO_FILES)
 compile: build-cairo compile-cairo-zero compile-cairo
 
-
-
 run-all: $(VALID_COMPILED_CAIRO_0_FILES) $(COMPILED_CAIRO_FILES)
 	@failed_tests_ctr=0; \
 	failed_tests=""; \
@@ -154,5 +152,8 @@ clean-diff-test:
 
 clean-bench:
 	@rm -rf /tmp/$(TMP_PREFIX)-bench*
+
+clean-artifacts:
+	@find cairo_programs -type f \( -name "*.json" -o -name "*.sierra" \) -delete
 
 clean-tmp: clean-diff-test clean-bench
