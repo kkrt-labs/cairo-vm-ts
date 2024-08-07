@@ -66,7 +66,7 @@ $(COMPILED_CAIRO_FILES): %.json: %.sierra
 
 compile-cairo-zero: $(COMPILED_CAIRO_0_FILES)
 compile-cairo: $(COMPILED_CAIRO_FILES)
-compile: compile-cairo-zero compile-cairo
+compile: build-cairo compile-cairo-zero compile-cairo
 
 
 
