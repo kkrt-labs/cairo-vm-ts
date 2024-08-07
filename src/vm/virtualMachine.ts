@@ -10,7 +10,6 @@ import {
   InvalidCallOp0Value,
   UndefinedOp1,
   InvalidBufferResOp,
-  CannotExtractRelocatable,
 } from 'errors/virtualMachine';
 import { DictNotFound } from 'errors/dictionary';
 import { InvalidCellRefRegister, UnknownHint } from 'errors/hints';
@@ -551,7 +550,31 @@ export class VirtualMachine {
   }
 
   /**
-   * Return the Felt value defined by `resOperand`
+   * Get the Felt defined by `resOperand`
+   *
+   * @param resOperand - The ResOperand to extract a Felt from.
+   * @returns {Felt} The value expressed by the given ResOperand.
+   */
+  getResOperandValue(resOperand: ResOperand): Felt {
+    const value = this.getResOperandSegmentValue(resOperand);
+    if (!isFelt(value)) throw new ExpectedFelt(value);
+    return value;
+  }
+
+  /**
+   * Get the Relocatable defined by `resOperand`
+   *
+   * @param resOperand - The ResOperand to extract a Relocatable from.
+   * @returns {Relocatable} The value expressed by the given ResOperand.
+   */
+  getResOperandRelocatable(resOperand: ResOperand): Relocatable {
+    const value = this.getResOperandSegmentValue(resOperand);
+    if (!isRelocatable(value)) throw new ExpectedRelocatable(value);
+    return value;
+  }
+
+  /**
+   * Return the SegmentValue value defined by `resOperand`
    *
    * Generic patterns:
    * - Deref: `[register + offset]`
@@ -564,19 +587,20 @@ export class VirtualMachine {
    *
    * @param {ResOperand} resOperand - The ResOperand to extract a Felt from.
    * @returns {Felt} The value expressed by the given ResOperand.
+   * @throws {ExpectedFelt} If ResOperand is a BinOp (Mul) with `a` being a Relocatable.
    *
    * NOTE: used in Cairo hints
    */
-  getResOperandValue(resOperand: ResOperand): Felt {
+  getResOperandSegmentValue(resOperand: ResOperand): SegmentValue {
     switch (resOperand.type) {
       case OpType.Deref:
-        return this.getFelt((resOperand as Deref).cell);
+        return this.getSegmentValue((resOperand as Deref).cell);
 
       case OpType.DoubleDeref:
         const dDeref = resOperand as DoubleDeref;
         const deref = this.getRelocatable(dDeref.cell);
         const value = this.memory.get(deref.add(dDeref.offset));
-        if (!value || !isFelt(value)) throw new ExpectedFelt(value);
+        if (!value) throw new UndefinedSegmentValue();
         return value;
 
       case OpType.Immediate:
@@ -584,7 +608,7 @@ export class VirtualMachine {
 
       case OpType.BinOp:
         const binOp = resOperand as BinOp;
-        const a = this.getFelt(binOp.a);
+        const a = this.getSegmentValue(binOp.a);
 
         let b: Felt | undefined = undefined;
         switch (binOp.b.type) {
@@ -605,68 +629,8 @@ export class VirtualMachine {
             return a.add(b);
 
           case Operation.Mul:
+            if (!isFelt(a)) throw new ExpectedFelt(a);
             return a.mul(b);
-        }
-    }
-  }
-
-  /**
-   * Return the Relocatable defined by `resOperand`
-   *
-   * Generic patterns:
-   * - Deref: `[register + offset]`
-   * - DoubleDeref: `[[register + offset1] + offset2]`
-   * - Immediate: Forbidden operation on `Relocatable`
-   * - BinOp (Add): `[register1 + offset1] + [register2 + offset2]`
-   * or `[register1 + offset1] + immediate`
-   * - BinOp (Mul): Forbidden operation on `Relocatable`
-   *
-   * @param {ResOperand} resOperand - The ResOperand to extract a Relocatable from.
-   * @returns {Relocatable} The value expressed by the given ResOperand.
-   * @throws {CannotExtractRelocatable} if OpType is Immediate or BinOp with a Mul operation.
-   *
-   * NOTE: used in Cairo hints
-   */
-  getResOperandRelocatable(resOperand: ResOperand): Relocatable {
-    switch (resOperand.type) {
-      case OpType.Deref:
-        return this.getRelocatable((resOperand as Deref).cell);
-
-      case OpType.DoubleDeref:
-        const dDeref = resOperand as DoubleDeref;
-        const deref = this.getRelocatable(dDeref.cell);
-        const value = this.memory.get(deref.add(dDeref.offset));
-        if (!value || !isRelocatable(value))
-          throw new ExpectedRelocatable(value);
-        return value;
-
-      case OpType.Immediate:
-        throw new CannotExtractRelocatable(resOperand.type);
-
-      case OpType.BinOp:
-        const binOp = resOperand as BinOp;
-        const a = this.getRelocatable(binOp.a);
-
-        let b: Felt | undefined = undefined;
-        switch (binOp.b.type) {
-          case OpType.Deref:
-            b = this.getFelt((binOp.b as Deref).cell);
-            break;
-
-          case OpType.Immediate:
-            b = (binOp.b as Immediate).value;
-            break;
-
-          default:
-            throw new ExpectedFelt(b);
-        }
-
-        switch (binOp.op) {
-          case Operation.Add:
-            return a.add(b);
-
-          case Operation.Mul:
-            throw new CannotExtractRelocatable(resOperand.type);
         }
     }
   }

@@ -1,11 +1,7 @@
 import { test, expect, describe, spyOn } from 'bun:test';
 
 import { ExpectedFelt, ExpectedRelocatable } from 'errors/primitives';
-import {
-  CannotExtractRelocatable,
-  InvalidBufferResOp,
-  UnusedRes,
-} from 'errors/virtualMachine';
+import { InvalidBufferResOp, UnusedRes } from 'errors/virtualMachine';
 
 import { Felt } from 'primitives/felt';
 import { Relocatable } from 'primitives/relocatable';
@@ -756,13 +752,6 @@ describe('VirtualMachine', () => {
           },
           new Relocatable(2, 4),
         ],
-        // [
-        //   {
-        //     type: OpType.Immediate,
-        //     value: new Felt(5n),
-        //   },
-        //   new Felt(5n),
-        // ],
         [
           {
             type: OpType.BinOp,
@@ -772,15 +761,6 @@ describe('VirtualMachine', () => {
           },
           new Relocatable(2, 9),
         ],
-        // [
-        //   {
-        //     type: OpType.BinOp,
-        //     op: Operation.Mul,
-        //     a: { register: Register.Fp, offset: 0 },
-        //     b: { type: OpType.Immediate, value: new Felt(5n) },
-        //   },
-        //   new Felt(15n),
-        // ],
         [
           {
             type: OpType.BinOp,
@@ -793,18 +773,6 @@ describe('VirtualMachine', () => {
           },
           new Relocatable(2, 16),
         ],
-        // [
-        //   {
-        //     type: OpType.BinOp,
-        //     op: Operation.Mul,
-        //     a: { register: Register.Ap, offset: 0 },
-        //     b: {
-        //       type: OpType.Deref,
-        //       cell: { register: Register.Ap, offset: 1 },
-        //     },
-        //   },
-        //   new Felt(21n),
-        // ],
       ])(
         'should properly read ResOperand as Relocatable',
         (resOperand: ResOperand, expected: Relocatable) => {
@@ -821,13 +789,27 @@ describe('VirtualMachine', () => {
         }
       );
 
+      test('should throw ExpectedRelocatable when extracting from an Immediate ResOperand', () => {
+        const vm = new VirtualMachine();
+        vm.memory.addSegment();
+        vm.memory.addSegment();
+        const address0 = new Relocatable(2, 4);
+        const address1 = new Relocatable(1, 1);
+        const value = new Felt(12n);
+        vm.memory.assertEq(vm.ap, address0);
+        vm.memory.assertEq(vm.ap.add(1), address1);
+        vm.memory.assertEq(vm.ap.add(2), value);
+
+        const resOperand = {
+          type: OpType.Immediate,
+          value: new Felt(5n),
+        };
+        expect(() => vm.getResOperandRelocatable(resOperand)).toThrow(
+          new ExpectedRelocatable(resOperand.value)
+        );
+      });
+
       test.each([
-        [
-          {
-            type: OpType.Immediate,
-            value: new Felt(5n),
-          },
-        ],
         [
           {
             type: OpType.BinOp,
@@ -835,6 +817,7 @@ describe('VirtualMachine', () => {
             a: { register: Register.Fp, offset: 0 },
             b: { type: OpType.Immediate, value: new Felt(5n) },
           },
+          new Relocatable(2, 4),
         ],
         [
           {
@@ -846,10 +829,11 @@ describe('VirtualMachine', () => {
               cell: { register: Register.Ap, offset: 2 },
             },
           },
+          new Relocatable(2, 4),
         ],
       ])(
-        'should throw CannotExtractRelocatable with Immediate BinOp + Operation.Mul ResOperand',
-        (resOperand: ResOperand) => {
+        'should throw ExpectedFelt with BinOp + Operation.Mul ResOperand',
+        (resOperand: ResOperand, receivedValue: Relocatable) => {
           const vm = new VirtualMachine();
           vm.memory.addSegment();
           vm.memory.addSegment();
@@ -860,7 +844,7 @@ describe('VirtualMachine', () => {
           vm.memory.assertEq(vm.ap.add(1), address1);
           vm.memory.assertEq(vm.ap.add(2), value);
           expect(() => vm.getResOperandRelocatable(resOperand)).toThrow(
-            new CannotExtractRelocatable(resOperand.type)
+            new ExpectedFelt(receivedValue)
           );
         }
       );

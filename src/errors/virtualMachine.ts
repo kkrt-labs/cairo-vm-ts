@@ -1,4 +1,4 @@
-import { OpType, ResOperand } from 'hints/hintParamsSchema';
+import { ResOperand } from 'hints/hintParamsSchema';
 import { Relocatable } from 'primitives/relocatable';
 import { SegmentValue } from 'primitives/segmentValue';
 
@@ -63,14 +63,5 @@ export class UndefinedOp1 extends VirtualMachineError {
 export class InvalidBufferResOp extends VirtualMachineError {
   constructor(resOperand: ResOperand) {
     super(`Cannot extract buffer from the given ResOperand: ${resOperand}`);
-  }
-}
-
-/** The given `resOperand` cannot be extracted as a Relocatable. */
-export class CannotExtractRelocatable extends VirtualMachineError {
-  constructor(type: OpType) {
-    super(
-      `The ResOperand ${type} cannot be extracted as a Relocatable. It doesn't support Immediate nor BinOp multiplicaton.`
-    );
   }
 }
