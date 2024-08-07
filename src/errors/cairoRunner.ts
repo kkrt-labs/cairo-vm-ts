@@ -17,7 +17,7 @@ export class CairoZeroHintsNotSupported extends CairoRunnerError {
 /** The given entrypoint is not in the program, it cannot be executed. */
 export class UndefinedEntrypoint extends CairoRunnerError {
   constructor(name: string) {
-    super(`The function to be executed doesn't exist: ${name}`);
+    super(`The entrypoint to be executed doesn't exist: ${name}`);
   }
 }
 
@@ -32,6 +32,32 @@ export class InvalidBuiltins extends CairoRunnerError {
       `The program builtins are not a subsequence of the '${layout}' layout builtins.
 Program builtins: ${programBuiltins.join(', ')}
 Layout builtins: ${layoutBuiltins.join(', ')}`
+    );
+  }
+}
+
+/**
+ * The label `__main__.__end__` must be in the compilation artifacts
+ * to run a Cairo Zero program in proof mode.
+ */
+export class MissingEndLabel extends CairoRunnerError {
+  constructor() {
+    super('Label __end__ not found in program.');
+  }
+}
+
+/** The requested builtin segment is undefined. */
+export class UndefinedBuiltinSegment extends CairoRunnerError {
+  constructor(builtin: string) {
+    super(`The requested builtin segment '${builtin}' is undefined.`);
+  }
+}
+
+/** The program consumes too many steps for the chosen layout. */
+export class InsufficientAllocatedCells extends CairoRunnerError {
+  constructor(layout: string, used: number, capacity: number) {
+    super(
+      `The chosen layout ${layout} only has a capacity of ${capacity} cells, but the program used ${used} cells.`
     );
   }
 }

@@ -14,7 +14,7 @@ import { parseProgram } from 'vm/program';
 import { outputHandler } from 'builtins/output';
 import { bitwiseHandler } from 'builtins/bitwise';
 import { layouts } from './layout';
-import { CairoRunner, RunOptions } from './cairoRunner';
+import { CairoRunner, RunnerMode, RunOptions } from './cairoRunner';
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'cairo-vm-ts-'));
 
@@ -468,7 +468,15 @@ describe('cairoRunner', () => {
         );
 
         expect(
-          () => new CairoRunner(dummyProgram, [], layout, 0, builtins)
+          () =>
+            new CairoRunner(
+              dummyProgram,
+              [],
+              layout,
+              RunnerMode.ExecutionMode,
+              0,
+              builtins
+            )
         ).not.toThrow();
       }
     );
@@ -489,7 +497,15 @@ describe('cairoRunner', () => {
         );
 
         expect(
-          () => new CairoRunner(dummyProgram, [], layout, 0, builtins)
+          () =>
+            new CairoRunner(
+              dummyProgram,
+              [],
+              layout,
+              RunnerMode.ExecutionMode,
+              0,
+              builtins
+            )
         ).toThrow(
           new InvalidBuiltins(builtins, layouts[layout].builtins, layout)
         );

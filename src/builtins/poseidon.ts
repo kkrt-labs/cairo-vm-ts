@@ -5,6 +5,12 @@ import { isFelt } from 'primitives/segmentValue';
 import { poseidonSmall } from '@scure/starknet';
 import { Felt } from 'primitives/felt';
 
+/** Total number of cells per poseidon operation */
+export const CELLS_PER_POSEIDON = 6;
+
+/** Number of input cells for a poseidon operation */
+export const INPUT_CELLS_PER_POSEIDON = 3;
+
 const poseidon = (x: bigint, y: bigint, z: bigint) => poseidonSmall([x, y, z]);
 
 /** Poseidon Builtin - Computes state of Poseidon(x, y)
@@ -17,12 +23,9 @@ export const poseidonHandler: BuiltinHandler = {
       return Reflect.get(target, prop);
     }
 
-    const cellsPerPoseidon = 6;
-    const inputCellsPerPoseidon = 3;
-
     const offset = Number(prop);
-    const poseidonIndex = offset % cellsPerPoseidon;
-    if (poseidonIndex < inputCellsPerPoseidon || target[offset]) {
+    const poseidonIndex = offset % CELLS_PER_POSEIDON;
+    if (poseidonIndex < INPUT_CELLS_PER_POSEIDON || target[offset]) {
       return target[offset];
     }
 
@@ -47,7 +50,7 @@ export const poseidonHandler: BuiltinHandler = {
     const state = poseidon(x, y, z);
 
     return (target[offset] = new Felt(
-      state[poseidonIndex - inputCellsPerPoseidon]
+      state[poseidonIndex - INPUT_CELLS_PER_POSEIDON]
     ));
   },
 };

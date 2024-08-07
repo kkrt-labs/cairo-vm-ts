@@ -17,6 +17,7 @@ export const run = (
   try {
     const {
       silent,
+      proofMode,
       layout,
       fn,
       relocate,
@@ -31,6 +32,10 @@ export const run = (
 
     if (silent) consola.level = LogLevels.silent;
 
+    consola.info(
+      `Cairo VM TS ${version} - ${proofMode ? 'Proof' : 'Execution'} Mode`
+    );
+
     if (!ALL_LAYOUTS.includes(layout)) {
       consola.error(
         `Layout "${layout}" is not a valid layout.
@@ -40,23 +45,22 @@ Use one from {${ALL_LAYOUTS.join(', ')}}`
     }
 
     if (
-      (!relocate && !!offset) ||
+      (!relocate && proofMode) ||
+      (!relocate && offset !== undefined) ||
       (!relocate && exportMemory) ||
       (!relocate && printRelocatedMemory)
     ) {
       consola.error(
-        "option '--no-relocate' cannot be used with options '--offset <OFFSET>', '--export-memory <MEMORY_FILENAME>' or '--print-relocated-memory'"
+        "option '--no-relocate' cannot be used with options '--proof-mode', '--offset <OFFSET>', '--export-memory <MEMORY_FILENAME>' or '--print-relocated-memory'"
       );
       process.exit(1);
     }
 
-    consola.info(`Cairo VM TS ${version} - Execution Mode`);
-
     const file = fs.readFileSync(String(path), 'utf-8');
 
     const program = parseProgram(file);
-    runner = CairoRunner.fromProgram(program, layout, fn);
-    const config: RunOptions = { relocate: relocate, offset: offset };
+    runner = CairoRunner.fromProgram(program, layout, proofMode, fn);
+    const config: RunOptions = { relocate, offset };
     runner.run(config);
     consola.success('Execution finished!');
 

@@ -16,6 +16,8 @@ type EcdsaSignatureDict = { [key: number]: EcdsaSignature };
 export type EcdsaSegment = SegmentValue[] & { signatures: EcdsaSignatureDict };
 type EcdsaProxyHandler = ProxyHandler<EcdsaSegment>;
 
+export const CELLS_PER_ECDSA = 2;
+
 const signatureHandler: ProxyHandler<EcdsaSignatureDict> = {
   set(target, prop, newValue): boolean {
     if (isNaN(Number(prop))) throw new ExpectedOffset();
@@ -50,9 +52,8 @@ export const ecdsaHandler: EcdsaProxyHandler = {
     if (!target.signatures) throw new UndefinedSignatureDict();
     if (!isFelt(newValue)) throw new ExpectedFelt(newValue);
 
-    const cellsPerEcdsa = 2;
     const offset = Number(prop);
-    const ecdsaIndex = offset % cellsPerEcdsa;
+    const ecdsaIndex = offset % CELLS_PER_ECDSA;
 
     const pubKeyXOffset = ecdsaIndex ? offset - 1 : offset;
     const msgOffset = ecdsaIndex ? offset : offset + 1;

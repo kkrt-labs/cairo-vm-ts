@@ -5,18 +5,21 @@ import { Felt } from 'primitives/felt';
 import { isFelt } from 'primitives/segmentValue';
 import { BuiltinHandler } from './builtin';
 
+/** Total number of cells per bitwise operation */
+export const CELLS_PER_BITWISE = 5;
+
+/** Number of input cells for a bitwise operation */
+export const INPUT_CELLS_PER_BITWISE = 2;
+
 export const bitwiseHandler: BuiltinHandler = {
   get(target, prop) {
     if (isNaN(Number(prop))) {
       return Reflect.get(target, prop);
     }
 
-    const cellsPerBitwise = 5;
-    const inputCellsPerBitwise = 2;
-
     const offset = Number(prop);
-    const bitwiseIndex = offset % cellsPerBitwise;
-    if (bitwiseIndex < inputCellsPerBitwise || target[offset]) {
+    const bitwiseIndex = offset % CELLS_PER_BITWISE;
+    if (bitwiseIndex < INPUT_CELLS_PER_BITWISE || target[offset]) {
       return target[offset];
     }
 

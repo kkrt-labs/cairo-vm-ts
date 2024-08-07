@@ -8,16 +8,8 @@ import {
 
 describe('layouts', () => {
   describe('Layout', () => {
-    test('plain layout should the right values', () => {
-      const plain = layouts['plain'];
-      expect(plain.builtins).toEqual([]);
-      expect(plain.rcUnits).toEqual(16);
-      expect(plain.publicMemoryFraction).toEqual(4);
-      expect(plain.dilutedPool).toBeUndefined();
-      expect(plain.ratios).toBeUndefined();
-    });
-
     test.each([
+      ['plain', [], 16, 4, {}],
       [
         'small',
         ['output', 'pedersen', 'range_check', 'ecdsa'],
@@ -36,6 +28,7 @@ describe('layouts', () => {
       'should have the correct values with undefined DilutedPool',
       (layoutName, builtins, rcUnits, publicMemoryFraction, ratios) => {
         const layout = layouts[layoutName];
+        expect(layout.name).toEqual(layoutName);
         expect(layout.builtins).toEqual(builtins);
         expect(layout.rcUnits).toEqual(rcUnits);
         expect(layout.publicMemoryFraction).toEqual(publicMemoryFraction);
@@ -209,6 +202,7 @@ describe('layouts', () => {
         ratios: { [key: string]: number }
       ) => {
         const layout = layouts[layoutName];
+        expect(layout.name).toEqual(layoutName);
         expect(layout.builtins).toEqual(builtins);
         expect(layout.rcUnits).toEqual(rcUnits);
         expect(layout.publicMemoryFraction).toEqual(publicMemoryFraction);
