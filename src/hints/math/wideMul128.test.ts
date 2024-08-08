@@ -29,7 +29,7 @@ const WIDE_MUL_128 = {
     },
   },
 };
-
+s
 describe('wideMul128', () => {
   test('should properly parse WideMul128 hint', () => {
     const hint = wideMul128Parser.parse(WIDE_MUL_128);
