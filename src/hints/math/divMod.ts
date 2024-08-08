@@ -50,9 +50,16 @@ export const divMod = (
     const lhsValue = vm.getResOperandValue(leftHandSide).toBigInt();
     const rhsValue = vm.getResOperandValue(rightHandSide).toBigInt();
     
+    if (rhsValue === 0n) {
+      throw new Error("Division by zero");
+    }
+
     const quotientValue = new Felt(lhsValue / rhsValue);
     const remainderValue = new Felt(lhsValue % rhsValue);
     
     const quotientAddr = vm.cellRefToRelocatable(quotientAddress);
     const remainderAddr = vm.cellRefToRelocatable(remainderAddress);
+
+    vm.memory.assertEq(quotientAddr, quotientValue);
+    vm.memory.assertEq(remainderAddr, remainderValue);
   };
