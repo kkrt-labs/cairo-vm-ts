@@ -2,7 +2,12 @@ import { z } from 'zod';
 
 import { VirtualMachine } from 'vm/virtualMachine';
 
-import { resOperand, ResOperand, cellRef, CellRef, } from 'hints/hintParamsSchema';
+import {
+  resOperand,
+  ResOperand,
+  cellRef,
+  CellRef,
+} from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 import { Felt } from 'primitives/felt';
 
@@ -18,12 +23,11 @@ export const divModParser = z
   })
   .transform(({ DivMod: { lhs, rhs, quotient, remainder } }) => ({
     type: HintName.DivMod,
-    leftHandSide: lhs,
-    rightHandSide: rhs,
-    quotientAddress: quotient,
-    remainderAddress: remainder,
+    lhs,
+    rhs,
+    quotient,
+    remainder,
   }));
-
 
 /**
  * DivMod hint type
@@ -34,32 +38,29 @@ export type DivMod = z.infer<typeof divModParser>;
  * Perform division and modulus operations.
  *
  * @param {VirtualMachine} vm - The virtual machine instance
- * @param {ResOperand} leftHandSide - The left-hand side operand
- * @param {ResOperand} rightHandSide - The right-hand side operand
- * @param {CellRef} quotientAddress - The address to store the quotient
- * @param {CellRef} remainderAddress - The address to store the remainder
+ * @param {ResOperand} lhs - The left-hand side operand
+ * @param {ResOperand} rhs - The right-hand side operand
+ * @param {CellRef} quotient - The address to store the quotient
+ * @param {CellRef} remainder - The address to store the remainder
  */
 
 export const divMod = (
-    vm: VirtualMachine,
-    leftHandSide: ResOperand,
-    rightHandSide: ResOperand,
-    quotientAddress: CellRef,
-    remainderAddress: CellRef
-  ) => {
-    const lhsValue = vm.getResOperandValue(leftHandSide).toBigInt();
-    const rhsValue = vm.getResOperandValue(rightHandSide).toBigInt();
-    
-    if (rhsValue === 0n) {
-      throw new Error("Division by zero");
-    }
+  vm: VirtualMachine,
+  lhs: ResOperand,
+  rhs: ResOperand,
+  quotient: CellRef,
+  remainder: CellRef
+) => {
+  const lhsValue = vm.getResOperandValue(lhs).toBigInt();
+  const rhsValue = vm.getResOperandValue(rhs).toBigInt();
 
-    const quotientValue = new Felt(lhsValue / rhsValue);
-    const remainderValue = new Felt(lhsValue % rhsValue);
-    
-    const quotientAddr = vm.cellRefToRelocatable(quotientAddress);
-    const remainderAddr = vm.cellRefToRelocatable(remainderAddress);
+  if (rhsValue === 0n) {
+    throw new Error('Division by zero');
+  }
 
-    vm.memory.assertEq(quotientAddr, quotientValue);
-    vm.memory.assertEq(remainderAddr, remainderValue);
-  };
+  const quotientValue = new Felt(lhsValue / rhsValue);
+  const remainderValue = new Felt(lhsValue % rhsValue);
+
+  vm.memory.assertEq(vm.cellRefToRelocatable(quotient), quotientValue);
+  vm.memory.assertEq(vm.cellRefToRelocatable(remainder), remainderValue);
+};

@@ -128,6 +128,6 @@ export const handlers: HintHandler = {
   },
   [HintName.DivMod]: (vm, hint) => {
     const h = hint as DivMod;
-    divMod(vm, h.leftHandSide, h.rightHandSide, h.quotientAddress, h.remainderAddress);
+    divMod(vm, h.lhs, h.rhs, h.quotient, h.remainder);
   },
 };

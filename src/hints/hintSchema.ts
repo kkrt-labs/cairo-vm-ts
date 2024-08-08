@@ -34,7 +34,7 @@ const hint = z.union([
   shouldContinueSquashLoopParser,
   shouldSkipSquashLoopParser,
   testLessThanParser,
-  divModParser
+  divModParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */
