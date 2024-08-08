@@ -51,7 +51,9 @@ export const testLessThanOrEqualAddress = (
   const lhsValue = vm.getResOperandRelocatable(lhs);
   const rhsValue = vm.getResOperandRelocatable(rhs);
 
-  const result = new Felt(BigInt(lhsValue < rhsValue));
+  const isLessThanOrEqual = lhsValue <= rhsValue;
+                            
+  const result = new Felt(isLessThanOrEqual ? 1n : 0n);
 
   vm.memory.assertEq(vm.cellRefToRelocatable(dst), result);
 };
