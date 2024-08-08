@@ -49,7 +49,10 @@ import {
 } from './dict/shouldSkipSquashLoop';
 import { TestLessThan, testLessThan } from './math/testLessThan';
 import { DivMod, divMod } from './math/divMod';
-import { TestLessThanOrEqualAddress, testLessThanOrEqualAddress } from './math/testLessThanOrEqualAddress';
+import {
+  TestLessThanOrEqualAddress,
+  testLessThanOrEqualAddress,
+} from './math/testLessThanOrEqualAddress';
 
 /**
  * Map hint names to the function executing their logic.

@@ -32,7 +32,9 @@ const TEST_LESS_THAN_OR_EQUAL_ADDRESS = {
 
 describe('TestLessThanOrEqualAddress', () => {
   test('should properly parse TestLessThanOrEqualAddress hint', () => {
-    const hint = testLessThanOrEqualAddressParser.parse(TEST_LESS_THAN_OR_EQUAL_ADDRESS);
+    const hint = testLessThanOrEqualAddressParser.parse(
+      TEST_LESS_THAN_OR_EQUAL_ADDRESS
+    );
 
     expect(hint).toEqual({
       type: HintName.TestLessThanOrEqualAddress,
@@ -62,15 +64,22 @@ describe('TestLessThanOrEqualAddress', () => {
     [new Relocatable(1, 1), new Relocatable(1, 0), new Felt(0n)],
     [new Relocatable(1, 1), new Relocatable(1, 1), new Felt(1n)],
     [new Relocatable(0, 0), new Relocatable(1, 0), new Felt(1n)],
-  ])('should properly execute TestLessThanOrEqualAddress hint', (lhs, rhs, expected) => {
-    const hint = testLessThanOrEqualAddressParser.parse(TEST_LESS_THAN_OR_EQUAL_ADDRESS);
-    const vm = new VirtualMachine();
-    vm.memory.addSegment();
-    vm.memory.addSegment();    
-    vm.memory.assertEq(vm.ap, lhs);    
-    vm.memory.assertEq(vm.ap.add(1), rhs);
+  ])(
+    'should properly execute TestLessThanOrEqualAddress hint',
+    (lhs, rhs, expected) => {
+      const hint = testLessThanOrEqualAddressParser.parse(
+        TEST_LESS_THAN_OR_EQUAL_ADDRESS
+      );
+      const vm = new VirtualMachine();
+      vm.memory.addSegment();
+      vm.memory.addSegment();
+      vm.memory.assertEq(vm.ap, lhs);
+      vm.memory.assertEq(vm.ap.add(1), rhs);
 
-    vm.executeHint(hint);
-    expect(vm.memory.get(vm.cellRefToRelocatable(hint.dst))).toEqual(expected);
-  });
+      vm.executeHint(hint);
+      expect(vm.memory.get(vm.cellRefToRelocatable(hint.dst))).toEqual(
+        expected
+      );
+    }
+  );
 });

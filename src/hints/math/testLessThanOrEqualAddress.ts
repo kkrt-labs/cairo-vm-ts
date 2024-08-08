@@ -14,7 +14,11 @@ import {
 /** Zod object to parse TestLessThanOrEqualAddress hint */
 export const testLessThanOrEqualAddressParser = z
   .object({
-    TestLessThanOrEqualAddress: z.object({ lhs: resOperand, rhs: resOperand, dst: cellRef }),
+    TestLessThanOrEqualAddress: z.object({
+      lhs: resOperand,
+      rhs: resOperand,
+      dst: cellRef,
+    }),
   })
   .transform(({ TestLessThanOrEqualAddress: { lhs, rhs, dst } }) => ({
     type: HintName.TestLessThanOrEqualAddress,
@@ -28,13 +32,15 @@ export const testLessThanOrEqualAddressParser = z
  *
  * Check whether the Relocatable value at `lhs` is inferior or equal to the value at `rhs`
  */
-export type TestLessThanOrEqualAddress = z.infer<typeof testLessThanOrEqualAddressParser>;
+export type TestLessThanOrEqualAddress = z.infer<
+  typeof testLessThanOrEqualAddressParser
+>;
 
 /**
  * TestLessThanOrEqualAddress hint
  *
- * Compares the values at the relocatable values `lhs` and `rhs` and stores 
- * the result in `dst`. The result is `1` if the value at `lhs` is 
+ * Compares the values at the relocatable values `lhs` and `rhs` and stores
+ * the result in `dst`. The result is `1` if the value at `lhs` is
  * less than or equal to the value at `rhs`, and `0` otherwise.
  *
  * @param {VirtualMachine} vm - The virtual machine instance.
@@ -52,7 +58,7 @@ export const testLessThanOrEqualAddress = (
   const rhsValue = vm.getResOperandRelocatable(rhs);
 
   const isLessThanOrEqual = lhsValue <= rhsValue;
-                            
+
   const result = new Felt(isLessThanOrEqual ? 1n : 0n);
 
   vm.memory.assertEq(vm.cellRefToRelocatable(dst), result);
