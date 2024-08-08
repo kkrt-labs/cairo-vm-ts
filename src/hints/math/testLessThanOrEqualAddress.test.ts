@@ -19,13 +19,13 @@ const TEST_LESS_THAN_OR_EQUAL_ADDRESS = {
     },
     rhs: {
       Deref: {
-        register: 'FP',
+        register: 'AP',
         offset: 1,
       },
     },
     dst: {
       register: 'AP',
-      offset: -1,
+      offset: 2,
     },
   },
 };
@@ -46,13 +46,13 @@ describe('TestLessThanOrEqualAddress', () => {
       rhs: {
         type: OpType.Deref,
         cell: {
-          register: Register.Fp,
+          register: Register.Ap,
           offset: 1,
         },
       },
       dst: {
         register: Register.Ap,
-        offset: -1,
+        offset: 2,
       },
     });
   });
@@ -66,11 +66,9 @@ describe('TestLessThanOrEqualAddress', () => {
     const hint = testLessThanOrEqualAddressParser.parse(TEST_LESS_THAN_OR_EQUAL_ADDRESS);
     const vm = new VirtualMachine();
     vm.memory.addSegment();
-    vm.memory.addSegment();
-    vm.ap = vm.ap.add(1);
-    vm.memory.assertEq(vm.ap.sub(1), lhs);
-    vm.fp = vm.fp.add(2);
-    vm.memory.assertEq(vm.fp.sub(1), rhs);
+    vm.memory.addSegment();    
+    vm.memory.assertEq(vm.ap, lhs);    
+    vm.memory.assertEq(vm.ap.add(1), rhs);
 
     vm.executeHint(hint);
     expect(vm.memory.get(vm.cellRefToRelocatable(hint.dst))).toEqual(expected);

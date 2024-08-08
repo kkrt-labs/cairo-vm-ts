@@ -26,17 +26,21 @@ export const testLessThanOrEqualAddressParser = z
 /**
  * TestLessThanOrEqualAddress hint
  *
- * Store true at `dst` if value at `lhs` inferior or equal to value at `rhs`.
- * Store false otherwise
+ * Check whether the Relocatable value at `lhs` is inferior or equal to the value at `rhs`
  */
-export type TestLessThan = z.infer<typeof testLessThanOrEqualAddressParser>;
+export type TestLessThanOrEqualAddress = z.infer<typeof testLessThanOrEqualAddressParser>;
 
 /**
  * TestLessThanOrEqualAddress hint
  *
- * Check whether the value at `lhs` is inferior or equal to the value at `rhs`
+ * Compares the values at the relocatable values `lhs` and `rhs` and stores 
+ * the result in `dst`. The result is `1` if the value at `lhs` is 
+ * less than or equal to the value at `rhs`, and `0` otherwise.
  *
- * Store the boolean result (0 or 1) at `dst`
+ * @param {VirtualMachine} vm - The virtual machine instance.
+ * @param {ResOperand} lhs - The relocatable value of the left-hand side operand.
+ * @param {ResOperand} rhs - The relocatable value of the right-hand side operand.
+ * @param {CellRef} dst - The address where the result of the comparison will be stored.
  */
 export const testLessThanOrEqualAddress = (
   vm: VirtualMachine,
@@ -47,10 +51,7 @@ export const testLessThanOrEqualAddress = (
   const lhsValue = vm.getResOperandRelocatable(lhs);
   const rhsValue = vm.getResOperandRelocatable(rhs);
 
-  const isLessThanOrEqual = lhsValue.segmentId < rhsValue.segmentId || 
-                            (lhsValue.segmentId === rhsValue.segmentId && lhsValue.offset <= rhsValue.offset);
-                            
-  const result = new Felt(isLessThanOrEqual ? 1n : 0n);
+  const result = new Felt(BigInt(lhsValue < rhsValue));
 
   vm.memory.assertEq(vm.cellRefToRelocatable(dst), result);
 };
