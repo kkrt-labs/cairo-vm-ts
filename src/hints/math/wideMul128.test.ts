@@ -29,7 +29,7 @@ const WIDE_MUL_128 = {
     },
   },
 };
-s
+
 describe('wideMul128', () => {
   test('should properly parse WideMul128 hint', () => {
     const hint = wideMul128Parser.parse(WIDE_MUL_128);
@@ -45,7 +45,7 @@ describe('wideMul128', () => {
       },
       rhs: {
         type: OpType.Immediate,
-        value: new Felt(BigInt('0x2')),
+        value: new Felt(2n),
       },
       high: {
         register: Register.Ap,
@@ -59,19 +59,26 @@ describe('wideMul128', () => {
   });
 
   test.each([
-    [new Felt(1n), new Felt(0n), new Felt(2n)], 
-    [new Felt(BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')), new Felt(1n), new Felt(BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFE'))], // max 128-bit value * 2
-    [new Felt(0n), new Felt(0n), new Felt(0n)], 
-  ])('should properly execute WideMul128 hint', (lhs, expectedHigh, expectedLow) => {
-    const hint = wideMul128Parser.parse(WIDE_MUL_128);
-    const vm = new VirtualMachine();
-    vm.memory.addSegment();
-    vm.ap = vm.ap.add(1);
-    vm.memory.assertEq(vm.ap, lhs);
+    [new Felt(1n), new Felt(0n), new Felt(2n)],
+    [new Felt((1n << 128n) - 1n), new Felt(1n), new Felt((1n << 128n) - 2n)],
+    [new Felt(0n), new Felt(0n), new Felt(0n)],
+  ])(
+    'should properly execute WideMul128 hint',
+    (lhs, expectedHigh, expectedLow) => {
+      const hint = wideMul128Parser.parse(WIDE_MUL_128);
+      const vm = new VirtualMachine();
+      vm.memory.addSegment();
+      vm.memory.addSegment();
+      vm.memory.assertEq(vm.ap, lhs);
 
-    wideMul128(vm, hint.lhs, hint.rhs, hint.high, hint.low);
+      wideMul128(vm, hint.lhs, hint.rhs, hint.high, hint.low);
 
-    expect(vm.memory.get(vm.cellRefToRelocatable(hint.high))).toEqual(expectedHigh);
-    expect(vm.memory.get(vm.cellRefToRelocatable(hint.low))).toEqual(expectedLow);
-  });
+      expect(vm.memory.get(vm.cellRefToRelocatable(hint.high))).toEqual(
+        expectedHigh
+      );
+      expect(vm.memory.get(vm.cellRefToRelocatable(hint.low))).toEqual(
+        expectedLow
+      );
+    }
+  );
 });

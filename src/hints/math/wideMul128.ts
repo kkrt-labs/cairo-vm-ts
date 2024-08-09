@@ -5,22 +5,24 @@ import { resOperand, ResOperand } from 'hints/hintParamsSchema';
 import { VirtualMachine } from 'vm/virtualMachine';
 import { Felt } from 'primitives/felt';
 
-export const wideMul128Parser = z.
-    object({
-        WideMul128: z.object({
-            lhs: resOperand,
-            rhs: resOperand,
-            high: cellRef,
-            low: cellRef
-        }),
-    })
-    .transform(({ WideMul128: { lhs, rhs, high, low } }) => ({
-        type: HintName.WideMul128,
-        lhs,
-        rhs,
-        high,
-        low
-    }));
+export const wideMul128Parser = z
+  .object({
+    WideMul128: z.object({
+      lhs: resOperand,
+      rhs: resOperand,
+      high: cellRef,
+      low: cellRef,
+    }),
+  })
+  .transform(({ WideMul128: { lhs, rhs, high, low } }) => ({
+    type: HintName.WideMul128,
+    lhs,
+    rhs,
+    high,
+    low,
+  }));
+
+export type WideMul128 = z.infer<typeof wideMul128Parser>;
 
 /**
  * Performs a wide multiplication of two 128-bit operands and stores the result.
@@ -37,29 +39,22 @@ export const wideMul128Parser = z.
  */
 
 export const wideMul128 = (
-    vm: VirtualMachine,
-    lhs: ResOperand,
-    rhs: ResOperand,
-    high: CellRef,
-    low: CellRef
+  vm: VirtualMachine,
+  lhs: ResOperand,
+  rhs: ResOperand,
+  high: CellRef,
+  low: CellRef
 ): void => {
+  const mask = (1n << 128n) - 1n;
 
-    const mask = (1n << 128n) - 1n;
+  const lhsVal = vm.getResOperandValue(lhs).toBigInt();
+  const rhsVal = vm.getResOperandValue(rhs).toBigInt();
 
-    const lhsVal = vm.getResOperandValue(lhs).toBigInt();
-    const rhsVal = vm.getResOperandValue(rhs).toBigInt();
+  const prod = lhsVal * rhsVal;
 
-    const prod = lhsVal * rhsVal;
+  const highVal = new Felt(prod >> 128n);
+  const lowVal = new Felt(prod & mask);
 
-    const highVal = prod >> BigInt(128);
-    vm.memory.assertEq(vm.cellRefToRelocatable(high), new Felt(highVal));
-
-    const lowVal = prod & mask;
-    const lowRef = vm.cellRefToRelocatable(low);
-    vm.memory.assertEq(lowRef, new Felt(lowVal));
-
+  vm.memory.assertEq(vm.cellRefToRelocatable(high), highVal);
+  vm.memory.assertEq(vm.cellRefToRelocatable(low), lowVal);
 };
-
-export type WideMul128 = z.infer<
-    typeof wideMul128Parser
->;
