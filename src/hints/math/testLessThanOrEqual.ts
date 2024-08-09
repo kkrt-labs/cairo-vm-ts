@@ -38,7 +38,7 @@ export type TestLessThanOrEqual = z.infer<typeof testLessThanOrEqualParser>;
 /**
  * TestLessThanOrEqual hint
  *
- * Store true at dst if value at lhs is inferior or equal to value at rhs, false otherwise.
+ * Store true at `dst` if value at `lhs` is inferior or equal to value at `rhs`, false otherwise.
  *
  * @param {VirtualMachine} vm - The virtual machine instance.
  * @param {ResOperand} lhs -  The left-hand side operand.
