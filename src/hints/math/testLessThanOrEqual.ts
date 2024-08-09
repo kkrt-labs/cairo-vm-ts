@@ -30,23 +30,20 @@ export const testLessThanOrEqualParser = z
 /**
  * TestLessThanOrEqual hint
  *
- * Store true at `dst` if value at `lhs` is inferior or equal to value at `rhs`.
- * Store false otherwise
+ * Check whether the value at `lhs` is less than or equal to the value at `rhs`
+ *
  */
 export type TestLessThanOrEqual = z.infer<typeof testLessThanOrEqualParser>;
 
 /**
  * TestLessThanOrEqual hint
  *
- * Check whether the value at `lhs` is less than or equal to the value at `rhs`
- *
- * Store the boolean result (0 or 1) at `dst`
- *
+ * Store true at dst if value at lhs is inferior or equal to value at rhs, false otherwise.
  *
  * @param {VirtualMachine} vm - The virtual machine instance.
- * @param {ResOperand} lhs -  Pointer to the operand representing the left-hand side value in the comparison.
- * @param {ResOperand} rhs -  Pointer to the operand representing the right-hand side value in the comparison.
- * @param {CellRef} dst -  Pointer to where the result of the comparison (0 or 1) will be stored.
+ * @param {ResOperand} lhs -  The left-hand side operand.
+ * @param {ResOperand} rhs -  The right-hand side operand.
+ * @param {CellRef} dst -  Pointer to where the result will be stored.
  *
  */
 export const testLessThanOrEqual = (
