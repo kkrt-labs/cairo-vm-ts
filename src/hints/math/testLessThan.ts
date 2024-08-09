@@ -26,7 +26,7 @@ export const testLessThanParser = z
 /**
  * TestLessThan hint
  *
- * Store true at `dst` if value at `lhs` is stricty inferior to value at `rhs`.
+ * Store true at `dst` if value at `lhs` is strictly inferior to value at `rhs`.
  * Store false otherwise
  */
 export type TestLessThan = z.infer<typeof testLessThanParser>;
