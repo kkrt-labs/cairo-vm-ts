@@ -10,6 +10,7 @@ import {
 } from 'hints/hintParamsSchema';
 import { HintName } from 'hints/hintName';
 import { Felt } from 'primitives/felt';
+import { CannotDivideByZero } from 'errors/primitives';
 
 /** Zod object to parse DivMod hint */
 export const divModParser = z
@@ -54,9 +55,7 @@ export const divMod = (
   const lhsValue = vm.getResOperandValue(lhs).toBigInt();
   const rhsValue = vm.getResOperandValue(rhs).toBigInt();
 
-  if (rhsValue === 0n) {
-    throw new Error('Division by zero');
-  }
+  if (!rhsValue) throw new CannotDivideByZero();
 
   const quotientValue = new Felt(lhsValue / rhsValue);
   const remainderValue = new Felt(lhsValue % rhsValue);
