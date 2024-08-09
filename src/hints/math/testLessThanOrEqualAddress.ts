@@ -39,13 +39,11 @@ export type TestLessThanOrEqualAddress = z.infer<
 /**
  * TestLessThanOrEqualAddress hint
  *
- * Compares the values at the relocatable values `lhs` and `rhs` and stores
- * the result in `dst`. The result is `1` if the value at `lhs` is
- * less than or equal to the value at `rhs`, and `0` otherwise.
+ * Check whether the Relocatable value at `lhs` is inferior or equal to the value at `rhs`
  *
  * @param {VirtualMachine} vm - The virtual machine instance.
- * @param {ResOperand} lhs - The relocatable value of the left-hand side operand.
- * @param {ResOperand} rhs - The relocatable value of the right-hand side operand.
+ * @param {ResOperand} lhs - The left-hand side operand.
+ * @param {ResOperand} rhs - The right-hand side operand.
  * @param {CellRef} dst - The address where the result of the comparison will be stored.
  */
 export const testLessThanOrEqualAddress = (
