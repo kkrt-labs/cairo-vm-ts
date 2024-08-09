@@ -41,6 +41,13 @@ export type TestLessThanOrEqual = z.infer<typeof testLessThanOrEqualParser>;
  * Check whether the value at `lhs` is less than or equal to the value at `rhs`
  *
  * Store the boolean result (0 or 1) at `dst`
+ * 
+ * 
+ * @param {VirtualMachine} vm - The virtual machine instance.
+ * @param {ResOperand} lhs -  Pointer to the operand representing the left-hand side value in the comparison.
+ * @param {ResOperand} rhs -  Pointer to the operand representing the right-hand side value in the comparison.
+ * @param {CellRef} dst -  Pointer to where the result of the comparison (0 or 1) will be stored. 
+ * 
  */
 export const testLessThanOrEqual = (
   vm: VirtualMachine,
