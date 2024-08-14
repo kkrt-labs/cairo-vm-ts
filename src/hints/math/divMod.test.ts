@@ -6,6 +6,7 @@ import { OpType } from 'hints/hintParamsSchema';
 import { divModParser } from './divMod';
 import { divMod } from './divMod';
 import { Register } from 'vm/instruction';
+import { CannotDivideByZero } from 'errors/primitives';
 
 const DIV_MOD_HINT = {
   DivMod: {
@@ -89,20 +90,22 @@ describe('DivMod', () => {
     }
   );
 
-  test('should throw an error when rhs is zero', () => {
+  test.each([
+    [new Felt(17n), new Felt(0n)],
+    [new Felt(100n), new Felt(0n)],
+    [new Felt(5n), new Felt(0n)],
+    [new Felt(0n), new Felt(0n)],
+  ])('should throw an error when rhs is zero', (lhsValue, rhsValue) => {
     const hint = divModParser.parse(DIV_MOD_HINT);
     const vm = new VirtualMachine();
     vm.memory.addSegment();
     vm.memory.addSegment();
-
-    const lhsValue = new Felt(17n);
-    const rhsValue = new Felt(0n);
 
     vm.memory.assertEq(vm.ap, lhsValue);
     vm.memory.assertEq(vm.ap.add(1), rhsValue);
 
     expect(() => {
       divMod(vm, hint.lhs, hint.rhs, hint.quotient, hint.remainder);
-    });
+    }).toThrow(CannotDivideByZero);
   });
 });
