@@ -30,7 +30,7 @@ export type WideMul128 = z.infer<typeof wideMul128Parser>;
  * This function calculates the product of two 128-bit operands, splits the result into high and low 128-bit parts,
  * and stores them in the specified memory locations within the virtual machine.
  *
- * @param {VirtualMachine} vm - The virtual machine instance where the operation is executed.
+ * @param {VirtualMachine} vm - The virtual machine instance.
  * @param {ResOperand} lhs - The left-hand side operand for the multiplication.
  * @param {ResOperand} rhs - The right-hand side operand for the multiplication.
  * @param {CellRef} high - The memory reference where the high 128 bits of the result will be stored.

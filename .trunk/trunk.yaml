@@ -13,8 +13,6 @@ runtimes:
     - node@18.12.1
     - python@3.10.8
 lint:
-  disabled:
-    - prettier
   files:
     - name: cairo
       extensions:

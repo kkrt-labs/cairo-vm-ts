@@ -1,5 +1,4 @@
 import { z } from 'zod';
-
 import { allocSegmentParser } from './allocSegment';
 import { assertLeFindSmallArcsParser } from './assertLeFindSmallArc';
 import { assertLeIsFirstArcExcludedParser } from './assertLeIsFirstArcExcluded';
@@ -15,7 +14,7 @@ import { initSquashDataParser } from './dict/initSquashData';
 import { shouldContinueSquashLoopParser } from './dict/shouldContinueSquashLoop';
 import { shouldSkipSquashLoopParser } from './dict/shouldSkipSquashLoop';
 import { testLessThanParser } from './math/testLessThan';
-import { wideMul128, wideMul128Parser } from './math/wideMul128';
+import { wideMul128Parser } from './math/wideMul128';
 /** Zod object to parse any implemented hints */
 const hint = z.union([
   allocFelt252DictParser,

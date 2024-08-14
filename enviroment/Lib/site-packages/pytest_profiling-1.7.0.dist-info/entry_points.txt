@@ -1,0 +1,3 @@
+[pytest11]
+profiling = pytest_profiling
+
