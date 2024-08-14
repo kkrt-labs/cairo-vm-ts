@@ -65,7 +65,12 @@ describe('WideMul128', () => {
   test.each([
     [new Felt(2n), new Felt(3n), new Felt(0n), new Felt(6n)],
     [new Felt(1n << 64n), new Felt(1n << 64n), new Felt(1n), new Felt(0n)],
-    [new Felt((1n << 63n) - 1n), new Felt(2n), new Felt(0n), new Felt((1n << 64n) - 2n)],
+    [
+      new Felt((1n << 63n) - 1n),
+      new Felt(2n),
+      new Felt(0n),
+      new Felt((1n << 64n) - 2n),
+    ],
     [new Felt(1n << 127n), new Felt(2n), new Felt(1n), new Felt(0n)],
   ])(
     'should properly execute WideMul128 hint',
