@@ -48,6 +48,7 @@ import {
   shouldSkipSquashLoop,
 } from './dict/shouldSkipSquashLoop';
 import { TestLessThan, testLessThan } from './math/testLessThan';
+import { WideMul128, wideMul128 } from './math/wideMul128';
 
 /**
  * Map hint names to the function executing their logic.
@@ -124,5 +125,9 @@ export const handlers: HintHandler = {
   [HintName.TestLessThan]: (vm, hint) => {
     const h = hint as TestLessThan;
     testLessThan(vm, h.lhs, h.rhs, h.dst);
+  },
+  [HintName.WideMul128]: (vm, hint) => {
+    const h = hint as WideMul128;
+    wideMul128(vm, h.lhs, h.rhs, h.high, h.low);
   },
 };

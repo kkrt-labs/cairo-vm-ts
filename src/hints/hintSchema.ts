@@ -15,6 +15,7 @@ import { initSquashDataParser } from './dict/initSquashData';
 import { shouldContinueSquashLoopParser } from './dict/shouldContinueSquashLoop';
 import { shouldSkipSquashLoopParser } from './dict/shouldSkipSquashLoop';
 import { testLessThanParser } from './math/testLessThan';
+import { wideMul128Parser } from './math/wideMul128';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -33,6 +34,7 @@ const hint = z.union([
   shouldContinueSquashLoopParser,
   shouldSkipSquashLoopParser,
   testLessThanParser,
+  wideMul128Parser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */
