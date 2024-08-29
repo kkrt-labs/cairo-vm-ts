@@ -106,6 +106,6 @@ describe('DivMod', () => {
 
     expect(() => {
       divMod(vm, hint.lhs, hint.rhs, hint.quotient, hint.remainder);
-    }).toThrow(CannotDivideByZero);
+    }).toThrow(new CannotDivideByZero());
   });
 });
