@@ -197,7 +197,7 @@ export class VirtualMachine {
     switch (op1Register) {
       case Op1Src.Op0:
         if (!op0) throw new UndefinedOp0();
-        if (!isRelocatable(op0)) throw new ExpectedFelt(op0);
+        if (!isRelocatable(op0)) throw new ExpectedRelocatable(op0);
         op1Addr = new Relocatable(op0.segmentId, op0.offset + op1Offset);
         break;
       default:
