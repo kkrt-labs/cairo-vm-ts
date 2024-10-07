@@ -16,4 +16,5 @@ export enum HintName {
   ShouldSkipSquashLoop = 'ShouldSkipSquashLoop',
   TestLessThan = 'TestLessThan',
   DivMod = 'DivMod',
+  TestLessThanOrEqualAddress = 'TestLessThanOrEqualAddress',
 }

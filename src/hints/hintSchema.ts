@@ -16,6 +16,7 @@ import { shouldContinueSquashLoopParser } from './dict/shouldContinueSquashLoop'
 import { shouldSkipSquashLoopParser } from './dict/shouldSkipSquashLoop';
 import { testLessThanParser } from './math/testLessThan';
 import { divModParser } from './math/divMod';
+import { testLessThanOrEqualAddressParser } from './math/testLessThanOrEqualAddress';
 
 /** Zod object to parse any implemented hints */
 const hint = z.union([
@@ -35,6 +36,7 @@ const hint = z.union([
   shouldSkipSquashLoopParser,
   testLessThanParser,
   divModParser,
+  testLessThanOrEqualAddressParser,
 ]);
 
 /** Zod object to parse an array of hints grouped on a given PC */
