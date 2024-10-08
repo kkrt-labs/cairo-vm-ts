@@ -5,6 +5,12 @@ import { isFelt } from 'primitives/segmentValue';
 import { pedersen } from '@scure/starknet';
 import { Felt } from 'primitives/felt';
 
+/** Total number of cells per pedersen operation */
+export const CELLS_PER_PEDERSEN = 3;
+
+/** Number of input cells for a pedersen operation */
+export const INPUT_CELLS_PER_PEDERSEN = 2;
+
 /** Pedersen Builtin - Computes Pedersen(x, y) */
 export const pedersenHandler: BuiltinHandler = {
   get(target, prop) {
@@ -12,12 +18,9 @@ export const pedersenHandler: BuiltinHandler = {
       return Reflect.get(target, prop);
     }
 
-    const cellsPerPedersen = 3;
-    const inputCellsPerPedersen = 2;
-
     const offset = Number(prop);
-    const pedersenIndex = offset % cellsPerPedersen;
-    if (pedersenIndex < inputCellsPerPedersen || target[offset]) {
+    const pedersenIndex = offset % CELLS_PER_PEDERSEN;
+    if (pedersenIndex < INPUT_CELLS_PER_PEDERSEN || target[offset]) {
       return target[offset];
     }
 

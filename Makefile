@@ -4,11 +4,17 @@ run-all diff-test bench clean-diff-test clean-bench clean-tmp
 
 # Clone & build the other VMs - Assume that related lang are installed
 CAIRO_VM_RS_CLI:=cairo-vm/target/release/cairo-vm-cli
+CAIRO_VM_RS_CAIRO_CLI:=cairo-vm/target/release/cairo1-run
 CAIRO_VM_ZIG_CLI:=ziggy-starkdust/zig-out/bin/ziggy-starkdust
 
 $(CAIRO_VM_RS_CLI):
 	@git submodule update --init cairo-vm; \
 	cd cairo-vm; cargo build --release --bin cairo-vm-cli
+
+$(CAIRO_VM_RS_CAIRO_CLI):
+	@git submodule update --init cairo-vm; \
+	cd cairo-vm/cairo1-run; make deps; \
+	cd ..; cargo build --release --bin cairo1-run
 
 $(CAIRO_VM_ZIG_CLI):
 	@git submodule update --init ziggy-starkdust \
@@ -17,7 +23,7 @@ $(CAIRO_VM_ZIG_CLI):
 build:
 	@bun install; bun link
 
-build-cairo-vm-rs-cli: | $(CAIRO_VM_RS_CLI)
+build-cairo-vm-rs-cli: | $(CAIRO_VM_RS_CLI) $(CAIRO_VM_RS_CAIRO_CLI)
 
 build-cairo-vm-zig-cli: | $(CAIRO_VM_ZIG_CLI)
 
