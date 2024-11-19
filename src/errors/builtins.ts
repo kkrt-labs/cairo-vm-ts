@@ -4,11 +4,11 @@ import { Felt } from 'primitives/felt';
 /** Errors related to builtins */
 class BuiltinError extends Error {}
 
-/** Value cannot be infered from undefined cell value */
+/** Value cannot be inferred from undefined cell value */
 export class UndefinedValue extends BuiltinError {
   constructor(offset: number) {
     super(
-      `Value cannot be infered from undefined cell value at offset ${offset}`
+      `Value cannot be inferred from undefined cell value at offset ${offset}`
     );
   }
 }
